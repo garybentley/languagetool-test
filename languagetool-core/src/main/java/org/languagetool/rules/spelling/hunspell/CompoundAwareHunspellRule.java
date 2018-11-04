@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,7 +24,6 @@ import org.languagetool.rules.spelling.morfologik.MorfologikMultiSpeller;
 import org.languagetool.tokenizers.CompoundWordTokenizer;
 import org.languagetool.tools.StringTools;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -35,14 +34,15 @@ import java.util.*;
 public abstract class CompoundAwareHunspellRule extends HunspellRule {
 
   private static final int MAX_SUGGESTIONS = 20;
-  
+
   private final CompoundWordTokenizer compoundSplitter;
   private final MorfologikMultiSpeller morfoSpeller;
 
   protected abstract void filterForLanguage(List<String> suggestions);
 
-  public CompoundAwareHunspellRule(ResourceBundle messages, Language language, CompoundWordTokenizer compoundSplitter, MorfologikMultiSpeller morfoSpeller, UserConfig userConfig) {
-    super(messages, language, userConfig);
+  public CompoundAwareHunspellRule(ResourceBundle messages, Language language, CompoundWordTokenizer compoundSplitter, MorfologikMultiSpeller morfoSpeller, UserConfig userConfig,
+                                    Hunspell.Dictionary hunspellDict, List<String> ignoreWords, List<String> prohibitedWords, String extraNonWordRegexPattern) throws Exception {
+    super(messages, language, userConfig, hunspellDict, ignoreWords, prohibitedWords, extraNonWordRegexPattern);
     this.compoundSplitter = compoundSplitter;
     this.morfoSpeller = morfoSpeller;
   }
@@ -54,10 +54,13 @@ public abstract class CompoundAwareHunspellRule extends HunspellRule {
    * supports compounds).
    */
   @Override
-  public List<String> getSuggestions(String word) throws IOException {
+  public List<String> getSuggestions(String word) throws Exception {
+      /*
+      GTODO: Cleanup
     if (needsInit) {
       init();
     }
+    */
     List<String> candidates = getCandidates(word);
     List<String> simpleSuggestions = getCorrectWords(candidates);
 
@@ -157,7 +160,7 @@ public abstract class CompoundAwareHunspellRule extends HunspellRule {
   private List<String> getCorrectWords(List<String> wordsOrPhrases) {
     List<String> result = new ArrayList<>();
     for (String wordOrPhrase : wordsOrPhrases) {
-      // this might be a phrase like "aufgrund dessen", so it needs to be split: 
+      // this might be a phrase like "aufgrund dessen", so it needs to be split:
       String[] words = tokenizeText(wordOrPhrase);
       boolean wordIsOkay = true;
       for (String word : words) {

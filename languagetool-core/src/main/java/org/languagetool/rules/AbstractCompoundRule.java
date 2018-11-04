@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -36,12 +36,12 @@ import org.languagetool.tools.StringTools;
 
 /**
  * Checks that compounds (if in the list) are not written as separate words.
- * 
+ *
  * @author Daniel Naber, Marcin Miłkowski (refactoring)
  */
 public abstract class AbstractCompoundRule extends Rule {
 
-  static final int MAX_TERMS = 5;
+  public static final int MAX_TERMS = 5;
 
   private final String withHyphenMessage;
   private final String withoutHyphenMessage;
@@ -62,6 +62,7 @@ public abstract class AbstractCompoundRule extends Rule {
   /**
    * @since 3.0
    */
+  // GTODO Change to pass in compound data?
   public AbstractCompoundRule(ResourceBundle messages,
                               String withHyphenMessage, String withoutHyphenMessage, String withOrWithoutHyphenMessage) throws IOException {
     this(messages, withHyphenMessage, withoutHyphenMessage, withOrWithoutHyphenMessage, null);
@@ -83,9 +84,9 @@ public abstract class AbstractCompoundRule extends Rule {
 
   /**
    * Flag to indicate if the hyphen is ignored in the text entered by the user.
-   * Set this to false if you want the rule to offer suggestions for words 
+   * Set this to false if you want the rule to offer suggestions for words
    * like [ro] "câte-și-trei" (with hyphen), not only for "câte și trei" (with spaces)
-   * This is only available for languages with hyphen as a word separator (ie: not 
+   * This is only available for languages with hyphen as a word separator (ie: not
    * available for English, available for Romanian). See Language.getWordTokenizer()
    */
   public boolean isHyphenIgnored() {
@@ -93,7 +94,7 @@ public abstract class AbstractCompoundRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = getSentenceWithImmunization(sentence).getTokensWithoutWhitespace();
 

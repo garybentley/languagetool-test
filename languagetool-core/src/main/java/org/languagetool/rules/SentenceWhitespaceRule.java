@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,7 +29,7 @@ import org.languagetool.AnalyzedTokenReadings;
 
 /**
  * Checks that there's whitespace between sentences.
- *   
+ *
  * @author Daniel Naber
  * @since 2.5
  */
@@ -40,7 +40,7 @@ public class SentenceWhitespaceRule extends TextLevelRule {
     super.setCategory(Categories.TYPOGRAPHY.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Whitespace);
   }
-  
+
   @Override
   public String getId() {
     return "SENTENCE_WHITESPACE";
@@ -68,6 +68,7 @@ public class SentenceWhitespaceRule extends TextLevelRule {
         isFirstSentence = false;
       } else {
         if (!prevSentenceEndsWithWhitespace && tokens.length > 1) {
+            System.out.println ("---> " + java.util.Arrays.asList(tokens));
           int startPos = 0;
           String firstToken = tokens[1].getToken();
           int endPos = firstToken.length();
@@ -88,5 +89,5 @@ public class SentenceWhitespaceRule extends TextLevelRule {
     }
     return toRuleMatchArray(ruleMatches);
   }
-  
+
 }

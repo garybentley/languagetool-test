@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,17 +26,29 @@ import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.MultiWordChunker;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for Polish.
- * 
+ *
  * @author Marcin Miłkowski
  */
 
-public class PolishHybridDisambiguator extends AbstractDisambiguator {
+public class PolishHybridDisambiguator extends AbstractDisambiguator<PolishResourceDataBroker> {
 
-  private final Disambiguator chunker = new MultiWordChunker("/pl/multiwords.txt");
-  private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Polish());
+  private final Disambiguator chunker;
+  private final Disambiguator disambiguator;
+
+  public PolishHybridDisambiguator (PolishResourceDataBroker dataBroker) {
+      super(dataBroker);
+      this.chunker = dataBroker.getChunker();
+      this.disambiguate = dataBroker.getDisambiguator();
+      /*
+      GTODO: Clean up
+      this.chunker = new MultiWordChunker("/pl/multiwords.txt", dataBroker);
+      this.disambiguator = new XmlRuleDisambiguator(new Polish());
+      */
+  }
 
   /**
    * Calls two disambiguator classes: (1) a chunker; (2) a rule-based

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.tools.StringTools;
+import org.languagetool.Language;
 
 /**
  * A {@link Match} is the configuration of an algorithm used to match {@link AnalyzedTokenReadings}s.
@@ -89,8 +90,8 @@ public final class Match {
    * Creates a state used for actually matching a token.
    * @since 2.3
    */
-  public MatchState createState(Synthesizer synthesizer, AnalyzedTokenReadings token) {
-    MatchState state = new MatchState(this, synthesizer);
+  public MatchState createState(Synthesizer synthesizer, Language lang, AnalyzedTokenReadings token) {
+    MatchState state = new MatchState(this, synthesizer, lang);
     state.setToken(token);
     return state;
   }
@@ -99,8 +100,8 @@ public final class Match {
    * Creates a state used for actually matching a token.
    * @since 2.3
    */
-  public MatchState createState(Synthesizer synthesizer, AnalyzedTokenReadings[] tokens, int index, int next) {
-    MatchState state = new MatchState(this, synthesizer);
+  public MatchState createState(Synthesizer synthesizer, Language lang, AnalyzedTokenReadings[] tokens, int index, int next) {
+    MatchState state = new MatchState(this, synthesizer, lang);
     state.setToken(tokens, index, next);
     return state;
   }

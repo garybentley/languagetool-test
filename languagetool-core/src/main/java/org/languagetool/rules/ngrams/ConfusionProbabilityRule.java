@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -48,7 +48,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
 
   /** @since 3.1 */
   public static final String RULE_ID = "CONFUSION_RULE";
-  // probability is only used then at least these many of the occurrence lookups succeeded, 
+  // probability is only used then at least these many of the occurrence lookups succeeded,
   // i.e. returned a value > 0:
   public static final float MIN_COVERAGE = 0.5f;
   // the minimum value the more probable variant needs to have to be considered:
@@ -56,6 +56,8 @@ public abstract class ConfusionProbabilityRule extends Rule {
 
   private static final boolean DEBUG = false;
 
+/*
+GTODO: Clean up
   // Speed up the server use case, where rules get initialized for every call:
   private static final LoadingCache<String, Map<String, List<ConfusionSet>>> confSetCache = CacheBuilder.newBuilder()
       .expireAfterWrite(10, TimeUnit.MINUTES)
@@ -69,24 +71,29 @@ public abstract class ConfusionProbabilityRule extends Rule {
           }
         }
       });
-
-  private final Map<String,List<ConfusionSet>> wordToSets = new HashMap<>();
+*/
+  private final Map<String,List<ConfusionSet>> wordToSets;
   private final LanguageModel lm;
   private final int grams;
   private final Language language;
 
-  public ConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language) {
-    this(messages, languageModel, language, 3);
+  // GTODO Should really pass the "google style" tokenizer as well...
+  public ConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, Map<String,List<ConfusionSet>> confusionSets) {
+    this(messages, languageModel, language, 3, confusionSets);
   }
-  
-  public ConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, int grams) {
+
+  public ConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, int grams, Map<String,List<ConfusionSet>> confusionSets) {
     super(messages);
     setCategory(Categories.TYPOS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.NonConformance);
+    wordToSets = confusionSets;
+    /*
+    GTODO: Clean up
     for (String filename : getFilenames()) {
       String path = "/" + language.getShortCode() + "/" + filename;
       this.wordToSets.putAll(confSetCache.getUnchecked(path));
     }
+    */
     this.lm = Objects.requireNonNull(languageModel);
     this.language = Objects.requireNonNull(language);
     if (grams < 1 || grams > 5) {
@@ -94,19 +101,20 @@ public abstract class ConfusionProbabilityRule extends Rule {
     }
     this.grams = grams;
   }
-
+/*
+GTODO: Clean up
   @NotNull
   protected List<String> getFilenames() {
     return Arrays.asList("confusion_sets.txt");
   }
-
+*/
   @Override
   public String getId() {
     return RULE_ID;
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     String text = sentence.getText();
     List<GoogleToken> tokens = GoogleToken.getGoogleTokens(text, true, getGoogleStyleWordTokenizer());
     List<RuleMatch> matches = new ArrayList<>();
@@ -116,6 +124,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
       List<ConfusionSet> confusionSets = wordToSets.get(token);
       boolean uppercase = false;
       if (confusionSets == null && token.length() > 0 && Character.isUpperCase(token.charAt(0))) {
+          // GTODO Use case converter here...
         confusionSets = wordToSets.get(StringTools.lowercaseFirstChar(token));
         uppercase = true;
       }
@@ -156,7 +165,8 @@ public abstract class ConfusionProbabilityRule extends Rule {
    * Return a tokenizer that works more like Google does for its ngram index (which
    * doesn't seem to be properly documented).
    */
-  protected Tokenizer getGoogleStyleWordTokenizer() {
+  protected Tokenizer getGoogleStyleWordTokenizer() throws Exception {
+      // GTODO: There is no guarantee that a google style tokenizer is returned, should change.
     return language.getWordTokenizer();
   }
 
@@ -169,7 +179,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
       return Tools.i18n(messages, "statistics_suggest3", suggestion.getString());
     }
   }
-  
+
   /** @deprecated used only for tests */
   public void setConfusionSet(ConfusionSet set) {
     wordToSets.clear();
@@ -187,7 +197,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
   }
 
   @Nullable
-  private ConfusionString getBetterAlternativeOrNull(GoogleToken token, List<GoogleToken> tokens, Set<ConfusionString> confusionSet, long factor) {
+  private ConfusionString getBetterAlternativeOrNull(GoogleToken token, List<GoogleToken> tokens, Set<ConfusionString> confusionSet, long factor) throws Exception {
     if (confusionSet.size() != 2) {
       throw new RuntimeException("Confusion set must be of size 2: " + confusionSet);
     }
@@ -213,7 +223,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
     throw new RuntimeException("Not found in set '" + confusionSet + "': " + token);
   }
 
-  private ConfusionString getBetterAlternativeOrNull(GoogleToken token, List<GoogleToken> tokens, ConfusionString otherWord, long factor) {
+  private ConfusionString getBetterAlternativeOrNull(GoogleToken token, List<GoogleToken> tokens, ConfusionString otherWord, long factor) throws Exception {
     String word = token.token;
     double p1;
     double p2;
@@ -234,7 +244,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
   List<String> getContext(GoogleToken token, List<GoogleToken> tokens, String newToken, int toLeft, int toRight) {
     return getContext(token, tokens, Collections.singletonList(new GoogleToken(newToken, 0, newToken.length())), toLeft, toRight);
   }
-  
+
   private List<String> getContext(GoogleToken token, List<GoogleToken> tokens, List<GoogleToken> newTokens, int toLeft, int toRight) {
     int pos = tokens.indexOf(token);
     if (pos == -1) {
@@ -278,7 +288,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
     return result;
   }
 
-  private double get3gramProbabilityFor(GoogleToken token, List<GoogleToken> tokens, String term) {
+  private double get3gramProbabilityFor(GoogleToken token, List<GoogleToken> tokens, String term) throws Exception {
     List<GoogleToken> newTokens = GoogleToken.getGoogleTokens(term, false, getGoogleStyleWordTokenizer());
     Probability ngram3Left;
     Probability ngram3Middle;
@@ -293,7 +303,7 @@ public abstract class ConfusionProbabilityRule extends Rule {
       ngram3Right = lm.getPseudoProbability(getContext(token, tokens, newTokens, 1, 0));
       // we cannot just use new Probability(1.0, 1.0f) as that would always produce higher
       // probabilities than in the case of one token (eg. "your"):
-      ngram3Middle = new Probability((ngram3Left.getProb() + ngram3Right.getProb()) / 2, 1.0f); 
+      ngram3Middle = new Probability((ngram3Left.getProb() + ngram3Right.getProb()) / 2, 1.0f);
     } else {
       throw new RuntimeException("Words that consists of more than 2 tokens (according to Google tokenization) are not supported yet: " + term + " -> " + newTokens);
     }
@@ -324,5 +334,5 @@ public abstract class ConfusionProbabilityRule extends Rule {
       System.out.printf(Locale.ENGLISH, message, vars);
     }
   }
-  
+
 }

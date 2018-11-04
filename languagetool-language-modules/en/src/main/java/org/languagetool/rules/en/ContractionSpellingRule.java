@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,17 +35,26 @@ import org.languagetool.rules.*;
 public class ContractionSpellingRule extends AbstractSimpleReplaceRule {
 
   public static final String CONTRACTION_SPELLING_RULE = "EN_CONTRACTION_SPELLING";
+  private final Locale locale;
 
-  private static final Map<String, List<String>> wrongWords = load("/en/contractions.txt");
-  private static final Locale EN_LOCALE = new Locale("en");
-
+  //private Map<String, List<String>> wrongWords;
+  //private static final Locale EN_LOCALE = new Locale("en");
+/*
+GTODO: Clean up
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      return dataBroker.getContractionWrongWords();
+      GTODO: Clean up
+      if (wrongWords == null) {
+          wrongWords = load("/en/contractions.txt", dataBroker);
+      }
     return wrongWords;
-  }
 
-  public ContractionSpellingRule(ResourceBundle messages) {
-    super(messages);
+  }
+*/
+  public ContractionSpellingRule(ResourceBundle messages, Map<String, List<String>> wrongWords, Locale locale) {
+    super(messages, wrongWords);
+    this.locale = locale;
     super.setCategory(Categories.TYPOS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
     addExamplePair(Example.wrong("We <marker>havent</marker> earned anything."),
@@ -79,7 +88,8 @@ public class ContractionSpellingRule extends AbstractSimpleReplaceRule {
 
   @Override
   public Locale getLocale() {
-    return EN_LOCALE;
+      return locale;
+    //GTODO return EN_LOCALE;
   }
 
 }

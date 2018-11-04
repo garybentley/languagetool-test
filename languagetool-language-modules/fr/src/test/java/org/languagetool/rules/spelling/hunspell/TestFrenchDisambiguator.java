@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Vincent Maubert
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,10 +28,12 @@ import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationRuleLoader;
 
 class TestFrenchDisambiguator extends AbstractDisambiguator {
-
   @Override
   public AnalyzedSentence disambiguate(AnalyzedSentence input) throws IOException {
     AnalyzedSentence sentence = input;
+    /*
+    GTODO Clean up not used now
+
     String filePath = "/disambiguator.xml";
     try (InputStream inputStream = getClass().getResourceAsStream(filePath)) {
       final DisambiguationRuleLoader ruleLoader = new DisambiguationRuleLoader();
@@ -42,6 +44,7 @@ class TestFrenchDisambiguator extends AbstractDisambiguator {
     } catch (Exception e) {
       throw new RuntimeException("Problems with loading disambiguation file: " + filePath, e);
     }
+    */
     return sentence;
   }
 

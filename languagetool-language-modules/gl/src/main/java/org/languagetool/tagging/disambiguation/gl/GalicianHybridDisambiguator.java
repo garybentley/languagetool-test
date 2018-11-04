@@ -27,6 +27,7 @@ import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.MultiWordChunker;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for Portuguese
@@ -36,8 +37,14 @@ import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
  */
 public class GalicianHybridDisambiguator extends AbstractDisambiguator {
 
-    private final Disambiguator chunker = new MultiWordChunker("/gl/multiwords.txt");
-    private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Galician());
+    private final Disambiguator chunker;
+    private final Disambiguator disambiguator;
+
+    public GalicianHybridDisambiguator(ResourceDataBroker dataBroker) {
+        super(dataBroker);
+        chunker = new MultiWordChunker("/gl/multiwords.txt", dataBroker);
+        disambiguator = new XmlRuleDisambiguator(new Galician());
+    }
 
     /**
      * Calls two disambiguator classes: (1) a chunker; (2) a rule-based

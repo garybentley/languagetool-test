@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,40 +21,44 @@ package org.languagetool.rules.en;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.List;
+import java.util.Set;
 
-import org.languagetool.Language;
+import org.languagetool.language.AmericanEnglish;
 import org.languagetool.UserConfig;
+import morfologik.stemming.Dictionary;
+import org.languagetool.synthesis.Synthesizer;
 
 public final class MorfologikAmericanSpellerRule extends AbstractEnglishSpellerRule {
 
   public static final String RULE_ID = "MORFOLOGIK_RULE_EN_US";
 
-  private static final String RESOURCE_FILENAME = "/en/hunspell/en_US.dict";
-  private static final String LANGUAGE_SPECIFIC_PLAIN_TEXT_DICT = "en/hunspell/spelling_en-US.txt";
-
-  public MorfologikAmericanSpellerRule(ResourceBundle messages, Language language) throws IOException {
-    super(messages, language, null);
-  }
+  // GTODO: Clean up
+  //GTODO private static final String RESOURCE_FILENAME = "/en/hunspell/en_US.dict";
+  //GTODO private static final String LANGUAGE_SPECIFIC_PLAIN_TEXT_DICT = "en/hunspell/spelling_en-US.txt";
 
   /**
    * @since 4.2
    */
-  public MorfologikAmericanSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+  public MorfologikAmericanSpellerRule(ResourceBundle messages, AmericanEnglish language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords, Synthesizer synthesizer) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords, synthesizer);
   }
-
+/*
+GTODO CLean up
   @Override
   public String getFileName() {
     return RESOURCE_FILENAME;
   }
-
+*/
   @Override
   public String getId() {
     return RULE_ID;
   }
-
+/*
+GTODO Clean up
   @Override
   public String getLanguageVariantSpellingFileName() {
     return LANGUAGE_SPECIFIC_PLAIN_TEXT_DICT;
   }
+  */
 }

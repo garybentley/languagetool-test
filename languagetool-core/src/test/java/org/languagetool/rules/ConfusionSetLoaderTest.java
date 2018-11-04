@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,12 +20,15 @@ package org.languagetool.rules;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
+import org.languagetool.TestLanguage;
+import org.languagetool.TestTools;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.nio.charset.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,12 +37,12 @@ import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("QuestionableName")
 public class ConfusionSetLoaderTest {
-  
+
   @Test
-  public void testLoadWithStrictLimits() throws IOException {
-    try (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/yy/confusion_sets.txt")) {
-      ConfusionSetLoader loader = new ConfusionSetLoader();
-      Map<String, List<ConfusionSet>> map = loader.loadConfusionSet(inputStream);
+  public void testLoadWithStrictLimits() throws Exception {
+      TestLanguage lang = TestTools.getTestLanguage();
+      Map<String, List<ConfusionSet>> map = lang.getUseDataBroker().getConfusionSets();
+      //GTODO (String.format("/%1$s/confusion_sets.txt", lang.getShortCode()), StandardCharsets.UTF_8);
       assertThat(map.size(), is(10));
 
       assertThat(map.get("there").size(), is(1));
@@ -47,7 +50,7 @@ public class ConfusionSetLoaderTest {
 
       assertThat(map.get("their").size(), is(1));
       assertThat(map.get("their").get(0).getFactor(), is(10L));
-      
+
       assertThat(map.get("foo").size(), is(2));
       assertThat(map.get("foo").get(0).getFactor(), is(5L));
       assertThat(map.get("foo").get(1).getFactor(), is(8L));
@@ -76,7 +79,6 @@ public class ConfusionSetLoaderTest {
       assertTrue(getAsString(bar).contains("bar"));
       Set<ConfusionString> baz = map.get("foo").get(1).getSet();
       assertTrue(getAsString(baz).contains("baz"));
-    }
   }
 
   private String getAsString(Set<ConfusionString> their) {

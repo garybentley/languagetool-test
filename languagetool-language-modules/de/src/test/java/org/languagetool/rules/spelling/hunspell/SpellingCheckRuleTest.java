@@ -23,10 +23,9 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.language.GermanyGerman;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
-import org.languagetool.rules.de.GermanSpellerRule;
+import org.languagetool.rules.de.GermanyGermanSpellerRule;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,18 +35,18 @@ import static org.junit.Assert.assertThat;
 public class SpellingCheckRuleTest {
 
   @Test
-  public void testIgnoreSuggestionsWithHunspell() throws IOException {
+  public void testIgnoreSuggestionsWithHunspell() throws Exception {
     JLanguageTool lt = new JLanguageTool(new GermanyGerman());
 
     assertThat(lt.check("Das ist ein einPseudoWortFürLanguageToolTests").size(), is(0));   // no error, as this word is in ignore.txt
 
     List<RuleMatch> matches = lt.check("Das ist ein Tibbfehla");
     assertThat(matches.size(), is(1));
-    assertThat(matches.get(0).getRule().getId(), is(GermanSpellerRule.RULE_ID));
+    assertThat(matches.get(0).getRule().getId(), is(GermanyGermanSpellerRule.RULE_ID));
   }
 
   @Test
-  public void testIgnorePhrases() throws IOException {
+  public void testIgnorePhrases() throws Exception {
     JLanguageTool lt = new JLanguageTool(new GermanyGerman());
     assertThat(lt.check("Ein Test mit Auriensis Fantasiewortus").size(), is(2));
     for (Rule rule : lt.getAllActiveRules()) {

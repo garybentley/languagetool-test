@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,7 +34,7 @@ public class FakeLanguageModel extends LuceneSingleIndexLanguageModel {
     super(3);
     FakeLanguageModel.map = map;
   }
-  
+
   public FakeLanguageModel() {
     super(3);
     // for "Their are new ideas to explore":
@@ -53,10 +53,6 @@ public class FakeLanguageModel extends LuceneSingleIndexLanguageModel {
     map.put("_START_ Im", 1);
     map.put("_START_ Um dabei", 20);
     map.put("_START_ Im dabei", 0);
-  }
-
-  @Override
-  public void doValidateDirectory(File topIndexDir) {
   }
 
   @Override

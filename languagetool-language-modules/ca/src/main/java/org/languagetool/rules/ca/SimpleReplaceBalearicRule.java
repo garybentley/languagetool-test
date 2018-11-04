@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,7 @@ package org.languagetool.rules.ca;
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,30 +31,33 @@ import java.util.ResourceBundle;
 
 /**
  * A rule that matches words which should not be used and suggests
- * correct ones instead. 
- * 
+ * correct ones instead.
+ *
  * Catalan implementations. Loads the
  * relevant words from <code>rules/ca/replace.txt</code>.
- * 
+ *
  * @author Jaume Ortolà
  */
 public class SimpleReplaceBalearicRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/ca/replace_balearic.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale CA_LOCALE = new Locale("CA");
 
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      if (wrongWords == null) {
+          wrongWords = load("/ca/replace_balearic.txt", dataBroker);
+      }
     return wrongWords;
   }
-  
-  public SimpleReplaceBalearicRule(final ResourceBundle messages) throws IOException {
-    super(messages);
+
+  public SimpleReplaceBalearicRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
     super.setCategory(Categories.TYPOS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     this.setCheckLemmas(false);
     //this.setIgnoreTaggedWords();
-  }  
+  }
 
   @Override
   public final String getId() {
@@ -69,17 +73,17 @@ public class SimpleReplaceBalearicRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Possible error ortogràfic.";
   }
-  
+
   @Override
   public String getMessage(String tokenStr,List<String> replacements) {
     return "Possible error ortogràfic (forma verbal vàlida en la variant balear).";
   }
-  
+
   @Override
   public boolean isCaseSensitive() {
     return false;
   }
-  
+
   @Override
   public Locale getLocale() {
     return CA_LOCALE;

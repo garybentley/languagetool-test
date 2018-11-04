@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,10 +25,15 @@ import org.languagetool.language.Italian;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
+import org.languagetool.databroker.ResourceDataBroker;
 
 public class ItalianRuleDisambiguator extends AbstractDisambiguator {
 
   private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Italian());
+
+  public ItalianRuleDisambiguator (ResourceDataBroker dataBroker) {
+      super(dataBroker);
+  }
 
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input)

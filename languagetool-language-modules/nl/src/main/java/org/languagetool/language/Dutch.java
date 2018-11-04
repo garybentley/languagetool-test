@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -73,7 +73,7 @@ public class Dutch extends Language {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new DutchSynthesizer();
+      synthesizer = new DutchSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
@@ -127,8 +127,8 @@ public class Dutch extends Language {
             new MorfologikDutchSpellerRule(messages, this, userConfig),
             new MultipleWhitespaceRule(messages, this),
             new CompoundRule(messages),
-            new DutchWrongWordInContextRule(messages),
-            new WordCoherencyRule(messages),
+            new DutchWrongWordInContextRule(messages, getUseDataBroker()),
+            new WordCoherencyRule(messages, getUseDataBroker()),
             new SimpleReplaceRule(messages),
             new LongSentenceRule(messages, userConfig, -1, true),
             new PreferredWordRule(messages)

@@ -30,7 +30,7 @@ import java.util.List;
  * @since 2.3
  */
 public class DemoChunker implements Chunker {
-
+//GTODO: Remove
   @Override
   public void addChunkTags(List<AnalyzedTokenReadings> tokenReadings) {
     for (AnalyzedTokenReadings tokenReading : tokenReadings) {

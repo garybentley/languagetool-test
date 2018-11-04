@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -58,7 +58,7 @@ import org.languagetool.tokenizers.ca.CatalanWordTokenizer;
 public class Catalan extends Language {
 
   private static final Language DEFAULT_CATALAN = new Catalan();
-  
+
   private Tagger tagger;
   private SentenceTokenizer sentenceTokenizer;
   private Tokenizer wordTokenizer;
@@ -74,7 +74,7 @@ public class Catalan extends Language {
   public String[] getCountries() {
     return new String[]{"ES"}; // "AD", "FR", "IT"
   }
-  
+
   @Override
   public String getShortCode() {
     return "ca";
@@ -84,7 +84,7 @@ public class Catalan extends Language {
   public Language getDefaultLanguageVariant() {
     return DEFAULT_CATALAN;
   }
-  
+
   @Override
   public Contributor[] getMaintainers() {
     return new Contributor[] { new Contributor("Ricard Roca"), new Contributor("Jaume Ortolà") };
@@ -93,7 +93,7 @@ public class Catalan extends Language {
   @Override
   public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
     return Arrays.asList(
-            new CommaWhitespaceRule(messages, 
+            new CommaWhitespaceRule(messages,
             		Example.wrong("A parer seu<marker> ,</marker> no era veritat."),
             		Example.fixed("A parer seu<marker>,</marker> no era veritat.")),
             new DoublePunctuationRule(messages),
@@ -110,16 +110,16 @@ public class Catalan extends Language {
             new CatalanUnpairedExclamationMarksRule(messages, this),
             new AccentuationCheckRule(messages),
             new ComplexAdjectiveConcordanceRule(messages),
-            new CatalanWrongWordInContextRule(messages),
-            new CatalanWrongWordInContextDiacriticsRule(messages),
+            new CatalanWrongWordInContextRule(messages, getUseDataBroker()),
+            new CatalanWrongWordInContextDiacriticsRule(messages, getUseDataBroker()),
             new ReflexiveVerbsRule(messages),
             new SimpleReplaceVerbsRule(messages, this),
-            new SimpleReplaceBalearicRule(messages),
-            new SimpleReplaceRule(messages),
+            new SimpleReplaceBalearicRule(messages, getUseDataBroker()),
+            new SimpleReplaceRule(messages, getUseDataBroker()),
             new ReplaceOperationNamesRule(messages, this),
             new SimpleReplaceDNVRule(messages, this), // can be removed here after updating dictionaries
-            new SimpleReplaceDiacriticsIEC(messages),
-            new SimpleReplaceDiacriticsTraditional(messages)
+            new SimpleReplaceDiacriticsIEC(messages, getUseDataBroker()),
+            new SimpleReplaceDiacriticsTraditional(messages, getUseDataBroker())
     );
   }
 
@@ -134,7 +134,7 @@ public class Catalan extends Language {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new CatalanSynthesizer();
+      synthesizer = new CatalanSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
@@ -146,19 +146,19 @@ public class Catalan extends Language {
     }
     return sentenceTokenizer;
   }
-  
+
   @Override
   public Disambiguator getDisambiguator() {
     if (disambiguator == null) {
-      disambiguator = new CatalanHybridDisambiguator();
+      disambiguator = new CatalanHybridDisambiguator(getUseDataBroker());
     }
     return disambiguator;
-  }  
-  
+  }
+
   @Override
   public Tokenizer getWordTokenizer() {
     if (wordTokenizer == null) {
-      wordTokenizer = new CatalanWordTokenizer();
+      wordTokenizer = new CatalanWordTokenizer(getUseDataBroker());
     }
     return wordTokenizer;
   }

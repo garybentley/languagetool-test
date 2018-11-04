@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings("MagicNumber")
 public class SameRuleGroupFilterTest {
 
-  private static final Language language = TestTools.getDemoLanguage();
+  private static final Language language = TestTools.getTestLanguage();
 
   @Test
   public void testFilter() {

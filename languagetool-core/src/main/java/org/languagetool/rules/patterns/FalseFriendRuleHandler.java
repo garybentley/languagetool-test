@@ -32,7 +32,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class FalseFriendRuleHandler extends XMLRuleHandler {
+public class FalseFriendRuleHandler extends XMLRuleHandler<FalseFriendPatternRule> {
 
   // Definitions of values in XML files:
   private static final String TRANSLATION = "translation";
@@ -52,7 +52,8 @@ class FalseFriendRuleHandler extends XMLRuleHandler {
   private StringBuilder translation = new StringBuilder();
   private boolean inTranslation;
 
-  FalseFriendRuleHandler(Language textLanguage, Language motherTongue) {
+  public FalseFriendRuleHandler(Language textLanguage, Language motherTongue) throws Exception {
+      super(textLanguage.getUseDataBroker().getRuleFilterCreator());
     messages = ResourceBundle.getBundle(
         JLanguageTool.MESSAGE_BUNDLE, motherTongue.getLocale());
     formatter = new MessageFormat("");
@@ -86,16 +87,17 @@ class FalseFriendRuleHandler extends XMLRuleHandler {
     } else if (qName.equals(PATTERN)) {
       inPattern = true;
       String languageStr = attrs.getValue("lang");
-      if (Languages.isLanguageSupported(languageStr)) {
-        language = Languages.getLanguageForShortCode(languageStr);
-      }
+      language = Languages.getBestMatchLanguage(languageStr);
+        if (language == null) {
+            throw new RuntimeException(String.format("Unable to find language: %1$s", languageStr));
+        }
     } else if (qName.equals(TOKEN)) {
       setToken(attrs);
     } else if (qName.equals(TRANSLATION)) {
       inTranslation = true;
       String languageStr = attrs.getValue("lang");
       if (Languages.isLanguageSupported(languageStr)) {
-        Language tmpLang = Languages.getLanguageForShortCode(languageStr);
+        Language tmpLang = Languages.getLanguage(languageStr);
         currentTranslationLanguage = tmpLang;
         if (tmpLang.equalsConsiderVariantsIfSpecified(motherTongue)) {
           translationLanguage = tmpLang;
@@ -132,11 +134,11 @@ class FalseFriendRuleHandler extends XMLRuleHandler {
           formatter.applyPattern(messages.getString("false_friend_hint"));
           String tokensAsString = StringUtils.join(patternTokens, " ").replace('|', '/');
           Object[] messageArguments = {tokensAsString,
-                  messages.getString(textLanguage.getShortCode()),
+                  messages.getString(textLanguage.getLocale().getLanguage()),
                   formatTranslations(translations),
-                  messages.getString(motherTongue.getShortCode())};
+                  messages.getString(motherTongue.getLocale().getLanguage())};
           String description = formatter.format(messageArguments);
-          PatternRule rule = new FalseFriendPatternRule(id, language, patternTokens,
+          FalseFriendPatternRule rule = new FalseFriendPatternRule(id, language, patternTokens,
                   messages.getString("false_friend_desc") + " "
                           + tokensAsString, description, messages.getString("false_friend"));
           rule.setCorrectExamples(correctExamples);
@@ -145,7 +147,7 @@ class FalseFriendRuleHandler extends XMLRuleHandler {
           if (defaultOff) {
             rule.setDefaultOff();
           }
-          rules.add(rule);
+          addRule(rule);
         }
         if (patternTokens != null) {
           patternTokens.clear();

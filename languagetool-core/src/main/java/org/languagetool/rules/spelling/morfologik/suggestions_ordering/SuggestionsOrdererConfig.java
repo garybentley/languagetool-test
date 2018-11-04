@@ -21,7 +21,8 @@ package org.languagetool.rules.spelling.morfologik.suggestions_ordering;
 public class SuggestionsOrdererConfig {
 
   private static final String PROP_NAME = "enableMLSuggestionsOrdering";
-
+/*
+GTODO Clean up
   private static String ngramsPath;
 
   static String getNgramsPath() {
@@ -31,8 +32,11 @@ public class SuggestionsOrdererConfig {
   public static void setNgramsPath(String ngramsPath) {
     SuggestionsOrdererConfig.ngramsPath = ngramsPath;
   }
-
+*/
+/*
+GTODO: Clean up, bad...
   static boolean isMLSuggestionsOrderingEnabled() {
+      // GTODO This could mess up multiple implementations...
     String enableMLSuggestionsOrderingProperty = System.getProperty(PROP_NAME, "false");
     return Boolean.parseBoolean(enableMLSuggestionsOrderingProperty);
   }
@@ -40,4 +44,5 @@ public class SuggestionsOrdererConfig {
   static void setMLSuggestionsOrderingEnabled(boolean MLSuggestionsOrderingEnabled) {
     System.setProperty(PROP_NAME, String.valueOf(MLSuggestionsOrderingEnabled));
   }
+  */
 }

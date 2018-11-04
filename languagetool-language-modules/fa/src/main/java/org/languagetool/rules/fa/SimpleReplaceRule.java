@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.rules.fa;
 
 import org.languagetool.rules.*;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,21 +32,23 @@ import java.util.ResourceBundle;
  */
 public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/fa/replace.txt");
-
-  public SimpleReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+  public SimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords) throws IOException {
+    super(messages, wrongWords);
     super.setCategory(Categories.CONFUSED_WORDS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
     addExamplePair(Example.wrong("وی <marker>حاظر</marker> به همکاری شد."),
                    Example.fixed("وی <marker>حاضر</marker> به همکاری شد."));
   }
-
+/*
+GTODO Clean up
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      if (wrongWords == null) {
+          wrongWords = load("/fa/replace.txt", dataBroker);
+      }
     return wrongWords;
   }
-
+*/
   @Override
   public final String getId() {
     return "FA_SIMPLE_REPLACE";

@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,59 +35,77 @@ import morfologik.stemming.WordData;
 
 import org.languagetool.AnalyzedToken;
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 public class BaseSynthesizer implements Synthesizer {
 
-  protected volatile List<String> possibleTags;
+  private Set<String> possibleTags;
 
-  private final String tagFileName;
-  private final String resourceFileName;
+  //GTODO private final String tagFileName;
+  //GTODO private final String resourceFileName;
   private final IStemmer stemmer;
+  //GTODO protected final ResourceDataBroker dataBroker;
 
-  private volatile Dictionary dictionary;
+  //private volatile Dictionary dictionary;
 
   /**
-   * @param resourceFileName The dictionary file name.
-   * @param tagFileName The name of a file containing all possible tags.
+   * Create a synthesizer using the stemmer and tags.
+   *
+   * @param stemmer The stemmer to use.
+   * @param possibleTags The tags.
    */
-  public BaseSynthesizer(String resourceFileName, String tagFileName) {
-    this.resourceFileName = resourceFileName;
-    this.tagFileName = tagFileName;
-    this.stemmer = createStemmer();
+  public BaseSynthesizer(IStemmer stemmer, Set<String> possibleTags) {
+     Objects.requireNonNull(stemmer, "Stemmer must be provided.");
+     Objects.requireNonNull(possibleTags, "Possible tags must be provided.");
+      //GTODO String resourceFileName, String tagFileName,
+    //GTODO this.resourceFileName = resourceFileName;
+    //GTODO this.tagFileName = tagFileName;
+    //GTODO this.dataBroker = dataBroker;
+    //this.dictionary = dict;
+    this.possibleTags = possibleTags;
+    //this.stemmer = createStemmer();
+    //this.stemmer = new DictionaryLookup(dictionary);
+    this.stemmer = stemmer;
   }
 
   /**
    * Returns the {@link Dictionary} used for this synthesizer.
    * The dictionary file can be defined in the {@link #BaseSynthesizer(String, String) constructor}.
+   *
+   * @param dataBroker The data broker to use for resource lookup.
    * @throws IOException In case the dictionary cannot be loaded.
    */
+   /*
   protected Dictionary getDictionary() throws IOException {
     Dictionary dict = this.dictionary;
     if (dict == null) {
       synchronized (this) {
         dict = this.dictionary;
         if (dict == null) {
-          URL url = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(resourceFileName);
+          URL url = dataBroker.getFromResourceDirAsUrl(resourceFileName);
           this.dictionary = dict = Dictionary.read(url);
         }
       }
     }
     return dict;
   }
+  */
 
   /**
    * Creates a new {@link IStemmer} based on the configured {@link #getDictionary() dictionary}.
    * The result must not be shared among threads.
    * @since 2.3
    */
+   /*
+   GTODO: Clean up
   protected IStemmer createStemmer() {
     try {
-      return new DictionaryLookup(getDictionary());
+      return new DictionaryLookup(dictionary);//GTODO getDictionary());
     } catch (IOException e) {
       throw new RuntimeException("Could not load dictionary", e);
     }
   }
-
+*/
   /**
    * Lookup the inflected forms of a lemma defined by a part-of-speech tag.
    * @param lemma the lemma to be inflected.
@@ -119,7 +139,7 @@ public class BaseSynthesizer implements Synthesizer {
   public String[] synthesize(AnalyzedToken token, String posTag,
       boolean posTagRegExp) throws IOException {
     if (posTagRegExp) {
-      initPossibleTags();
+      //GTODO initPossibleTags();
       Pattern p = Pattern.compile(posTag);
       List<String> results = new ArrayList<>();
       for (String tag : possibleTags) {
@@ -138,6 +158,10 @@ public class BaseSynthesizer implements Synthesizer {
     return posTag;
   }
 
+  public Set<String> getPossibleTags() {
+      return possibleTags;
+  }
+
   /**
    * @since 2.5
    * @return the stemmer interface to be used.
@@ -145,19 +169,20 @@ public class BaseSynthesizer implements Synthesizer {
   public IStemmer getStemmer() {
     return stemmer;
   }
-
+/*
+GTODO: Clean up
   protected void initPossibleTags() throws IOException {
     List<String> tags = possibleTags;
     if (tags == null) {
       synchronized (this) {
         tags = possibleTags;
         if (tags == null) {
-          try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(tagFileName)) {
+          try (InputStream stream = dataBroker.getFromResourceDirAsStream(tagFileName)) {
             possibleTags = SynthesizerTools.loadWords(stream);
           }
         }
       }
     }
   }
-
+*/
 }

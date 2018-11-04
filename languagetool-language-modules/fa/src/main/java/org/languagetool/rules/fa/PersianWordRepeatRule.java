@@ -27,13 +27,13 @@ import org.languagetool.rules.WordRepeatRule;
 
 /**
  * Word repeat rule for English, to avoid false alarms in the generic word repetition rule.
- * 
+ *
  * @since 2.7
  */
 public class PersianWordRepeatRule extends WordRepeatRule {
 
-  public PersianWordRepeatRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public PersianWordRepeatRule(ResourceBundle messages) {
+    super(messages);
     addExamplePair(Example.wrong("این کار <marker>برای برای</marker> تو بود."),
                    Example.fixed("این کار <marker>برای</marker> تو بود."));
   }

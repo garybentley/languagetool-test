@@ -32,7 +32,7 @@ import java.io.*;
 import java.util.*;
 
 public class NeuralNetworkRule extends Rule {
-  
+
   private static final int CONTEXT_LENGTH = 5;
   private static final boolean DEBUG = false;
 
@@ -42,7 +42,8 @@ public class NeuralNetworkRule extends Rule {
   private final Classifier classifier;
 
   private double minScore;
-
+/*
+GTODO Clean up
   public NeuralNetworkRule(ResourceBundle messages, Language language, ScoredConfusionSet confusionSet, Word2VecModel word2VecModel) throws IOException {
     super(messages);
     super.setCategory(Categories.TYPOS.getCategory(messages));
@@ -70,7 +71,7 @@ public class NeuralNetworkRule extends Rule {
 
     this.id = createId(language);
   }
-
+*/
   public NeuralNetworkRule(ResourceBundle messages, Language language, ScoredConfusionSet confusionSet, Classifier classifier) {
     super(messages);
     super.setCategory(Categories.TYPOS.getCategory(messages));
@@ -83,14 +84,15 @@ public class NeuralNetworkRule extends Rule {
 
   @NotNull
   private String createId(Language language) {
-    return language.getShortCode().toUpperCase() + "_" + subjects.get(0) + "_VS_" + subjects.get(1) + "_NEURALNETWORK";
+    return language.getLocale().getLanguage().toUpperCase() + "_" + subjects.get(0) + "_VS_" + subjects.get(1) + "_NEURALNETWORK";
   }
-
+/*
+ GTODO Clean up
   private InputStream streamFor(File path, String filename) throws FileNotFoundException {
     String folderName = String.join("_", subjects);
     return new FileInputStream(path.getPath() + File.separator + "neuralnetwork" + File.separator + folderName + File.separator + filename);
   }
-
+*/
   public List<String> getSubjects() {
     return subjects;
   }

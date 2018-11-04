@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,6 +24,7 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.TestTools;
 import org.languagetool.language.English;
 import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tagging.Tagger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,22 +34,24 @@ import static org.junit.Assert.assertEquals;
 
 public class EnglishTaggerTest {
 
-  private EnglishTagger tagger;
+  private Tagger tagger;
   private WordTokenizer tokenizer;
-  
+  private English lang;
+
   @Before
-  public void setUp() {
-    tagger = new EnglishTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    lang = new English();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new English());
+  public void testDictionary() throws Exception {
+    TestTools.testTaggerDictionary(lang.getUseDataBroker().getWordTaggerDictionary(), new English());
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("This is a big house.",
         "This/[this]DT|This/[this]PDT -- is/[be]VBZ -- a/[a]DT -- big/[big]JJ|big/[big]RB -- house/[house]NN|house/[house]VB|house/[house]VBP", tokenizer, tagger);
     TestTools.myAssert("Marketing do a lot of trouble.",
@@ -60,17 +63,16 @@ public class EnglishTaggerTest {
     TestTools.myAssert("He doesn't believe me.",
         "He/[he]PRP -- doesn/[do]VBZ -- t/[null]null -- believe/[believe]VB|believe/[believe]VBP -- me/[I]PRP", tokenizer, tagger);
     TestTools.myAssert("It has become difficult.",
-        "It/[it]PRP -- has/[have]VBZ -- become/[become]VB|become/[become]VBN|become/[become]VBP -- difficult/[difficult]JJ", tokenizer, tagger); 
+        "It/[it]PRP -- has/[have]VBZ -- become/[become]VB|become/[become]VBN|become/[become]VBP -- difficult/[difficult]JJ", tokenizer, tagger);
   }
 
   @Test
-  public void testLemma() throws IOException {
-    EnglishTagger tagger = new EnglishTagger();
+  public void testLemma() throws Exception {
     List<String> words = new ArrayList<>();
     words.add("Oliver");
     words.add("works");
     List<AnalyzedTokenReadings> aToken = tagger.tag(words);
-    
+
     assertEquals(2, aToken.size());
     assertEquals(3, aToken.get(0).getReadings().size());
     assertEquals(2, aToken.get(1).getReadings().size());

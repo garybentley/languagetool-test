@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,7 +23,7 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
-import org.languagetool.language.Demo;
+import org.languagetool.TestLanguage;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tokenizers.WordTokenizer;
 
@@ -36,7 +36,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class GoogleTokenTest {
-  
+
   @Test
   public void testTokenization() {
     List<GoogleToken> tokens = GoogleToken.getGoogleTokens("This, isn't a test.", false, new MyWordTokenizer());
@@ -51,7 +51,7 @@ public class GoogleTokenTest {
   }
 
   @Test
-  public void testTokenizationWithPosTag() throws IOException {
+  public void testTokenizationWithPosTag() throws Exception {
     JLanguageTool lt = new JLanguageTool(new PosTaggingDemo());
     AnalyzedSentence analyzedSentence = lt.getAnalyzedSentence("This, isn't a test.");
     List<GoogleToken> tokens = GoogleToken.getGoogleTokens(analyzedSentence, false, new MyWordTokenizer());
@@ -67,7 +67,7 @@ public class GoogleTokenTest {
     assertThat(tokens.get(6).token, is("."));
   }
 
-  class PosTaggingDemo extends Demo {
+  class PosTaggingDemo extends TestLanguage {
     @Override
     public Tagger getTagger() {
       return new Tagger() {

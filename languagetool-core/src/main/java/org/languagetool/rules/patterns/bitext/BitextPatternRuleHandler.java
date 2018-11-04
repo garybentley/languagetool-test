@@ -27,21 +27,34 @@ import org.languagetool.rules.patterns.PatternToken;
 import org.languagetool.rules.patterns.Match;
 import org.languagetool.rules.patterns.PatternRule;
 import org.languagetool.rules.patterns.PatternRuleHandler;
+import org.languagetool.rules.patterns.RuleFilterCreator;
+import org.languagetool.rules.patterns.XMLRuleHandler;
+import org.languagetool.rules.patterns.AbstractPatternRule;
+import org.languagetool.rules.patterns.AbstractPatternRuleHandler;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
-class BitextPatternRuleHandler extends PatternRuleHandler {
+/**
+ * A handler of bi-text pattern rules.
+ * Note: this used to extend PatternRuleHandler but that caused ambiguity since you had to ignore
+ * getting the rules and use getBitextRules instead.
+ */
+public class BitextPatternRuleHandler extends AbstractPatternRuleHandler<BitextPatternRule> {
 
   private static final String SOURCE = "source";
   private static final String TARGET = "target";
   private static final String SRC_EXAMPLE = "srcExample";
   private static final String TRG_EXAMPLE = "trgExample";
 
-  private final List<BitextPatternRule> rules = new ArrayList<>();
+  //private final List<BitextPatternRule> rules = new ArrayList<>();
+
+  protected String name;
 
   private PatternRule srcRule;
   private PatternRule trgRule;
@@ -53,9 +66,24 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
 
   private List<StringPair> correctExamples = new ArrayList<>();
   private List<IncorrectBitextExample> incorrectExamples = new ArrayList<>();
-
-  List<BitextPatternRule> getBitextRules() {
+/*
+GTODO: Clean up
+  public List<BitextPatternRule> getBitextRules() {
     return rules;
+  }
+*/
+  public BitextPatternRuleHandler(RuleFilterCreator ruleFilterCreator) {
+      super(ruleFilterCreator);
+  }
+
+  @Override
+  public void handleStartElementRulesCase(Attributes attrs) {
+      String languageStr = attrs.getValue("targetLang");
+      Language l = Languages.getLanguage(new Locale(languageStr));
+      if (l == null) {
+          throw new RuntimeException(String.format("Unable to find target language: %1$s", languageStr));
+      }
+      language = l;
   }
 
   // ===========================================================
@@ -66,20 +94,31 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
   public void startElement(String namespaceURI, String lName,
       String qName, Attributes attrs) throws SAXException {
     switch (qName) {
+        /*
       case RULES:
         String languageStr = attrs.getValue("targetLang");
         language = Languages.getLanguageForShortCode(languageStr);
         break;
+        */
+        /*
       case RULE:
+
         super.startElement(namespaceURI, lName, qName, attrs);
+This is already handled
         correctExamples = new ArrayList<>();
         incorrectExamples = new ArrayList<>();
         break;
+        */
       case TARGET:
         startPattern(attrs);
         break;
       case SOURCE:
-        srcLang = Languages.getLanguageForShortCode(attrs.getValue("lang"));
+        String lang = attrs.getValue("lang");
+        Language l = Languages.getBestMatchLanguage(new Locale(lang));
+        if (l == null) {
+            throw new RuntimeException(String.format("Unable to find source language: %1$s", lang));
+        }
+        srcLang = l;
         break;
       default:
         super.startElement(namespaceURI, lName, qName, attrs);
@@ -88,9 +127,44 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
   }
 
   @Override
+  public void handleEndElementRuleCase() {
+      trgRule.setMessage(message.toString());
+      for (Match m : suggestionMatches) {
+        trgRule.addSuggestionMatch(m);
+      }
+      if (phrasePatternTokens.size() <= 1) {
+        suggestionMatches.clear();
+      }
+      BitextPatternRule bRule = new BitextPatternRule(srcRule, trgRule);
+      bRule.setCorrectBitextExamples(correctExamples);
+      bRule.setIncorrectBitextExamples(incorrectExamples);
+      bRule.setSourceLanguage(srcLang);
+      addRule(bRule);
+  }
+
+  @Override
+  public void handleEndElementExampleCase() {
+      if (inCorrectExample) {
+        correctExamples.add(new StringPair(srcExample.getExample(), trgExample.getExample()));
+      } else if (inIncorrectExample) {
+        StringPair examplePair = new StringPair(srcExample.getExample(), trgExample.getExample());
+        if (trgExample.getCorrections().isEmpty()) {
+          incorrectExamples.add(new IncorrectBitextExample(examplePair));
+        } else {
+          List<String> corrections = trgExample.getCorrections();
+          incorrectExamples.add(new IncorrectBitextExample(examplePair, corrections));
+        }
+      }
+      inCorrectExample = false;
+      inIncorrectExample = false;
+      inErrorTriggerExample = false;
+  }
+
+  @Override
   public void endElement(String namespaceURI, String sName,
       String qName) throws SAXException {
     switch (qName) {
+        /*
       case RULE:
         trgRule.setMessage(message.toString());
         for (Match m : suggestionMatches) {
@@ -103,8 +177,9 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
         bRule.setCorrectBitextExamples(correctExamples);
         bRule.setIncorrectBitextExamples(incorrectExamples);
         bRule.setSourceLanguage(srcLang);
-        rules.add(bRule);
+        addRule(bRule);
         break;
+        */
       case SRC_EXAMPLE:
         srcExample = setExample();
         break;
@@ -117,6 +192,7 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
       case TARGET:
         trgRule = finalizeRule();
         break;
+        /*
       case EXAMPLE:
         if (inCorrectExample) {
           correctExamples.add(new StringPair(srcExample.getExample(), trgExample.getExample()));
@@ -133,6 +209,7 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
         inIncorrectExample = false;
         inErrorTriggerExample = false;
         break;
+        */
       default:
         super.endElement(namespaceURI, sName, qName);
         break;
@@ -140,6 +217,74 @@ class BitextPatternRuleHandler extends PatternRuleHandler {
 
   }
 
+  /**
+   * Prepare the rule.  Copied from {@link PatternRuleHandler.prepareRule(AbstractPatternRule)}.
+   */
+   /*
+   GTODO Clean up
+  protected void prepareRule(AbstractPatternRule rule) {
+    if (startPos != -1 && endPos != -1) {
+      rule.setStartPositionCorrection(startPos);
+      rule.setEndPositionCorrection(endPos - tokenCountForMarker);
+    }
+    startPos = -1;
+    endPos = -1;
+    rule.setCorrectExamples(correctExamples);
+    rule.setIncorrectExamples(incorrectExamples);
+    rule.setErrorTriggeringExamples(errorTriggeringExamples);
+    rule.setCategory(category);
+    if (!rulegroupAntiPatterns.isEmpty()) {
+      rule.setAntiPatterns(rulegroupAntiPatterns);
+    }
+    if (!ruleAntiPatterns.isEmpty()) {
+      rule.setAntiPatterns(ruleAntiPatterns);
+      ruleAntiPatterns.clear();
+    }
+    if (inRuleGroup) {
+      rule.setSubId(Integer.toString(subId));
+    } else {
+      rule.setSubId("1");
+    }
+    caseSensitive = false;
+    for (Match m : suggestionMatches) {
+      rule.addSuggestionMatch(m);
+    }
+    if (phrasePatternTokens.size() <= 1) {
+      suggestionMatches.clear();
+    }
+    for (Match m : suggestionMatchesOutMsg) {
+      rule.addSuggestionMatchOutMsg(m);
+    }
+    suggestionMatchesOutMsg.clear();
+    if (category == null) {
+      throw new RuntimeException("Cannot activate rule '" + id + "', it is outside of a <category>...</category>");
+    }
+    if (defaultOff) {
+      rule.setDefaultOff();
+    }
+    if (url != null && url.length() > 0) {
+      try {
+        rule.setUrl(new URL(url.toString()));
+      } catch (MalformedURLException e) {
+        throw new RuntimeException("Could not parse URL for rule: " + rule + ": '" + url + "'", e);
+      }
+    } else if (urlForRuleGroup != null && urlForRuleGroup.length() > 0) {
+      try {
+        rule.setUrl(new URL(urlForRuleGroup.toString()));
+      } catch (MalformedURLException e) {
+        throw new RuntimeException("Could not parse URL for rule: " + rule + ": '" + urlForRuleGroup + "'", e);
+      }
+    }
+    // inheritance of values - if no type value is defined for a rule, take the rule group's value etc:
+    if (ruleIssueType != null) {
+      rule.setLocQualityIssueType(ITSIssueType.getIssueType(ruleIssueType));
+    } else if (ruleGroupIssueType != null) {
+      rule.setLocQualityIssueType(ITSIssueType.getIssueType(ruleGroupIssueType));
+    } else if (categoryIssueType != null) {
+      rule.setLocQualityIssueType(ITSIssueType.getIssueType(categoryIssueType));
+    }
+  }
+*/
   private IncorrectExample setExample() {
     IncorrectExample example = null;
     if (inCorrectExample) {

@@ -38,7 +38,7 @@ public class UnitConversionRuleTestHelper {
     this.verbose = verbose;
   }
 
-  public void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws IOException {
+  public void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     if (verbose) {
       System.out.println("----------------------------------------");

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,12 +33,14 @@ import java.util.ResourceBundle;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.AustrianGerman;
 import org.languagetool.language.German;
 import org.languagetool.language.GermanyGerman;
 import org.languagetool.language.SwissGerman;
+import org.languagetool.databroker.DefaultGermanResourceDataBroker;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.hunspell.HunspellRule;
 
@@ -50,62 +52,76 @@ import morfologik.stemming.Dictionary;
 
 public class GermanSpellerRuleTest {
 
-  private static final GermanyGerman GERMAN_DE = new GermanyGerman();
-  private static final SwissGerman GERMAN_CH = new SwissGerman();
+    private GermanyGermanSpellerRule deDERule;
+    private SwissGermanSpellerRule deCHRule;
+    private GermanyGerman deDE;
+    private SwissGerman deCH;
 
   //
   // NOTE: also manually run SuggestionRegressionTest when the suggestions are changing!
   //
-  
+
+  @Before
+  public void setUp() throws Exception {
+      deDE = new GermanyGerman();
+      deDERule = deDE.createSpellerRule(null, null);
+
+      deCH = new SwissGerman();
+      deCHRule = deCH.createSpellerRule(null, null);
+  }
+
   @Test
   public void filterForLanguage() {
-    GermanSpellerRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
+
     List<String> list1 = new ArrayList<>(Arrays.asList("Mafiosi s", "foo"));
-    rule.filterForLanguage(list1);
+    deDERule.filterForLanguage(list1);
     assertThat(list1, is(Arrays.asList("foo")));
 
     List<String> list2 = new ArrayList<>(Arrays.asList("-bar", "foo"));
-    rule.filterForLanguage(list2);
+    deDERule.filterForLanguage(list2);
     assertThat(list2, is(Arrays.asList("foo")));
 
-    GermanSpellerRule ruleCH = new SwissGermanSpellerRule(TestTools.getMessages("de"), GERMAN_CH);
     List<String> list3 = new ArrayList<>(Arrays.asList("Muße", "foo"));
-    ruleCH.filterForLanguage(list3);
+    deCHRule.filterForLanguage(list3);
     assertThat(list3, is(Arrays.asList("Musse", "foo")));
   }
 
   @Test
   public void testSortSuggestion() {
-    GermanSpellerRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    assertThat(rule.sortSuggestionByQuality("fehler", Arrays.asList("fehla", "xxx", "Fehler")).toString(),
+    assertThat(deDERule.sortSuggestionByQuality("fehler", Arrays.asList("fehla", "xxx", "Fehler")).toString(),
             is("[Fehler, fehla, xxx]"));
-    assertThat(rule.sortSuggestionByQuality("mülleimer", Arrays.asList("Mülheimer", "-mülheimer", "Melkeimer", "Mühlheimer", "Mülleimer")).toString(),
+    assertThat(deDERule.sortSuggestionByQuality("mülleimer", Arrays.asList("Mülheimer", "-mülheimer", "Melkeimer", "Mühlheimer", "Mülleimer")).toString(),
             is("[Mülleimer, Mülheimer, -mülheimer, Melkeimer, Mühlheimer]"));
   }
 
   @Test
   public void testProhibited() throws Exception {
-    GermanSpellerRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    rule.getSuggestions("");  // needed to force a proper init
-    assertTrue(rule.isProhibited("Standart-Test"));
-    assertTrue(rule.isProhibited("Weihnachtfreier"));
-    assertFalse(rule.isProhibited("Standard-Test"));
-    assertTrue(rule.isProhibited("Abstellgreis"));
-    assertTrue(rule.isProhibited("Abstellgreise"));
-    assertTrue(rule.isProhibited("Abstellgreisen"));
-    assertTrue(rule.isProhibited("Landstreckenflüge"));
-    assertTrue(rule.isProhibited("Landstreckenflügen"));
+    deDERule.getSuggestions("");  // needed to force a proper init
+    assertTrue(deDERule.isProhibited("Standart-Test"));
+    assertTrue(deDERule.isProhibited("Weihnachtfreier"));
+    assertFalse(deDERule.isProhibited("Standard-Test"));
+    assertTrue(deDERule.isProhibited("Abstellgreis"));
+    assertTrue(deDERule.isProhibited("Abstellgreise"));
+    assertTrue(deDERule.isProhibited("Abstellgreisen"));
+    assertTrue(deDERule.isProhibited("Landstreckenflüge"));
+    assertTrue(deDERule.isProhibited("Landstreckenflügen"));
   }
 
   @Test
   public void testGetAdditionalTopSuggestions() throws Exception {
-    GermanSpellerRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    JLanguageTool lt = new JLanguageTool(GERMAN_DE);
+    JLanguageTool lt = new JLanguageTool(deDE);
+    GermanyGermanSpellerRule rule = deDERule;
     assertThat(rule.match(lt.getAnalyzedSentence("konservierungsstoffstatistik"))[0].getSuggestedReplacements().toString(), is("[Konservierungsstoffstatistik]"));
     assertThat(rule.match(lt.getAnalyzedSentence("konservierungsstoffsasdsasda"))[0].getSuggestedReplacements().size(), is(0));
     assertThat(rule.match(lt.getAnalyzedSentence("Ventrolateral")).length, is(0));
     assertThat(rule.match(lt.getAnalyzedSentence("Kleindung")).length, is(1));  // ignored due to ignoreCompoundWithIgnoredWord(), but still in ignore.txt -> ignore.txt must override this
     assertThat(rule.match(lt.getAnalyzedSentence("Majonäse."))[0].getSuggestedReplacements().toString(), is("[Mayonnaise.]"));
+
+    RuleMatch[] matches = rule.match(lt.getAnalyzedSentence("daß"));
+    assertEquals(1, matches.length);
+    assertEquals("das", matches[0].getSuggestedReplacements().get(0));  // "dass" would actually be better...
+    assertEquals("dass", matches[0].getSuggestedReplacements().get(1));
+
     assertFirstSuggestion("wars.", "war's.", rule, lt);
     assertFirstSuggestion("konservierungsstoffe", "Konservierungsstoffe", rule, lt);
     assertFirstSuggestion("Ist Ventrolateral", "ventrolateral", rule, lt);
@@ -118,7 +134,7 @@ public class GermanSpellerRuleTest {
     assertFirstSuggestion("getrinkt", "getrunken", rule, lt);
     assertFirstSuggestion("gespringt", "gesprungen", rule, lt);
     assertFirstSuggestion("geruft", "gerufen", rule, lt);
-    assertFirstSuggestion("Au-pair-Agentr", "Au-pair-Agentur", rule, lt); // "Au-pair" from spelling.txt 
+    assertFirstSuggestion("Au-pair-Agentr", "Au-pair-Agentur", rule, lt); // "Au-pair" from spelling.txt
     assertFirstSuggestion("Netflix-Flm", "Netflix-Film", rule, lt); // "Netflix" from spelling.txt
     assertFirstSuggestion("Bund-Länder-Kommissio", "Bund-Länder-Kommission", rule, lt);
     assertFirstSuggestion("Emailaccount", "E-Mail-Account", rule, lt);
@@ -285,9 +301,9 @@ public class GermanSpellerRuleTest {
 
   @Test
   public void testAddIgnoreWords() throws Exception {
-    MyGermanSpellerRule rule = new MyGermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
+      GermanSpellerRule rule = deDE.createSpellerRule(null, null);
     rule.addIgnoreWords("Fußelmappse");
-    JLanguageTool lt = new JLanguageTool(GERMAN_DE);
+    JLanguageTool lt = new JLanguageTool(deDE);
     assertCorrect("Fußelmappse", rule, lt);
     rule.addIgnoreWords("Fußelmappse/N");
     assertCorrect("Fußelmappse", rule, lt);
@@ -296,17 +312,17 @@ public class GermanSpellerRuleTest {
     assertCorrect("Toggeltröt", rule, lt);
     assertCorrect("Toggeltröts", rule, lt);
     assertCorrect("Toggeltrötn", rule, lt);
-    MyGermanSpellerRule ruleCH = new MyGermanSpellerRule(TestTools.getMessages("de"), GERMAN_CH);
-    ruleCH.addIgnoreWords("Fußelmappse/N");
-    assertCorrect("Fusselmappse", ruleCH, lt);
-    assertCorrect("Fusselmappsen", ruleCH, lt);
+    rule = deCH.createSpellerRule(null, null);
+    rule.addIgnoreWords("Fußelmappse/N");
+    assertCorrect("Fusselmappse", rule, lt);
+    assertCorrect("Fusselmappsen", rule, lt);
   }
 
-  private void assertCorrect(String word, MyGermanSpellerRule rule, JLanguageTool lt) throws IOException {
+  private void assertCorrect(String word, GermanSpellerRule rule, JLanguageTool lt) throws Exception {
     assertThat(rule.match(lt.getAnalyzedSentence(word)).length, is(0));
   }
 
-  private void assertFirstSuggestion(String input, String expected, GermanSpellerRule rule, JLanguageTool lt) throws IOException {
+  private void assertFirstSuggestion(String input, String expected, GermanSpellerRule rule, JLanguageTool lt) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat("Matches: " + matches.length + ", Suggestions of first match: " +
             matches[0].getSuggestedReplacements(), matches[0].getSuggestedReplacements().get(0), is(expected));
@@ -314,8 +330,8 @@ public class GermanSpellerRuleTest {
 
   @Test
   public void testDashAndHyphen() throws Exception {
-    HunspellRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    JLanguageTool lt = new JLanguageTool(GERMAN_DE);
+    GermanSpellerRule rule = deDERule;
+    JLanguageTool lt = new JLanguageTool(deDE);
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Ist doch - gut")).length);
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Ist doch -- gut")).length);
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Stil- und Grammatikprüfung gut")).length);
@@ -353,51 +369,64 @@ public class GermanSpellerRuleTest {
 
   @Test
   public void testGetSuggestionsFromSpellingTxt() throws Exception {
-    MyGermanSpellerRule ruleGermany = new MyGermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    assertThat(ruleGermany.getSuggestions("Ligafußboll").toString(), is("[Ligafußball, Ligafußballs]"));  // from spelling.txt
-    assertThat(ruleGermany.getSuggestions("free-and-open-source").toString(), is("[]"));  // to prevent OutOfMemoryErrors: do not create hyphenated compounds consisting of >3 parts
-    MyGermanSpellerRule ruleSwiss = new MyGermanSpellerRule(TestTools.getMessages("de"), GERMAN_CH);
-    assertThat(ruleSwiss.getSuggestions("Ligafußboll").toString(), is("[Ligafussball, Ligafussballs]"));
-    assertThat(ruleSwiss.getSuggestions("konfliktbereid").toString(), is("[konfliktbereit, konfliktbereite]"));
-    assertThat(ruleSwiss.getSuggestions("konfliktbereitel").toString(),
+    assertThat(deDERule.getSuggestions("Ligafußboll").toString(), is("[Ligafußball, Ligafußballs]"));  // from spelling.txt
+    assertThat(deDERule.getSuggestions("free-and-open-source").toString(), is("[]"));  // to prevent OutOfMemoryErrors: do not create hyphenated compounds consisting of >3 parts
+    assertThat(deCHRule.getSuggestions("Ligafußboll").toString(), is("[Ligafussball, Ligafussballs]"));
+    assertThat(deCHRule.getSuggestions("konfliktbereid").toString(), is("[konfliktbereit, konfliktbereite]"));
+    assertThat(deCHRule.getSuggestions("konfliktbereitel").toString(),
                is("[konfliktbereiten, konfliktbereite, konfliktbereiter, konfliktbereitem, konfliktbereites, konfliktbereit]"));
   }
 
   @Test
   public void testIgnoreWord() throws Exception {
-    MyGermanSpellerRule ruleGermany = new MyGermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    assertTrue(ruleGermany.doIgnoreWord("einPseudoWortFürLanguageToolTests"));  // from ignore.txt
-    assertTrue(ruleGermany.doIgnoreWord("Wichtelmännchen"));            // from spelling.txt
-    assertTrue(ruleGermany.doIgnoreWord("Wichtelmännchens"));           // from spelling.txt with suffix
-    assertFalse(ruleGermany.doIgnoreWord("wichtelmännchen"));           // from spelling.txt, no reason to accept it as lowercase
-    assertFalse(ruleGermany.doIgnoreWord("wichtelmännchens"));          // from spelling.txt with suffix, no reason to accept it as lowercase
-    assertTrue(ruleGermany.doIgnoreWord("vorgehängt"));                 // from spelling.txt
-    assertTrue(ruleGermany.doIgnoreWord("vorgehängten"));               // from spelling.txt with suffix
-    assertTrue(ruleGermany.doIgnoreWord("Vorgehängt"));                 // from spelling.txt, it's lowercase there but we accept uppercase at idx = 0
-    assertTrue(ruleGermany.doIgnoreWord("Vorgehängten"));               // from spelling.txt with suffix, it's lowercase there but we accept uppercase at idx = 0
-    assertTrue(ruleGermany.doIgnoreWord("Wichtelmännchen-vorgehängt")); // from spelling.txt formed hyphenated compound
-    assertTrue(ruleGermany.doIgnoreWord("Wichtelmännchen-Au-pair"));    // from spelling.txt formed hyphenated compound
-    assertTrue(ruleGermany.doIgnoreWord("Fermi-Dirac-Statistik"));      // from spelling.txt formed hyphenated compound
-    assertTrue(ruleGermany.doIgnoreWord("Au-pair-Wichtelmännchen"));    // from spelling.txt formed hyphenated compound
-    assertTrue(ruleGermany.doIgnoreWord("Secondhandware"));             // from spelling.txt formed compound
-    assertTrue(ruleGermany.doIgnoreWord("Feynmandiagramme"));           // from spelling.txt formed compound
-    assertTrue(ruleGermany.doIgnoreWord("Helizitätsoperator"));         // from spelling.txt formed compound
-    assertTrue(ruleGermany.doIgnoreWord("Wodkaherstellung"));           // from spelling.txt formed compound
-    assertTrue(ruleGermany.doIgnoreWord("Latte-macchiato-Glas"));       // from spelling.txt formed compound
-    assertTrue(ruleGermany.doIgnoreWord("No-Name-Hersteller"));         // from spelling.txt formed compound
-    assertFalse(ruleGermany.doIgnoreWord("Helizitätso"));               // from spelling.txt formed compound (second part is too short)
-    assertFalse(ruleGermany.doIgnoreWord("Feynmand"));                  // from spelling.txt formed compound (second part is too short)
-    assertFalse(ruleGermany.doIgnoreWord("Hundhütte"));                 // compound formed from two valid words, but still incorrect
-    assertFalse(ruleGermany.doIgnoreWord("Frauversteher"));             // compound formed from two valid words, but still incorrect
-    assertFalse(ruleGermany.doIgnoreWord("Wodkasglas"));                // compound formed from two valid words, but still incorrect
-    assertFalse(ruleGermany.doIgnoreWord("Author"));
-    assertFalse(ruleGermany.doIgnoreWord("SecondhandWare"));            // from spelling.txt formed compound
-    assertFalse(ruleGermany.doIgnoreWord("MHDware"));                   // from spelling.txt formed compound
-    MyGermanSpellerRule ruleSwiss = new MyGermanSpellerRule(TestTools.getMessages("de"), GERMAN_CH);
-    assertTrue(ruleSwiss.doIgnoreWord("einPseudoWortFürLanguageToolTests"));
-    assertFalse(ruleSwiss.doIgnoreWord("Ligafußball"));        // 'ß' never accepted for Swiss
+    GermanSpellerRule ruleGermany = deDERule;
+    assertTrue(ruleGermany.ignoreWord("einPseudoWortFürLanguageToolTests"));  // from ignore.txt
+    assertFalse(ruleGermany.ignoreWord("Hundhütte"));                 // compound formed from two valid words, but still incorrect
+    assertFalse(ruleGermany.ignoreWord("Frauversteher"));             // compound formed from two valid words, but still incorrect
+    assertFalse(ruleGermany.ignoreWord("Wodkasglas"));                // compound formed from two valid words, but still incorrect
+    assertFalse(ruleGermany.ignoreWord("Author"));
+    assertFalse(ruleGermany.ignoreWord("SecondhandWare"));            // from spelling.txt formed compound
+    assertFalse(ruleGermany.ignoreWord("MHDware"));                   // from spelling.txt formed compound
+    GermanSpellerRule ruleSwiss = deCHRule;
+    assertTrue(ruleSwiss.ignoreWord("einPseudoWortFürLanguageToolTests"));
+    assertFalse(ruleSwiss.ignoreWord("Ligafußball"));        // 'ß' never accepted for Swiss
   }
-
+  /*
+  GTODO Remove...
+  public void testIgnoreWord() throws Exception {
+    assertTrue(deDERule.ignoreWord("einPseudoWortFürLanguageToolTests"));  // from ignore.txt
+    assertTrue(deDERule.ignoreWord("Wichtelmännchen"));            // from spelling.txt
+    assertTrue(deDERule.ignoreWord("Wichtelmännchens"));           // from spelling.txt with suffix
+    assertFalse(deDERule.ignoreWord("wichtelmännchen"));           // from spelling.txt, no reason to accept it as lowercase
+    assertFalse(deDERule.ignoreWord("wichtelmännchens"));          // from spelling.txt with suffix, no reason to accept it as lowercase
+    assertTrue(deDERule.ignoreWord("vorgehängt"));                 // from spelling.txt
+    assertTrue(deDERule.ignoreWord("vorgehängten"));               // from spelling.txt with suffix
+    assertTrue(deDERule.ignoreWord("Vorgehängt"));                 // from spelling.txt, it's lowercase there but we accept uppercase at idx = 0
+    assertTrue(deDERule.ignoreWord("Vorgehängten"));               // from spelling.txt with suffix, it's lowercase there but we accept uppercase at idx = 0
+    assertTrue(deDERule.ignoreWord("Wichtelmännchen-vorgehängt")); // from spelling.txt formed hyphenated compound
+    assertTrue(deDERule.ignoreWord("Wichtelmännchen-Au-pair"));    // from spelling.txt formed hyphenated compound
+    assertTrue(deDERule.ignoreWord("Fermi-Dirac-Statistik"));      // from spelling.txt formed hyphenated compound
+    assertTrue(deDERule.ignoreWord("Au-pair-Wichtelmännchen"));    // from spelling.txt formed hyphenated compound
+    assertTrue(deDERule.ignoreWord("Secondhandware"));             // from spelling.txt formed compound
+    assertTrue(deDERule.ignoreWord("Feynmandiagramme"));           // from spelling.txt formed compound
+    assertTrue(deDERule.ignoreWord("Helizitätsoperator"));         // from spelling.txt formed compound
+    assertTrue(deDERule.ignoreWord("Wodkaherstellung"));           // from spelling.txt formed compound
+    assertTrue(deDERule.ignoreWord("Latte-macchiato-Glas"));       // from spelling.txt formed compound
+    assertTrue(deDERule.ignoreWord("No-Name-Hersteller"));         // from spelling.txt formed compound
+    assertFalse(deDERule.ignoreWord("Helizitätso"));               // from spelling.txt formed compound (second part is too short)
+    assertFalse(deDERule.ignoreWord("Feynmand"));                  // from spelling.txt formed compound (second part is too short)
+    assertFalse(deDERule.ignoreWord("Hundhütte"));                 // compound formed from two valid words, but still incorrect
+    assertFalse(deDERule.ignoreWord("Frauversteher"));             // compound formed from two valid words, but still incorrect
+    assertFalse(deDERule.ignoreWord("Wodkasglas"));                // compound formed from two valid words, but still incorrect
+    assertFalse(deDERule.ignoreWord("Author"));
+    assertFalse(deDERule.ignoreWord("SecondhandWare"));            // from spelling.txt formed compound
+    assertFalse(deDERule.ignoreWord("MHDware"));                   // from spelling.txt formed compound
+    assertTrue(deCHRule.ignoreWord("einPseudoWortFürLanguageToolTests"));
+    assertFalse(deCHRule.ignoreWord("Ligafußball"));        // 'ß' never accepted for Swiss
+  }
+  */
+/*
+GTODO Clean up
   private static class MyGermanSpellerRule extends GermanSpellerRule {
     MyGermanSpellerRule(ResourceBundle messages, German language) throws IOException {
       super(messages, language, null, null);
@@ -407,24 +436,46 @@ public class GermanSpellerRuleTest {
       return super.ignoreWord(Collections.singletonList(word), 0);
     }
   }
-
+*/
   // note: copied from HunspellRuleTest
   @Test
   public void testRuleWithGermanyGerman() throws Exception {
-    HunspellRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    JLanguageTool lt = new JLanguageTool(GERMAN_DE);
-    commonGermanAsserts(rule, lt);
-    assertEquals(0, rule.match(lt.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // umlauts
-    assertEquals(1, rule.match(lt.getAnalyzedSentence("Der äussere Übeltäter.")).length);
+    JLanguageTool lt = new JLanguageTool(deDE);
+    commonGermanAsserts(deDERule, lt);
+    assertEquals(0, deDERule.match(lt.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // umlauts
+    assertEquals(1, deDERule.match(lt.getAnalyzedSentence("Der äussere Übeltäter.")).length);
     // TODO: this is a false alarm:
     //assertEquals(0, rule.match(langTool.getAnalyzedSentence("Die Mozart'sche Sonate.")).length);
+
+    // ignore URLs:
+    assertEquals(0, deDERule.match(lt.getAnalyzedSentence("Unter http://foo.org/bar steht was.")).length);
+    assertEquals(1, deDERule.match(lt.getAnalyzedSentence("dasdassda http://foo.org/bar steht was.")).length);
+    assertEquals(1, deDERule.match(lt.getAnalyzedSentence("Unter http://foo.org/bar steht dasdassda.")).length);
+
+    // check the correct calculation of error position
+    // note that emojis have string length 2
+    assertEquals(6 ,deDERule.match(lt.getAnalyzedSentence("Hallo men Schatz!"))[0].getFromPos());
+    assertEquals(9 ,deDERule.match(lt.getAnalyzedSentence("Hallo men Schatz!"))[0].getToPos());
+    assertEquals(9 ,deDERule.match(lt.getAnalyzedSentence("Hallo 😂 men Schatz!"))[0].getFromPos());
+    assertEquals(12 ,deDERule.match(lt.getAnalyzedSentence("Hallo 😂 men Schatz!"))[0].getToPos());
+    assertEquals(11 ,deDERule.match(lt.getAnalyzedSentence("Hallo 😂😂 men Schatz!"))[0].getFromPos());
+    assertEquals(14 ,deDERule.match(lt.getAnalyzedSentence("Hallo 😂😂 men Schatz!"))[0].getToPos());
+    assertEquals(0, deDERule.match(lt.getAnalyzedSentence("Mir geht es 😂gut😂.")).length);
+    assertEquals(1, deDERule.match(lt.getAnalyzedSentence("Mir geht es 😂gtu😂.")).length);
+
+    assertEquals(0, deDERule.match(lt.getAnalyzedSentence("Hier stimmt jedes Wort!")).length);
+    assertEquals(1, deDERule.match(lt.getAnalyzedSentence("Hir nicht so ganz.")).length);
+
+    assertEquals(0, deDERule.match(lt.getAnalyzedSentence("Überall äußerst böse Umlaute!")).length);
+    assertEquals(1, deDERule.match(lt.getAnalyzedSentence("Üperall äußerst böse Umlaute!")).length);
+
   }
 
   // note: copied from HunspellRuleTest
   @Test
   public void testRuleWithAustrianGerman() throws Exception {
     AustrianGerman language = new AustrianGerman();
-    HunspellRule rule = new AustrianGermanSpellerRule(TestTools.getMessages("de"), language);
+    AustrianGermanSpellerRule rule = language.createSpellerRule(null, null);
     JLanguageTool lt = new JLanguageTool(language);
     commonGermanAsserts(rule, lt);
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // umlauts
@@ -434,16 +485,14 @@ public class GermanSpellerRuleTest {
   // note: copied from HunspellRuleTest
   @Test
   public void testRuleWithSwissGerman() throws Exception {
-    SwissGerman language = new SwissGerman();
-    HunspellRule rule = new SwissGermanSpellerRule(TestTools.getMessages("de"), language);
-    JLanguageTool lt = new JLanguageTool(language);
-    commonGermanAsserts(rule, lt);
-    assertEquals(1, rule.match(lt.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // ß not allowed in Swiss
-    assertEquals(0, rule.match(lt.getAnalyzedSentence("Der äussere Übeltäter.")).length);  // ss is used instead of ß
+    JLanguageTool lt = new JLanguageTool(deCH);
+    commonGermanAsserts(deCHRule, lt);
+    assertEquals(1, deCHRule.match(lt.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // ß not allowed in Swiss
+    assertEquals(0, deCHRule.match(lt.getAnalyzedSentence("Der äussere Übeltäter.")).length);  // ss is used instead of ß
   }
-  
+
   // note: copied from HunspellRuleTest
-  private void commonGermanAsserts(HunspellRule rule, JLanguageTool lt) throws IOException {
+  private void commonGermanAsserts(GermanSpellerRule rule, JLanguageTool lt) throws Exception {
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Der Waschmaschinentestversuch")).length);  // compound
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Der Waschmaschinentest-Versuch")).length);  // compound
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Der Arbeitnehmer")).length);
@@ -460,13 +509,13 @@ public class GermanSpellerRuleTest {
     assertEquals(2, rule.match(lt.getAnalyzedSentence("Der asdegfue orkt")).length);
     assertEquals(1, rule.match(lt.getAnalyzedSentence("rumfangreichen")).length);
   }
-  
+
   @Test
   public void testGetSuggestions() throws Exception {
-    HunspellRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
+    GermanSpellerRule rule = deDERule;
 
     assertCorrection(rule, "Hauk", "Haus", "Haut");
-    assertCorrection(rule, "Eisnbahn", "Eisbahn", "Eisenbahn"); 
+    assertCorrection(rule, "Eisnbahn", "Eisbahn", "Eisenbahn");
     assertCorrection(rule, "Rechtschreipreform", "Rechtschreibreform");
     assertCorrection(rule, "Theatrekasse", "Theaterkasse");
     assertCorrection(rule, "Traprennen", "Trabrennen");
@@ -487,35 +536,35 @@ public class GermanSpellerRuleTest {
 
     assertCorrection(rule, "hasslich", "hässlich", "fasslich");
     assertCorrection(rule, "Struße", "Strauße", "Straße", "Sträuße");
-    
+
     assertCorrection(rule, "gewohnlich", "gewöhnlich");
     assertCorrection(rule, "gawöhnlich", "gewöhnlich");
     assertCorrection(rule, "gwöhnlich", "gewöhnlich");
     assertCorrection(rule, "geewöhnlich", "gewöhnlich");
     assertCorrection(rule, "gewönlich", "gewöhnlich");
-    
+
     assertCorrection(rule, "außergewöhnkich", "außergewöhnlich");
     assertCorrection(rule, "agressiv", "aggressiv");
     assertCorrection(rule, "agressivster", "aggressivster");
     assertCorrection(rule, "agressiver", "aggressiver");
     assertCorrection(rule, "agressive", "aggressive");
-    
+
     assertCorrection(rule, "Algorythmus", "Algorithmus");
     assertCorrection(rule, "Algorhythmus", "Algorithmus");
-    
+
     assertCorrection(rule, "Amalgan", "Amalgam");
     assertCorrection(rule, "Amaturenbrett", "Armaturenbrett");
     assertCorrection(rule, "Aquise", "Akquise");
     assertCorrection(rule, "Artzt", "Arzt");
-    
+
     assertCorrection(rule, "aufgrunddessen", "aufgrund dessen");
-    
+
     assertCorrection(rule, "barfuss", "barfuß");
     assertCorrection(rule, "Batallion", "Bataillon");
     assertCorrection(rule, "Medallion", "Medaillon");
     assertCorrection(rule, "Scheisse", "Scheiße");
     assertCorrection(rule, "Handselvertreter", "Handelsvertreter");
-    
+
     assertCorrection(rule, "aul", "auf");
     assertCorrection(rule, "Icj", "Ich");   // only "ich" (lowercase) is in the lexicon
     //assertCorrection(rule, "Ihj", "Ich");   // only "ich" (lowercase) is in the lexicon - does not work because of the limit
@@ -542,8 +591,8 @@ public class GermanSpellerRuleTest {
 
   @Test
   public void testGetSuggestionWithPunctuation() throws Exception {
-    GermanSpellerRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    JLanguageTool lt = new JLanguageTool(GERMAN_DE);
+    GermanSpellerRule rule = deDERule;
+    JLanguageTool lt = new JLanguageTool(deDE);
     assertFirstSuggestion("informationnen.", "Informationen.", rule, lt);
     assertFirstSuggestion("Kundigungsfrist.", "Kündigungsfrist.", rule, lt);
     assertFirstSuggestion("aufgeregegt.", "aufgeregt.", rule, lt);
@@ -553,10 +602,10 @@ public class GermanSpellerRuleTest {
     // commas are actually not part of the word, so the suggestion doesn't include them:
     assertFirstSuggestion("informationnen,", "Informationen", rule, lt);
   }
-  
+
   @Test
   public void testGetSuggestionOrder() throws Exception {
-    HunspellRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
+    GermanSpellerRule rule = deDERule;
     assertCorrectionsByOrder(rule, "heisst", "heißt");  // "heißt" should be first
     assertCorrectionsByOrder(rule, "heissen", "heißen");
     assertCorrectionsByOrder(rule, "müßte", "musste", "müsste");
@@ -573,7 +622,8 @@ public class GermanSpellerRuleTest {
     assertCorrectionsByOrder(rule, "Fux", "Fuchs");  // fixed in morfologik 2.1.4
     assertCorrectionsByOrder(rule, "schänken", "Schänken");  // "schenken" is missing
   }
-  
+/*
+GTODO Clean up, not appropriate now.
   @Test
   @Ignore("testing a potential bug in Morfologik")
   public void testMorfologikSpeller() throws Exception {
@@ -588,14 +638,18 @@ public class GermanSpellerRuleTest {
     Speller speller = new Speller(dict, 2);
     System.out.println(speller.findReplacements("is"));  // why do both "die" and "ist" have a distance of 1 in the CandidateData constructor?
   }
-
+*/
+/*
+GTODO Clean up, not appropriate now.
   @Test
   @Ignore("testing Morfologik directly, with LT dictionary (de_DE.dict) but no LT-specific code")
   public void testMorfologikSpeller2() throws Exception {
     Dictionary dict = Dictionary.read(JLanguageTool.getDataBroker().getFromResourceDirAsUrl("/de/hunspell/de_DE.dict"));
     runTests(dict, "Fux");
   }
-
+*/
+/*
+ GTODO Need separate handling for this.
   @Test
   @Ignore("testing Morfologik directly, with hard-coded dictionary but no LT-specific code")
   public void testMorfologikSpellerWithSpellingTxt() throws Exception {
@@ -620,11 +674,11 @@ public class GermanSpellerRuleTest {
     Dictionary dict = Dictionary.read(fsaInStream, is);
     runTests(dict, inputWord);
   }
-
+*/
   @Test
-  public void testPosition() throws IOException{
-    HunspellRule rule = new GermanSpellerRule(TestTools.getMessages("de"), GERMAN_DE);
-    JLanguageTool lt = new JLanguageTool(GERMAN_DE);
+  public void testPosition() throws Exception{
+    GermanSpellerRule rule = deDERule;
+    JLanguageTool lt = new JLanguageTool(deDE);
     RuleMatch[] match1 = rule.match(lt.getAnalyzedSentence(
             "Er ist entsetzt, weil beim 'Wiederaufbau' das original-gotische Achsfenster mit reichem Maßwerk ausgebaut " +
             "und an die südliche TeStWoRt gesetzt wurde."));
@@ -646,7 +700,7 @@ public class GermanSpellerRuleTest {
     }
   }
 
-  private Dictionary getDictionary(List<byte[]> lines, InputStream infoFile) throws IOException {
+  private Dictionary getDictionary(List<byte[]> lines, InputStream infoFile) throws Exception {
     Collections.sort(lines, FSABuilder.LEXICAL_ORDERING);
     FSA fsa = FSABuilder.build(lines);
     ByteArrayOutputStream fsaOutStream = new CFSA2Serializer().serialize(fsa, new ByteArrayOutputStream());
@@ -654,14 +708,14 @@ public class GermanSpellerRuleTest {
     return Dictionary.read(fsaInStream, infoFile);
   }
 
-  private void assertCorrection(HunspellRule rule, String input, String... expectedTerms) throws IOException {
+  private void assertCorrection(GermanSpellerRule rule, String input, String... expectedTerms) throws Exception {
     List<String> suggestions = rule.getSuggestions(input);
     for (String expectedTerm : expectedTerms) {
       assertTrue("Not found: '" + expectedTerm + "' in: " + suggestions, suggestions.contains(expectedTerm));
     }
   }
-  
-  private void assertCorrectionsByOrder(HunspellRule rule, String input, String... expectedTerms) throws IOException {
+
+  private void assertCorrectionsByOrder(GermanSpellerRule rule, String input, String... expectedTerms) throws Exception {
     List<String> suggestions = rule.getSuggestions(input);
     int i = 0;
     for (String expectedTerm : expectedTerms) {
@@ -669,5 +723,52 @@ public class GermanSpellerRuleTest {
       i++;
     }
   }
-  
+
+  @Test
+  @Ignore("testing for https://github.com/languagetool-org/languagetool/issues/236")
+  public void testFrequency() throws Exception {
+      GermanyGerman german = new GermanyGerman();
+      DefaultGermanResourceDataBroker broker = new DefaultGermanResourceDataBroker(german, german.getClass().getClassLoader());
+      german.setDataBroker(broker);
+      Dictionary dictionary = broker.getMorfologikBinaryDictionaryFromResourcePath("de/hunspell/de_DE.dict");
+    Speller speller = new Speller(dictionary, 2);
+    assertThat(speller.getFrequency("der"), is(25));
+    assertThat(speller.getFrequency("Haus"), is(11));
+    assertThat(speller.getFrequency("schön"), is(9));
+    assertThat(speller.getFrequency("gippsnicht"), is(0));
+  }
+
+  @Test
+  @Ignore("help testing for https://github.com/morfologik/morfologik-stemming/issues/34")
+  public void testCommonMisspellings() throws Exception {
+      GermanyGerman german = new GermanyGerman();
+      DefaultGermanResourceDataBroker broker = new DefaultGermanResourceDataBroker(german, german.getClass().getClassLoader());
+      german.setDataBroker(broker);
+      Dictionary dictionary = broker.getMorfologikBinaryDictionaryFromResourcePath("de/hunspell/de_DE.dict");
+    Speller speller = new Speller(dictionary, 2);
+    List<String> input = Arrays.asList((
+            // tiny subset from https://de.wikipedia.org/wiki/Wikipedia:Liste_von_Tippfehlern
+            "Abenteur Abhängikeit abzuschliessen agerufen Aktivitiäten Aktzeptanz " +
+            "Algorhitmus Algoritmus aliiert allgmein Amtsitz änlich Anstoss atakieren begrüsst Bezeichnug chinesiche " +
+            "dannach Frima Fahrad Gebaüde gesammt Schrifsteller seperat Septmber Staddteil Rhytmen rhytmisch Maschiene " +
+            "Lebensmittelgäschefte enstand großmutter Rytmus " +
+            // from user feedback:
+            "Vorstelungsgespräch Heißhunge-Attakcen evntl. langwalig Selbstportät Erdgeshoss " +
+            "kommmischeweise gegensatz Gesichte Suedkaukasus Englisch-sprachigige " +
+            // from gutefrage.net:
+            "gerägelt Aufjedenfall ivh hällt daß muß woeder oderso anwalt"
+        ).split(" "));
+    for (String word : input) {
+      check(word, speller);
+    }
+  }
+
+  private void check(String word, Speller speller) throws Exception {
+    List<String> suggestions = speller.findReplacements(word);
+    /*if (suggestions.size() > 10) {
+      suggestions = suggestions.subList(0, 9);
+    }*/
+    System.out.println(word + ": " + String.join(", ", suggestions));
+  }
+
 }

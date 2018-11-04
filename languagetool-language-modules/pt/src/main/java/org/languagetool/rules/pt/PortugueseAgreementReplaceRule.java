@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005-2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,6 +23,7 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,7 +42,7 @@ public class PortugueseAgreementReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String PORTUGUESE_AGREEMENT_REPLACE_RULE = "PT_AGREEMENT_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/pt/AOreplace.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale PT_LOCALE = new Locale("pt");
 
   @Override
@@ -49,8 +50,9 @@ public class PortugueseAgreementReplaceRule extends AbstractSimpleReplaceRule {
     return wrongWords;
   }
 
-  public PortugueseAgreementReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+  public PortugueseAgreementReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
+    wrongWords = load("/pt/AOreplace.txt", dataBroker);
     super.setCategory(Categories.TYPOS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
     // setDefaultOff();
@@ -72,7 +74,7 @@ public class PortugueseAgreementReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Forma do Acordo Ortográfico de 45.";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " é uma forma do antigo acordo ortográfico. No novo acordo ortográfico, a palavra escreve-se assim: "

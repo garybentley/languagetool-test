@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -46,7 +46,7 @@ public class AgreementSuggestorTest {
     assertSuggestion("mehrere/mehrer/PRO:IND:NOM:PLU:NEU:B/S WLAN-LAN-Kabels/WLAN-LAN-Kabel/SUB:GEN:SIN:MAS", "[mehrere WLAN-LAN-Kabel]");
   }
 
-  private void assertSuggestion(String input, String expectedSuggestions) {
+  private void assertSuggestion(String input, String expectedSuggestions) throws Exception {
     String[] tokens = input.split(" ");
     List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;

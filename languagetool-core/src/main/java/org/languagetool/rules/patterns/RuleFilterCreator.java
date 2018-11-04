@@ -20,18 +20,27 @@ package org.languagetool.rules.patterns;
 
 import java.lang.reflect.Constructor;
 
+import org.languagetool.databroker.ResourceDataBroker;
+
 /**
  * Create a {@link RuleFilter}.
  * @since 2.7 (public since 3.2)
  */
 public class RuleFilterCreator {
 
+    private ClassLoader classLoader;
+
+    public RuleFilterCreator(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
   /**
    * @param className fully qualified class Name of a class implementing {@link RuleFilter}
+   * @param classLoader The class loader to use.
    */
-  public RuleFilter getFilter(String className) {
+  public RuleFilter getFilter(String className) throws Exception {
     try {
-      Class<?> aClass = Class.forName(className);
+      Class<?> aClass = Class.forName(className, true, classLoader);
       Constructor<?>[] constructors = aClass.getConstructors();
       if (constructors.length != 1) {
         throw new RuntimeException("Constructor of filter class '"
@@ -56,5 +65,5 @@ public class RuleFilterCreator {
               + className + "' - make sure to use a fully qualified class name like 'org.languagetool.rules.MyFilter'");
     }
   }
- 
+
 }

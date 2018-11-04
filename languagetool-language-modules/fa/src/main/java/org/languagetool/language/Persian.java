@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,6 +18,9 @@
  */
 package org.languagetool.language;
 
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+
 import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.*;
@@ -27,49 +30,74 @@ import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.WordTokenizer;
 
+import org.languagetool.databroker.PersianResourceDataBroker;
+import org.languagetool.databroker.DefaultPersianResourceDataBroker;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 /**
  * Support for Persian.
  * @since 2.7
  */
-public class Persian extends Language {
+public class Persian extends Language<PersianResourceDataBroker> {
 
-  private SentenceTokenizer sentenceTokenizer;
-  private WordTokenizer wordTokenizer;
+  public static final String LANGUAGE_ID = "fa";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID);
+
+  @Override
+  public PersianResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
+  }
+
+  @Override
+  public PersianResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultPersianResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override @Nullable
+  public Language getDefaultLanguageVariant() {
+    return null;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
 
   @Override
   public String getName() {
     return "Persian";
   }
-
+/*
+GTODO Clean up
   @Override
   public String getShortCode() {
     return "fa";
   }
-
+*/
   @Override
   public String[] getCountries() {
     return new String[]{"IR", "AF"};
   }
-  
+
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new PersianWordTokenizer();
-    }
-    return wordTokenizer;
+  public WordTokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
@@ -82,21 +110,73 @@ public class Persian extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     return Arrays.asList(
-        new CommaWhitespaceRule(messages),
-        new DoublePunctuationRule(messages),
-        new MultipleWhitespaceRule(messages, this),
-        new LongSentenceRule(messages, userConfig),
+        createCommaWhitespaceRule(messages),
+        createDoublePunctuationRule(messages),
+        createMultipleWhitespaceRule(messages),
+        createLongSentenceRule(messages, userConfig),
         // specific to Persian:
-        new PersianCommaWhitespaceRule(messages),
-        new PersianDoublePunctuationRule(messages),
-        new PersianWordRepeatBeginningRule(messages, this),
-        new PersianWordRepeatRule(messages, this),
-        new SimpleReplaceRule(messages),
-        new PersianSpaceBeforeRule(messages, this),
-        new WordCoherencyRule(messages)
+        createPersianCommaWhitespaceRule(messages),
+        createPersianDoublePunctuationRule(messages),
+        createPersianWordRepeatBeginningRule(messages),
+        createPersianWordRepeatRule(messages),
+        createSimpleReplaceRule(messages),
+        createPersianSpaceBeforeRule(messages),
+        createWordCoherencyRule(messages)
     );
+  }
+
+  public WordCoherencyRule createWordCoherencyRule(ResourceBundle messages) throws Exception {
+      return new WordCoherencyRule(getUseMessages(messages), getUseDataBroker().getCoherencyMappings());
+  }
+
+  public PersianSpaceBeforeRule createPersianSpaceBeforeRule(ResourceBundle messages) throws Exception {
+      return new PersianSpaceBeforeRule(getUseMessages(messages));
+  }
+
+  public SimpleReplaceRule createSimpleReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords());
+  }
+
+  public PersianWordRepeatRule createPersianWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new PersianWordRepeatRule(getUseMessages(messages));
+  }
+
+  public PersianWordRepeatBeginningRule createPersianWordRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new PersianWordRepeatBeginningRule(getUseMessages(messages));
+  }
+
+  public PersianDoublePunctuationRule createPersianDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new PersianDoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public PersianCommaWhitespaceRule createPersianCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new PersianCommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages), null, null);
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages), this);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(messages, confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords);
   }
 
 }

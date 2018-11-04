@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Milkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,7 +28,6 @@ import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 import org.languagetool.tokenizers.WordTokenizer;
 import org.languagetool.tools.StringTools;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,17 +46,17 @@ public abstract class SpellingCheckRule extends Rule {
   /**
    * The name of the LanguageTool Firefox extension, {@code LanguageToolFx}.
    * @since 2.3
-   * @deprecated not needed anymore, the add-on is now just called 'LanguageTool' 
+   * @deprecated not needed anymore, the add-on is now just called 'LanguageTool'
    */
   public static final String LANGUAGETOOL_FX = "LanguageToolFx";
 
   protected final Language language;
-  protected final CachingWordListLoader wordListLoader = new CachingWordListLoader();
+  //GTODO protected final CachingWordListLoader wordListLoader = new CachingWordListLoader();
 
-  private static final String SPELLING_IGNORE_FILE = "/hunspell/ignore.txt";
-  private static final String SPELLING_FILE = "/hunspell/spelling.txt";
-  private static final String SPELLING_PROHIBIT_FILE = "/hunspell/prohibit.txt";
-  private static final String SPELLING_FILE_VARIANT = null;
+  //GTODO private static final String SPELLING_IGNORE_FILE = "/hunspell/ignore.txt";
+  //GTODO private static final String SPELLING_FILE = "/hunspell/spelling.txt";
+  //GTODO private static final String SPELLING_PROHIBIT_FILE = "/hunspell/prohibit.txt";
+  //GTODO private static final String SPELLING_FILE_VARIANT = null;
   private static final Comparator<String> STRING_LENGTH_COMPARATOR = Comparator.comparingInt(String::length);
 
   private final Set<String> wordsToBeIgnored = new HashSet<>();
@@ -65,14 +64,30 @@ public abstract class SpellingCheckRule extends Rule {
 
   private Map<String,Set<String>> wordsToBeIgnoredDictionary = new HashMap<>();
   private Map<String,Set<String>> wordsToBeIgnoredDictionaryIgnoreCase = new HashMap<>();
-  
+
   private List<DisambiguationPatternRule> antiPatterns = new ArrayList<>();
   private boolean considerIgnoreWords = true;
   private boolean convertsCase = false;
 
-  public SpellingCheckRule(ResourceBundle messages, Language language, UserConfig userConfig) {
+  // GTODO Look at removing UserConfig, just get words to be ignored...
+  // GTODO Look at removing "Language language" from constructor, will need:
+        // word tokenizer
+        // only then used for AbstractPatternRule.supportsLanguage and that should be changed to ask the language if it supports the rule...
+  public SpellingCheckRule(ResourceBundle messages, Language language, UserConfig userConfig, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
     super(messages);
     this.language = language;
+
+    if (ignoreWords != null) {
+        for (String word : ignoreWords) {
+            addIgnoreWords(word);
+        }
+    }
+
+    if (prohibitedWords != null) {
+        // GTODO Deal with expandLine override, DE overrides this.
+        wordsToBeProhibited.addAll (prohibitedWords);
+    }
+
     if (userConfig != null) {
       wordsToBeIgnored.addAll(userConfig.getAcceptedWords());
     }
@@ -86,7 +101,7 @@ public abstract class SpellingCheckRule extends Rule {
   public abstract String getDescription();
 
   @Override
-  public abstract RuleMatch[] match(AnalyzedSentence sentence) throws IOException;
+  public abstract RuleMatch[] match(AnalyzedSentence sentence) throws Exception;
 
   @Override
   public boolean isDictionaryBasedSpellingRule() {
@@ -127,7 +142,7 @@ public abstract class SpellingCheckRule extends Rule {
    * re-order the suggestions anyway). Only add suggestions here that you know are spelled correctly,
    * they will not be checked again before being shown to the user.
    */
-  protected List<String> getAdditionalTopSuggestions(List<String> suggestions, String word) throws IOException {
+  protected List<String> getAdditionalTopSuggestions(List<String> suggestions, String word) throws Exception {
     List<String> moreSuggestions = new ArrayList<>();
     if (("Languagetool".equals(word) || "languagetool".equals(word)) && !suggestions.contains(LANGUAGETOOL)) {
       moreSuggestions.add(LANGUAGETOOL);
@@ -146,7 +161,7 @@ public abstract class SpellingCheckRule extends Rule {
   /**
    * Returns true iff the token at the given position should be ignored by the spell checker.
    */
-  protected boolean ignoreToken(AnalyzedTokenReadings[] tokens, int idx) throws IOException {
+  protected boolean ignoreToken(AnalyzedTokenReadings[] tokens, int idx) throws Exception {
     List<String> words = new ArrayList<>();
     for (AnalyzedTokenReadings token : tokens) {
       words.add(token.getToken());
@@ -158,7 +173,7 @@ public abstract class SpellingCheckRule extends Rule {
    * Returns true iff the word should be ignored by the spell checker.
    * If possible, use {@link #ignoreToken(AnalyzedTokenReadings[], int)} instead.
    */
-  protected boolean ignoreWord(String word) throws IOException {
+  public boolean ignoreWord(String word) throws Exception {
     if (!considerIgnoreWords) {
       return false;
     }
@@ -169,6 +184,7 @@ public abstract class SpellingCheckRule extends Rule {
   }
 
   private boolean isIgnoredNoCase(String word) {
+      // GTODO Use CaseConverter?
     return wordsToBeIgnored.contains(word) ||
            (convertsCase && wordsToBeIgnored.contains(word.toLowerCase(language.getLocale())));
   }
@@ -178,7 +194,7 @@ public abstract class SpellingCheckRule extends Rule {
    * If possible, use {@link #ignoreToken(AnalyzedTokenReadings[], int)} instead.
    * @since 2.6
    */
-  protected boolean ignoreWord(List<String> words, int idx) throws IOException {
+  protected boolean ignoreWord(List<String> words, int idx) throws Exception {
     return ignoreWord(words.get(idx));
   }
 
@@ -211,7 +227,8 @@ public abstract class SpellingCheckRule extends Rule {
   protected boolean isEMail(String token) {
     return WordTokenizer.isEMail(token);
   }
-  
+/*
+GTODO: Clean up
   protected void init() throws IOException {
     for (String ignoreWord : wordListLoader.loadWords(getIgnoreFileName())) {
       addIgnoreWords(ignoreWord);
@@ -224,46 +241,54 @@ public abstract class SpellingCheckRule extends Rule {
       addProhibitedWords(expandLine(prohibitedWord));
     }
   }
-
+*/
   /**
    * Get the name of the ignore file, which lists words to be accepted, even
    * when the spell checker would not accept them. Unlike with {@link #getSpellingFileName()}
    * the words in this file will not be used for creating suggestions for misspelled words.
    * @since 2.7
    */
+   /*
+   GTODO Clean up
   protected String getIgnoreFileName() {
     return language.getShortCode() + SPELLING_IGNORE_FILE;
   }
-
+*/
   /**
    * Get the name of the spelling file, which lists words to be accepted
    * and used for suggestions, even when the spell checker would not accept them.
    * @since 2.9, public since 3.5
    */
+   /*
+   GTODO Clean up
   public String getSpellingFileName() {
     return language.getShortCode() + SPELLING_FILE;
   }
-
+*/
   /**
-   * 
-   * Get the name of the spelling file for a language variant (e.g., en-US or de-AT), 
+   *
+   * Get the name of the spelling file for a language variant (e.g., en-US or de-AT),
    * which lists words to be accepted and used for suggestions, even when the spell
    * checker would not accept them.
    * @since 4.3
    */
+   /*
+   GTODO Clean up
   public String getLanguageVariantSpellingFileName() {
     return SPELLING_FILE_VARIANT;
   }
-
+*/
   /**
    * Get the name of the prohibit file, which lists words not to be accepted, even
    * when the spell checker would accept them.
    * @since 2.8
    */
+/*
+GTODO Clean up
   protected String getProhibitFileName() {
     return language.getShortCode() + SPELLING_PROHIBIT_FILE;
   }
-
+*/
   /**
    * Whether the word is prohibited, i.e. whether it should be marked as a spelling
    * error even if the spell checker would accept it. (This is useful to improve our spell
@@ -286,7 +311,7 @@ public abstract class SpellingCheckRule extends Rule {
    * @param line the line as read from {@code spelling.txt}.
    * @since 2.9, signature modified in 3.9
    */
-  protected void addIgnoreWords(String line) {
+  protected void addIgnoreWords(String line) throws Exception {
     // if line consists of several words (separated by " "), a DisambiguationPatternRule
     // will be created where each words serves as a case-sensitive and non-inflected PatternToken
     // so that the entire multi-word entry is ignored by the spell checker
@@ -319,9 +344,13 @@ public abstract class SpellingCheckRule extends Rule {
    * Implementations might e.g. turn {@code bicycle/S} into {@code [bicycle, bicycles]}.
    * @since 3.0
    */
+   /*
+   GTODO: Clean up
+   Languages need to expand their own...
   protected List<String> expandLine(String line) {
     return Collections.singletonList(line);
   }
+  */
 
   /**
    * Accept (case-sensitively, unless at the start of a sentence) the given phrases even though they
@@ -379,7 +408,7 @@ public abstract class SpellingCheckRule extends Rule {
   public List<DisambiguationPatternRule> getAntiPatterns() {
     return antiPatterns;
   }
-  
+
   /**
    * Checks whether a <code>word</code> starts with an ignored word.
    * Note that a minimum <code>word</code>-length of 4 characters is expected.

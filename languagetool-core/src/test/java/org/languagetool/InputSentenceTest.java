@@ -27,10 +27,10 @@ import java.util.HashSet;
 import static org.junit.Assert.*;
 
 public class InputSentenceTest {
-  
+
   @Test
   public void test() {
-    Language lang = Languages.getLanguageForShortCode("xx-XX");
+    Language lang = TestTools.getTestLanguage();
     UserConfig userConfig1 = new UserConfig(Arrays.asList("foo1", "foo2"));
     JLanguageTool.Mode mode = JLanguageTool.Mode.ALL;
     InputSentence inputSentence1a = new InputSentence("foo", lang, lang,

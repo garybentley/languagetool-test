@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,6 +23,7 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,16 +31,17 @@ import java.util.ResourceBundle;
 
 /**
  * Portuguese version of {@link AbstractWordCoherencyRule}.
- * 
+ *
  * @author Tiago F. Santos
  * @since 3.8
  */
 public class PortugueseWordCoherencyRule extends AbstractWordCoherencyRule {
 
-  private static final Map<String, String> wordMap = new WordCoherencyDataLoader().loadWords("/pt/coherency.txt");
+  private Map<String, String> wordMap;
 
-  public PortugueseWordCoherencyRule(ResourceBundle messages) throws IOException {
+  public PortugueseWordCoherencyRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
     super(messages);
+    wordMap = new WordCoherencyDataLoader().loadWords("/pt/coherency.txt", dataBroker);
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Inconsistency);
     addExamplePair(Example.wrong("Foi um período duradouro. Tão marcante e <marker>duradoiro</marker> dificilmente será esquecido."),
@@ -55,7 +57,7 @@ public class PortugueseWordCoherencyRule extends AbstractWordCoherencyRule {
   protected String getMessage(String word1, String word2) {
     return "Não deve utilizar formas distintas de palavras com dupla grafia no mesmo texto. Escolha entre '" + word1 + "' e '" + word2 + "'.";
   }
-  
+
   @Override
   public String getId() {
     return "PT_WORD_COHERENCY";

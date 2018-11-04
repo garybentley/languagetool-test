@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,7 @@ package org.languagetool.rules.de;
 import org.languagetool.rules.AbstractWordCoherencyRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.Map;
@@ -28,17 +29,19 @@ import java.util.ResourceBundle;
 
 /**
  * German version of {@link AbstractWordCoherencyRule}.
- * 
+ *
  * @author Daniel Naber
  */
 public class WordCoherencyRule extends AbstractWordCoherencyRule {
 
-  private static final Map<String, String> wordMap = new WordCoherencyDataLoader().loadWords("/de/coherency.txt");
+  private Map<String, String> wordMap;
 
-  public WordCoherencyRule(ResourceBundle messages) throws IOException {
+  public WordCoherencyRule(ResourceBundle messages, Map<String, String> wordMap) throws IOException {
     super(messages);
+    //GTODO wordMap = new WordCoherencyDataLoader().loadWords("/de/coherency.txt", dataBroker);
     addExamplePair(Example.wrong("Die Delfine gehören zu den Zahnwalen. <marker>Delphine</marker> sind in allen Meeren verbreitet."),
                    Example.fixed("Die Delfine gehören zu den Zahnwalen. <marker>Delfine</marker> sind in allen Meeren verbreitet."));
+    this.wordMap = wordMap;
   }
 
   @Override
@@ -50,7 +53,7 @@ public class WordCoherencyRule extends AbstractWordCoherencyRule {
   protected String getMessage(String word1, String word2) {
     return "'" + word1 + "' und '" + word2 + "' sollten nicht gleichzeitig benutzt werden";
   }
-  
+
   @Override
   public String getId() {
     return "DE_WORD_COHERENCY";

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,8 +20,33 @@ package org.languagetool.databroker;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
-import org.languagetool.JLanguageTool;
+import org.jetbrains.annotations.Nullable;
+import biz.k11i.xgboost.Predictor;
+import com.optimaize.langdetect.profiles.LanguageProfile;
+
+import org.languagetool.rules.patterns.AbstractPatternRule;
+import org.languagetool.rules.patterns.FalseFriendPatternRule;
+import org.languagetool.rules.patterns.RuleFilterCreator;
+import org.languagetool.tagging.disambiguation.Disambiguator;
+import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.rules.patterns.bitext.BitextPatternRule;
+import org.languagetool.rules.neuralnetwork.Word2VecModel;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.rules.ConfusionSet;
+import org.languagetool.rules.Rule;
+import org.languagetool.Language;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.chunking.Chunker;
+import org.languagetool.rules.bitext.BitextRule;
+import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.languagemodel.LanguageModel;
+
 
 /**
  * Is responsible for getting the necessary resources for the grammar checker
@@ -36,6 +61,7 @@ import org.languagetool.JLanguageTool;
  * directories.
  * <p>
  *
+ * GTODO Clean up
  * Make sure that you never obtain any grammar checker resources by calling
  * {@code Object.class.getResource(String)} or {@code
  * Object.class.getResourceAsStream(String)} directly. If you would like to
@@ -54,83 +80,105 @@ import org.languagetool.JLanguageTool;
  * @author PAX
  * @since 1.0.1
  */
-public interface ResourceDataBroker {
+public interface ResourceDataBroker extends AutoCloseable {
 
   /**
-   * The directory name of the {@code /resource} directory.
+   * @param className The fully qualified name of the class to load.
+   * @return The requested class.
+   * @throws ClassNotFoundException If the class cannot be loaded.
    */
-  String RESOURCE_DIR = "/org/languagetool/resource";
+  Class getClass(String className) throws ClassNotFoundException;
+
+  Language getLanguage();
 
   /**
-   * The directory name of the {@code /rules} directory.
+   * Get the message resource bundle to use for the language.
    */
-  String RULES_DIR = "/org/languagetool/rules";
+  ResourceBundle getMessageBundle() throws Exception;
 
   /**
-   * Gets any resource from the grammar checker's {@code /resource} directory.
-   *
-   * @param path Path to an item from the {@code /resource} directory.
-   * @return An {@link URL} object to the requested item
-   * @throws RuntimeException if path cannot be found
+   * Get the model 2 vec model.  Can return null if not supported for the language.
    */
-  URL getFromResourceDirAsUrl(String path);
-  
+  @Nullable
+  Word2VecModel getWord2VecModel() throws Exception;
+
   /**
-   * Checks if a resource in the grammar checker's {@code /resource} exists.
-   * @param path Path to an item from the {@code /resource} directory.
-   * @return {@code true} if the resource file exists.
+   * Get the chunker.
    */
-  boolean resourceExists(String path);
-  
+  Chunker getChunker() throws Exception;
+
   /**
-   * Checks if a resource in the grammar checker's {@code /rules} exists.
-   * @param path Path to an item from the {@code /rules} directory.
-   * @return {@code true} if the resource file exists.
+   * Get the pattern rules.
    */
-  boolean ruleFileExists(String path);
-  
+  List<AbstractPatternRule> getPatternRules() throws Exception;
+
+  /**
+   * Get the disambiguator.
+   */
+   @Nullable
+   Disambiguator getDisambiguator() throws Exception;
+
    /**
-   * Gets any resource from the grammar checker's {@code /resource} directory.
-   *
-   * @param path Path to an item from the {@code /resource} directory.
-   * @return An {@link InputStream} object to the requested item
-   * @throws RuntimeException if path cannot be found
-   */
-   InputStream getFromResourceDirAsStream(String path);
+    * Get the sentence tokenizer.
+    */
+   SentenceTokenizer getSentenceTokenizer() throws Exception;
 
-  /**
-   * Gets any resource from the grammar checker's {@code /rules} directory.
-   *
-   * @param path
-   *            Path to an item from the {@code /rules} directory.
-   * @return An {@link URL} object to the requested item
-   * @throws RuntimeException if path cannot be found
-   */
-  URL getFromRulesDirAsUrl(String path);
+   /**
+    * Get the language profile.
+    */
+   LanguageProfile getLanguageProfile() throws Exception;
 
-  /**
-   * Gets any resource from the grammar checker's {@code /rules} directory.
-   *
-   * @param path Path to an item from the {@code /rules} directory.
-   * @return An {@link InputStream} object to the requested item
-   * @throws RuntimeException if path cannot be found
-   */
-  InputStream getFromRulesDirAsStream(String path);
+   /**
+    * Get the bitext rules for the language.
+    */
+    List<BitextRule> getBitextRules() throws Exception;
 
-  /**
-   * @return The currently set resource directory path as a string. Make sure
-   *         that you comply with the following format when setting this value:
-   *         <p>
-   *         {@code /subdir/furtherdir/resourcedir}
-   */
-  String getResourceDir();
+   /**
+    * Get the word tagger.
+    */
+    WordTagger getWordTagger() throws Exception;
 
-  /**
-   * @return The currently set rules directory path as a string. Make sure
-   *         that you comply with the following format when setting this value:
-   *         <p>
-   *         {@code /subdir/furtherdir/rulesdir}
-   */
-  String getRulesDir();
+    /**
+     * Get the tagger.
+     */
+    Tagger getTagger() throws Exception;
+
+    /**
+     * Get the rule filter creator.
+     */
+    RuleFilterCreator getRuleFilterCreator() throws Exception;
+
+    /**
+     * Get the false friend rules applicable between the language this broker is handling and the passed in language.
+     */
+    List<FalseFriendPatternRule> getFalseFriendPatternRules(Language otherLanguage) throws Exception;
+
+    /**
+     * Get the word tokenizer.
+     */
+    WordTokenizer getWordTokenizer() throws Exception;
+
+    /**
+     * Get the case converter.
+     */
+    CaseConverter getCaseConverter() throws Exception;
+
+    /**
+     * Get the synthesizer.
+     */
+    Synthesizer getSynthesizer() throws Exception;
+
+    /**
+     * Get the language model.
+     */
+    @Nullable
+    LanguageModel getLanguageModel() throws Exception;
+
+    /**
+     * Get the Predictor used to make predictions about the text for the specified rule, can return null
+     * if no predictor exists for the rule.
+     */
+    @Nullable
+    Predictor getRulePredictor(Rule rule) throws Exception;
 
 }

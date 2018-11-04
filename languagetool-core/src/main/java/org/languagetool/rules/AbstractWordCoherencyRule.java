@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,11 +28,11 @@ import java.util.*;
 /**
  * A rule that matches words for which two different spellings are used
  * throughout the document.
- * 
+ *
  * <p>Note that this should not be used for language variations like
  * American English vs. British English or German "alte Rechtschreibung"
  * vs. "neue Rechtschreibung" -- that's the task of a spell checker.
- * 
+ *
  * @author Daniel Naber
  * @since 2.7
  */
@@ -42,17 +42,18 @@ public abstract class AbstractWordCoherencyRule extends TextLevelRule {
    * Maps words in both directions, e.g. "aufwendig -&gt; aufwändig" and "aufwändig -&gt; aufwendig".
    * @since 3.0
    */
+   // GTODO Put into constructor...
   protected abstract Map<String, String> getWordMap();
 
   /**
    * Get the message shown to the user if the rule matches.
    */
   protected abstract String getMessage(String word1, String word2);
-  
+
   public AbstractWordCoherencyRule(ResourceBundle messages) throws IOException {
     super.setCategory(Categories.MISC.getCategory(messages));
   }
-  
+
   @Override
   public RuleMatch[] match(List<AnalyzedSentence> sentences) {
     List<RuleMatch> ruleMatches = new ArrayList<>();

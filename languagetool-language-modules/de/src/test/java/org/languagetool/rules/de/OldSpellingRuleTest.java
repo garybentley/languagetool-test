@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,18 +23,17 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
-
-import java.io.IOException;
+import org.languagetool.language.German;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class OldSpellingRuleTest {
-  
+
   @Test
-  public void test() throws IOException {
-    Language german = Languages.getLanguageForShortCode("de");
-    OldSpellingRule rule = new OldSpellingRule(JLanguageTool.getMessageBundle());
+  public void test() throws Exception {
+    German german = new German();
+    OldSpellingRule rule = german.createOldSpellingRule(null);
     JLanguageTool lt = new JLanguageTool(german);
 
     AnalyzedSentence sentence1 = lt.getAnalyzedSentence("Ein Kuß");

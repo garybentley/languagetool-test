@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,9 +31,9 @@ import static org.junit.Assert.assertEquals;
 public class ToolsTest {
 
   @Test
-  public void testCorrect() throws IOException, ParserConfigurationException, SAXException {
+  public void testCorrect() throws Exception {
     JLanguageTool tool = new JLanguageTool(new English());
     assertEquals("This is a test.", Tools.correctText("This is an test.", tool));
   }
-  
+
 }

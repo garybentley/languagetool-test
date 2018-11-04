@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,6 +31,7 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.patterns.PatternToken;
 import org.languagetool.rules.patterns.PatternTokenBuilder;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
+import org.languagetool.databroker.EnglishResourceDataBroker;
 
 /**
  * Checks that compounds (if in the list) are not written as separate words.
@@ -38,7 +39,7 @@ import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 public class CompoundRule extends AbstractCompoundRule {
 
   // static to make sure this gets loaded only once:
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/en/compounds.txt");
+  private CompoundRuleData compoundData;
   private static final Language AMERICAN_ENGLISH = new AmericanEnglish();
   private static List<DisambiguationPatternRule> antiDisambiguationPatterns = null;
   private static final List<List<PatternToken>> ANTI_PATTERNS = Arrays.asList(
@@ -48,12 +49,15 @@ public class CompoundRule extends AbstractCompoundRule {
         )
       );
 
-  public CompoundRule(ResourceBundle messages) throws IOException {    
+  public CompoundRule(ResourceBundle messages, CompoundRuleData data) throws IOException {
     super(messages,
-            "This word is normally spelled with hyphen.", 
-            "This word is normally spelled as one.", 
+            "This word is normally spelled with hyphen.",
+            "This word is normally spelled as one.",
             "This expression is normally spelled as one or with hyphen.",
             "Hyphenation problem");
+    compoundData = data;
+    // GTODO: Clean up
+    //compoundData = new CompoundRuleData(dataBroker, "/en/compounds.txt");
     addExamplePair(Example.wrong("I now have a <marker>part time</marker> job."),
                    Example.fixed("I now have a <marker>part-time</marker> job."));
   }

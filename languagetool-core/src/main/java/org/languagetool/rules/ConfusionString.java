@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,7 +31,7 @@ public class ConfusionString {
   private final String str;
   private final String description;
 
-  ConfusionString(String str, String description) {
+  public ConfusionString(String str, String description) {
     this.str = Objects.requireNonNull(str);
     this.description = description;
   }

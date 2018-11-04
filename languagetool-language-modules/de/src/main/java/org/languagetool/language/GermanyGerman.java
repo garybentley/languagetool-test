@@ -20,18 +20,46 @@ package org.languagetool.language;
 
 import org.languagetool.UserConfig;
 import org.languagetool.rules.Rule;
-import org.languagetool.rules.de.GermanSpellerRule;
+import org.languagetool.languagemodel.*;
+import org.languagetool.rules.de.GermanyGermanSpellerRule;
+import org.languagetool.rules.spelling.morfologik.MorfologikMultiSpeller;
+import org.languagetool.rules.spelling.hunspell.Hunspell;
+import org.languagetool.tokenizers.Tokenizer;
+import morfologik.stemming.Dictionary;
+import org.languagetool.rules.de.GermanLineExpander;
+import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.Language;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 public class GermanyGerman extends German {
 
+    public static final String COUNTRY_ID = "DE";
+    public static final String LANGUAGE_ID = "de";
+    public static final Locale LOCALE = new Locale(German.LOCALE.getLanguage(), COUNTRY_ID);
+
   @Override
   public String[] getCountries() {
-    return new String[]{"DE"};
+    return new String[]{COUNTRY_ID};
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+    return null;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return true;
   }
 
   @Override
@@ -40,10 +68,33 @@ public class GermanyGerman extends German {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
-    List<Rule> rules = new ArrayList<>(super.getRelevantRules(messages, userConfig));
-    rules.add(new GermanSpellerRule(messages, this, userConfig, null));
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+    List<Rule> rules = new ArrayList<>(super.getRelevantRules(messages, userConfig, altLanguages));
+    rules.add(createSpellerRule(messages, userConfig));
     return rules;
   }
-  
+
+  @Override
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      List<Rule> rules = new ArrayList<>(super.getRelevantLanguageModelRules(messages, languageModel));
+
+      if (languageModel instanceof BaseLanguageModel) {
+          // GTODO It looks like user allowed spellings will be missed here.
+          rules.add (createProhibitedCompoundRule(messages, (BaseLanguageModel) languageModel, createSpellerRule(messages, null)));
+      }
+
+      return rules;
+  }
+
+  public GermanyGermanSpellerRule createSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      Set<Dictionary> dicts = getUseDataBroker().getDictionaries(userConfig);
+      MorfologikMultiSpeller speller = new MorfologikMultiSpeller(dicts, userConfig, 2);
+      Hunspell.Dictionary hdic = getUseDataBroker().getHunspellDictionary();
+      List ignoreWords = getUseDataBroker().getSpellingIgnoreWords();
+      List prohibWords = getUseDataBroker().getSpellingProhibitedWords();
+      return new GermanyGermanSpellerRule(getUseMessages(messages), this, speller, userConfig, hdic,
+            getUseDataBroker().getTagger(), getUseDataBroker().getSynthesizer(), getUseDataBroker().getStrictCompoundTokenizer(), getUseDataBroker().getNonStrictCompoundSplitter(),
+            ignoreWords, prohibWords, new GermanLineExpander());
+  }
+
 }

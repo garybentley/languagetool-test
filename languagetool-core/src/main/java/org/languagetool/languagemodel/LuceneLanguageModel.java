@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Like {@link LuceneSingleIndexLanguageModel}, but can merge the results of
@@ -32,8 +32,10 @@ import java.util.List;
  */
 public class LuceneLanguageModel extends BaseLanguageModel {
 
-  private final List<LuceneSingleIndexLanguageModel> lms = new ArrayList<>();
+  private final Set<LuceneSingleIndexLanguageModel> lms;
 
+/*
+GTODO Clean up
   public static void validateDirectory(File topIndexDir) {
     File[] subDirs = getSubDirectoriesOrNull(topIndexDir);
     if (subDirs == null || subDirs.length == 0) {
@@ -45,6 +47,10 @@ public class LuceneLanguageModel extends BaseLanguageModel {
   private static File[] getSubDirectoriesOrNull(File topIndexDir) {
     return topIndexDir.listFiles((file, name) -> name.matches("index-\\d+"));
   }
+*/
+  public LuceneLanguageModel(Set<LuceneSingleIndexLanguageModel> indexes) {
+      this.lms = indexes;
+  }
 
   /**
    * @param topIndexDir a directory which contains either:
@@ -54,6 +60,8 @@ public class LuceneLanguageModel extends BaseLanguageModel {
    *                    or 2) sub directories {@code index-1}, {@code index-2} etc that contain
    *                    the sub directories described under 1)
    */
+   /*
+   GTODO Clean up
   public LuceneLanguageModel(File topIndexDir)  {
     File[] subDirs = getSubDirectoriesOrNull(topIndexDir);
     if (subDirs != null && subDirs.length > 0) {
@@ -65,7 +73,7 @@ public class LuceneLanguageModel extends BaseLanguageModel {
       lms.add(new LuceneSingleIndexLanguageModel(topIndexDir));
     }
   }
-
+*/
   @Override
   public long getCount(List<String> tokens) {
     return lms.stream().mapToLong(lm -> lm.getCount(tokens)).sum();

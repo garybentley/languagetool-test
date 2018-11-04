@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
@@ -44,13 +46,16 @@ import static org.junit.Assert.assertEquals;
 
 public final class TestTools {
 
-  private static final Language DEMO_LANGUAGE = new Demo();
-  
+  private static final TestLanguage TEST_LANGUAGE = new TestLanguage();
+
   private TestTools() {
   }
 
-  public static Language getDemoLanguage() {
-    return DEMO_LANGUAGE;
+  /**
+   * Return the test language.
+   */
+  public static TestLanguage getTestLanguage() {
+    return TEST_LANGUAGE;
   }
 
   public static Set<Language> getLanguagesExcept(String[] langCodes) {
@@ -58,7 +63,7 @@ public final class TestTools {
     languages.addAll(Languages.getWithDemoLanguage());
     if (langCodes != null) {
       for (String langCode : langCodes) {
-        Language lang = Languages.getLanguageForShortCode(langCode);
+        Language lang = Languages.getLanguage(langCode);
         languages.remove(lang);
       }
     }
@@ -83,14 +88,20 @@ public final class TestTools {
     return messages;
   }
 
-  public static void testSplit(String[] sentences, SentenceTokenizer sTokenizer) {
-    StringBuilder inputString = new StringBuilder();
+  public static void testSplit(SentenceTokenizer sTokenizer, String... sentences) {
+      // GTODO: Clean up
+    //StringBuilder inputString = new StringBuilder();
+    //List<String> input = Arrays.asList(sentences);
+    /*
     List<String> input = new ArrayList<>();
     Collections.addAll(input, sentences);
     for (String s : input) {
       inputString.append(s);
     }
-    assertEquals(input, sTokenizer.tokenize(inputString.toString()));
+    */
+    List<String> input = Arrays.asList(sentences);
+    assertEquals(input, sTokenizer.tokenize(input.stream().collect(Collectors.joining())));
+    // inputString.toString()));
   }
 
   public static void myAssert(String input, String expected,
@@ -113,7 +124,7 @@ public final class TestTools {
   public static void myAssert(String input, String expected,
       Tokenizer tokenizer, SentenceTokenizer sentenceTokenizer,
       Tagger tagger, Disambiguator disambiguator)
-      throws IOException {
+      throws Exception {
     StringBuilder outputStr = new StringBuilder();
     List<String> sentences = sentenceTokenizer.tokenize(input);
     for (String sentence : sentences) {
@@ -168,9 +179,9 @@ public final class TestTools {
     return false;
   }
 
-  public static void testDictionary(BaseTagger tagger, Language language) throws IOException {
-    Dictionary dictionary = Dictionary.read(JLanguageTool.getDataBroker().getFromResourceDirAsUrl(tagger.getDictionaryPath()));
-    DictionaryLookup lookup = new DictionaryLookup(dictionary);
+  public static void testTaggerDictionary(Dictionary dict, Language language) throws IOException {
+    //GTODO: Dictionary dictionary = Dictionary.read(JLanguageTool.getDataBroker().getFromResourceDirAsUrl(tagger.getDictionaryPath()));
+    DictionaryLookup lookup = new DictionaryLookup(dict);
     for (WordData wordData : lookup) {
       if (wordData.getTag() == null || wordData.getTag().length() == 0) {
         System.err.println("**** Warning: " + language + ": the word " + wordData.getWord() + "/" + wordData.getStem() + " lacks a POS tag in the dictionary.");

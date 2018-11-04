@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,12 +19,6 @@
 
 package org.languagetool.rules.spelling.hunspell;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -41,21 +35,21 @@ import org.languagetool.rules.spelling.SpellingCheckRule;
 
 /**
  * A hunspell-based spellchecking-rule.
- * 
+ *
  * The default dictionary is set to the first country variant on the list - so the order
    in the Language class declaration is important!
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class HunspellRule extends SpellingCheckRule {
 
   public static final String RULE_ID = "HUNSPELL_RULE";
 
-  protected boolean needsInit = true;
+  // GTODO: protected boolean needsInit = true;
   protected Hunspell.Dictionary hunspellDict = null;
 
   private static final String NON_ALPHABETIC = "[^\\p{L}]";
-  protected static final String FILE_EXTENSION = ".dic";
+  //GTODO: protected static final String FILE_EXTENSION = ".dic";
 
   private static final String[] WHITESPACE_ARRAY = new String[20];
   static {
@@ -63,12 +57,34 @@ public class HunspellRule extends SpellingCheckRule {
       WHITESPACE_ARRAY[i] = StringUtils.repeat(' ', i);
     }
   }
-  protected Pattern nonWordPattern;
+  private Pattern nonWordPattern;
 
   private final UserConfig userConfig;
 
-  public HunspellRule(ResourceBundle messages, Language language, UserConfig userConfig) {
-    super(messages, language, userConfig);
+  public HunspellRule(ResourceBundle messages, Language language, UserConfig userConfig, Hunspell.Dictionary dict, List<String> wordsToBeIgnored, List<String> prohibitedWords, String extraNonWordRegexPattern) throws Exception {
+    super(messages, language, userConfig, wordsToBeIgnored, prohibitedWords);
+    this.hunspellDict = dict;
+    String nwPattern = "";
+    if (hunspellDict != null) {
+        if (wordsToBeIgnored != null) {
+            for (String word : wordsToBeIgnored) {
+                try {
+                    hunspellDict.addWord(word);
+                } catch(Exception e) {
+                    throw new IllegalArgumentException(String.format("Encoding for word %1$s is not supported.", word), e);
+                }
+            }
+        }
+        if (!hunspellDict.getWordChars().isEmpty()) {
+            nwPattern = "(?![" + hunspellDict.getWordChars().replace("-", "\\-") + "])";
+        }
+    }
+    nwPattern = nwPattern + NON_ALPHABETIC;
+    if (extraNonWordRegexPattern != null) {
+        nwPattern = String.format("(%1$s|%2$s)", nwPattern, extraNonWordRegexPattern);
+    }
+    this.nonWordPattern = Pattern.compile(nwPattern);
+
     super.setCategory(Categories.TYPOS.getCategory(messages));
     this.userConfig = userConfig;
   }
@@ -84,7 +100,7 @@ public class HunspellRule extends SpellingCheckRule {
   }
 
   /**
-   * Is the given token part of a hyphenated compound preceded by a quoted token (e.g., „Spiegel“-Magazin) 
+   * Is the given token part of a hyphenated compound preceded by a quoted token (e.g., „Spiegel“-Magazin)
    * and should be treated as an ordinary hyphenated compound (e.g., „Spiegel-Magazin“)
    */
   protected boolean isQuotedCompound (AnalyzedSentence analyzedSentence, int idx, String token) {
@@ -92,11 +108,14 @@ public class HunspellRule extends SpellingCheckRule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
+/*
+GTODO: CLean up
     if (needsInit) {
       init();
     }
+    */
     if (hunspellDict == null) {
       // some languages might not have a dictionary, be silent about it
       return toRuleMatchArray(ruleMatches);
@@ -158,19 +177,22 @@ public class HunspellRule extends SpellingCheckRule {
   @Experimental
   public boolean isMisspelled(String word) {
     try {
+        /*
+        GTODO: Clean up
       if (needsInit) {
         init();
       }
+      */
       boolean isAlphabetic = true;
       if (word.length() == 1) { // hunspell dictionaries usually do not contain punctuation
         isAlphabetic = Character.isAlphabetic(word.charAt(0));
       }
       return (isAlphabetic && !"--".equals(word) && hunspellDict.misspelled(word) && !ignoreWord(word)) || isProhibited(removeTrailingDot(word));
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
-  
+
   void filterDupes(List<String> words) {
     Set<String> seen = new HashSet<>();
     Iterator<String> iterator = words.iterator();
@@ -190,10 +212,18 @@ public class HunspellRule extends SpellingCheckRule {
     return word;
   }
 
-  public List<String> getSuggestions(String word) throws IOException {
+  public List<String> getSuggestions(String word) throws Exception {
+/*
+ GTODO: Clean up
     if (needsInit) {
       init();
     }
+    */
+
+    if (hunspellDict == null) {
+        return new ArrayList<>();
+    }
+
     return hunspellDict.suggest(word);
   }
 
@@ -201,7 +231,7 @@ public class HunspellRule extends SpellingCheckRule {
     return nonWordPattern.split(sentence);
   }
 
-  protected String getSentenceTextWithoutUrlsAndImmunizedTokens(AnalyzedSentence sentence) {
+  protected String getSentenceTextWithoutUrlsAndImmunizedTokens(AnalyzedSentence sentence) throws Exception {
     StringBuilder sb = new StringBuilder();
     AnalyzedTokenReadings[] sentenceTokens = getSentenceWithImmunization(sentence).getTokens();
     for (int i = 1; i < sentenceTokens.length; i++) {
@@ -219,7 +249,7 @@ public class HunspellRule extends SpellingCheckRule {
           }
         }
       } else if (token.length() > 1 && token.codePointCount(0, token.length()) != token.length()) {
-        // some symbols such as emojis (😂) have a string length that equals 2 
+        // some symbols such as emojis (😂) have a string length that equals 2
         for (int charIndex = 0; charIndex < token.length();) {
           int unicodeCodePoint = token.codePointAt(charIndex);
           int increment = Character.charCount(unicodeCodePoint);
@@ -236,7 +266,8 @@ public class HunspellRule extends SpellingCheckRule {
     }
     return sb.toString();
   }
-
+/*
+GTODO: Cleanup
   @Override
   protected void init() throws IOException {
     super.init();
@@ -251,7 +282,7 @@ public class HunspellRule extends SpellingCheckRule {
         + FILE_EXTENSION;
     String wordChars = "";
     // set dictionary only if there are dictionary files:
-    if (JLanguageTool.getDataBroker().resourceExists(shortDicPath)) {
+    if (dataBroker.resourceExists(shortDicPath)) {
       String path = getDictionaryPath(langCountry, shortDicPath);
       if ("".equals(path)) {
         hunspellDict = null;
@@ -266,10 +297,12 @@ public class HunspellRule extends SpellingCheckRule {
     nonWordPattern = Pattern.compile(wordChars + NON_ALPHABETIC);
     needsInit = false;
   }
-
+*/
+/*
+GOTOD: Cleanup
   private void addIgnoreWords() throws IOException {
     hunspellDict.addWord(SpellingCheckRule.LANGUAGETOOL);
-    URL ignoreUrl = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(getIgnoreFileName());
+    URL ignoreUrl = dataBroker.getFromResourceDirAsUrl(getIgnoreFileName());
     List<String> ignoreLines = Resources.readLines(ignoreUrl, Charsets.UTF_8);
     for (String ignoreLine : ignoreLines) {
       if (!ignoreLine.startsWith("#")) {
@@ -277,11 +310,13 @@ public class HunspellRule extends SpellingCheckRule {
       }
     }
   }
-
+*/
+/*
+GTODO: Cleanup
   private String getDictionaryPath(String dicName,
       String originalPath) throws IOException {
 
-    URL dictURL = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(originalPath);
+    URL dictURL = dataBroker.getFromResourceDirAsUrl(originalPath);
     String dictionaryPath;
     //in the webstart, java EE or OSGi bundle version, we need to copy the files outside the jar
     //to the local temporary directory
@@ -289,7 +324,7 @@ public class HunspellRule extends SpellingCheckRule {
       File tempDir = new File(System.getProperty("java.io.tmpdir"));
       File tempDicFile = new File(tempDir, dicName + FILE_EXTENSION);
       JLanguageTool.addTemporaryFile(tempDicFile);
-      try (InputStream dicStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(originalPath)) {
+      try (InputStream dicStream = dataBroker.getFromResourceDirAsStream(originalPath)) {
         fileCopy(dicStream, tempDicFile);
       }
       File tempAffFile = new File(tempDir, dicName + ".aff");
@@ -297,7 +332,7 @@ public class HunspellRule extends SpellingCheckRule {
       if (originalPath.endsWith(FILE_EXTENSION)) {
         originalPath = originalPath.substring(0, originalPath.length() - FILE_EXTENSION.length()) + ".aff";
       }
-      try (InputStream affStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(originalPath)) {
+      try (InputStream affStream = dataBroker.getFromResourceDirAsStream(originalPath)) {
         fileCopy(affStream, tempAffFile);
       }
       dictionaryPath = tempDir.getAbsolutePath() + "/" + dicName;
@@ -312,7 +347,9 @@ public class HunspellRule extends SpellingCheckRule {
     }
     return dictionaryPath;
   }
-
+*/
+/*
+GTODO: Cleanup
   private void fileCopy(InputStream in, File targetFile) throws IOException {
     try (OutputStream out = new FileOutputStream(targetFile)) {
       byte[] buf = new byte[1024];
@@ -323,5 +360,5 @@ public class HunspellRule extends SpellingCheckRule {
       in.close();
     }
   }
-
+*/
 }

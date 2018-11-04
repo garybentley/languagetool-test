@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
+import org.languagetool.language.Persian;
 
 import java.io.IOException;
 
@@ -33,19 +34,20 @@ public class PersianSpaceBeforeRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new PersianSpaceBeforeRule(TestTools.getEnglishMessages(), TestTools.getDemoLanguage());
-    langTool = new JLanguageTool(TestTools.getDemoLanguage());
+  public void setUp() throws Exception {
+    Persian lang = new Persian();
+    rule = lang.createPersianSpaceBeforeRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRules() throws IOException {
+  public void testRules() throws Exception {
     assertMatches("به اینجا", 1);
     assertMatches("من به اینجا", 0);
     assertMatches("(به اینجا", 0);
   }
 
-  private void assertMatches(String text, int expectedMatches) throws IOException {
+  private void assertMatches(String text, int expectedMatches) throws Exception {
     assertEquals(expectedMatches, rule.match(langTool.getAnalyzedSentence(text)).length);
   }
 

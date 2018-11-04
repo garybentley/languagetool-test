@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.rules;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 
@@ -32,37 +33,44 @@ import static org.junit.Assert.assertEquals;
  */
 public class MultipleWhitespaceRuleTest {
 
+  private MultipleWhitespaceRule rule;
+  private JLanguageTool lt;
+
+  @Before
+  public void setUp() throws Exception {
+       lt = new JLanguageTool(TestTools.getTestLanguage());
+       rule = new MultipleWhitespaceRule(TestTools.getEnglishMessages(), TestTools.getTestLanguage());
+  }
+
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     List<RuleMatch> matches;
-    JLanguageTool lt = new JLanguageTool(TestTools.getDemoLanguage());
-    setUpRule(lt);
 
     // correct sentences:
-    assertGood("This is a test sentence.", lt);
-    assertGood("This is a test sentence...", lt);
-    assertGood("\n\tThis is a test sentence...", lt);
-    assertGood("Multiple tabs\t\tare okay", lt);
-    assertGood("\n This is a test sentence...", lt);
-    assertGood("\n    This is a test sentence...", lt);
+    assertGood("This is a test sentence.");
+    assertGood("This is a test sentence...");
+    assertGood("\n\tThis is a test sentence...");
+    assertGood("Multiple tabs\t\tare okay");
+    assertGood("\n This is a test sentence...");
+    assertGood("\n    This is a test sentence...");
     // Needs isParagraphStart creation. Excluding i = 1 will make the rule ignore multiple white spaces in middle senteces.
     // matches = rule.match(langTool.getAnalyzedSentence("    This is a test sentence..."));
     // assertEquals(0, matches.length);
 
     // incorrect sentences:
-    matches = lt.check("This  is a test sentence.");
+    matches = lt.check(rule, "This  is a test sentence.");
     assertEquals(1, matches.size());
     assertEquals(4, matches.get(0).getFromPos());
     assertEquals(6, matches.get(0).getToPos());
-    matches = lt.check("\n   This  is a test sentence.");
+    matches = lt.check(rule, "\n   This  is a test sentence.");
     assertEquals(1, matches.size());
     assertEquals(8, matches.get(0).getFromPos());
     assertEquals(10, matches.get(0).getToPos());
-    matches = lt.check("This is a test   sentence.");
+    matches = lt.check(rule, "This is a test   sentence.");
     assertEquals(1, matches.size());
     assertEquals(14, matches.get(0).getFromPos());
     assertEquals(17, matches.get(0).getToPos());
-    matches = lt.check("This is   a  test   sentence.");
+    matches = lt.check(rule, "This is   a  test   sentence.");
     assertEquals(3, matches.size());
     assertEquals(7, matches.get(0).getFromPos());
     assertEquals(10, matches.get(0).getToPos());
@@ -70,28 +78,21 @@ public class MultipleWhitespaceRuleTest {
     assertEquals(13, matches.get(1).getToPos());
     assertEquals(17, matches.get(2).getFromPos());
     assertEquals(20, matches.get(2).getToPos());
-    matches = lt.check("\t\t\t    \t\t\t\t  ");
+    matches = lt.check(rule, "\t\t\t    \t\t\t\t  ");
     assertEquals(2, matches.size());
     //with non-breakable spaces
-    matches = lt.check("This \u00A0is a test sentence.");
+    matches = lt.check(rule, "This \u00A0is a test sentence.");
     assertEquals(1, matches.size());
     assertEquals(4, matches.get(0).getFromPos());
-    assertEquals(6, matches.get(0).getToPos());    
+    assertEquals(6, matches.get(0).getToPos());
   }
 
-  private void assertGood(String input, JLanguageTool langTool) throws IOException {
-    List<RuleMatch> ruleMatches = langTool.check(input);
+  private void assertGood(String input) throws Exception {
+    List<RuleMatch> ruleMatches = lt.check(rule, input);
     assertEquals(0, ruleMatches.size());
   }
-  
-  private void setUpRule(JLanguageTool lt) {
-    for (Rule rule : lt.getAllRules()) {
-      lt.disableRule(rule.getId());
-    }
-    MultipleWhitespaceRule rule = new MultipleWhitespaceRule(TestTools.getEnglishMessages(), TestTools.getDemoLanguage());
-    lt.addRule(rule);
-  }
-
+/*
+GTODO: Clean up
   public static MultipleWhitespaceRule getMultipleWhitespaceRule(JLanguageTool langTool) {
     for (Rule rule : langTool.getAllActiveRules()) {
       if (rule instanceof MultipleWhitespaceRule) {
@@ -100,6 +101,6 @@ public class MultipleWhitespaceRuleTest {
     }
     throw new RuntimeException("Rule not found: " + GenericUnpairedBracketsRule.class);
   }
-
+*/
 
 }

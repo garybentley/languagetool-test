@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,13 +39,13 @@ public class EnglishDashRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    Language lang = new AmericanEnglish();
+    AmericanEnglish lang = new AmericanEnglish();
     langTool = new JLanguageTool(lang);
-    rule = new EnglishDashRule();
+    rule = lang.createDashRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "This is my T-shirt.");
     check(0, "This is water-proof.");
@@ -55,7 +55,7 @@ public class EnglishDashRuleTest {
     check(1, "surface — to — surface", new String[]{"surface-to-surface"});
   }
 
-  private void check(int expectedErrors, String text) throws IOException {
+  private void check(int expectedErrors, String text) throws Exception {
     check(expectedErrors, text, null);
   }
 
@@ -65,7 +65,7 @@ public class EnglishDashRuleTest {
    * @param text the text to check
    * @param expSuggestions the expected suggestions
    */
-  private void check(int expectedErrors, String text, String[] expSuggestions) throws IOException {
+  private void check(int expectedErrors, String text, String[] expSuggestions) throws Exception {
     assertNotNull("Please initialize langTool!", langTool);
     assertNotNull("Please initialize 'rule'!", rule);
     RuleMatch[] ruleMatches = rule.match(langTool.getAnalyzedSentence(text));

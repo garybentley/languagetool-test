@@ -24,6 +24,7 @@ import java.io.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -31,16 +32,18 @@ import java.util.regex.Pattern;
  */
 final class CaseRuleExceptions {
 
-  private static final Set<String> exceptions = loadExceptions("/de/case_rule_exceptions.txt");
+  private Set<String> exceptions;
+  //GTODO  = loadExceptions("/de/case_rule_exceptions.txt");
 
-  private CaseRuleExceptions() {
+  private CaseRuleExceptions(Set<String> exceptions) {
+      this.exceptions = Objects.requireNonNull(exceptions, "Exceptions must be provided.");
   }
 
-  public static Set<String> getExceptions() {
+  public Set<String> getExceptions() {
     return exceptions;
   }
 
-  public static Set<Pattern[]> getExceptionPatterns() {
+  public Set<Pattern[]> getExceptionPatterns() {
     HashSet<Pattern[]> exceptionPatterns = new HashSet<>(250);
     for (String phrase : exceptions) {
       String[] parts = phrase.split(" ");
@@ -52,7 +55,8 @@ final class CaseRuleExceptions {
     }
     return Collections.unmodifiableSet(exceptionPatterns);
   }
-
+/*
+GTODO Clean up
   private static Set<String> loadExceptions(String path) {
     Set<String> result = new HashSet<>();
     try (
@@ -75,5 +79,6 @@ final class CaseRuleExceptions {
     }
     return Collections.unmodifiableSet(result);
   }
+  */
 
 }

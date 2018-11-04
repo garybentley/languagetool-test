@@ -19,16 +19,53 @@
 package org.languagetool.rules.spelling.morfologik;
 
 import org.junit.Test;
+import org.junit.Before;
+
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 import java.io.IOException;
+
+import java.nio.file.*;
+import java.nio.charset.*;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
+import morfologik.stemming.Dictionary;
+import org.languagetool.TestLanguage;
+import org.languagetool.TestTools;
+
 public class MorfologikMultiSpellerTest {
 
+  private TestLanguage lang;
+
+  @Before
+  public void setUp() throws Exception {
+      lang = TestTools.getTestLanguage();
+  }
+
+  private Dictionary loadTextDictionary() throws Exception {
+      return lang.getUseDataBroker().getMorfologikTextDictionaryFromResourcePath(String.format("/%1$s/spelling/test2.txt", lang.getLocale().getLanguage()),
+            String.format("/%1$s/spelling/test.info", lang.getLocale().getLanguage()), StandardCharsets.UTF_8);
+  }
+
+  private Dictionary loadBinaryDictionary() throws Exception {
+      return lang.getUseDataBroker().getMorfologikBinaryDictionaryFromResourcePath(String.format("/%1$s/spelling/test.dict", lang.getLocale().getLanguage()));
+  }
+
   @Test
-  public void testIsMisspelled() throws IOException {
+  public void testTextFile() throws Exception {
+      loadTextDictionary();
+  }
+
+  @Test
+  public void testBinaryFile() throws Exception {
+      loadBinaryDictionary();
+  }
+
+  @Test
+  public void testIsMisspelled() throws Exception {
     MorfologikMultiSpeller speller = getSpeller();
     // from test.dict:
     assertFalse(speller.isMisspelled("wordone"));
@@ -52,7 +89,7 @@ public class MorfologikMultiSpellerTest {
   }
 
   @Test
-  public void testGetSuggestions() throws IOException {
+  public void testGetSuggestions() throws Exception {
     MorfologikMultiSpeller speller = getSpeller();
     assertThat(speller.getSuggestions("wordone").toString(), is("[]"));  // a non-misspelled word
     assertThat(speller.getSuggestions("wordones").toString(), is("[wordone]"));
@@ -61,18 +98,26 @@ public class MorfologikMultiSpellerTest {
     assertThat(speller.getSuggestions("Häusers").toString(), is("[Häuser]"));
   }
 
+/*
+Not needed, this tests a negative
   @Test(expected = RuntimeException.class)
   public void testInvalidFileName() throws IOException {
     new MorfologikMultiSpeller("/xx/spelling/test.dict.README", "/xx/spelling/test2.txt", null, 1);
   }
+*/
 
+/*
+Not needed, tests a negative...
   @Test(expected = RuntimeException.class)
   public void testInvalidFile() throws IOException {
     new MorfologikMultiSpeller("/xx/spelling/no-such-file", "/xx/spelling/test2.txt", null, 1);
   }
-
-  private MorfologikMultiSpeller getSpeller() throws IOException {
-    return new MorfologikMultiSpeller("/xx/spelling/test.dict", "/xx/spelling/test2.txt", null, 1);
+*/
+  private MorfologikMultiSpeller getSpeller() throws Exception {
+    Set<Dictionary> dicts = new LinkedHashSet<>();
+    dicts.add(loadBinaryDictionary());
+    dicts.add(loadTextDictionary());
+    return new MorfologikMultiSpeller(dicts, null, 1);
   }
 
 }

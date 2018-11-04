@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber & Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,13 +39,17 @@ import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.WordTokenizer;
 import org.languagetool.tokenizers.pl.PolishWordTokenizer;
 
-public class Polish extends Language {
+public class Polish extends Language<PolishResourceDataBroker> {
 
   private Tagger tagger;
   private SentenceTokenizer sentenceTokenizer;
   private PolishWordTokenizer wordTokenizer;
   private Disambiguator disambiguator;
   private Synthesizer synthesizer;
+
+  public PolishResourceDataBroker getDefaultDataBroker() {
+      return new DefaultPolishResourceDataBroker();
+  }
 
   @Override
   public String getName() {
@@ -91,7 +95,7 @@ public class Polish extends Language {
   @Override
   public Disambiguator getDisambiguator() {
     if (disambiguator == null) {
-      disambiguator = new PolishHybridDisambiguator();
+      disambiguator = new PolishHybridDisambiguator(getUseDataBroker());
     }
     return disambiguator;
   }
@@ -99,7 +103,7 @@ public class Polish extends Language {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new PolishSynthesizer();
+      synthesizer = new PolishSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
@@ -122,7 +126,7 @@ public class Polish extends Language {
         new MorfologikPolishSpellerRule(messages, this, userConfig),
         new PolishWordRepeatRule(messages),
         new CompoundRule(messages),
-        new SimpleReplaceRule(messages),
+        new SimpleReplaceRule(messages, getUseDataBroker()),
         new DashRule()
         );
   }

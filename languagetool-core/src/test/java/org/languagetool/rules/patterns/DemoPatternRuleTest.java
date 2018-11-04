@@ -34,11 +34,11 @@ import static org.junit.Assert.assertTrue;
 
 public class DemoPatternRuleTest extends PatternRuleTest {
 
-  private static final Language language = TestTools.getDemoLanguage();
+  private static final Language language = TestTools.getTestLanguage();
 
   @Test
-  public void testRules() throws IOException {
-    runTestForLanguage(new Demo());
+  public void testRules() throws Exception {
+    runTestForLanguage(language);
   }
 
   @Test
@@ -47,7 +47,7 @@ public class DemoPatternRuleTest extends PatternRuleTest {
   }
 
   @Test
-  public void testMakeSuggestionUppercase() throws IOException {
+  public void testMakeSuggestionUppercase() throws Exception {
     JLanguageTool langTool = new JLanguageTool(language);
 
     PatternToken patternToken = new PatternToken("Were", false, false, false);
@@ -64,7 +64,7 @@ public class DemoPatternRuleTest extends PatternRuleTest {
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     PatternRule pr;
     RuleMatch[] matches;
     JLanguageTool langTool = new JLanguageTool(language);
@@ -123,7 +123,7 @@ public class DemoPatternRuleTest extends PatternRuleTest {
   }
 
   @Test
-  public void testSentenceStart() throws IOException {
+  public void testSentenceStart() throws Exception {
     JLanguageTool langTool = new JLanguageTool(language);
     PatternRule pr = makePatternRule("SENT_START One");
     assertEquals(0, pr.match(langTool.getAnalyzedSentence("Not One word.")).length);

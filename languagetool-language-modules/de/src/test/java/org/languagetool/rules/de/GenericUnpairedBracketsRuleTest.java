@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2008 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,7 +24,6 @@ import org.languagetool.language.German;
 import org.languagetool.rules.GenericUnpairedBracketsRule;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -35,9 +34,10 @@ public class GenericUnpairedBracketsRuleTest {
   private JLanguageTool lt;
 
   @Test
-  public void testGermanRule() throws IOException {
-    lt = new JLanguageTool(new German());
-    rule = org.languagetool.rules.GenericUnpairedBracketsRuleTest.getBracketsRule(lt);
+  public void testGermanRule() throws Exception {
+      German lang = new German();
+      rule = lang.createUnpairedBracketsRule(null);
+    lt = new JLanguageTool(lang);
     // correct sentences:
     assertMatches("(Das sind die Sätze, die sie testen sollen).", 0);
     assertMatches("(Das sind die «Sätze», die sie testen sollen).", 0);
@@ -53,7 +53,7 @@ public class GenericUnpairedBracketsRuleTest {
     assertMatches("Die »Sätze zum Testen.", 1);
   }
 
-  private void assertMatches(String input, int expectedMatches) throws IOException {
+  private void assertMatches(String input, int expectedMatches) throws Exception {
     RuleMatch[] matches = rule.match(Collections.singletonList(lt.getAnalyzedSentence(input)));
     assertEquals(expectedMatches, matches.length);
   }

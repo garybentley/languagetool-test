@@ -65,14 +65,14 @@ public final class PatternTestTools {
       for (PatternToken token : patternTokens) {
         if (token.getString() != null && token.getString().matches(".*\\s.*")) {
           fail("Whitespace found in token '" + token.getString() + "' of rule " + rule.getFullId() +
-               " (language " + lang.getShortCodeWithCountryAndVariant() + "): " +
+               " (language " + lang.getLocale().toLanguageTag() + "): " +
                "Using whitespace in a token will not work, as text gets split at whitespace. " +
                "Use a new <token> element instead.");
         }
       }
     }
   }
-  
+
   // TODO: probably this would be more useful for exceptions
   // instead of adding next methods to PatternRule
   // we can probably validate using XSD and specify regexes straight there
@@ -116,7 +116,7 @@ public final class PatternTestTools {
         for (PatternToken exception: pToken.getExceptionList()) {
           // Detect useless exception or missing skip="...". I.e. things like this:
           // <token postag="..."><exception scope="next">foo</exception</token>
-          
+
           // We now allow scope="next" without skip="..."
           if (exception.hasNextException())
             continue;
@@ -340,7 +340,7 @@ public final class PatternTestTools {
     // Use a different regexp to check for probable regexp in Polish POS tags
     // since Polish uses dot '.' in POS tags. So a dot does not indicate that
     // it's a probable regexp for Polish POS tags.
-    Pattern regexPattern = (isPos && lang.getShortCode().equals("pl"))
+    Pattern regexPattern = (isPos && lang.getLocale().getLanguage().equals("pl"))
             ? PROBABLE_PATTERN_PL_POS // Polish POS tag.
             : PROBABLE_PATTERN;       // something else than Polish POS tag.
 

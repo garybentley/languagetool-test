@@ -28,7 +28,6 @@ import org.languagetool.chunking.GermanChunker;
 import org.languagetool.language.German;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,14 +41,14 @@ public class SubjectVerbAgreementRuleTest {
   private static JLanguageTool langTool;
 
   @BeforeClass
-  public static void setUp() {
+  public static void setUp() throws Exception {
     German german = new German();
-    rule = new SubjectVerbAgreementRule(TestTools.getMessages("de"), german);
+    rule = german.createSubjectVerbAgreementRule(null);
     langTool = new JLanguageTool(german);
   }
 
   @Test
-  public void testTemp() throws IOException {
+  public void testTemp() throws Exception {
     // For debugging, comment in the next three lines:
     //GermanChunker.setDebug(true);
     //assertGood("...");
@@ -97,7 +96,7 @@ public class SubjectVerbAgreementRuleTest {
   }
 
   @Test
-  public void testPrevChunkIsNominative() throws IOException {
+  public void testPrevChunkIsNominative() throws Exception {
     assertTrue(rule.prevChunkIsNominative(getTokens("Die Katze ist süß"), 2));
     assertTrue(rule.prevChunkIsNominative(getTokens("Das Fell der Katzen ist süß"), 4));
 
@@ -109,16 +108,16 @@ public class SubjectVerbAgreementRuleTest {
   }
 
   @Test
-  public void testArrayOutOfBoundsBug() throws IOException {
+  public void testArrayOutOfBoundsBug() throws Exception {
     rule.match(langTool.getAnalyzedSentence("Die nicht Teil des Näherungsmodells sind"));
   }
 
-  private AnalyzedTokenReadings[] getTokens(String s) throws IOException {
+  private AnalyzedTokenReadings[] getTokens(String s) throws Exception {
     return langTool.getAnalyzedSentence(s).getTokensWithoutWhitespace();
   }
 
   @Test
-  public void testRuleWithIncorrectSingularVerb() throws IOException {
+  public void testRuleWithIncorrectSingularVerb() throws Exception {
     List<String> sentences = Arrays.asList(
         "Die Autos ist schnell.",
         "Der Hund und die Katze ist draußen.",
@@ -149,7 +148,7 @@ public class SubjectVerbAgreementRuleTest {
   }
 
   @Test
-  public void testRuleWithCorrectSingularVerb() throws IOException {
+  public void testRuleWithCorrectSingularVerb() throws Exception {
     List<String> sentences = Arrays.asList(
         "All diesen Bereichen ist gemeinsam, dass sie unterfinanziert sind.",
         "Die Katze ist schön.",
@@ -307,7 +306,7 @@ public class SubjectVerbAgreementRuleTest {
   }
 
   @Test
-  public void testRuleWithIncorrectPluralVerb() throws IOException {
+  public void testRuleWithIncorrectPluralVerb() throws Exception {
     List<String> sentences = Arrays.asList(
         "Die Katze sind schön.",
         "Die Katze waren schön.",
@@ -326,7 +325,7 @@ public class SubjectVerbAgreementRuleTest {
   }
 
   @Test
-  public void testRuleWithCorrectPluralVerb() throws IOException {
+  public void testRuleWithCorrectPluralVerb() throws Exception {
     List<String> sentences = Arrays.asList(
         "Die Katzen sind schön.",
         "Frau Meier und Herr Müller sind alt.",
@@ -404,7 +403,7 @@ public class SubjectVerbAgreementRuleTest {
         "Jüngere sind oft davon überzeugt, im Recht zu sein.",
         "Verwandte sind selten mehr als Bekannte.",
         "Ursache waren die hohe Arbeitslosigkeit und die Wohnungsnot.",
-        "Ursache waren unter anderem die hohe Arbeitslosigkeit und die Wohnungsnot.", 
+        "Ursache waren unter anderem die hohe Arbeitslosigkeit und die Wohnungsnot.",
         "Er ahnt nicht, dass sie und sein Sohn ein Paar sind.",
         "Die Ursachen der vorliegenden Durchblutungsstörung sind noch unbekannt.",
         "Der See und das Marschland sind ein Naturschutzgebiet",
@@ -417,7 +416,7 @@ public class SubjectVerbAgreementRuleTest {
   }
 
   @Test
-  public void testRuleWithCorrectSingularAndPluralVerb() throws IOException {
+  public void testRuleWithCorrectSingularAndPluralVerb() throws Exception {
     // Manchmal sind beide Varianten korrekt:
     // siehe http://www.canoo.net/services/OnlineGrammar/Wort/Verb/Numerus-Person/ProblemNum.html
     List<String> sentences = Arrays.asList(
@@ -441,21 +440,21 @@ public class SubjectVerbAgreementRuleTest {
     }
   }
 
-  private void assertGood(String input) throws IOException {
+  private void assertGood(String input) throws Exception {
     RuleMatch[] matches = getMatches(input);
     if (matches.length != 0) {
       fail("Got unexpected match(es) for '" + input + "': " + Arrays.toString(matches), input);
     }
   }
 
-  private void assertBad(String input) throws IOException {
+  private void assertBad(String input) throws Exception {
     int matchCount = getMatches(input).length;
     if (matchCount == 0) {
       fail("Did not get the expected match for '" + input + "'", input);
     }
   }
 
-  private void fail(String message, String input) throws IOException {
+  private void fail(String message, String input) throws Exception {
     if (!GermanChunker.isDebug()) {
       GermanChunker.setDebug(true);
       getMatches(input);  // run again with debug mode
@@ -463,7 +462,7 @@ public class SubjectVerbAgreementRuleTest {
     Assert.fail(message);
   }
 
-  private RuleMatch[] getMatches(String input) throws IOException {
+  private RuleMatch[] getMatches(String input) throws Exception {
     return rule.match(langTool.getAnalyzedSentence(input));
   }
 

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,20 @@ import org.languagetool.rules.Category.Location;
 public class LongParagraphRule extends TextLevelRule {
 
   public static final String RULE_ID = "TOO_LONG_PARAGRAPH";
-  
+  public static final String RULE_MATCH_MESSAGE_ID = "long_paragraph_rule_msg";
+  public static final String RULE_DESCRIPTION_MESSAGE_ID = "long_paragraph_rule_desc";
+
+  public static final RuleConfiguration RULE_CONFIGURATION;
+
+  static {
+      RULE_CONFIGURATION = new RuleConfiguration(LongParagraphRule.class, RULE_ID, RuleConfiguration.newDescription(RULE_DESCRIPTION_MESSAGE_ID, Integer.class),
+                    RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_ID, Integer.class));
+  }
+
+  public static RuleConfiguration getRuleConfiguration() {
+      return RULE_CONFIGURATION;
+  }
+
   private static final int DEFAULT_MAX_WORDS = 80;
   private static final Pattern NON_WORD_REGEX = Pattern.compile("[.?!…:;,~’'\"„“”»«‚‘›‹()\\[\\]\\-–—*×∗·+÷/=]");
   private static final boolean DEFAULT_ACTIVATION = false;
@@ -46,37 +58,29 @@ public class LongParagraphRule extends TextLevelRule {
   protected int maxWords = DEFAULT_MAX_WORDS;
   private final Language lang;
 
-  public LongParagraphRule(ResourceBundle messages, Language lang, UserConfig userConfig, int defaultWords, boolean defaultActive) {
+  public LongParagraphRule(ResourceBundle messages, Language lang, int defaultWords, boolean defaultActive) {
     super(messages);
-    super.setCategory(new Category(new CategoryId("CREATIVE_WRITING"), 
+    super.setCategory(new Category(new CategoryId("CREATIVE_WRITING"),
         messages.getString("category_creative_writing"), Location.INTERNAL, false));
     this.lang = lang;
     if (!defaultActive) {
       setDefaultOff();
     }
-    if (defaultWords > 0) {
-      this.maxWords = defaultWords;
-    }
-    if (userConfig != null) {
-      int confWords = userConfig.getConfigValueByID(getId());
-      if (confWords > 0) {
-        this.maxWords = confWords;
-      }
-    }
+    this.maxWords = (defaultWords > 0 ? defaultWords : DEFAULT_MAX_WORDS);
     setLocQualityIssueType(ITSIssueType.Style);
   }
 
-  public LongParagraphRule(ResourceBundle messages, Language lang, UserConfig userConfig, int defaultWords) {
-    this(messages, lang, userConfig, defaultWords, DEFAULT_ACTIVATION);
+  public LongParagraphRule(ResourceBundle messages, Language lang, int defaultWords) {
+    this(messages, lang, defaultWords, DEFAULT_ACTIVATION);
   }
 
-  public LongParagraphRule(ResourceBundle messages, Language lang, UserConfig userConfig) {
-    this(messages, lang, userConfig, -1, DEFAULT_ACTIVATION);
+  public LongParagraphRule(ResourceBundle messages, Language lang) {
+    this(messages, lang, -1, DEFAULT_ACTIVATION);
   }
 
   @Override
   public String getDescription() {
-    return MessageFormat.format(messages.getString("long_paragraph_rule_desc"), maxWords);
+    return MessageFormat.format(messages.getString(RULE_DESCRIPTION_MESSAGE_ID), maxWords);
   }
 
   @Override
@@ -109,11 +113,18 @@ public class LongParagraphRule extends TextLevelRule {
   }
 
   public String getMessage() {
-    return MessageFormat.format(messages.getString("long_paragraph_rule_msg"), maxWords);
+    return MessageFormat.format(messages.getString(RULE_MATCH_MESSAGE_ID), maxWords);
+  }
+
+  public void setMaxWords(int v) {
+      if (v < 1) {
+          throw new IllegalArgumentException("Value must be greater than 0.");
+      }
+      this.maxWords = v;
   }
 
   @Override
-  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     String msg = getMessage();
     int pos = 0;

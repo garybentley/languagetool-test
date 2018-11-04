@@ -19,6 +19,7 @@
 package org.languagetool.rules;
 
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,8 +36,10 @@ import java.util.Map;
  */
 public class WordCoherencyDataLoader {
 
-  public Map<String, String> loadWords(String path) {
-    InputStream stream = JLanguageTool.getDataBroker().getFromRulesDirAsStream(path);
+/*
+GTODO Clean up
+  public Map<String, String> loadWords(String path, ResourceDataBroker dataBroker) {
+    InputStream stream = dataBroker.getFromRulesDirAsStream(path);
     Map<String, String> map = new HashMap<>();
     try (
       InputStreamReader reader = new InputStreamReader(stream, "utf-8");
@@ -59,5 +62,5 @@ public class WordCoherencyDataLoader {
     }
     return Collections.unmodifiableMap(map);
   }
-
+*/
 }

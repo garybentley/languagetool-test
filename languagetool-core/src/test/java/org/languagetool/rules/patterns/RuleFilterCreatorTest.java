@@ -18,22 +18,26 @@
  */
 package org.languagetool.rules.patterns;
 
+import org.languagetool.*;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
 public class RuleFilterCreatorTest {
 
-  private final RuleFilterCreator creator = new RuleFilterCreator();
-
   @Test
   public void testMockFilter() throws Exception {
+    TestLanguage lang = TestTools.getTestLanguage();
+    RuleFilterCreator creator = lang.getUseDataBroker().getRuleFilterCreator();
     RuleFilter filter = creator.getFilter(MockFilter.class.getName());
     assertNotNull(filter);
   }
 
   @Test(expected = RuntimeException.class)
   public void testInvalidClassName() throws Exception {
+    TestLanguage lang = TestTools.getTestLanguage();
+    RuleFilterCreator creator = lang.getUseDataBroker().getRuleFilterCreator();
     creator.getFilter("MyInvalidClassName");
   }
 

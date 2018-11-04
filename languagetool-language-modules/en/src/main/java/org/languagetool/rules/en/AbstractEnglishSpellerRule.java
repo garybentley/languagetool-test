@@ -21,47 +21,58 @@ package org.languagetool.rules.en;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
-import org.languagetool.Language;
+import org.languagetool.language.English;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
-import org.languagetool.synthesis.en.EnglishSynthesizer;
+import org.languagetool.synthesis.Synthesizer;
+import morfologik.stemming.Dictionary;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
 
 public abstract class AbstractEnglishSpellerRule extends MorfologikSpellerRule {
 
-  private final EnglishSynthesizer synthesizer = new EnglishSynthesizer();
-
-  public AbstractEnglishSpellerRule(ResourceBundle messages, Language language) throws IOException {
-    this(messages, language, null);
+  private final Synthesizer synthesizer;
+/*
+GTODO If used will cause an NPE, clean up
+  public AbstractEnglishSpellerRule(ResourceBundle messages, English language) throws Exception {
+    this(messages, language, null, null, null, null, null);
   }
-
+*/
   /**
    * @since 4.2
    */
-  public AbstractEnglishSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+   // GTODO Aim to get rid of "English language" in the constructor...  Its not used in this class, only our superclass.
+  public AbstractEnglishSpellerRule(ResourceBundle messages, English language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords, Synthesizer synthesizer) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords);
+    this.synthesizer = synthesizer;
+    //GTODO: synthesizer = new EnglishSynthesizer(language.getUseDataBroker());
     setCheckCompound(true);
     addExamplePair(Example.wrong("This <marker>sentenc</marker> contains a spelling mistake."),
                    Example.fixed("This <marker>sentence</marker> contains a spelling mistake."));
+                   /*
+                   GTODO Clean up
     String languageSpecificIgnoreFile = getSpellingFileName().replace(".txt", "_"+language.getShortCodeWithCountryAndVariant()+".txt");
     for (String ignoreWord : wordListLoader.loadWords(languageSpecificIgnoreFile)) {
       addIgnoreWords(ignoreWord);
     }
+    */
   }
 
   @Override
-  protected List<RuleMatch> getRuleMatches(String word, int startPos, AnalyzedSentence sentence, List<RuleMatch> ruleMatchesSoFar) throws IOException {
+  protected List<RuleMatch> getRuleMatches(String word, int startPos, AnalyzedSentence sentence, List<RuleMatch> ruleMatchesSoFar) throws Exception {
     List<RuleMatch> ruleMatches = super.getRuleMatches(word, startPos, sentence, ruleMatchesSoFar);
     if (ruleMatches.size() > 0) {
-      // so 'word' is misspelled: 
+      // so 'word' is misspelled:
       IrregularForms forms = getIrregularFormsOrNull(word);
       if (forms != null) {
         RuleMatch oldMatch = ruleMatches.get(0);
-        RuleMatch newMatch = new RuleMatch(this, sentence, oldMatch.getFromPos(), oldMatch.getToPos(), 
+        RuleMatch newMatch = new RuleMatch(this, sentence, oldMatch.getFromPos(), oldMatch.getToPos(),
                 "Possible spelling mistake. Did you mean <suggestion>" + forms.forms.get(0) +
                 "</suggestion>, the " + forms.formName + " form of the " + forms.posName +
                 " '" + forms.baseform + "'?");
@@ -79,26 +90,34 @@ public abstract class AbstractEnglishSpellerRule extends MorfologikSpellerRule {
     return ruleMatches;
   }
 
-  @SuppressWarnings({"ReuseOfLocalVariable", "ControlFlowStatementWithoutBraces"})
   @Nullable
-  private IrregularForms getIrregularFormsOrNull(String word) {
+  private IrregularForms getIrregularFormsOrNull(String word) throws Exception {
     IrregularForms irregularFormsOrNull = getIrregularFormsOrNull(word, "ed", Arrays.asList("ed"), "VBD", "verb", "past tense");
-    if (irregularFormsOrNull != null) return irregularFormsOrNull;
+    if (irregularFormsOrNull != null) {
+        return irregularFormsOrNull;
+    }
     irregularFormsOrNull = getIrregularFormsOrNull(word, "ed", Arrays.asList("d" /* e.g. awaked */), "VBD", "verb", "past tense");
-    if (irregularFormsOrNull != null) return irregularFormsOrNull;
+    if (irregularFormsOrNull != null) {
+        return irregularFormsOrNull;
+    }
     irregularFormsOrNull = getIrregularFormsOrNull(word, "s", Arrays.asList("s"), "NNS", "noun", "plural");
-    if (irregularFormsOrNull != null) return irregularFormsOrNull;
+    if (irregularFormsOrNull != null) {
+        return irregularFormsOrNull;
+    }
     irregularFormsOrNull = getIrregularFormsOrNull(word, "es", Arrays.asList("es"/* e.g. 'analysises' */), "NNS", "noun", "plural");
-    if (irregularFormsOrNull != null) return irregularFormsOrNull;
+    if (irregularFormsOrNull != null) {
+        return irregularFormsOrNull;
+    }
     irregularFormsOrNull = getIrregularFormsOrNull(word, "er", Arrays.asList("er"/* e.g. 'farer' */), "JJR", "adjective", "comparative");
-    if (irregularFormsOrNull != null) return irregularFormsOrNull;
+    if (irregularFormsOrNull != null) {
+        return irregularFormsOrNull;
+    }
     irregularFormsOrNull = getIrregularFormsOrNull(word, "est", Arrays.asList("est"/* e.g. 'farest' */), "JJS", "adjective", "superlative");
     return irregularFormsOrNull;
   }
 
   @Nullable
-  private IrregularForms getIrregularFormsOrNull(String word, String wordSuffix, List<String> suffixes, String posTag, String posName, String formName) {
-    try {
+  private IrregularForms getIrregularFormsOrNull(String word, String wordSuffix, List<String> suffixes, String posTag, String posName, String formName) throws Exception {
       for (String suffix : suffixes) {
         if (word.endsWith(wordSuffix)) {
           String baseForm = word.substring(0, word.length() - suffix.length());
@@ -122,16 +141,13 @@ public abstract class AbstractEnglishSpellerRule extends MorfologikSpellerRule {
         }
       }
       return null;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
    * @since 2.7
    */
   @Override
-  protected List<String> getAdditionalTopSuggestions(List<String> suggestions, String word) throws IOException {
+  protected List<String> getAdditionalTopSuggestions(List<String> suggestions, String word) throws Exception {
     if ("Alot".equals(word)) {
       return Arrays.asList("A lot");
     } else if ("alot".equals(word)) {

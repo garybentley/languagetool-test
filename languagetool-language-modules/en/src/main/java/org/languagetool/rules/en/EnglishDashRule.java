@@ -31,11 +31,12 @@ import java.util.List;
  * @since 3.8
  */
 public class EnglishDashRule extends AbstractDashRule {
-
+/*
+GTODO Clean up
   private static final List<PatternRule> dashRules = loadCompoundFile("/en/compounds.txt",
           "A dash was used instead of a hyphen. Did you mean: ", Languages.getLanguageForShortCode("en"));
-
-  public EnglishDashRule() throws IOException {
+*/
+  public EnglishDashRule(List<PatternRule> dashRules) throws Exception {
     super(dashRules);
   }
 

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,18 +39,21 @@ import org.languagetool.tagging.ca.CatalanTagger;
 /**
  * A rule that matches incorrect verbs (including all inflected forms) and
  * suggests correct ones instead.
- * 
+ *
  * Loads the relevant words from <code>rules/ca/replace_verbs.txt</code>.
- * 
+ *
  * @author Jaume Ortolà
  */
 public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
-  
-  private static final Map<String, List<String>> wrongWords = load("/ca/replace_verbs.txt");
+
+  private Map<String, List<String>> wrongWords;
   private static final Locale CA_LOCALE = new Locale("CA");
 
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      if (wrongWords == null) {
+          wrongWords = load("/ca/replace_verbs.txt", dataBroker);
+      }
     return wrongWords;
   }
 
@@ -62,9 +65,9 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
   private static final Pattern desinencies_1conj_1 = Pattern.compile("(.+)("  + endings + ")");
   private CatalanTagger tagger;
   private CatalanSynthesizer synth;
-  
+
   public SimpleReplaceVerbsRule(final ResourceBundle messages, Language language) {
-    super(messages);
+    super(messages, language.getUseDataBroker());
     super.setCategory(Categories.TYPOS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     super.setIgnoreTaggedWords();

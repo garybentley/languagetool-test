@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,19 +31,24 @@ import org.languagetool.Language;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.xml.sax.SAXException;
 
+import org.languagetool.databroker.ResourceDataBroker;
+
 /**
  * Rule-based disambiguator.
  * Implements an idea by Agnes Souque.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class XmlRuleDisambiguator extends AbstractDisambiguator {
 
-  private static final String DISAMBIGUATION_FILE = "disambiguation.xml";
+  // GTODO: private static final String DISAMBIGUATION_FILE = "disambiguation.xml";
 
   private final List<DisambiguationPatternRule> disambiguationRules;
 
-  public XmlRuleDisambiguator(Language language) {
+  public XmlRuleDisambiguator(List<DisambiguationPatternRule> disambiguationRules) {
+      this.disambiguationRules = disambiguationRules;
+      /*
+      GTODO: Clean up
     Objects.requireNonNull(language);
     String disambiguationFile = language.getShortCode() + "/" + DISAMBIGUATION_FILE;
     try {
@@ -51,10 +56,11 @@ public class XmlRuleDisambiguator extends AbstractDisambiguator {
     } catch (Exception e) {
       throw new RuntimeException("Problems with loading disambiguation file: " + disambiguationFile, e);
     }
+    */
   }
 
   @Override
-  public AnalyzedSentence disambiguate(AnalyzedSentence input) throws IOException {
+  public AnalyzedSentence disambiguate(AnalyzedSentence input) throws Exception {
     AnalyzedSentence sentence = input;
     for (DisambiguationPatternRule patternRule : disambiguationRules) {
       sentence = patternRule.replace(sentence);
@@ -67,9 +73,11 @@ public class XmlRuleDisambiguator extends AbstractDisambiguator {
    * these rules to the checking process.
    * @return a List of {@link DisambiguationPatternRule} objects
    */
+   /*
+   GTODO: Clean up
   protected List<DisambiguationPatternRule> loadPatternRules(String filename) throws ParserConfigurationException, SAXException, IOException {
     DisambiguationRuleLoader ruleLoader = new DisambiguationRuleLoader();
-    return ruleLoader.getRules(JLanguageTool.getDataBroker().getFromResourceDirAsStream(filename));
+    return ruleLoader.getRules(dataBroker.getFromResourceDirAsStream(filename), dataBroker);
   }
-
+*/
 }

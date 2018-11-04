@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -56,7 +56,7 @@ public class Slovak extends Language {
   public String getShortCode() {
     return "sk";
   }
-  
+
   @Override
   public String[] getCountries() {
     return new String[]{"SK"};
@@ -73,11 +73,11 @@ public class Slovak extends Language {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new SlovakSynthesizer();
+      synthesizer = new SlovakSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
-  
+
   @Override
   public SentenceTokenizer getSentenceTokenizer() {
     if (sentenceTokenizer == null) {
@@ -85,7 +85,7 @@ public class Slovak extends Language {
     }
     return sentenceTokenizer;
   }
-  
+
   @Override
   public Contributor[] getMaintainers() {
     return new Contributor[] {
@@ -114,8 +114,7 @@ public class Slovak extends Language {
   @Override
   public List<String> getRuleFileNames() {
     List<String> ruleFileNames = super.getRuleFileNames();
-    ResourceDataBroker dataBroker = JLanguageTool.getDataBroker();
-    String dirBase = dataBroker.getRulesDir() + "/" + getShortCode() + "/";
+    String dirBase = getUseDataBroker().getRulesDir() + "/" + getShortCode() + "/";
     for (String ruleFile : RULE_FILES) {
       ruleFileNames.add(dirBase + ruleFile);
     }

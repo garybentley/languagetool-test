@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,19 +29,21 @@ import org.languagetool.rules.Example;
 /**
  * Checks that compounds are not written as separate words. The supported compounds are loaded
  * from {@code /de/compounds.txt} in the resource directory.
- * 
+ *
  * @author Daniel Naber
  */
 public class CompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/de/compounds.txt", "/de/compound-cities.txt");
- 
-  public CompoundRule(ResourceBundle messages) throws IOException {
+  private final CompoundRuleData compoundData;
+  //GTODO  = new CompoundRuleData("/de/compounds.txt", "/de/compound-cities.txt");
+
+  public CompoundRule(ResourceBundle messages, CompoundRuleData compounds) throws IOException {
     super(messages,
             "Dieses Wort wird mit Bindestrich geschrieben.",
             "Dieses Wort wird zusammengeschrieben.",
             "Diese Wörter werden zusammengeschrieben oder mit Bindestrich getrennt.",
             "Zusammenschreibung von Wörtern");
+    this.compoundData = compounds;
     super.setCategory(Categories.COMPOUNDING.getCategory(messages));
     addExamplePair(Example.wrong("Wenn es schlimmer wird, solltest Du zum <marker>HNO Arzt</marker> gehen."),
                    Example.fixed("Wenn es schlimmer wird, solltest Du zum <marker>HNO-Arzt</marker> gehen."));

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,8 @@ package org.languagetool.synthesis.en;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,25 +34,26 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
 import org.languagetool.rules.en.AvsAnRule;
 import org.languagetool.synthesis.BaseSynthesizer;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * English word form synthesizer.
  * Based on part-of-speech lists in Public Domain. See readme.txt for details,
  * the POS tagset is described in tagset.txt.
- * 
+ *
  * There are to special additions:
  * <ol>
  * <li>+DT - tag that adds "a" or "an" (according to the way the word is
  * pronounced) and "the"</li>
  * <li>+INDT - a tag that adds only "a" or "an"</li>
  * </ol>
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class EnglishSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = "/en/english_synth.dict";
-  private static final String TAGS_FILE_NAME = "/en/english_tags.txt";
+  //GTODO private static final String RESOURCE_FILENAME = "/en/english_synth.dict";
+  //GTODO private static final String TAGS_FILE_NAME = "/en/english_tags.txt";
 
   // A special tag to add determiners.
   private static final String ADD_DETERMINER = "+DT";
@@ -58,30 +61,30 @@ public class EnglishSynthesizer extends BaseSynthesizer {
   // A special tag to add only indefinite articles.
   private static final String ADD_IND_DETERMINER = "+INDT";
 
-  private final AvsAnRule aVsAnRule = new AvsAnRule(JLanguageTool.getMessageBundle(Languages.getLanguageForShortCode("en")));
-
-  public EnglishSynthesizer() {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME);
+  private final AvsAnRule aVsAnRule;
+  public EnglishSynthesizer(ResourceBundle messages, IStemmer stemmer, Set<String> tags, Set<String> requireAWords, Set<String> requireAnWords) {
+      super(stemmer, tags);
+      aVsAnRule = new AvsAnRule(messages, requireAWords, requireAnWords);
+    //GTODO super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
   }
 
   /**
    * Get a form of a given AnalyzedToken, where the form is defined by a
    * part-of-speech tag.
-   * 
+   *
    * @param token AnalyzedToken to be inflected.
    * @param posTag A desired part-of-speech tag.
    * @return String value - inflected word.
    */
   @Override
-  public String[] synthesize(AnalyzedToken token, String posTag)
-      throws IOException {
+  public String[] synthesize(AnalyzedToken token, String posTag) {
     String aOrAn = aVsAnRule.suggestAorAn(token.getToken());
     if (ADD_DETERMINER.equals(posTag)) {
       return new String[] { aOrAn, "the " + token.getToken() };
     } else if (ADD_IND_DETERMINER.equals(posTag)) {
       return new String[] { aOrAn };
     }
-    IStemmer synthesizer = createStemmer();
+    IStemmer synthesizer = getStemmer();
     List<WordData> wordData = synthesizer.lookup(token.getLemma() + "|" + posTag);
     List<String> wordForms = new ArrayList<>();
     for (WordData wd : wordData) {
@@ -93,12 +96,12 @@ public class EnglishSynthesizer extends BaseSynthesizer {
   /**
    * Special English regexp based synthesizer that allows adding articles
    * when the regexp-based tag ends with a special signature {@code \\+INDT} or {@code \\+DT}.
-   * 
+   *
    * @since 2.5
    */
   @Override
   public String[] synthesize(AnalyzedToken token, String posTag,
-      boolean posTagRegExp) throws IOException {
+      boolean posTagRegExp) {
 
     if (posTag != null && posTagRegExp) {
       String myPosTag = posTag;
@@ -112,11 +115,10 @@ public class EnglishSynthesizer extends BaseSynthesizer {
         det = "the ";
       }
 
-      initPossibleTags();
       Pattern p = Pattern.compile(myPosTag);
       List<String> results = new ArrayList<>();
 
-      for (String tag : possibleTags) {
+      for (String tag : getPossibleTags()) {
         Matcher m = p.matcher(tag);
         if (m.matches()) {
           lookup(token.getLemma(), tag, results, det);
@@ -138,5 +140,3 @@ public class EnglishSynthesizer extends BaseSynthesizer {
   }
 
 }
-
-

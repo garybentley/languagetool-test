@@ -30,15 +30,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.languagetool.TestLanguage;
 import static org.junit.Assert.*;
 
 public class PatternRuleLoaderTest {
 
   @Test
   public void testGetRules() throws Exception {
-    PatternRuleLoader prg = new PatternRuleLoader();
-    String name = "/xx/grammar.xml";
-    List<AbstractPatternRule> rules = prg.getRules(JLanguageTool.getDataBroker().getFromRulesDirAsStream(name), name);
+    //GTODO PatternRuleLoader prg = new PatternRuleLoader(JLanguageTool.getDataBroker());
+    //GTODO String name = "/xx/grammar.xml";
+    TestLanguage lang = new TestLanguage();
+    List<AbstractPatternRule> rules = lang.getUseDataBroker().getPatternRules();
+    //GTODO loadPatternRulesFromResourcePath(name, false);
+    //GTODO List<AbstractPatternRule> rules = prg.getRules(JLanguageTool.getDataBroker().getFromRulesDirAsStream(name), name);
     assertTrue(rules.size() >= 30);
 
     Rule demoRule1 = getRuleById("DEMO_RULE", rules);
@@ -80,11 +84,11 @@ public class PatternRuleLoaderTest {
     assertEquals("http://fake-server.org/rule-group-url", orRules.get(0).getUrl().toString());
     assertEquals("http://fake-server.org/rule-group-url-overwrite", orRules.get(1).getUrl().toString());
     assertEquals("http://fake-server.org/rule-group-url", orRules.get(2).getUrl().toString());
-    
+
     assertEquals("short message on rule group", ((PatternRule)orRules.get(0)).getShortMessage());
     assertEquals("overwriting short message", ((PatternRule)orRules.get(1)).getShortMessage());
     assertEquals("short message on rule group", ((PatternRule)orRules.get(2)).getShortMessage());
-    
+
     // make sure URLs don't leak to the next rule:
     List<Rule> orRules2 = getRulesById("OR_GROUPS", rules);
     for (Rule rule : orRules2) {

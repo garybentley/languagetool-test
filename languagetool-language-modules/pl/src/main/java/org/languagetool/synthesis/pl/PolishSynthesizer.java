@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -37,10 +37,11 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.synthesis.BaseSynthesizer;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.synthesis.SynthesizerTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Polish word form synthesizer. Based on project Morfologik.
- * 
+ *
  * @author Marcin Milkowski
  */
 
@@ -58,8 +59,8 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
   private List<String> possibleTags;
 
 
-  public PolishSynthesizer() {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME);
+  public PolishSynthesizer(ResourceDataBroker dataBroker) {
+    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
   }
 
   @Override
@@ -124,8 +125,8 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
       Set<String> hs = new HashSet<>();
       hs.addAll(results);
       results.clear();
-      results.addAll(hs);     
-      
+      results.addAll(hs);
+
       return results.toArray(new String[results.size()]);
     }
     return synthesize(token, posTag);
@@ -163,7 +164,7 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
     if (isNegated) {
       wordForms = synthesizer.lookup(token.getLemma() + "|"
           + posTag.replaceFirst(NEGATION_TAG, POTENTIAL_NEGATION_TAG));
-      if (wordForms != null) {                      
+      if (wordForms != null) {
         for (WordData wd : wordForms) {
           forms.add("nie" + wd.getStem());
         }
@@ -174,7 +175,7 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
         if (wd.getStem() != null) {
           forms.add(wd.getStem().toString());
         }
-      }      
+      }
     }
     return forms;
   }

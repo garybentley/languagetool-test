@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,12 +29,11 @@ import static org.junit.Assert.assertThat;
 
 public class SwissGermanSpellerRuleTest {
 
-  private static final SwissGerman DE_CH = new SwissGerman();
-
   @Test
   public void testGetSuggestionsFromSpellingTxt() throws Exception {
-    SwissGermanSpellerRule rule = new SwissGermanSpellerRule(TestTools.getEnglishMessages(), DE_CH);
-    JLanguageTool lt = new JLanguageTool(DE_CH);
+      SwissGerman german = new SwissGerman();
+    SwissGermanSpellerRule rule = german.createSpellerRule(null, null);
+    JLanguageTool lt = new JLanguageTool(german);
     assertThat(rule.match(lt.getAnalyzedSentence("Shopbewertung")).length, is(0));  // from spelling.txt
     assertThat(rule.match(lt.getAnalyzedSentence("Abwart")).length, is(0));
     assertThat(rule.match(lt.getAnalyzedSentence("Abwarts")).length, is(0));

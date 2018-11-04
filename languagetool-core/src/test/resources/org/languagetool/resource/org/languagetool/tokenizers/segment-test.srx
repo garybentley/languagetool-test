@@ -14,14 +14,14 @@
                     <afterbreak/>
                 </rule>
             </languagerule>
-            
+
             <languagerule languagerulename="ByTwoLineBreaks">
                 <rule break="yes">
                     <beforebreak>\r?\n\s*\r?\n[\t]*</beforebreak>
                     <afterbreak/>
                 </rule>
             </languagerule>
-            
+
             <languagerule languagerulename="TestLanguage">
                 <rule break="no">
                     <beforebreak>\b(fooabbr|barabbr)\.\s</beforebreak>
@@ -32,12 +32,15 @@
                     <afterbreak/>
                 </rule>
             </languagerule>
-            
+
         </languagerules>
         <maprules>
             <languagemap languagepattern="[a-z]{2}_one" languagerulename="ByLineBreak"/>
             <languagemap languagepattern="[a-z]{2}_two" languagerulename="ByTwoLineBreaks"/>
-            <languagemap languagepattern="yy.*" languagerulename="TestLanguage"/>
+            <!--
+            GTODO: Changed from yy to xx for use with TestLanguage.
+        -->
+            <languagemap languagepattern="xx.*" languagerulename="TestLanguage"/>
         </maprules>
     </body>
 </srx>

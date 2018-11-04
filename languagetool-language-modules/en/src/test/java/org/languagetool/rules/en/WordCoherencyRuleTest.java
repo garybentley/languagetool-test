@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,15 +35,20 @@ import org.languagetool.rules.RuleMatch;
 
 public class WordCoherencyRuleTest {
 
-  private final JLanguageTool lt = new JLanguageTool(new AmericanEnglish());
+  private JLanguageTool lt;
+  private AmericanEnglish lang;
+  private WordCoherencyRule rule;
 
   @Before
-  public void before() throws IOException {
-    TestTools.disableAllRulesExcept(lt, "EN_WORD_COHERENCY");
+  public void before() throws Exception {
+      lang = new AmericanEnglish();
+      lt = new JLanguageTool(lang);
+      rule = new WordCoherencyRule(lang.getMessageBundle(), lang.getUseDataBroker().getCoherencyMappings());
+    //GTODO TestTools.disableAllRulesExcept(lt, "EN_WORD_COHERENCY");
   }
-  
+
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     assertGood("He likes archeology. She likes archeology, too.");
     assertGood("He likes archaeology. She likes archaeology, too.");
@@ -52,34 +57,32 @@ public class WordCoherencyRuleTest {
   }
 
   @Test
-  public void testCallIndependence() throws IOException {
+  public void testCallIndependence() throws Exception {
     assertGood("He likes archaeology.");
     assertGood("She likes archeology, too.");  // this won't be noticed, the calls are independent of each other
   }
 
   @Test
-  public void testMatchPosition() throws IOException {
-    List<RuleMatch> ruleMatches = lt.check("He likes archaeology. She likes archeology, too.");
+  public void testMatchPosition() throws Exception {
+    List<RuleMatch> ruleMatches = lt.check(rule, "He likes archaeology. She likes archeology, too.");
     assertThat(ruleMatches.size(), is(1));
     assertThat(ruleMatches.get(0).getFromPos(), is(32));
     assertThat(ruleMatches.get(0).getToPos(), is(42));
   }
 
-  private void assertGood(String s) throws IOException {
-    WordCoherencyRule rule = new WordCoherencyRule(TestTools.getEnglishMessages());
+  private void assertGood(String s) throws Exception {
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     assertEquals(0, rule.match(analyzedSentences).length);
   }
 
   @Test
-  public void testRuleCompleteTexts() throws IOException {
+  public void testRuleCompleteTexts() throws Exception {
     assertEquals(0, lt.check("He likes archaeology. Really? She likes archaeology, too.").size());
     assertEquals(1, lt.check("He likes archaeology. Really? She likes archeology, too.").size());
     assertEquals(1, lt.check("He likes archeology. Really? She likes archaeology, too.").size());
   }
 
-  private void assertError(String s) throws IOException {
-    WordCoherencyRule rule = new WordCoherencyRule(TestTools.getEnglishMessages());
+  private void assertError(String s) throws Exception {
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     assertEquals(1, rule.match(analyzedSentences).length);
   }

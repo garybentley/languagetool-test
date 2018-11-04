@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -43,7 +43,7 @@ public class NgramProbabilityRule extends Rule {
 
   /** @since 3.2 */
   public static final String RULE_ID = "NGRAM_RULE";
-  
+
   private static final boolean DEBUG = false;
   private static final List<Replacement> REPLACEMENTS = Collections.unmodifiableList(Arrays.asList(
     new Replacement("VBG", "VB"),
@@ -102,7 +102,7 @@ public class NgramProbabilityRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<GoogleToken> tokens = GoogleToken.getGoogleTokens(sentence, true, getGoogleStyleWordTokenizer());
     List<RuleMatch> matches = new ArrayList<>();
     GoogleToken prevPrevToken = null;
@@ -172,7 +172,7 @@ public class NgramProbabilityRule extends Rule {
     return true;
   }
 
-  private Alternatives getBetterAlternatives(GoogleToken prevToken, String token, GoogleToken next, GoogleToken googleToken, Probability p, AnalyzedSentence sentence) throws IOException {
+  private Alternatives getBetterAlternatives(GoogleToken prevToken, String token, GoogleToken next, GoogleToken googleToken, Probability p, AnalyzedSentence sentence) throws Exception {
     List<Alternative> betterAlternatives = new ArrayList<>();
     boolean alternativesConsidered = false;
     for (Replacement replacement : REPLACEMENTS) {
@@ -208,8 +208,8 @@ public class NgramProbabilityRule extends Rule {
 
     return new Alternatives(betterAlternatives, alternativesConsidered);
   }
-  
-  private Optional<List<Alternative>> getBetterAlternatives(Replacement replacement, GoogleToken prevToken, GoogleToken token, GoogleToken next, Probability p) throws IOException {
+
+  private Optional<List<Alternative>> getBetterAlternatives(Replacement replacement, GoogleToken prevToken, GoogleToken token, GoogleToken next, Probability p) throws Exception {
     Optional<AnalyzedToken> reading = getByPosTag(token.getPosTags(), replacement.tagRegex);
     List<Alternative> betterAlternatives = new ArrayList<>();
     if (reading.isPresent()) {
@@ -250,16 +250,17 @@ public class NgramProbabilityRule extends Rule {
     return "Assume errors for phrases (ngrams) that occur rarely in a reference index";
   }
 
-  protected Tokenizer getGoogleStyleWordTokenizer() {
+  protected Tokenizer getGoogleStyleWordTokenizer() throws Exception {
+      // GTODO: No guarantee that a google style one will be returned.
     return language.getWordTokenizer();
   }
-  
+
   private void debug(String message, Object... vars) {
     if (DEBUG) {
       System.out.printf(Locale.ENGLISH, message, vars);
     }
   }
-  
+
   static class Replacement {
     final String tagRegex;
     final String alternativeTag;
@@ -286,7 +287,7 @@ public class NgramProbabilityRule extends Rule {
       this.p = p;
     }
   }
-  
+
   class Alternatives {
     final List<Alternative> alternatives;
     final boolean alternativesConsidered;
@@ -295,5 +296,5 @@ public class NgramProbabilityRule extends Rule {
       this.alternativesConsidered = alternativesConsidered;
     }
   }
-  
+
 }

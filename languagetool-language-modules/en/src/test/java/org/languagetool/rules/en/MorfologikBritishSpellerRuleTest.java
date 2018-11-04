@@ -36,22 +36,20 @@ import org.languagetool.rules.RuleMatch;
 public class MorfologikBritishSpellerRuleTest extends AbstractEnglishSpellerRuleTest {
 
   @Test
-  public void testSuggestions() throws IOException {
-    Language language = new BritishEnglish();
-    Rule rule = new MorfologikBritishSpellerRule(TestTools.getMessages("en"), language, null);
+  public void testSuggestions() throws Exception {
+    BritishEnglish language = new BritishEnglish();
+    Rule rule = language.createMorfologikSpellerRule(null, null);
     super.testNonVariantSpecificSuggestions(rule, language);
 
     JLanguageTool langTool = new JLanguageTool(language);
     // suggestions from language specific spelling_en-XX.txt
     assertSuggestion(rule, langTool, "GBTestWordToBeIgnore", "GBTestWordToBeIgnored");
   }
-  
-  @Test
-  public void testMorfologikSpeller() throws IOException {
-    BritishEnglish language = new BritishEnglish();
-    MorfologikBritishSpellerRule rule =
-            new MorfologikBritishSpellerRule(TestTools.getMessages("en"), language, null);
 
+  @Test
+  public void testMorfologikSpeller() throws Exception {
+    BritishEnglish language = new BritishEnglish();
+    MorfologikBritishSpellerRule rule = language.createMorfologikSpellerRule(null, null);
     JLanguageTool langTool = new JLanguageTool(language);
 
     // correct sentences:
@@ -59,7 +57,7 @@ public class MorfologikBritishSpellerRuleTest extends AbstractEnglishSpellerRule
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Why don't we speak today.")).length);
     //with doesn't
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("He doesn't know what to do.")).length);
-    //with diacritics 
+    //with diacritics
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("The entrée at the café.")).length);
     //with an abbreviation:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("This is my Ph.D. thesis.")).length);
@@ -77,7 +75,7 @@ public class MorfologikBritishSpellerRuleTest extends AbstractEnglishSpellerRule
 
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("aõh")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("a")).length);
-    
+
     //based on replacement pairs:
 
     RuleMatch[] matches2 = rule.match(langTool.getAnalyzedSentence("He teached us."));
@@ -88,7 +86,7 @@ public class MorfologikBritishSpellerRuleTest extends AbstractEnglishSpellerRule
     assertEquals("taught", matches2[0].getSuggestedReplacements().get(0));
   }
 
-  private void assertSuggestion(Rule rule, JLanguageTool lt, String input, String... expectedSuggestions) throws IOException {
+  private void assertSuggestion(Rule rule, JLanguageTool lt, String input, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat(matches.length, is(1));
     assertTrue("Expected >= " + expectedSuggestions.length + ", got: " + matches[0].getSuggestedReplacements(),

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -36,6 +36,8 @@ import java.util.ResourceBundle;
  */
 public class SimpleGerman extends GermanyGerman {
 
+    public static final Locale LOCALE = new Locale(German.LANGUAGE_ID, GermanyGerman.COUNTRY_ID, "x-simple-language");
+
   @Override
   public String getName() {
     return "Simple German";
@@ -44,6 +46,16 @@ public class SimpleGerman extends GermanyGerman {
   @Override
   public String getShortCode() {
     return "de-DE-x-simple-language";  // a "private use tag" according to http://tools.ietf.org/html/bcp47
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return true;
   }
 
   @Override
@@ -60,7 +72,7 @@ public class SimpleGerman extends GermanyGerman {
     rules.add(lengthRule);
     return rules;
   }
-  
+
   @Override
   public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
     return null;

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,45 +23,46 @@ import java.util.ResourceBundle;
 
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.WrongWordInContextRule;
+import org.languagetool.databroker.ResourceDataBroker;
 
 public class CatalanWrongWordInContextRule extends WrongWordInContextRule {
-  
-  public CatalanWrongWordInContextRule(final ResourceBundle messages) throws IOException {
-    super(messages);
+
+  public CatalanWrongWordInContextRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
     setLocQualityIssueType(ITSIssueType.Grammar);
     setMatchLemmmas();
   }
-  
+
   @Override
   protected String getCategoryString() {
     return "Z) Confusions";
   }
-  
+
   @Override
   public String getId() {
     return "CATALAN_WRONG_WORD_IN_CONTEXT";
   }
-  
+
   @Override
   public String getDescription() {
     return "Confusió segons el context (infligir/infringir, etc.)";
   }
-  
+
   @Override
   protected String getFilename() {
     return "/ca/wrongWordInContext.txt";
   }
-  
+
   @Override
   protected String getMessageString() {
     return "¿Volíeu dir <suggestion>$SUGGESTION</suggestion> en lloc de '$WRONGWORD'?";
   }
-  
+
   @Override
   protected String getShortMessageString() {
     return "Possible confusió";
   }
-  
+
   @Override
   protected String getLongMessageString() {
     return "¿Volíeu dir <suggestion>$SUGGESTION</suggestion> (= $EXPLANATION_SUGGESTION) en lloc de '$WRONGWORD' (= $EXPLANATION_WRONGWORD)?";

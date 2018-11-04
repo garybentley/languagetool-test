@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2008 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,15 +35,16 @@ import org.languagetool.rules.RuleMatch;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 
 /**
- * An Abstract Pattern Rule that describes a pattern of words or part-of-speech tags 
+ * An Abstract Pattern Rule that describes a pattern of words or part-of-speech tags
  * used for PatternRule and DisambiguationPatternRule.
- * 
+ *
  * Introduced to minimize code duplication between those classes.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public abstract class AbstractPatternRule extends Rule {
 
+  // GTODO Make this private so the compile can indicate where it's being used.
   protected final Language language;
   protected final List<PatternToken> patternTokens;
   protected final Pattern regex;
@@ -124,6 +125,7 @@ public abstract class AbstractPatternRule extends Rule {
 
   @Override
   public boolean supportsLanguage(Language language) {
+      // GTODO Change to query the language to see if it supports the rule...
     return language.equalsConsiderVariantsIfSpecified(this.language);
   }
 
@@ -147,7 +149,7 @@ public abstract class AbstractPatternRule extends Rule {
   }
 
   /**
-   * @see #getFullId() 
+   * @see #getFullId()
    */
   @Override
   public String getId() {
@@ -259,7 +261,7 @@ public abstract class AbstractPatternRule extends Rule {
   public final void addSuggestionMatchOutMsg(Match m) {
     suggestionMatchesOutMsg.add(m);
   }
-  
+
   List<Match> getSuggestionMatches() {
     return suggestionMatches;
   }
@@ -272,7 +274,7 @@ public abstract class AbstractPatternRule extends Rule {
   public final String getSuggestionsOutMsg() {
     return suggestionsOutMsg;
   }
-  
+
   /**
    * Get the message shown to the user if this rule matches.
    */

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertThat;
 
 public class LineExpanderTest {
 
-  private final LineExpander exp = new LineExpander();
+  private final LineExpander exp = new GermanLineExpander();
 
   @Test
   public void testExpansion() {

@@ -25,8 +25,10 @@ import java.util.List;
 
 import morfologik.stemming.IStemmer;
 
+import org.languagetool.*;
+
 /**
- *  Adapter from {@link ManualSynthesizer} to {@link Synthesizer}. 
+ *  Adapter from {@link ManualSynthesizer} to {@link Synthesizer}.
  *  Note: It resides in "test" package because for now it is only used on unit testing.
  */
 public class ManualSynthesizerAdapter extends BaseSynthesizer {
@@ -34,22 +36,16 @@ public class ManualSynthesizerAdapter extends BaseSynthesizer {
   private final ManualSynthesizer manualSynthesizer;
 
   public ManualSynthesizerAdapter(ManualSynthesizer manualSynthesizer) {
-    super(null, null); // no file
+    super((word -> Collections.emptyList()), manualSynthesizer.getPossibleTags()); // no dictionary
     this.manualSynthesizer = manualSynthesizer;
   }
 
+/*
   @Override
-  protected IStemmer createStemmer() {
+  public IStemmer getStemmer() {
     return word -> Collections.emptyList();
   }
-  
-  @Override
-  protected void initPossibleTags() throws IOException {
-    if (possibleTags == null) {
-      possibleTags = new ArrayList<>(manualSynthesizer.getPossibleTags());
-    }
-  }
-
+*/
   @Override
   protected void lookup(String lemma, String posTag, List<String> results) {
     super.lookup(lemma, posTag, results);

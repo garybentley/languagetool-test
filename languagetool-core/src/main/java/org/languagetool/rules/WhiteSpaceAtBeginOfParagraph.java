@@ -25,6 +25,7 @@ import java.util.ResourceBundle;
 
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * A rule that checks for WhiteSpaces at the begin of a paragraph

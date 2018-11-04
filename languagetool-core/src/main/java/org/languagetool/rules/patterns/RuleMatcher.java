@@ -22,14 +22,12 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.ApiCleanupNeeded;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 /**
  * @since 3.2
  */
 public interface RuleMatcher {
 
   @ApiCleanupNeeded("Should return an unmodifiable list")
-  RuleMatch[] match(AnalyzedSentence sentence) throws IOException;
-    
+  RuleMatch[] match(AnalyzedSentence sentence) throws Exception;
+
 }

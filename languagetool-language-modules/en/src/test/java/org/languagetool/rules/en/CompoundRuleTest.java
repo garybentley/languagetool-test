@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,12 +31,13 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    lt = new JLanguageTool(new AmericanEnglish());
-    rule = new CompoundRule(TestTools.getEnglishMessages());
+    AmericanEnglish lang = new AmericanEnglish();
+    lt = new JLanguageTool(lang);
+    rule = new CompoundRule(lang.getMessageBundle(), lang.getCompounds());
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "The software supports case-sensitive search.");
     check(0, "He is one-year-old.");
@@ -45,5 +46,5 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
     check(1, "case sensitive", new String[]{"case-sensitive"});
     check(1, "Young criminals must be re educated.");
   }
- 
+
 }

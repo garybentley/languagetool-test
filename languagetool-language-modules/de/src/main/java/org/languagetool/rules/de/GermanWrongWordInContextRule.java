@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,48 +19,52 @@
 package org.languagetool.rules.de;
 
 import java.util.ResourceBundle;
+import java.util.List;
 
 import org.languagetool.rules.Example;
 import org.languagetool.rules.WrongWordInContextRule;
+import org.languagetool.rules.ContextWords;
+import org.languagetool.databroker.ResourceDataBroker;
 
 public class GermanWrongWordInContextRule extends WrongWordInContextRule {
-  
-  public GermanWrongWordInContextRule(ResourceBundle messages) {
-    super(messages);
+
+  public GermanWrongWordInContextRule(ResourceBundle messages, List<ContextWords> wrongWords) {
+    super(messages, wrongWords);
     addExamplePair(Example.wrong("Eine Gitarre hat sechs <marker>Seiten</marker>."),
                    Example.fixed("Eine Gitarre hat sechs <marker>Saiten</marker>."));
   }
-  
+
   @Override
   protected String getCategoryString() {
     return "Leicht zu verwechselnde Wörter";
   }
-  
+
   @Override
   public String getId() {
     return "GERMAN_WRONG_WORD_IN_CONTEXT";
   }
-  
+
   @Override
   public String getDescription() {
     return "Wortverwechslungen (Mine/Miene, Saite/Seite etc.)";
   }
-  
+/*
+GTODO Clean up
   @Override
   protected String getFilename() {
     return "/de/wrongWordInContext.txt";
   }
-  
+*/
   @Override
   protected String getMessageString() {
     return "Mögliche Wortverwechslung: Meinten Sie <suggestion>$SUGGESTION</suggestion> anstatt '$WRONGWORD'?";
   }
-  
+
   @Override
   protected String getShortMessageString() {
     return "Mögliche Wortverwechslung";
   }
-  
+
   @Override
   protected String getLongMessageString() {
     return "Mögliche Wortverwechslung: Meinten Sie <suggestion>$SUGGESTION</suggestion> (= $EXPLANATION_SUGGESTION) anstatt '$WRONGWORD' (= $EXPLANATION_WRONGWORD)?";

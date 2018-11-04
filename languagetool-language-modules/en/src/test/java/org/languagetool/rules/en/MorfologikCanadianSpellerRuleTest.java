@@ -36,9 +36,9 @@ import org.languagetool.rules.RuleMatch;
 public class MorfologikCanadianSpellerRuleTest extends AbstractEnglishSpellerRuleTest{
 
   @Test
-  public void testSuggestions() throws IOException {
-    Language language = new CanadianEnglish();
-    Rule rule = new MorfologikCanadianSpellerRule(TestTools.getMessages("en"), language, null);
+  public void testSuggestions() throws Exception {
+    CanadianEnglish language = new CanadianEnglish();
+    Rule rule = language.createMorfologikSpellerRule(null, null);
     super.testNonVariantSpecificSuggestions(rule, language);
 
     JLanguageTool langTool = new JLanguageTool(language);
@@ -47,11 +47,9 @@ public class MorfologikCanadianSpellerRuleTest extends AbstractEnglishSpellerRul
   }
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     CanadianEnglish language = new CanadianEnglish();
-    MorfologikBritishSpellerRule rule =
-            new MorfologikBritishSpellerRule(TestTools.getMessages("en"), language, null);
-
+    MorfologikCanadianSpellerRule rule = language.createMorfologikSpellerRule(null, null);
     JLanguageTool langTool = new JLanguageTool(language);
 
     // correct sentences:
@@ -76,7 +74,7 @@ public class MorfologikCanadianSpellerRuleTest extends AbstractEnglishSpellerRul
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("a")).length);
   }
 
-  private void assertSuggestion(Rule rule, JLanguageTool lt, String input, String... expectedSuggestions) throws IOException {
+  private void assertSuggestion(Rule rule, JLanguageTool lt, String input, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat(matches.length, is(1));
     assertTrue("Expected >= " + expectedSuggestions.length + ", got: " + matches[0].getSuggestedReplacements(),

@@ -40,21 +40,26 @@ import java.util.List;
  */
 public class EnglishChunker implements Chunker {
 
+/*
+GTODO Clean up
   private static final String TOKENIZER_MODEL = "/en-token.bin";
   private static final String POS_TAGGER_MODEL = "/en-pos-maxent.bin";
   private static final String CHUNKER_MODEL = "/en-chunker.bin";
-
-  /**
-   * This needs to be static to save memory: as Language.LANGUAGES is static, any language
-   * that is once created there will never be released. As English has several variants,
-   * we'd have as many posModels etc. as we have variants -> huge waste of memory:
-   */
-  private static volatile TokenizerModel tokenModel;
-  private static volatile POSModel posModel;
-  private static volatile ChunkerModel chunkerModel;
+*/
+  private final TokenizerModel tokenModel;
+  private final POSModel posModel;
+  private final ChunkerModel chunkerModel;
 
   private final EnglishChunkFilter chunkFilter;
 
+  public EnglishChunker(TokenizerModel tokenModel, POSModel posModel, ChunkerModel chunkerModel) {
+      this.tokenModel = tokenModel;
+      this.posModel = posModel;
+      this.chunkerModel = chunkerModel;
+      this.chunkFilter = new EnglishChunkFilter();
+  }
+/*
+GTODO Clean up
   public EnglishChunker() {
     try {
       if (tokenModel == null) {
@@ -71,7 +76,7 @@ public class EnglishChunker implements Chunker {
       throw new RuntimeException("Could not initialize English chunker", e);
     }
   }
-
+*/
   @Override
   public void addChunkTags(List<AnalyzedTokenReadings> tokenReadings) {
     List<ChunkTaggedToken> origChunkTags = getChunkTagsForReadings(tokenReadings);

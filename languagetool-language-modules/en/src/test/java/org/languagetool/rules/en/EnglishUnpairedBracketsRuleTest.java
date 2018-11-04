@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Daniel Naber (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -38,13 +38,14 @@ public class EnglishUnpairedBracketsRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() {
-    rule = new EnglishUnpairedBracketsRule(TestTools.getEnglishMessages(), new English());
-    langTool = new JLanguageTool(new English());
+  public void setUp() throws Exception {
+    English lang = new English();
+    rule = lang.createUnpairedBracketsRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertCorrect("(This is a test sentence).");
@@ -104,18 +105,18 @@ public class EnglishUnpairedBracketsRuleTest {
     assertEquals(3, matches.length);
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(sentence)));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(sentence)));
     assertEquals(1, matches.length);
   }
 
   @Test
-  public void testMultipleSentences() throws IOException {
+  public void testMultipleSentences() throws Exception {
     JLanguageTool lt = new JLanguageTool(new English());
 
     assertEquals(0, getMatches("This is multiple sentence text that contains a bracket: "
@@ -128,7 +129,7 @@ public class EnglishUnpairedBracketsRuleTest {
                              + "[This is bracket. With some text. And this continues.\n\n", lt));
   }
 
-  private int getMatches(String input, JLanguageTool lt) throws IOException {
+  private int getMatches(String input, JLanguageTool lt) throws Exception {
     return lt.check(input).size();
   }
 

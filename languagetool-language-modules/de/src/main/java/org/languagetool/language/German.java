@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import org.languagetool.UserConfig;
 import org.languagetool.chunking.Chunker;
 import org.languagetool.chunking.GermanChunker;
 import org.languagetool.languagemodel.LanguageModel;
+import org.languagetool.languagemodel.BaseLanguageModel;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.*;
 import org.languagetool.rules.de.*;
@@ -32,40 +33,35 @@ import org.languagetool.rules.de.LongSentenceRule;
 import org.languagetool.rules.de.SentenceWhitespaceRule;
 import org.languagetool.rules.neuralnetwork.NeuralNetworkRuleCreator;
 import org.languagetool.rules.neuralnetwork.Word2VecModel;
-import org.languagetool.synthesis.GermanSynthesizer;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.de.GermanTagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.de.GermanRuleDisambiguator;
 import org.languagetool.tokenizers.CompoundWordTokenizer;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.de.GermanCompoundTokenizer;
+import org.languagetool.databroker.GermanResourceDataBroker;
+import org.languagetool.databroker.DefaultGermanResourceDataBroker;
+import org.languagetool.rules.neuralnetwork.NeuralNetworkRule;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 /**
  * Support for German - use the sub classes {@link GermanyGerman}, {@link SwissGerman}, or {@link AustrianGerman}
  * if you need spell checking.
  */
-public class German extends Language implements AutoCloseable {
+public class German extends Language<GermanResourceDataBroker> implements AutoCloseable {
+
+    public static final String LANGUAGE_ID = "de";
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID);
 
   private static final Language GERMANY_GERMAN = new GermanyGerman();
-  
-  private Tagger tagger;
-  private Synthesizer synthesizer;
-  private SentenceTokenizer sentenceTokenizer;
-  private Disambiguator disambiguator;
-  private GermanChunker chunker;
-  private CompoundWordTokenizer compoundTokenizer;
-  private GermanCompoundTokenizer strictCompoundTokenizer;
-  private LanguageModel languageModel;
+
   private List<Rule> nnRules;
   private Word2VecModel word2VecModel;
 
@@ -76,29 +72,43 @@ public class German extends Language implements AutoCloseable {
   @Deprecated
   public German() {
   }
-  
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public GermanResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
+  }
+
+  @Override
+  public GermanResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultGermanResourceDataBroker(this, getClass().getClassLoader());
+  }
+
   @Override
   public Language getDefaultLanguageVariant() {
     return GERMANY_GERMAN;
   }
-  
+
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new GermanRuleDisambiguator();
-    }
-    return disambiguator;
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   /**
    * @since 2.9
    */
   @Override
-  public Chunker getPostDisambiguationChunker() {
-    if (chunker == null) {
-      chunker = new GermanChunker();
-    }
-    return chunker;
+  public Chunker getPostDisambiguationChunker() throws Exception {
+      return getUseDataBroker().getPostDisambiguationChunker();
   }
 
   @Override
@@ -107,44 +117,25 @@ public class German extends Language implements AutoCloseable {
   }
 
   @Override
-  public String getShortCode() {
-    return "de";
-  }
-
-  @Override
   public String[] getCountries() {
+      // GTODO: Only these countries?
     return new String[]{"LU", "LI", "BE"};
   }
 
   @Override
-  public Tagger getTagger() {
-    Tagger t = tagger;
-    if (t == null) {
-      synchronized (this) {
-        t = tagger;
-        if (t == null) {
-          tagger = t = new GermanTagger();
-        }
-      }
-    }
-    return t;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
   @NotNull
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new GermanSynthesizer();
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -156,54 +147,201 @@ public class German extends Language implements AutoCloseable {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages,
-                    Example.wrong("Die Partei<marker> ,</marker> die die letzte Wahl gewann."),
-                    Example.fixed("Die Partei<marker>,</marker> die die letzte Wahl gewann.")),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "„", "»", "«", "\""),
-                    Arrays.asList("]", ")", "}", "“", "«", "»", "\"")),
-            new UppercaseSentenceStartRule(messages, this,
-                    Example.wrong("Das Haus ist alt. <marker>es</marker> wurde 1950 gebaut."),
-                    Example.fixed("Das Haus ist alt. <marker>Es</marker> wurde 1950 gebaut.")),
-            new MultipleWhitespaceRule(messages, this),
+            createCommaWhitespaceRule(messages),
+            createUnpairedBracketsRule(messages),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
             // specific to German:
-            new OldSpellingRule(messages),
-            new SentenceWhitespaceRule(messages),
-            new GermanDoublePunctuationRule(messages),
-            new MissingVerbRule(messages, this),
-            new GermanWordRepeatRule(messages, this),
-            new GermanWordRepeatBeginningRule(messages, this),
-            new GermanWrongWordInContextRule(messages),
-            new AgreementRule(messages, this),
-            new CaseRule(messages, this),
-            new CompoundRule(messages),
-            new DashRule(messages),
-            new VerbAgreementRule(messages, this),
-            new SubjectVerbAgreementRule(messages, this),
-            new WordCoherencyRule(messages),
-            new SimilarNameRule(messages),
-            new WiederVsWiderRule(messages),
-            new WhiteSpaceBeforeParagraphEnd(messages, this),
-            new WhiteSpaceAtBeginOfParagraph(messages),
-            new EmptyLineRule(messages, this),
-            new GermanStyleRepeatedWordRule(messages, userConfig),
-            new CompoundCoherencyRule(messages),
-            new LongSentenceRule(messages, userConfig),
-            new LongParagraphRule(messages, this, userConfig),
-            new GermanFillerWordsRule(messages, this, userConfig),
-            new GermanParagraphRepeatBeginningRule(messages, this),
-            new PunctuationMarkAtParagraphEnd(messages, this),
-            new DuUpperLowerCaseRule(messages),
-            new UnitConversionRule(messages)
+            createOldSpellingRule(messages),
+            createSentenceWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createMissingVerbRule(messages),
+            createWordRepeatRule(messages),
+            createWordRepeatBeginningRule(messages),
+            createWrongWordInContextRule(messages),
+            createAgreementRule(messages),
+            createCaseRule(messages),
+            createCompoundRule(messages),
+            createDashRule(messages),
+            createVerbAgreementRule(messages),
+            createSubjectVerbAgreementRule(messages),
+            createWordCoherencyRule(messages),
+            createSimilarNameRule(messages),
+            createWiederVsWiderRule(messages),
+            createWhiteSpaceBeforeParagraphEndRule(messages),
+            createWhiteSpaceAtBeginOfParagraphRule(messages),
+            createEmptyLineRule(messages),
+            createGermanStyleRepeatedWordRule(messages, userConfig),
+            createCompoundCoherencyRule(messages),
+            createLongSentenceRule(messages, userConfig),
+            createLongParagraphRule(messages, userConfig),
+            createFillerWordsRule(messages, userConfig),
+            createParagraphRepeatBeginningRule(messages),
+            createPunctuationMarkAtParagraphEnd(messages),
+            createDuUpperLowerCaseRule(messages),
+            createUnitConversionRule(messages)
     );
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages), this);
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+                          Example.wrong("Das Haus ist alt. <marker>es</marker> wurde 1950 gebaut."),
+                          Example.fixed("Das Haus ist alt. <marker>Es</marker> wurde 1950 gebaut."));
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "„", "»", "«", "\""),
+              Arrays.asList("]", ")", "}", "“", "«", "»", "\""));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages),
+              Example.wrong("Die Partei<marker> ,</marker> die die letzte Wahl gewann."),
+              Example.fixed("Die Partei<marker>,</marker> die die letzte Wahl gewann."));
+  }
+
+  public OldSpellingRule createOldSpellingRule(ResourceBundle messages) throws Exception {
+      return new OldSpellingRule(getUseMessages(messages), getUseDataBroker().getOldSpellingRuleSuggestions());
+  }
+
+  public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new SentenceWhitespaceRule(getUseMessages(messages));
+  }
+
+  public GermanDoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new GermanDoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public GermanWrongWordInContextRule createWrongWordInContextRule(ResourceBundle messages) throws Exception {
+      return new GermanWrongWordInContextRule(getUseMessages(messages), getUseDataBroker().getWrongWordsInContext());
+  }
+
+  public AgreementRule createAgreementRule(ResourceBundle messages) throws Exception {
+      return new AgreementRule(getUseMessages(messages), this);
+  }
+
+  public CaseRule createCaseRule(ResourceBundle messages) throws Exception {
+      return new CaseRule(getUseMessages(messages), this, getUseDataBroker().getTagger(), getUseDataBroker().getCaseRuleExceptionPatterns());
+  }
+
+  public DashRule createDashRule(ResourceBundle messages) throws Exception {
+      return new DashRule(getUseMessages(messages));
+  }
+
+  public VerbAgreementRule createVerbAgreementRule(ResourceBundle messages) throws Exception {
+      return new VerbAgreementRule(getUseMessages(messages), this);
+  }
+
+  public SubjectVerbAgreementRule createSubjectVerbAgreementRule(ResourceBundle messages) throws Exception {
+      return new SubjectVerbAgreementRule(getUseMessages(messages), this, getUseDataBroker().getTagger());
+  }
+
+  public GermanStyleRepeatedWordRule createGermanStyleRepeatedWordRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new GermanStyleRepeatedWordRule(getUseMessages(messages), userConfig);
+  }
+
+  public GermanFillerWordsRule createFillerWordsRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new GermanFillerWordsRule(getUseMessages(messages), this, userConfig);
+  }
+
+  public SimilarNameRule createSimilarNameRule(ResourceBundle messages) throws Exception {
+      return new SimilarNameRule(getUseMessages(messages));
+  }
+
+  public WiederVsWiderRule createWiederVsWiderRule(ResourceBundle messages) throws Exception {
+      return new WiederVsWiderRule(getUseMessages(messages));
+  }
+
+  public WhiteSpaceBeforeParagraphEnd createWhiteSpaceBeforeParagraphEndRule(ResourceBundle messages) throws Exception {
+      return new WhiteSpaceBeforeParagraphEnd(getUseMessages(messages), this);
+  }
+
+  public WhiteSpaceAtBeginOfParagraph createWhiteSpaceAtBeginOfParagraphRule(ResourceBundle messages) throws Exception {
+      return new WhiteSpaceAtBeginOfParagraph(getUseMessages(messages));
+  }
+
+  public EmptyLineRule createEmptyLineRule(ResourceBundle messages) throws Exception {
+      return new EmptyLineRule(getUseMessages(messages), this);
+  }
+
+  public CompoundCoherencyRule createCompoundCoherencyRule(ResourceBundle messages) throws Exception {
+      return new CompoundCoherencyRule(getUseMessages(messages));
+  }
+
+  public GermanParagraphRepeatBeginningRule createParagraphRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new GermanParagraphRepeatBeginningRule(getUseMessages(messages), this);
+  }
+
+  public PunctuationMarkAtParagraphEnd createPunctuationMarkAtParagraphEnd(ResourceBundle messages) throws Exception {
+      return new PunctuationMarkAtParagraphEnd(getUseMessages(messages), this);
+  }
+
+  public DuUpperLowerCaseRule createDuUpperLowerCaseRule(ResourceBundle messages) throws Exception {
+      return new DuUpperLowerCaseRule(getUseMessages(messages));
+  }
+
+  public UnitConversionRule createUnitConversionRule(ResourceBundle messages) throws Exception {
+      return new UnitConversionRule(getUseMessages(messages));
+  }
+
+  public MissingVerbRule createMissingVerbRule(ResourceBundle messages) throws Exception {
+      return new MissingVerbRule(getUseMessages(messages), this);
+  }
+
+  public GermanWordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new GermanWordRepeatRule(getUseMessages(messages));
+  }
+
+  public CompoundRule createCompoundRule(ResourceBundle messages) throws Exception {
+      return new CompoundRule(getUseMessages(messages), getUseDataBroker().getCompounds());
+  }
+
+  public WordCoherencyRule createWordCoherencyRule(ResourceBundle messages) throws Exception {
+      return new WordCoherencyRule(getUseMessages(messages), getUseDataBroker().getCoherencyMappings());
+  }
+
+  public GermanWordRepeatBeginningRule createWordRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new GermanWordRepeatBeginningRule(getUseMessages(messages));
+  }
+
+  public LongParagraphRule createLongParagraphRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongParagraphRule(getUseMessages(messages), this, maxWords);
+  }
+
+  public LongParagraphRule createLongParagraphRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+         confWords = userConfig.getConfigValueByID(LongParagraphRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongParagraphRule(messages, confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(messages, confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords);
   }
 
   /**
    * @since 2.7
    */
-  public CompoundWordTokenizer getNonStrictCompoundSplitter() {
+   /*
+   GTODO Clean up
+  public Tokenizer getNonStrictCompoundSplitter() {
     if (compoundTokenizer == null) {
       try {
         GermanCompoundTokenizer tokenizer = new GermanCompoundTokenizer(false);  // there's a spelling mistake in (at least) one part, so strict mode wouldn't split the word
@@ -214,68 +352,57 @@ public class German extends Language implements AutoCloseable {
     }
     return compoundTokenizer;
   }
-
+*/
   /**
    * @since 2.7
    */
-  public GermanCompoundTokenizer getStrictCompoundTokenizer() {
-    if (strictCompoundTokenizer == null) {
-      try {
-        strictCompoundTokenizer = new GermanCompoundTokenizer();
-      } catch (IOException e) {
-        throw new RuntimeException("Could not set up strict German compound splitter", e);
-      }
-    }
-    return strictCompoundTokenizer;
+/*
+GTODO Clean up
+  public Tokenizer getStrictCompoundTokenizer() {
+      return getUseDataBroker().getStrictCompoundTokenizer();
   }
-
+*/
   @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
-    if (languageModel == null) {
-      languageModel = new LuceneLanguageModel(new File(indexDir, getShortCode()));
-      // for testing:
-      //languageModel = new BerkeleyRawLanguageModel(new File("/media/Data/berkeleylm/google_books_binaries/ger.blm.gz"));
-      //languageModel = new BerkeleyLanguageModel(new File("/media/Data/berkeleylm/google_books_binaries/ger.blm.gz"));
-    }
-    return languageModel;
+  public LanguageModel getLanguageModel() throws Exception {
+      return getUseDataBroker().getLanguageModel();
   }
 
   /** @since 4.0 */
   @Override
-  public synchronized Word2VecModel getWord2VecModel(File indexDir) throws IOException {
-    if (word2VecModel == null) {
-      word2VecModel = new Word2VecModel(indexDir + File.separator + getShortCode());
-    }
-    return word2VecModel;
+  public Word2VecModel getWord2VecModel() throws Exception {
+      return getUseDataBroker().getWord2VecModel();
   }
 
   /** @since 3.1 */
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
-    return Arrays.asList(
-            new GermanConfusionProbabilityRule(messages, languageModel, this),
-            new ProhibitedCompoundRule(messages, languageModel)
-    );
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      List<Rule> rules = new ArrayList<>();
+
+      rules.add (createConfusionProbabilityRule(messages, languageModel));
+      return rules;
+  }
+
+  public GermanConfusionProbabilityRule createConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      return new GermanConfusionProbabilityRule(getUseMessages(messages), languageModel, this, getUseDataBroker().getConfusionSets());
+  }
+
+  public ProhibitedCompoundRule createProhibitedCompoundRule(ResourceBundle messages, BaseLanguageModel languageModel, GermanSpellerRule spellerRule) throws Exception {
+      return new ProhibitedCompoundRule(getUseMessages(messages), languageModel, spellerRule, getUseDataBroker().getConfusionSets());
   }
 
   /** @since 4.0 */
   @Override
-  public List<Rule> getRelevantWord2VecModelRules(ResourceBundle messages, Word2VecModel word2vecModel) throws IOException {
-    if (nnRules == null) {
-      nnRules = NeuralNetworkRuleCreator.createRules(messages, this, word2vecModel);
-    }
-    return nnRules;
+  public List<NeuralNetworkRule> getRelevantWord2VecModelRules(ResourceBundle messages, Word2VecModel word2vecModel) throws Exception {
+      return getUseDataBroker().createNeuralNetworkRules(messages, word2vecModel);
   }
 
   /**
-   * Closes the language model, if any. 
-   * @since 3.1 
+   * Closes the language model, if any.
+   * @since 3.1
    */
   @Override
   public void close() throws Exception {
-    if (languageModel != null) {
-      languageModel.close();
-    }
+      getUseDataBroker().close();
   }
 
   @Override

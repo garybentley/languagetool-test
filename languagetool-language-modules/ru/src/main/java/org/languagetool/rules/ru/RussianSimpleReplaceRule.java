@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,6 +20,7 @@ package org.languagetool.rules.ru;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.ResourceBundle;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
- * correct ones instead. 
+ * correct ones instead.
  *
  * Russian implementations. Loads the
  * relevant words from <code>rules/ru/replace.txt</code>.
@@ -38,21 +39,21 @@ import java.util.ResourceBundle;
  */
 public class RussianSimpleReplaceRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/ru/replace.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale RU_LOCALE = new Locale("ru");
-  
-  
+
+
   @Override
   protected Map<String, List<String>> getWrongWords() {
     return wrongWords;
   }
 
-  public RussianSimpleReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
-  
+  public RussianSimpleReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
+    wrongWords = load("/ru/replace.txt", dataBroker);
   addExamplePair(Example.wrong("<marker>Экспрессо</marker> – крепкий кофе, приготовленный из хорошо обжаренных и тонко помолотых кофейных зёрен."),
                  Example.fixed("<marker>Эспрессо</marker> – крепкий кофе, приготовленный из хорошо обжаренных и тонко помолотых кофейных зёрен."));
-  
+
   }
 
   @Override
@@ -69,7 +70,7 @@ public class RussianSimpleReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Ошибка?";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " - ошибочное слово/фраза, исправление: "

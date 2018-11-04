@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Arrays;
 
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Loads extra helper dictionaries in plain text format
@@ -18,9 +19,9 @@ import org.languagetool.JLanguageTool;
  */
 public class ExtraDictionaryLoader {
 
-  public static Set<String> loadSet(String path) {
+  public static Set<String> loadSet(String path, ResourceDataBroker dataBroker) {
     Set<String> result = new HashSet<>();
-    try (InputStream is = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path);
+    try (InputStream is = dataBroker.getFromResourceDirAsStream(path);
          Scanner scanner = new Scanner(is, "UTF-8")) {
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();
@@ -34,9 +35,9 @@ public class ExtraDictionaryLoader {
     }
   }
 
-  public static Map<String, List<String>> loadLists(String path) {
+  public static Map<String, List<String>> loadLists(String path, ResourceDataBroker dataBroker) {
     Map<String, List<String>> result = new HashMap<>();
-    try (InputStream is = JLanguageTool.getDataBroker().getFromRulesDirAsStream(path);
+    try (InputStream is = dataBroker.getFromRulesDirAsStream(path);
          Scanner scanner = new Scanner(is, "UTF-8")) {
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();

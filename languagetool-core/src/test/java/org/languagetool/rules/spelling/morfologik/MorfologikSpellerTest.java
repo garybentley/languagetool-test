@@ -19,17 +19,32 @@
 package org.languagetool.rules.spelling.morfologik;
 
 import org.junit.Test;
+import org.junit.Before;
 
 import java.io.IOException;
+import java.nio.file.*;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
+import morfologik.stemming.Dictionary;
+import org.languagetool.TestTools;
+import org.languagetool.TestLanguage;
+
 public class MorfologikSpellerTest {
 
+  private Dictionary dictionary;
+
+  @Before
+  public void setUp() throws Exception {
+      TestLanguage lang = TestTools.getTestLanguage();
+      dictionary = lang.getUseDataBroker().getMorfologikBinaryDictionaryFromResourcePath(String.format("/%1$s/spelling/test.dict", lang.getLocale().getLanguage()));
+  }
+
   @Test
-  public void testIsMisspelled() throws IOException {
-    MorfologikSpeller speller = new MorfologikSpeller("/xx/spelling/test.dict");
+  public void testIsMisspelled() throws Exception {
+    // We expect a binary dictionary file.
+    MorfologikSpeller speller = new MorfologikSpeller(dictionary, 1);
     assertTrue(speller.convertsCase());
 
     assertFalse(speller.isMisspelled("wordone"));
@@ -45,9 +60,9 @@ public class MorfologikSpellerTest {
   }
 
   @Test
-  public void testGetSuggestions() throws IOException {
-    MorfologikSpeller spellerDist1 = new MorfologikSpeller("/xx/spelling/test.dict", 1);
-    MorfologikSpeller spellerDist2 = new MorfologikSpeller("/xx/spelling/test.dict", 2);
+  public void testGetSuggestions() throws Exception {
+    MorfologikSpeller spellerDist1 = new MorfologikSpeller(dictionary, 1);
+    MorfologikSpeller spellerDist2 = new MorfologikSpeller(dictionary, 2);
 
     assertThat(spellerDist1.getSuggestions("wordone").toString(), is("[]"));
     assertThat(spellerDist1.getSuggestions("wordonex").toString(), is("[wordone]"));

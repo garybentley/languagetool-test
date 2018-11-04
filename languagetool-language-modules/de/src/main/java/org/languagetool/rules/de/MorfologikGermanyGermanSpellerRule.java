@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,10 @@ package org.languagetool.rules.de;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.List;
+import java.util.Set;
+
+import morfologik.stemming.Dictionary;
 
 import org.languagetool.Language;
 import org.languagetool.UserConfig;
@@ -33,20 +37,20 @@ import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
  */
 public final class MorfologikGermanyGermanSpellerRule extends MorfologikSpellerRule {
 
-  private static final String RESOURCE_FILENAME = "/de/hunspell/de_DE.dict";
+  //GTODO private static final String RESOURCE_FILENAME = "/de/hunspell/de_DE.dict";
 
-  public MorfologikGermanyGermanSpellerRule(ResourceBundle messages,
-                                            Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
-    addExamplePair(Example.wrong("LanguageTool kann mehr als eine <marker>nromale</marker> Rechtschreibprüfung."),
-                   Example.fixed("LanguageTool kann mehr als eine <marker>normale</marker> Rechtschreibprüfung."));
+  public MorfologikGermanyGermanSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
+      super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords);
+      addExamplePair(Example.wrong("LanguageTool kann mehr als eine <marker>nromale</marker> Rechtschreibprüfung."),
+                     Example.fixed("LanguageTool kann mehr als eine <marker>normale</marker> Rechtschreibprüfung."));
   }
-
+/*
+GTODO Clean up
   @Override
   public String getFileName() {
     return RESOURCE_FILENAME;
   }
-
+*/
   @Override
   public String getId() {
     return "MORFOLOGIK_RULE_DE_DE";

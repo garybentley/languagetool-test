@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,7 +21,11 @@ package org.languagetool.rules;
 import org.languagetool.JLanguageTool;
 
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
+import java.nio.charset.*;
+
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Load replacement data from a UTF-8 file. One replacement per line,
@@ -32,31 +36,45 @@ import java.util.*;
  */
 public final class SimpleReplaceDataLoader {
 
+/*
+GTODO Clean up
+  public Map<String, List<String>> loadWords(InputStream stream, Charset charset) throws IOException {
+      if (charset == null) {
+          charset = StandardCharsets.UTF_8;
+      }
+      Map<String, List<String>> map = new HashMap<>();
+      try (Scanner scanner = new Scanner(stream, charset.name())) {
+        while (scanner.hasNextLine()) {
+          String line = scanner.nextLine();
+          if (line.isEmpty() || line.charAt(0) == '#') { // # = comment
+            continue;
+          }
+          String[] parts = line.split("=");
+          if (parts.length != 2) {
+            throw new IOException("Error in line '" + line + "', expected format 'word=replacement'");
+          }
+          String[] wrongForms = parts[0].split("\\|");
+          List<String> replacements = Arrays.asList(parts[1].split("\\|"));
+          for (String wrongForm : wrongForms) {
+            map.put(wrongForm, replacements);
+          }
+        }
+      }
+      return Collections.unmodifiableMap(map);
+  }
+*/
   /**
    * Load replacement rules from a utf-8 file in the classpath.
    */
-  public Map<String, List<String>> loadWords(String path) {
-    InputStream stream = JLanguageTool.getDataBroker().getFromRulesDirAsStream(path);
-    Map<String, List<String>> map = new HashMap<>();
-    try (Scanner scanner = new Scanner(stream, "utf-8")) {
-      while (scanner.hasNextLine()) {
-        String line = scanner.nextLine();
-        if (line.isEmpty() || line.charAt(0) == '#') { // # = comment
-          continue;
-        }
-        String[] parts = line.split("=");
-        if (parts.length != 2) {
-          throw new RuntimeException("Could not load simple replacement data from: " + path + ". " +
-                  "Error in line '" + line + "', expected format 'word=replacement'");
-        }
-        String[] wrongForms = parts[0].split("\\|");
-        List<String> replacements = Arrays.asList(parts[1].split("\\|"));
-        for (String wrongForm : wrongForms) {
-          map.put(wrongForm, replacements);
-        }
-      }
+/*
+GTODO Clean up
+  public Map<String, List<String>> loadWords(String path, ResourceDataBroker dataBroker) {
+    InputStream stream = dataBroker.getFromRulesDirAsStream(path);
+    try {
+        return loadWords(stream, StandardCharsets.UTF_8);
+    } catch(Exception e) {
+        throw new RuntimeException("Unable to load words from path: " + dataBroker.getFromResourceDirAsUrl(path), e);
     }
-    return Collections.unmodifiableMap(map);
   }
-
+*/
 }

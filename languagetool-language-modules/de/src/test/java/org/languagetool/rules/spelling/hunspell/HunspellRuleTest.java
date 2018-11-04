@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -37,8 +37,10 @@ import java.util.ResourceBundle;
 
 import static org.junit.Assert.assertEquals;
 
+// GTODO This test has been merged with GermanSpellerRuleTest which replaces it.
 public class HunspellRuleTest {
-
+/*
+GTODO Clean up
   @Test
   public void testRuleWithGerman() throws Exception {
     HunspellRule rule = new HunspellRule(TestTools.getMessages("de"), new GermanyGerman(), null);
@@ -50,7 +52,7 @@ public class HunspellRuleTest {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Unter http://foo.org/bar steht was.")).length);
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("dasdassda http://foo.org/bar steht was.")).length);
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("Unter http://foo.org/bar steht dasdassda.")).length);
-    
+
     // check the correct calculation of error position
     // note that emojis have string length 2
     assertEquals(6 ,rule.match(langTool.getAnalyzedSentence("Hallo men Schatz!"))[0].getFromPos());
@@ -62,7 +64,9 @@ public class HunspellRuleTest {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Mir geht es 😂gut😂.")).length);
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("Mir geht es 😂gtu😂.")).length);
   }
-
+*/
+/*
+GTODO Clean up
   @Test
   public void testRuleWithAustrianGerman() throws Exception {
     HunspellRule rule = new HunspellRule(TestTools.getMessages("de"), new AustrianGerman(), null);
@@ -71,7 +75,9 @@ public class HunspellRuleTest {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // umlauts
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("Der äussere Übeltäter.")).length);
   }
-
+*/
+/*
+GTODO Clean up
   @Test
   public void testRuleWithSwissGerman() throws Exception {
     HunspellRule rule = new HunspellRule(TestTools.getMessages("de"), new SwissGerman(), null);
@@ -80,7 +86,9 @@ public class HunspellRuleTest {
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("Der äußere Übeltäter.")).length);  // ß not allowed in Swiss
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Der äussere Übeltäter.")).length);  // ss is used instead of ß
   }
-
+*/
+/*
+GTODO Clean up
   private void commonGermanAsserts(HunspellRule rule, JLanguageTool langTool) throws IOException {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Der Waschmaschinentestversuch")).length);  // compound
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Der Waschmaschinentest-Versuch")).length);  // compound
@@ -95,7 +103,9 @@ public class HunspellRuleTest {
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("Die Verhaltenänderung")).length);  // missing interfix
     assertEquals(2, rule.match(langTool.getAnalyzedSentence("Der asdegfue orkt")).length);
   }
-
+*/
+/*
+GTODO Clean up
   @Ignore("just for internal performance testing, thus ignored by default")
   @Test
   public void testPerformance() throws Exception {
@@ -114,7 +124,9 @@ public class HunspellRuleTest {
       System.out.println((endTime-startTime) + "ms for " + language);
     }
   }
-
+*/
+/*
+GTODO Clean up
   @Ignore("just for internal performance testing, thus ignored by default")
   @Test
   public void testCompoundAwareRulePerformance() throws IOException {
@@ -131,5 +143,5 @@ public class HunspellRuleTest {
       System.out.println((System.currentTimeMillis()-startTime) + "ms for " + word + ": " + suggest);
     }
   }
-  
+*/
 }

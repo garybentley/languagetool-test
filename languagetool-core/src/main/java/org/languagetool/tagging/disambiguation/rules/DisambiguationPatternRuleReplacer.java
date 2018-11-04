@@ -47,7 +47,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
   }
 
   public final AnalyzedSentence replace(AnalyzedSentence sentence)
-      throws IOException {
+      throws Exception {
     List<PatternTokenMatcher> patternTokenMatchers = createElementMatchers();
 
     AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
@@ -146,7 +146,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
     return sentence;
   }
 
-  private boolean keepDespiteFilter(AnalyzedTokenReadings[] tokens, int[] tokenPositions, int firstMatchToken, int lastMatchToken) {
+  private boolean keepDespiteFilter(AnalyzedTokenReadings[] tokens, int[] tokenPositions, int firstMatchToken, int lastMatchToken) throws Exception {
     RuleFilter filter = rule.getFilter();
     if (filter != null) {
       RuleFilterEvaluator ruleFilterEval = new RuleFilterEvaluator(filter);
@@ -162,7 +162,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
   }
 
   @Override
-  protected int skipMaxTokens(AnalyzedTokenReadings[] tokens, PatternTokenMatcher matcher, int firstMatchToken, int prevSkipNext, PatternTokenMatcher prevElement, int m, int remainingElems) throws IOException {
+  protected int skipMaxTokens(AnalyzedTokenReadings[] tokens, PatternTokenMatcher matcher, int firstMatchToken, int prevSkipNext, PatternTokenMatcher prevElement, int m, int remainingElems) throws Exception {
     int maxSkip = 0;
     int maxOccurrences = matcher.getPatternToken().getMaxOccurrence() == -1 ? Integer.MAX_VALUE : matcher.getPatternToken().getMaxOccurrence();
     for (int j = 1; j < maxOccurrences && m+j < tokens.length - remainingElems; j++) {
@@ -181,7 +181,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
                                                 AnalyzedTokenReadings[] whiteTokens,
                                                 AnalyzedTokenReadings[] unifiedTokens,
                                                 int firstMatchToken, int lastMatchToken,
-                                                int matchingTokens, int[] tokenPositions) {
+                                                int matchingTokens, int[] tokenPositions) throws Exception {
     AnalyzedTokenReadings[] whTokens = whiteTokens.clone();
     DisambiguationPatternRule rule = (DisambiguationPatternRule) this.rule;
 
@@ -338,7 +338,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
             null, Match.CaseConversion.NONE, false, false,
             Match.IncludeRange.NONE);
 
-        MatchState matchState = tmpMatchToken.createState(rule.getLanguage().getSynthesizer(), whTokens[position]);
+        MatchState matchState = tmpMatchToken.createState(rule.getLanguage().getSynthesizer(), rule.getLanguage(), whTokens[position]);
         String prevValue = whTokens[position].toString();
         String prevAnot = whTokens[position].getHistoricalAnnotations();
         whTokens[position] = matchState.filterReadings();
@@ -373,7 +373,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
           }
         }
         if (newPOSmatches) {
-          MatchState matchState = tmpMatchToken.createState(rule.getLanguage().getSynthesizer(), whTokens[fromPos]);
+          MatchState matchState = tmpMatchToken.createState(rule.getLanguage().getSynthesizer(), rule.getLanguage(), whTokens[fromPos]);
           String prevValue = whTokens[fromPos].toString();
           String prevAnot = whTokens[fromPos].getHistoricalAnnotations();
           whTokens[fromPos] = matchState.filterReadings();
@@ -426,7 +426,7 @@ class DisambiguationPatternRuleReplacer extends AbstractPatternRulePerformer {
           whTokens[fromPos] = replaceTokens(whTokens[fromPos], toReplace);
         } else {
           // using the match element
-          MatchState matchElementState = matchElement.createState(rule.getLanguage().getSynthesizer(), whTokens[fromPos]);
+          MatchState matchElementState = matchElement.createState(rule.getLanguage().getSynthesizer(), rule.getLanguage(), whTokens[fromPos]);
           String prevValue = whTokens[fromPos].toString();
           String prevAnot = whTokens[fromPos].getHistoricalAnnotations();
           whTokens[fromPos] = matchElementState.filterReadings();

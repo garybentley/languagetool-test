@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,16 +20,26 @@ package org.languagetool.tagging.fr;
 
 import java.util.Locale;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /** French Tagger
- * 
+ *
  * Based on Dicollecte (http://www.dicollecte.org/) implemented in FSA.
- * 
+ *
  * @author Marcin Milkowski
  */
 public class FrenchTagger extends BaseTagger {
 
+    public FrenchTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+        super(baseDict, tagger, caseCon, false);
+    }
+
+/*
+GTODO Clean up
   @Override
   public String getManualAdditionsFileName() {
     return "/fr/added.txt";
@@ -38,4 +48,5 @@ public class FrenchTagger extends BaseTagger {
   public FrenchTagger() {
     super("/fr/french.dict", Locale.FRENCH, false);
   }
+  */
 }

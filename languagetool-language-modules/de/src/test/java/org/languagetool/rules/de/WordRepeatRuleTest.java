@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.rules.de;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.German;
@@ -30,11 +31,17 @@ import static org.junit.Assert.assertEquals;
 
 public class WordRepeatRuleTest {
 
-  private final German german = new German();
-  private final WordRepeatRule rule = new GermanWordRepeatRule(TestTools.getEnglishMessages(), german);
+  private German german;
+  private WordRepeatRule rule;
+
+  @Before
+  public void setUp() throws Exception {
+      german = new German();
+      rule = german.createWordRepeatRule(null);
+  }
 
   @Test
-  public void testRuleGerman() throws IOException {
+  public void testRuleGerman() throws Exception {
     JLanguageTool lt = new JLanguageTool(german);
 
     assertGood("Das sind die Sätze, die die testen sollen.", lt);
@@ -51,11 +58,11 @@ public class WordRepeatRuleTest {
     assertBad("Sie sie gehen nach Hause.", lt);
   }
 
-  private void assertGood(String text, JLanguageTool langTool) throws IOException {
+  private void assertGood(String text, JLanguageTool langTool) throws Exception {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence(text)).length);
   }
 
-  private void assertBad(String text, JLanguageTool langTool) throws IOException {
+  private void assertBad(String text, JLanguageTool langTool) throws Exception {
     assertEquals(1, rule.match(langTool.getAnalyzedSentence(text)).length);
   }
 

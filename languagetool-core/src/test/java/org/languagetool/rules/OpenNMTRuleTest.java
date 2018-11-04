@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
+import org.languagetool.TestTools;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,15 +34,15 @@ public class OpenNMTRuleTest {
 
   @Test
   @Ignore("only works when OpenNMT server is running")
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     OpenNMTRule rule = new OpenNMTRule();
-    JLanguageTool lt = new JLanguageTool(Languages.getLanguageForShortCode("xx"));
+    JLanguageTool lt = new JLanguageTool(TestTools.getTestLanguage());
     String input = "This were an example.";
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     // TODO: check result - depends on model...
     System.out.println("-->"  + Arrays.toString(matches));
   }
-  
+
   @Test
   public void testGetFirstDiffPosition() throws IOException {
     OpenNMTRule r = new OpenNMTRule();
@@ -103,14 +104,14 @@ public class OpenNMTRuleTest {
     assertThat(r.getRightWordBoundary("föö.", 0), is(3));
     assertThat(r.getRightWordBoundary("foo bar", 4), is(7));
   }
-  
+
   private void testFirst(OpenNMTRule rule, String text1, String text2, int expectedResult) {
     assertThat(rule.getFirstDiffPosition(text1, text2), is(expectedResult));
     assertThat(rule.getFirstDiffPosition(text2, text1), is(expectedResult));  // needs to be symmetrical
   }
-  
+
   private void testLast(OpenNMTRule rule, String text1, String text2, int expectedResult) {
     assertThat(rule.getLastDiffPosition(text1, text2), is(expectedResult));
   }
-  
+
 }

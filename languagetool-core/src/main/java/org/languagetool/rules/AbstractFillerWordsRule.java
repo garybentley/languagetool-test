@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,15 +33,15 @@ import org.languagetool.rules.Category.Location;
 /**
  * A rule that gives hints about the use of filler words.
  * The hints are only given when the percentage of filler words per paragraph exceeds the given limit.
- * A limit of 0 shows all used filler words. Direct speech or citation is excluded otherwise. 
+ * A limit of 0 shows all used filler words. Direct speech or citation is excluded otherwise.
  * This rule detects no grammar error but gives stylistic hints (default off).
  * @author Fred Kruse
  * @since 4.2
  */
 public abstract class AbstractFillerWordsRule extends TextLevelRule {
-  
+
   public static final String RULE_ID = "FILLER_WORDS";
-  
+
   private static final int DEFAULT_MIN_PERCENT = 8;
   private static final Pattern NON_WORD_REGEX = Pattern.compile("[.?!…:;,~’'\"„“”»«‚‘›‹()\\[\\]\\-–—*×∗·+÷/=]");
   private static final Pattern OPENING_QUOTES = Pattern.compile("[\"„”»«]");
@@ -55,10 +55,10 @@ public abstract class AbstractFillerWordsRule extends TextLevelRule {
    * Override this to detect filler words in the specified language
    */
   protected abstract boolean isFillerWord(String token);
-  
+
   public AbstractFillerWordsRule(ResourceBundle messages, Language lang, UserConfig userConfig, boolean defaultActive) {
     super(messages);
-    super.setCategory(new Category(new CategoryId("CREATIVE_WRITING"), 
+    super.setCategory(new Category(new CategoryId("CREATIVE_WRITING"),
         messages.getString("category_creative_writing"), Location.INTERNAL, false));
     this.lang = lang;
     if (!defaultActive) {
@@ -114,13 +114,13 @@ public abstract class AbstractFillerWordsRule extends TextLevelRule {
   public String getMessage() {
     return messages.getString("filler_words_rule_msg");
   }
-  
+
   protected boolean isException(AnalyzedTokenReadings[] tokens, int num) {
     return false;
   }
 
   @Override
-  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     String msg = getMessage();
     List<Integer> startPos = new ArrayList<>();
@@ -182,5 +182,5 @@ public abstract class AbstractFillerWordsRule extends TextLevelRule {
     }
     return toRuleMatchArray(ruleMatches);
   }
-  
+
 }

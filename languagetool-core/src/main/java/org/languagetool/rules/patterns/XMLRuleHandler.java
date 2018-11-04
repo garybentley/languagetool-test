@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.Nullable;
@@ -37,15 +38,16 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+import org.languagetool.rules.Rule;
 
 /**
  * XML rule handler that loads rules from XML and throws
  * exceptions on errors and warnings.
- * 
+ *
  * @author Daniel Naber
  */
-public class XMLRuleHandler extends DefaultHandler {
-  
+public class XMLRuleHandler<T extends Rule> extends DefaultHandler {
+
   enum RegexpMode {
     SMART, EXACT
   }
@@ -96,7 +98,7 @@ public class XMLRuleHandler extends DefaultHandler {
   protected static final String SUGGESTION = "suggestion";
   protected static final String TABNAME = "tab";
 
-  protected List<AbstractPatternRule> rules = new ArrayList<>();
+  private List<T> rules = new ArrayList<>();
   protected Language language;
 
   protected StringBuilder correctExample = new StringBuilder();
@@ -199,7 +201,7 @@ public class XMLRuleHandler extends DefaultHandler {
   protected boolean inUrlForRuleGroup;
   protected StringBuilder url = new StringBuilder();
   protected StringBuilder urlForRuleGroup = new StringBuilder();
-  
+
   protected boolean inRegex;
   protected StringBuilder regex = new StringBuilder();
   protected RegexpMode regexMode = RegexpMode.SMART;
@@ -222,12 +224,19 @@ public class XMLRuleHandler extends DefaultHandler {
 
   protected List<String> uTypeList = new ArrayList<>();
   protected Map<String, List<String>> equivalenceFeatures = new HashMap<>();
+  private RuleFilterCreator ruleFilterCreator;
 
-  public XMLRuleHandler() {
+  public XMLRuleHandler(RuleFilterCreator ruleFilterCreator) {
+      Objects.requireNonNull(ruleFilterCreator, "Rule filter creator must be provided.");
+      this.ruleFilterCreator = ruleFilterCreator;
   }
 
-  public List<AbstractPatternRule> getRules() {
+  public List<T> getRules() {
     return rules;
+  }
+
+  public void addRule(T rule) {
+      rules.add(rule);
   }
 
   @Override
@@ -324,7 +333,7 @@ public class XMLRuleHandler extends DefaultHandler {
   /**
    * Calculates the offset of the match reference (if any) in case the match
    * element has been used in the group.
-   * 
+   *
    * @param patternTokens token list where the match element was used. It is directly changed.
    */
   protected void processElement(List<PatternToken> patternTokens) {
@@ -619,11 +628,13 @@ public class XMLRuleHandler extends DefaultHandler {
     }
     resetToken();
   }
-  
-  protected void setRuleFilter(String filterClassName, String filterArgs, AbstractPatternRule rule) {
+
+  protected void setRuleFilter(String filterClassName, String filterArgs, AbstractPatternRule rule) throws Exception {
     if (filterClassName != null && filterArgs != null) {
-      RuleFilterCreator creator = new RuleFilterCreator();
-      RuleFilter filter = creator.getFilter(filterClassName);
+        if (ruleFilterCreator == null) {
+            throw new IllegalStateException("No rule filter creator provided.  Check the construction of this object.");
+        }
+      RuleFilter filter = ruleFilterCreator.getFilter(filterClassName);
       rule.setFilter(filter);
       rule.setFilterArguments(filterArgs);
     }

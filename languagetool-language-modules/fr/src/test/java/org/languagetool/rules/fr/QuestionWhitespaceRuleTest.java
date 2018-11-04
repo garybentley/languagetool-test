@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,16 +34,16 @@ import static org.junit.Assert.assertEquals;
 public class QuestionWhitespaceRuleTest {
 
     @Test
-    public final void testRule() throws IOException {
+    public final void testRule() throws Exception {
       QuestionWhitespaceRule rule = new QuestionWhitespaceRule(TestTools.getEnglishMessages());
       RuleMatch[] matches;
       JLanguageTool langTool = new JLanguageTool(new French());
-      
+
       // correct sentences:
       assertEquals(0, rule.match(langTool.getAnalyzedSentence("C'est vrai !")).length);
       assertEquals(0, rule.match(langTool.getAnalyzedSentence("Qu'est ce que c'est ?")).length);
       assertEquals(0, rule.match(langTool.getAnalyzedSentence("L'enjeu de ce livre est donc triple : philosophique")).length);
-      
+
       // errors:
       matches = rule.match(langTool.getAnalyzedSentence("C'est vrai!"));
       assertEquals(1, matches.length);
@@ -69,6 +69,5 @@ public class QuestionWhitespaceRuleTest {
       matches = rule.match(langTool.getAnalyzedSentence("Le guillemet ouvrant est suivi d'un espace insécable : «mais le lieu [...] et le guillemet fermant est précédé d'un espace insécable : [...] littérature»."));
       assertEquals(2, matches.length);
     }
-    
-}
 
+}

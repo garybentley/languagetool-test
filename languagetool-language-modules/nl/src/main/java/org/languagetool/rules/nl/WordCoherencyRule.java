@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,7 @@ package org.languagetool.rules.nl;
 import org.languagetool.rules.AbstractWordCoherencyRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,10 +32,11 @@ import java.util.ResourceBundle;
  */
 public class WordCoherencyRule extends AbstractWordCoherencyRule {
 
-  private static final Map<String, String> wordMap = new WordCoherencyDataLoader().loadWords("/nl/coherency.txt");
+  private Map<String, String> wordMap;
 
-  public WordCoherencyRule(ResourceBundle messages) throws IOException {
+  public WordCoherencyRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
     super(messages);
+    wordMap = new WordCoherencyDataLoader().loadWords("/nl/coherency.txt", dataBroker);
     addExamplePair(Example.wrong("We raden af om in één tekst zowel <marker>hivtest</marker> als <marker>hiv-test</marker> te schrijven."),
                    Example.fixed("We raden af om in één tekst zowel <marker>hivtest</marker> als <marker>hivtest</marker> te schrijven."));
   }

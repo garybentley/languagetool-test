@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -47,18 +47,18 @@ import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 
 /**
  * Simple agreement checker for German noun phrases. Checks agreement in:
- * 
+ *
  * <ul>
  *  <li>DET/PRO NOUN: e.g. "mein Auto", "der Mann", "die Frau" (correct), "die Haus" (incorrect)</li>
- *  <li>DET/PRO ADJ NOUN: e.g. "der riesige Tisch" (correct), "die riesigen Tisch" (incorrect)</li> 
+ *  <li>DET/PRO ADJ NOUN: e.g. "der riesige Tisch" (correct), "die riesigen Tisch" (incorrect)</li>
  * </ul>
- * 
+ *
  * Note that this rule only checks agreement inside the noun phrase, not whether
  * e.g. the correct case is used. For example, "Es ist das Haus dem Mann" is not
  * detected as incorrect.
  *
  * <p>TODO: the implementation could use a re-write that first detects the relevant noun phrases and then checks agreement
- *  
+ *
  * @author Daniel Naber
  */
 public class AgreementRule extends Rule {
@@ -69,7 +69,7 @@ public class AgreementRule extends Rule {
     KASUS("Kasus (Fall: Wer/Was, Wessen, Wem, Wen/Was - Beispiel: 'das Fahrrads' statt 'des Fahrrads')"),
     GENUS("Genus (männlich, weiblich, sächlich - Beispiel: 'der Fahrrad' statt 'das Fahrrad')"),
     NUMERUS("Numerus (Einzahl, Mehrzahl - Beispiel: 'das Fahrräder' statt 'die Fahrräder')");
-    
+
     private final String displayName;
     GrammarCategory(String displayName) {
       this.displayName = displayName;
@@ -382,11 +382,11 @@ public class AgreementRule extends Rule {
     "mehrerer",
     "mehrere"
   ));
-  
+
   private static final String[] REL_PRONOUN_LEMMAS = {"der", "welch"};
 
   private static final Pattern UNITS = Pattern.compile(".*([gG]ramm|[mM]eter)");
-  
+
   private static final Set<String> PRONOUNS_TO_BE_IGNORED = new HashSet<>(Arrays.asList(
     "ich",
     "dir",
@@ -421,21 +421,22 @@ public class AgreementRule extends Rule {
     "jemand", "jemandes",
     "niemand", "niemandes"
   ));
-  
+
   private static final Set<String> NOUNS_TO_BE_IGNORED = new HashSet<>(Arrays.asList(
     "Prozent",   // Plural "Prozente", trotzdem ist "mehrere Prozent" korrekt
     "Gramm",
     "Kilogramm",
     "Uhr"   // "um ein Uhr"
   ));
-    
+
+  // GTODO Change to pass the synthesizer rather than language.
   public AgreementRule(ResourceBundle messages, German language) {
     this.language = language;
     super.setCategory(Categories.GRAMMAR.getCategory(messages));
     addExamplePair(Example.wrong("<marker>Der Haus</marker> wurde letztes Jahr gebaut."),
                    Example.fixed("<marker>Das Haus</marker> wurde letztes Jahr gebaut."));
   }
-  
+
   @Override
   public String getId() {
     return "DE_AGREEMENT";
@@ -457,7 +458,7 @@ public class AgreementRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = getSentenceWithImmunization(sentence).getTokensWithoutWhitespace();
     replacePrepositionsByArticle(tokens);
@@ -471,7 +472,7 @@ public class AgreementRule extends Rule {
 
       AnalyzedTokenReadings tokenReadings = tokens[i];
       boolean relevantPronoun = isRelevantPronoun(tokens, i);
-     
+
       boolean ignore = couldBeRelativeOrDependentClause(tokens, i);
       if (i > 0) {
         String prevToken = tokens[i-1].getToken().toLowerCase();
@@ -481,7 +482,7 @@ public class AgreementRule extends Rule {
           ignore = true;
         }
       }
-      
+
       // avoid false alarm on "nichts Gutes" and "alles Gute"
       if (StringUtils.equalsAny(tokenReadings.getToken(), "nichts", "alles", "dies")) {
         ignore = true;
@@ -615,8 +616,8 @@ public class AgreementRule extends Rule {
 
   @Nullable
   private RuleMatch checkDetNounAgreement(AnalyzedTokenReadings token1,
-      AnalyzedTokenReadings token2, AnalyzedSentence sentence) {
-    // TODO: remove "-".equals(token2.getToken()) after the bug fix 
+      AnalyzedTokenReadings token2, AnalyzedSentence sentence) throws Exception {
+    // TODO: remove "-".equals(token2.getToken()) after the bug fix
     // see Daniel's comment from 20.12.2016 at https://github.com/languagetool-org/languagetool/issues/635
     if (token2.isImmunized() || NOUNS_TO_BE_IGNORED.contains(token2.getToken()) || "-".equals(token2.getToken())) {
       return null;
@@ -627,7 +628,7 @@ public class AgreementRule extends Rule {
         token1.getReadings().get(0).getPOSTag() != null &&
         token1.getReadings().get(0).getPOSTag().endsWith(":STV")) {
       // catch the error in "Meiner Chef raucht."
-      set1 = Collections.emptySet(); 
+      set1 = Collections.emptySet();
     } else {
       set1 = getAgreementCategories(token1);
     }
@@ -679,7 +680,7 @@ public class AgreementRule extends Rule {
 
   private RuleMatch checkDetAdjNounAgreement(AnalyzedTokenReadings token1,
       AnalyzedTokenReadings token2, AnalyzedTokenReadings token3, AnalyzedSentence sentence) {
-    // TODO: remove (token3 == null || token3.getToken().length() < 2) 
+    // TODO: remove (token3 == null || token3.getToken().length() < 2)
     // see Daniel's comment from 20.12.2016 at https://github.com/languagetool-org/languagetool/issues/635
     if(token3 == null || token3.getToken().length() < 2) {
       return null;
@@ -711,7 +712,7 @@ public class AgreementRule extends Rule {
     }
     Set<String> set2 = getAgreementCategories(token2, categoryToRelaxSet, true);
     if (set2 == null) {
-      return true;      
+      return true;
     }
     set1.retainAll(set2);
     return set1.size() > 0;
@@ -742,7 +743,7 @@ public class AgreementRule extends Rule {
   private Set<String> getAgreementCategories(AnalyzedTokenReadings aToken) {
     return getAgreementCategories(aToken, new HashSet<>(), false);
   }
-  
+
   /** Return Kasus, Numerus, Genus of those forms with a determiner. */
   private Set<String> getAgreementCategories(AnalyzedTokenReadings aToken, Set<GrammarCategory> omit, boolean skipSol) {
     Set<String> set = new HashSet<>();
@@ -757,9 +758,9 @@ public class AgreementRule extends Rule {
           reading.getGenus() == null) {
         continue;
       }
-      if (reading.getGenus() == GermanToken.Genus.ALLGEMEIN && 
+      if (reading.getGenus() == GermanToken.Genus.ALLGEMEIN &&
           tmpReading.getPOSTag() != null && !tmpReading.getPOSTag().endsWith(":STV") &&  // STV: stellvertretend (!= begleitend)
-          !possessiveSpecialCase(aToken, tmpReading)) {   
+          !possessiveSpecialCase(aToken, tmpReading)) {
         // genus=ALG in the original data. Not sure if this is allowed, but expand this so
         // e.g. "Ich Arbeiter" doesn't get flagged as incorrect:
         if (reading.getDetermination() == null) {

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,16 +19,25 @@
 package org.languagetool.tokenizers.de;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.German;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
+
+// GTODO Should rename to remove SRX reference.
 
 /**
  * @author Daniel Naber
  */
 public class GermanSRXSentenceTokenizerTest {
 
-  private final SRXSentenceTokenizer stokenizer = new SRXSentenceTokenizer(new German());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      German german = new German();
+      stokenizer = german.getSentenceTokenizer();
+  }
 
   @Test
   public void testTokenize() {
@@ -85,9 +94,9 @@ public class GermanSRXSentenceTokenizerTest {
     // ganzer Satz kommt oder nicht:
     testSplit("Das war es: gar nichts.");
     testSplit("Das war es: Dies ist ein neuer Satz.");
-    
-    // Tests created as part of regression testing of SRX tokenizer. 
-    // They come from Schuld und Sühne (Crime and Punishment) book. 
+
+    // Tests created as part of regression testing of SRX tokenizer.
+    // They come from Schuld und Sühne (Crime and Punishment) book.
     testSplit("schlug er die Richtung nach der K … brücke ein. ");
     testSplit("sobald ich es von einem Freunde zurückbekomme …« Er wurde verlegen und schwieg.");
  //   testSplit(new String[] { "Verstehen Sie wohl? ", "… ", "Gestatten Sie mir noch die Frage" });
@@ -104,7 +113,7 @@ public class GermanSRXSentenceTokenizerTest {
   }
 
   private void testSplit(String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
-  
+
 }

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,7 +35,7 @@ import org.languagetool.rules.patterns.Match;
 /**
  * A Rule that describes a pattern of words or part-of-speech tags used for
  * disambiguation.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class DisambiguationPatternRule extends AbstractPatternRule {
@@ -96,7 +96,7 @@ public class DisambiguationPatternRule extends AbstractPatternRule {
    * @param sentence {@link AnalyzedSentence} Sentence to be disambiguated.
    * @return {@link AnalyzedSentence} Disambiguated sentence (might be unchanged).
    */
-  public final AnalyzedSentence replace(AnalyzedSentence sentence) throws IOException {
+  public final AnalyzedSentence replace(AnalyzedSentence sentence) throws Exception {
     DisambiguationPatternRuleReplacer replacer = new DisambiguationPatternRuleReplacer(this);
     return replacer.replace(sentence);
   }

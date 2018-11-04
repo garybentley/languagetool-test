@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,21 +20,21 @@ package org.languagetool.rules.de;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
-import org.languagetool.language.GermanyGerman;
+import org.languagetool.language.German;
 
 public class MissingVerbRuleTest {
 
-  private final MissingVerbRule rule = new MissingVerbRule(TestTools.getEnglishMessages(), new GermanyGerman());
+  private MissingVerbRule rule;
 
   @Test
-  public void test() throws IOException {
-    JLanguageTool lt = new JLanguageTool(new GermanyGerman());
-    
+  public void test() throws Exception {
+      German german = new German();
+      rule = german.createMissingVerbRule(null);
+    JLanguageTool lt = new JLanguageTool(german);
+
     assertGood("Da ist ein Verb, mal so zum testen.", lt);
     assertGood("Überschrift ohne Verb aber doch nicht zu kurz", lt);
     assertGood("Sprechen Sie vielleicht zufällig Türkisch?", lt);
@@ -44,18 +44,18 @@ public class MissingVerbRuleTest {
     assertGood("Ja!", lt);  // no verb, but very short
     assertGood("Vielen Dank für alles, was Du für mich getan hast.", lt);
     assertGood("Herzlichen Glückwunsch zu Deinem zwanzigsten Geburtstag.", lt);
-    
+
     assertBad("Dieser Satz kein Verb.", lt);
     assertBad("Aus einer Idee sich erste Wortgruppen, aus Wortgruppen einzelne Sätze, aus Sätzen ganze Texte.", lt);
     assertBad("Ich ein neues Rad.", lt);
     //assertBad("Ich einen neuen Fehler gefunden.", lt);  // see issue #42
   }
 
-  private void assertGood(String text, JLanguageTool langTool) throws IOException {
+  private void assertGood(String text, JLanguageTool langTool) throws Exception {
     assertEquals("Found unexpected error in: '" + text + "'", 0, rule.match(langTool.getAnalyzedSentence(text)).length);
   }
 
-  private void assertBad(String text, JLanguageTool langTool) throws IOException {
+  private void assertBad(String text, JLanguageTool langTool) throws Exception {
     assertEquals("Did not find expected error in: '" + text + "'", 1, rule.match(langTool.getAnalyzedSentence(text)).length);
   }
 

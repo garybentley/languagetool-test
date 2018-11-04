@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,7 +23,7 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.Example;
-import org.languagetool.rules.spelling.hunspell.CompoundAwareHunspellRule;
+import org.languagetool.rules.spelling.hunspell.*;
 import org.languagetool.rules.spelling.morfologik.MorfologikMultiSpeller;
 import org.languagetool.tokenizers.CompoundWordTokenizer;
 
@@ -35,9 +35,10 @@ import java.util.*;
  * @since 4.0
  */
 public class FrenchCompoundAwareHunspellRule extends CompoundAwareHunspellRule {
-  
-  public FrenchCompoundAwareHunspellRule(ResourceBundle messages, Language language, UserConfig userConfig) {
-    super(messages, language, new NonSplittingTokenizer(), getSpeller(language, userConfig), userConfig);
+
+  public FrenchCompoundAwareHunspellRule(ResourceBundle messages, Language language, MorfologikMultiSpeller morfoSpeller, UserConfig userConfig,
+                Hunspell.Dictionary hunspellDict, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
+    super(messages, language, new NonSplittingTokenizer(), morfoSpeller, userConfig, hunspellDict, ignoreWords, prohibitedWords, null /* non word pattern, just use default */);
     addExamplePair(Example.wrong("Le <marker>chein</marker> noir"),
                    Example.fixed("Le <marker>chien</marker> noir"));
   }
@@ -51,6 +52,8 @@ public class FrenchCompoundAwareHunspellRule extends CompoundAwareHunspellRule {
   protected void filterForLanguage(List<String> suggestions) {
   }
 
+/*
+GTODO Clean up
   @Nullable
   private static MorfologikMultiSpeller getSpeller(Language language, UserConfig userConfig) {
     if (!language.getShortCode().equals(Locale.FRENCH.getLanguage())) {
@@ -58,10 +61,10 @@ public class FrenchCompoundAwareHunspellRule extends CompoundAwareHunspellRule {
     }
     try {
       String morfoFile = "/fr/hunspell/fr_" + language.getCountries()[0] + ".dict";
-      if (JLanguageTool.getDataBroker().resourceExists(morfoFile)) {
+      if (language.getUseDataBroker().resourceExists(morfoFile)) {
         // spell data will not exist in LibreOffice/OpenOffice context
         String path = "/fr/hunspell/spelling.txt";
-        try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path);
+        try (InputStream stream = language.getUseDataBroker().getFromResourceDirAsStream(path);
              BufferedReader br = new BufferedReader(new InputStreamReader(stream, "utf-8"))) {
           return new MorfologikMultiSpeller(morfoFile, br, path, null, null, userConfig != null ? userConfig.getAcceptedWords(): Collections.emptyList(), 2);
         }
@@ -72,7 +75,7 @@ public class FrenchCompoundAwareHunspellRule extends CompoundAwareHunspellRule {
       throw new RuntimeException("Could not set up morfologik spell checker", e);
     }
   }
-
+*/
   static class NonSplittingTokenizer implements CompoundWordTokenizer {
     @Override
     public List<String> tokenize(String text) {

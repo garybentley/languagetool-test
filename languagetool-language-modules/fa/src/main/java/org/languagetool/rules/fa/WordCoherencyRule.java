@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,6 +20,7 @@ package org.languagetool.rules.fa;
 
 import org.languagetool.rules.AbstractWordCoherencyRule;
 import org.languagetool.rules.WordCoherencyDataLoader;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,15 +28,19 @@ import java.util.ResourceBundle;
 
 /**
  * Persian version of {@link org.languagetool.rules.AbstractWordCoherencyRule}.
- * 
+ *
  * @since 2.7
  */
 public class WordCoherencyRule extends AbstractWordCoherencyRule {
 
-  private static final Map<String, String> wordMap = new WordCoherencyDataLoader().loadWords("/fa/coherency.txt");
+  private Map<String, String> wordMap;
 
-  public WordCoherencyRule(ResourceBundle messages) throws IOException {
+  public WordCoherencyRule(ResourceBundle messages, Map<String, String> wordMap) throws IOException {
     super(messages);
+    this.wordMap = wordMap;
+    /*
+    GTODO wordMap = new WordCoherencyDataLoader().loadWords("/fa/coherency.txt", dataBroker);
+    */
     // TODO:
     //addExamplePair(Example.wrong("من در <marker>اطاق</marker> تو را دیدم."),
     //               Example.fixed("من در <marker>اتاق</marker> تو را دیدم."));
@@ -50,7 +55,7 @@ public class WordCoherencyRule extends AbstractWordCoherencyRule {
   protected String getMessage(String word1, String word2) {
     return "'" + word1 + "' و '"  + word2 + "' نباید در یک جا استفاده شوند";
   }
-  
+
   @Override
   public String getId() {
     return "FA_WORD_COHERENCY";

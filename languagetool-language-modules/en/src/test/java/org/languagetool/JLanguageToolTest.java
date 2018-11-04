@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -43,7 +43,7 @@ public class JLanguageToolTest {
 
   @Ignore("not a test, but used on http://wiki.languagetool.org/java-api")
   @Test
-  public void demoCodeForHomepage() throws IOException {
+  public void demoCodeForHomepage() throws Exception {
     JLanguageTool langTool = new JLanguageTool(new BritishEnglish());
     // comment in to use statistical ngram data:
     //langTool.activateLanguageModelRules(new File("/data/google-ngram-data"));
@@ -59,7 +59,7 @@ public class JLanguageToolTest {
 
   @Ignore("not a test, but used on http://wiki.languagetool.org/java-spell-checker")
   @Test
-  public void spellCheckerDemoCodeForHomepage() throws IOException {
+  public void spellCheckerDemoCodeForHomepage() throws Exception {
     JLanguageTool langTool = new JLanguageTool(new BritishEnglish());
     for (Rule rule : langTool.getAllRules()) {
       if (!rule.isDictionaryBasedSpellingRule()) {
@@ -78,7 +78,7 @@ public class JLanguageToolTest {
 
   @Ignore("not a test, but used on http://wiki.languagetool.org/java-spell-checker")
   @Test
-  public void spellCheckerDemoCodeForHomepageWithAddedWords() throws IOException {
+  public void spellCheckerDemoCodeForHomepageWithAddedWords() throws Exception {
     JLanguageTool langTool = new JLanguageTool(new BritishEnglish());
     for (Rule rule : langTool.getAllRules()) {
       if (rule instanceof SpellingCheckRule) {
@@ -90,7 +90,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testEnglish() throws IOException {
+  public void testEnglish() throws Exception {
     //more error-free sentences to deal with possible regressions
     if (System.getProperty("disableHardcodedTests") == null) {
       JLanguageTool lt = new JLanguageTool(new English());
@@ -110,7 +110,6 @@ public class JLanguageToolTest {
       assertNoError("And the few must win what the many lose, for the opposite arrangement would not support markets as we know them at all, and is, in fact, unimaginable.", lt);
       assertNoError("He explained his errand, but without bothering much to make it plausible, for he felt something well up in him which was the reason why he had fled the army.", lt);
       assertNoError("I think it's better, and it's not a big deal.", lt);
-
       assertOneError("A test test that should give errors.", lt);
       assertOneError("I can give you more a detailed description.", lt);
       assertTrue(lt.getAllRules().size() > 1000);
@@ -125,18 +124,18 @@ public class JLanguageToolTest {
     }
   }
 
-  private void assertNoError(String input, JLanguageTool lt) throws IOException {
+  private void assertNoError(String input, JLanguageTool lt) throws Exception {
     List<RuleMatch> matches = lt.check(input);
     assertEquals("Did not expect an error in test sentence: '" + input + "', but got: " + matches, 0, matches.size());
   }
 
-  private void assertOneError(String input, JLanguageTool lt) throws IOException {
+  private void assertOneError(String input, JLanguageTool lt) throws Exception {
     List<RuleMatch> matches = lt.check(input);
     assertEquals("Did expect 1 error in test sentence: '" + input + "', but got: " + matches, 1, matches.size());
   }
 
   @Test
-  public void testPositionsWithEnglish() throws IOException {
+  public void testPositionsWithEnglish() throws Exception {
     JLanguageTool tool = new JLanguageTool(new AmericanEnglish());
     List<RuleMatch> matches = tool.check("A sentence with no period\n" +
         "A sentence. A typoh.");
@@ -147,7 +146,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testPositionsWithEnglishTwoLineBreaks() throws IOException {
+  public void testPositionsWithEnglishTwoLineBreaks() throws Exception {
     JLanguageTool tool = new JLanguageTool(new AmericanEnglish());
     List<RuleMatch> matches = tool.check("This sentence.\n\n" +
         "A sentence. A typoh.");
@@ -158,7 +157,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testAnalyzedSentence() throws IOException {
+  public void testAnalyzedSentence() throws Exception {
     JLanguageTool tool = new JLanguageTool(new English());
     //test soft-hyphen ignoring:
     assertEquals("<S> This[this/DT,B-NP-singular|E-NP-singular] " +
@@ -171,7 +170,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testParagraphRules() throws IOException {
+  public void testParagraphRules() throws Exception {
     JLanguageTool tool = new JLanguageTool(new English());
 
     //run normally
@@ -195,7 +194,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testWhitespace() throws IOException {
+  public void testWhitespace() throws Exception {
     JLanguageTool tool = new JLanguageTool(new English());
     AnalyzedSentence raw = tool.getRawAnalyzedSentence("Let's do a \"test\", do you understand?");
     AnalyzedSentence cooked = tool.getAnalyzedSentence("Let's do a \"test\", do you understand?");
@@ -212,7 +211,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testOverlapFilter() throws IOException {
+  public void testOverlapFilter() throws Exception {
     Category category = new Category(new CategoryId("TEST_ID"), "test category");
     List<PatternToken> elements1 = Arrays.asList(new PatternToken("one", true, false, false));
     PatternRule rule1 = new PatternRule("id1", new English(), elements1, "desc1", "msg1", "shortMsg1");
@@ -239,9 +238,9 @@ public class JLanguageToolTest {
     assertEquals("one overlapping rule must be filtered out", 1, ruleMatches2.size());
     assertEquals("msg1", ruleMatches2.get(0).getMessage());
   }
-  
+
   @Test
-  public void testTextLevelRuleWithGlobalData() throws IOException {
+  public void testTextLevelRuleWithGlobalData() throws Exception {
     JLanguageTool tool = new JLanguageTool(new English());
     tool.addRule(new MyTextLevelRule());
     AnnotatedText text1 = new AnnotatedTextBuilder().addGlobalMetaData(AnnotatedText.MetaDataKey.EmailToAddress, "Foo Bar <foo@foo.de>").build();
@@ -249,17 +248,17 @@ public class JLanguageToolTest {
     AnnotatedText text2 = new AnnotatedTextBuilder().addGlobalMetaData(AnnotatedText.MetaDataKey.EmailToAddress, "blah blah <foo@foo.de>").build();
     assertThat(tool.check(text2).size(), is(0));
   }
-  
+
   class MyTextLevelRule extends TextLevelRule {
     @Override
-    public RuleMatch[] match(List<AnalyzedSentence> sentences, AnnotatedText text) throws IOException {
+    public RuleMatch[] match(List<AnalyzedSentence> sentences, AnnotatedText text) throws Exception {
       if (text.getGlobalMetaData(AnnotatedText.MetaDataKey.EmailToAddress, "").contains("Foo Bar")) {
         return new RuleMatch[]{new RuleMatch(this, null, 0, 1, "test message")};
       }
       return new RuleMatch[0];
     }
     @Override
-    public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+    public RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
       throw new RuntimeException("not implemented");
     }
     @Override

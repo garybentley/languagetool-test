@@ -32,15 +32,16 @@ public class EnglishWrongWordInContextRuleTest {
 
   private JLanguageTool langTool;
   private EnglishWrongWordInContextRule rule;
-  
+
   @Before
-  public void setUp() throws IOException {
-    langTool = new JLanguageTool(new AmericanEnglish());
-    rule = new EnglishWrongWordInContextRule(null);
+  public void setUp() throws Exception {
+    AmericanEnglish lang = new AmericanEnglish();
+    langTool = new JLanguageTool(lang);
+    rule = lang.createWrongWordInContextRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // prescribe/proscribe
     assertBad("I have proscribed you a course of antibiotics.");
     assertGood("I have prescribed you a course of antibiotics.");
@@ -70,11 +71,11 @@ public class EnglishWrongWordInContextRuleTest {
     assertGood("They have a great marble statue.");
   }
 
-  private void assertGood(String sentence) throws IOException {
+  private void assertGood(String sentence) throws Exception {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence(sentence)).length);
   }
 
-  private void assertBad(String sentence) throws IOException {
+  private void assertBad(String sentence) throws Exception {
     assertEquals(1, rule.match(langTool.getAnalyzedSentence(sentence)).length);
   }
 }

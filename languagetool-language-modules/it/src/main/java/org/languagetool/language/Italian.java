@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -48,7 +48,7 @@ public class Italian extends Language implements AutoCloseable {
   private SentenceTokenizer sentenceTokenizer;
   private LuceneLanguageModel languageModel;
   private Disambiguator disambiguator;
-  
+
   @Override
   public String getName() {
     return "Italian";
@@ -58,7 +58,7 @@ public class Italian extends Language implements AutoCloseable {
   public String getShortCode() {
     return "it";
   }
-  
+
   @Override
   public String[] getCountries() {
     return new String[]{"IT", "CH"};
@@ -120,7 +120,7 @@ public class Italian extends Language implements AutoCloseable {
   }
 
   /**
-   * Closes the language model, if any. 
+   * Closes the language model, if any.
    * @since 3.1
    */
   @Override
@@ -133,7 +133,7 @@ public class Italian extends Language implements AutoCloseable {
   @Override
   public final Disambiguator getDisambiguator() {
     if (disambiguator == null) {
-      disambiguator = new ItalianRuleDisambiguator();
+      disambiguator = new ItalianRuleDisambiguator(getUseDataBroker());
     }
     return disambiguator;
   }

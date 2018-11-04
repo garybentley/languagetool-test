@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,7 +31,7 @@ import org.languagetool.rules.WordRepeatBeginningRule;
 /**
  * Extends {@link WordRepeatBeginningRule} by a list of German adverbs ("Konjunktionaladverben")
  * for a more precise error message.
- * 
+ *
  * @author Markus Brenneis
  */
 public class GermanWordRepeatBeginningRule extends WordRepeatBeginningRule {
@@ -41,17 +41,17 @@ public class GermanWordRepeatBeginningRule extends WordRepeatBeginningRule {
           "Nebenher", "Nebenbei", "Überdies", "Weiterführend", "Zudem", "Zusätzlich"
   ));
 
-  public GermanWordRepeatBeginningRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public GermanWordRepeatBeginningRule(ResourceBundle messages) {
+    super(messages);
     addExamplePair(Example.wrong("Dann hatten wir Freizeit. Dann gab es Essen. <marker>Dann</marker> gingen wir schlafen."),
                    Example.fixed("Dann hatten wir Freizeit. Danach gab es Essen. <marker>Schließlich</marker> gingen wir schlafen."));
   }
-  
+
   @Override
   public String getId() {
     return "GERMAN_WORD_REPEAT_BEGINNING_RULE";
   }
-  
+
   @Override
   protected boolean isAdverb(AnalyzedTokenReadings token) {
     return ADVERBS.contains(token.getToken());

@@ -23,15 +23,19 @@ import org.junit.Test;
 import java.net.URL;
 import java.util.List;
 
+import org.languagetool.TestTools;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class MorfologikTaggerTest {
 
   @Test
-  public void testTag() {
-    URL url = MorfologikTaggerTest.class.getResource("/org/languagetool/tagging/test.dict");
-    MorfologikTagger tagger = new MorfologikTagger(url);
+  public void testTag() throws Exception {
+
+    //GTODO URL url = MorfologikTaggerTest.class.getResource("/org/languagetool/tagging/test.dict");
+    MorfologikTagger tagger = TestTools.getTestLanguage().getUseDataBroker().getMorfologikTagger();
+    //GTODO new MorfologikTagger(url);
 
     List<TaggedWord> result1 = tagger.tag("lowercase");
     assertThat(result1.size(), is(2));

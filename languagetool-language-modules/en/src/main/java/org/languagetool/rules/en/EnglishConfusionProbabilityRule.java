@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,13 +18,16 @@
  */
 package org.languagetool.rules.en;
 
-import org.languagetool.Language;
+import org.languagetool.language.English;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.ngrams.ConfusionProbabilityRule;
 import org.languagetool.rules.Example;
+import org.languagetool.rules.ConfusionSet;
 import org.languagetool.tokenizers.WordTokenizer;
 
 import java.util.ResourceBundle;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @since 2.7
@@ -33,12 +36,12 @@ public class EnglishConfusionProbabilityRule extends ConfusionProbabilityRule {
 
   private final WordTokenizer tokenizer = new GoogleStyleWordTokenizer();
 
-  public EnglishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language) {
-    this(messages, languageModel, language, 3);
+  public EnglishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, English language, Map<String,List<ConfusionSet>> confusionSets) {
+    this(messages, languageModel, language, 3, confusionSets);
   }
 
-  public EnglishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, int grams) {
-    super(messages, languageModel, language, grams);
+  public EnglishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, English language, int grams, Map<String,List<ConfusionSet>> confusionSets) {
+    super(messages, languageModel, language, grams, confusionSets);
     addExamplePair(Example.wrong("I didn't <marker>now</marker> where it came from."),
                    Example.fixed("I didn't <marker>know</marker> where it came from."));
   }

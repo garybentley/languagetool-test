@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Data about words that are compounds and should thus not be written
@@ -35,25 +36,37 @@ import org.languagetool.JLanguageTool;
  */
 public class CompoundRuleData {
 
-  private final Set<String> incorrectCompounds = new HashSet<>();
-  private final Set<String> noDashSuggestion = new HashSet<>();
-  private final Set<String> noDashLowerCaseSuggestion = new HashSet<>();
-  private final Set<String> onlyDashSuggestion = new HashSet<>();
+  private Set<String> incorrectCompounds = new HashSet<>();
+  private Set<String> noDashSuggestion = new HashSet<>();
+  private Set<String> noDashLowerCaseSuggestion = new HashSet<>();
+  private Set<String> onlyDashSuggestion = new HashSet<>();
 
+  public CompoundRuleData(Set<String> incorrectCompounds, Set<String> noDashSuggestions, Set<String> noDashLowerCaseSuggestions, Set<String> onlyDashSuggestions) {
+      this.incorrectCompounds = incorrectCompounds;
+      this.noDashSuggestion = noDashSuggestions;
+      this.noDashLowerCaseSuggestion = noDashLowerCaseSuggestions;
+      this.onlyDashSuggestion = onlyDashSuggestions;
+  }
+/*
+GTODO: Clean up
   public CompoundRuleData(String path) {
     this(new String[] {path});
   }
 
   public CompoundRuleData(String... paths) {
+      this(JLanguageTool.getDataBroker(), paths);
+  }
+
+  public CompoundRuleData(ResourceDataBroker dataBroker, String... paths) {
     for (String path : paths) {
       try {
-        loadCompoundFile(path);
+        loadCompoundFile(path, dataBroker);
       } catch (IOException e) {
         throw new RuntimeException("Could not load compound data from " + path, e);
       }
     }
   }
-
+*/
   Set<String> getIncorrectCompounds() {
     return Collections.unmodifiableSet(incorrectCompounds);
   }
@@ -70,9 +83,11 @@ public class CompoundRuleData {
 	return Collections.unmodifiableSet(noDashLowerCaseSuggestion);
   }
 
-  private void loadCompoundFile(String path) throws IOException {
+/*
+GTODO: Clean up
+  private void loadCompoundFile(String path, ResourceDataBroker dataBroker) throws IOException {
     try (
-      InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path);
+      InputStream stream = dataBroker.getFromResourceDirAsStream(path);
       InputStreamReader reader = new InputStreamReader(stream, "utf-8");
       BufferedReader br = new BufferedReader(reader)
     ) {
@@ -118,5 +133,5 @@ public class CompoundRuleData {
   private String removeLastCharacter(String str) {
     return str.substring(0, str.length() - 1);
   }
-
+*/
 }

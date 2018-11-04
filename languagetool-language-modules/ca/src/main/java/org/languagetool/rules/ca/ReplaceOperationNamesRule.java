@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -37,37 +37,40 @@ import org.languagetool.synthesis.ca.CatalanSynthesizer;
 
 /**
  * A rule that suggests better names for technical operation names
- * 
+ *
  * Loads the relevant words from <code>/ca/replace_operationnames.txt</code>.
- * 
+ *
  * @author Jaume Ortolà
  */
 public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/ca/replace_operationnames.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale CA_LOCALE = new Locale("CA");
 
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      if (wrongWords == null) {
+          wrongWords = load("/ca/replace_operationnames.txt", dataBroker);
+      }
     return wrongWords;
   }
-  
+
   private CatalanSynthesizer synth;
-  
+
   private static final Pattern PrevToken_POS = Pattern.compile("D[^R].*|PX.*|SPS00|SENT_START");
   private static final Pattern PrevToken_POS_Excep = Pattern.compile("RG_anteposat|N.*|CC|_PUNCT.*|_loc_unavegada|RN");
   private static final Pattern NextToken_POS_Excep = Pattern.compile("N.*");
-  
+
   private static final Pattern PUNTUACIO = Pattern.compile("PUNCT.*|SENT_START");
   private static final Pattern DETERMINANT = Pattern.compile("D[^R].M.*");
-  
+
 
   public ReplaceOperationNamesRule(final ResourceBundle messages, Language language) throws IOException {
-    super(messages);
+    super(messages, language.getUseDataBroker());
     super.setLocQualityIssueType(ITSIssueType.Style);
-    super.setCategory(new Category(new CategoryId("FORMES_SECUNDARIES"), "C8) Formes secundàries")); 
+    super.setCategory(new Category(new CategoryId("FORMES_SECUNDARIES"), "C8) Formes secundàries"));
     synth = (CatalanSynthesizer) language.getSynthesizer();
-  }  
+  }
 
   @Override
   public final String getId() {
@@ -83,7 +86,7 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Forma preferible";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return "Si és el nom d'una operació tècnica, val més usar una altra forma.";
@@ -93,7 +96,7 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
   public Locale getLocale() {
     return CA_LOCALE;
   }
-  
+
   @Override
   public final RuleMatch[] match(final AnalyzedSentence sentence) {
     List<RuleMatch> ruleMatches = new ArrayList<>();
@@ -101,10 +104,10 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
 
     loop: for (int i=1; i<tokens.length; i++) {
 
-      List<String> replacementLemmas = null; 
+      List<String> replacementLemmas = null;
 
       String token = tokens[i].getToken().toLowerCase();
-      
+
       if (token.length()>3 && token.endsWith("s")) {
         token = token.substring(0, token.length() - 1);
       }
@@ -113,7 +116,7 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
       } else {
         continue loop;
       }
-      
+
       // exceptions
       if (token.equals("duplicat") && tokens[i-1].getToken().equalsIgnoreCase("per")) {
         continue loop;
@@ -123,37 +126,37 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
           matchPostagRegexp(tokens[i - 1], PUNTUACIO) &&
           matchPostagRegexp(tokens[i + 1], DETERMINANT)) {
         continue loop;
-      }  
-      
+      }
+
       // relevant token
       if (tokens[i].hasPosTag("_GV_")) {
         continue loop;
       }
-  
+
       // next token
       if (i + 1 < tokens.length
           && (tokens[i + 1].hasLemma("per") || tokens[i + 1].hasLemma("com")
-              || tokens[i + 1].hasLemma("des") || tokens[i + 1].hasLemma("amb") 
+              || tokens[i + 1].hasLemma("des") || tokens[i + 1].hasLemma("amb")
               || matchPostagRegexp(tokens[i + 1], NextToken_POS_Excep))) {
         continue loop;
       }
-      
+
       // prev token
       if (!matchPostagRegexp(tokens[i - 1], PrevToken_POS)
           || matchPostagRegexp(tokens[i - 1], PrevToken_POS_Excep)) {
         continue loop;
       }
-      
+
       // The rule matches!
       //synthesize replacements
-      
+
       if (replacementLemmas != null) {
         List<String> possibleReplacements = new ArrayList<>();
         String[] synthesized = null;
 
         if (!tokens[i].getToken().toLowerCase().endsWith("s")) {
           possibleReplacements.addAll(replacementLemmas);
-        } else { 
+        } else {
           //synthesize plural
           for (String replacementLemma : replacementLemmas) {
             try {
@@ -174,7 +177,7 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
     }
     return toRuleMatchArray(ruleMatches);
   }
-  
+
   /**
    * Match POS tag with regular expression
    */

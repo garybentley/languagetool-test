@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules.de;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,21 +38,31 @@ import org.jetbrains.annotations.Nullable;
 import org.languagetool.*;
 import org.languagetool.language.German;
 import org.languagetool.rules.Example;
-import org.languagetool.rules.spelling.hunspell.CompoundAwareHunspellRule;
 import org.languagetool.rules.spelling.morfologik.MorfologikMultiSpeller;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tokenizers.de.GermanCompoundTokenizer;
 import org.languagetool.tools.StringTools;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.tokenizers.CompoundWordTokenizer;
+import org.languagetool.rules.spelling.hunspell.*;
 
 import de.danielnaber.jwordsplitter.GermanWordSplitter;
 
-public class GermanSpellerRule extends CompoundAwareHunspellRule {
+/**
+ GTODO This has been made abstract to be more consistent with other languages and to better enforce
+  the variant behaviour.  Instead of hacks here for Swiss, i.e. ß -> ss.  Those replacements have been
+  moved to SwissGermanSpellerRule.  That helps prevent subtle typing bugs that may arise where the user
+  believes they are using Swiss but are not really.
+
+  A new GermanyGerman has been introduced to fill the gap.
+  */
+public abstract class GermanSpellerRule extends CompoundAwareHunspellRule {
 
   public static final String RULE_ID = "GERMAN_SPELLER_RULE";
 
   private static final int MAX_EDIT_DISTANCE = 2;
-  
+
   // some exceptions for changes to the spelling in 2017 - just a workaround so we don't have to touch the binary dict:
   private static final Pattern PREVENT_SUGGESTION = Pattern.compile(
           ".*(Majonäse|Bravur|Anschovis|Belkanto|Campagne|Frotté|Grisli|Jockei|Joga|Kalvinismus|Kanossa|Kargo|Ketschup|" +
@@ -347,23 +356,63 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
   private static GermanWordSplitter getSplitter() {
     try {
       return new GermanWordSplitter(false);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private final LineExpander lineExpander = new LineExpander();
-  private final GermanCompoundTokenizer compoundTokenizer;
+  public static final String NON_WORD_REGEX_PATTERN = "(?<=\\d)-|-(?=\\d+)";
+  private final LineExpander lineExpander;
+  // GTODO private final GermanCompoundTokenizer compoundTokenizer;
+  private final Tokenizer compoundTokenizer;
   private final Synthesizer synthesizer;
   private final Tagger tagger;
 
+  // GTODO Maybe get rid of line expander and override relevant methods in Swiss rule?
+  public GermanSpellerRule(ResourceBundle messages, German language, MorfologikMultiSpeller morfoSpeller, UserConfig userConfig,
+                Hunspell.Dictionary hunspellDict, Tagger tagger, Synthesizer synthesizer, Tokenizer strictTokenizer,
+                CompoundWordTokenizer nonStrictTokenizer, List<String> ignoreWords, List<String> prohibitedWords, LineExpander lineExpander) throws Exception {
+    // We pass null for the ignore words and prohibited words then add them later to ensure that the line expander is used.
+    super(messages, language, nonStrictTokenizer, morfoSpeller, userConfig, hunspellDict, null, null, NON_WORD_REGEX_PATTERN);
+    if (lineExpander == null) {
+        lineExpander = new LineExpander() {
+            @Override
+            public List<String> expandLine(String line) {
+                return Collections.singletonList(line);
+            }
+        };
+    }
+    this.lineExpander = lineExpander;
+    this.compoundTokenizer = strictTokenizer;
+    this.tagger = tagger;
+    this.synthesizer = synthesizer;
+    addExamplePair(Example.wrong("LanguageTool kann mehr als eine <marker>nromale</marker> Rechtschreibprüfung."),
+                   Example.fixed("LanguageTool kann mehr als eine <marker>normale</marker> Rechtschreibprüfung."));
+    // Now add the ignore words, we needed the line expander before.
+    if (ignoreWords != null) {
+        for (String w : ignoreWords) {
+            addIgnoreWords(w);
+        }
+    }
+
+    // Now add the prohibited words, like the ignore words we need the line expander.
+    if (prohibitedWords != null) {
+        for (String w : prohibitedWords) {
+            addProhibitedWords(lineExpander.expandLine(w));
+        }
+    }
+  }
+/*
+GTODO Clean up
   public GermanSpellerRule(ResourceBundle messages, German language) {
     this(messages, language, null, null);
   }
-
+*/
   /**
    * @since 4.2
    */
+   /*
+   GTODO Clean up
   public GermanSpellerRule(ResourceBundle messages, German language, UserConfig userConfig, String languageVariantPlainTextDict) {
     super(messages, language, language.getNonStrictCompoundSplitter(), getSpeller(language, userConfig, languageVariantPlainTextDict), userConfig);
     addExamplePair(Example.wrong("LanguageTool kann mehr als eine <marker>nromale</marker> Rechtschreibprüfung."),
@@ -372,7 +421,9 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
     tagger = language.getTagger();
     synthesizer = language.getSynthesizer();
   }
-
+*/
+/*
+GTODO Clean up
   @Override
   protected void init() throws IOException {
     super.init();
@@ -380,10 +431,20 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
     nonWordPattern = Pattern.compile(pattern);
     needsInit = false;
   }
-
+*/
   @Override
   public String getId() {
     return RULE_ID;
+  }
+
+  // GTODO Should expandline be called for each word here?  This behaviour is different to addIgnoreWords which treats each word as a line...
+  @Override
+  protected void addProhibitedWords(List<String> words) {
+    if(words.size() == 1 && words.get(0).endsWith(".*")) {
+      wordStartsToBeProhibited.add(words.get(0).substring(0, words.get(0).length()-2));
+    } else {
+      super.addProhibitedWords(words);
+    }
   }
 
   @Override
@@ -417,35 +478,25 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
   }
 
   @Override
-  protected void addIgnoreWords(String origLine) {
+  protected void addIgnoreWords(String origLine) throws Exception {
     String line;
-    if (language.getShortCodeWithCountryAndVariant().equals("de-CH")) {
-      // hack: Swiss German doesn't use "ß" but always "ss" - replace this, otherwise
-      // misspellings (from Swiss point-of-view) like "äußere" wouldn't be found:
-      line = origLine.replace("ß", "ss");
-    } else if (origLine.endsWith("-*")) {
+     if (origLine.endsWith("-*")) {
       // words whose line ends with "-*" are only allowed in hyphenated compounds
       wordsToBeIgnoredInCompounds.add(origLine.substring(0, origLine.length() - 2));
       return;
     } else {
       line = origLine;
     }
-    List<String> words = expandLine(line);
-    for (String word : words) {
-      super.addIgnoreWords(word);
+    for (String w : lineExpander.expandLine(line)) {
+        super.addIgnoreWords(w);
     }
-  }
-
-  @Override
-  protected List<String> expandLine(String line) {
-    return lineExpander.expandLine(line);
   }
 
   /*
    * @since 3.6
    */
   @Override
-  public List<String> getSuggestions(String word) throws IOException {
+  public List<String> getSuggestions(String word) throws Exception {
     List<String> suggestions = super.getSuggestions(word);
     suggestions = suggestions.stream().filter(k -> !PREVENT_SUGGESTION.matcher(k).matches() && !k.endsWith("roulett")).collect(Collectors.toList());
     if (word.endsWith(".")) {
@@ -455,7 +506,8 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
     suggestions = suggestions.stream().filter(k -> !k.equals(word)).collect(Collectors.toList());
     return suggestions;
   }
-
+/*
+ GTODO Clean up
   @Nullable
   private static MorfologikMultiSpeller getSpeller(Language language, UserConfig userConfig, String languageVariantPlainTextDict) {
     if (!language.getShortCode().equals(Locale.GERMAN.getLanguage())) {
@@ -490,15 +542,19 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
       throw new RuntimeException("Could not set up morfologik spell checker", e);
     }
   }
+*/
 
   @Override
   protected void filterForLanguage(List<String> suggestions) {
+      /*
+      GTODO Moved to SwissGermanSpellerRule
     if (language.getShortCodeWithCountryAndVariant().equals("de-CH")) {
       for (int i = 0; i < suggestions.size(); i++) {
         String s = suggestions.get(i);
         suggestions.set(i, s.replace("ß", "ss"));
       }
     }
+    */
     // Remove suggestions like "Mafiosi s" and "Mafiosi s.":
     suggestions.removeIf(s -> Arrays.stream(s.split(" ")).anyMatch(k -> k.matches("\\w\\p{Punct}?")));
     // This is not quite correct as it might remove valid suggestions that start with "-",
@@ -522,7 +578,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
   }
 
   @Override
-  protected boolean ignoreWord(List<String> words, int idx) throws IOException {
+  protected boolean ignoreWord(List<String> words, int idx) throws Exception {
     boolean ignore = super.ignoreWord(words, idx);
     boolean ignoreUncapitalizedWord = !ignore && idx == 0 && super.ignoreWord(StringUtils.uncapitalize(words.get(0)));
     boolean ignoreByHyphen = false;
@@ -537,7 +593,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
   }
 
   @Override
-  protected List<String> getAdditionalTopSuggestions(List<String> suggestions, String word) throws IOException {
+  protected List<String> getAdditionalTopSuggestions(List<String> suggestions, String word) throws Exception {
     String suggestion;
     if ("WIFI".equalsIgnoreCase(word)) {
       return Collections.singletonList("Wi-Fi");
@@ -834,7 +890,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
             return forms[0];
           }
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
@@ -842,7 +898,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
   }
 
   @Nullable
-  private String baseForThirdPersonSingularVerb(String word) throws IOException {
+  private String baseForThirdPersonSingularVerb(String word) throws Exception {
     List<AnalyzedTokenReadings> readings = tagger.tag(Collections.singletonList(word));
     for (AnalyzedTokenReadings reading : readings) {
       if (reading.hasPosTagStartingWith("VER:3:SIN:")) {
@@ -864,7 +920,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
         if (participle != null) {
           return participle;
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
@@ -872,7 +928,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
   }
 
   @Nullable
-  private String getParticipleForBaseform(String baseform) throws IOException {
+  private String getParticipleForBaseform(String baseform) throws Exception {
     AnalyzedToken token = new AnalyzedToken(baseform, null, baseform);
     String[] forms = synthesizer.synthesize(token, "VER:PA2:.*", true);
     if (forms.length > 0 && !hunspellDict.misspelled(forms[0])) {
@@ -881,7 +937,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
     return null;
   }
 
-  private boolean ignoreByHangingHyphen(List<String> words, int idx) throws IOException {
+  private boolean ignoreByHangingHyphen(List<String> words, int idx) throws Exception {
     String word = words.get(idx);
     String nextWord = getWordAfterEnumerationOrNull(words, idx+1);
     nextWord = StringUtils.removeEnd(nextWord, ".");
@@ -920,7 +976,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
 
   // check whether a <code>word<code> is a valid compound (e.g., "Feynmandiagramm" or "Feynman-Diagramm")
   // that contains an ignored word from spelling.txt (e.g., "Feynman")
-  private boolean ignoreCompoundWithIgnoredWord(String word) throws IOException {
+  private boolean ignoreCompoundWithIgnoredWord(String word) throws Exception {
     if (!StringTools.startsWithUppercase(word) && !StringUtils.startsWithAny(word, "nord", "west", "ost", "süd", "α-", "β-", "ɣ-")) {
       // otherwise stuff like "rumfangreichen" gets accepted
       return false;
@@ -931,7 +987,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
       // only search for compounds that start(!) with a word from spelling.txt
       int end = super.startsWithIgnoredWord(word, true);
       if (end < 3) {
-        // support for geographical adjectives - although "süd/ost/west/nord" are not in spelling.txt 
+        // support for geographical adjectives - although "süd/ost/west/nord" are not in spelling.txt
         // to accept sentences such as
         // "Der westperuanische Ferienort, das ostargentinische Städtchen, das südukrainische Brauchtum, der nordägyptische Staudamm."
         if (word.startsWith("ost") || word.startsWith("süd")) {
@@ -990,6 +1046,8 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
     return hasIgnoredWord;
   }
 
+/*
+ GTODO Clean up
   static class ExpandingReader extends BufferedReader {
 
     private final List<String> buffer = new ArrayList<>();
@@ -1011,7 +1069,7 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
       return buffer.remove(0);
     }
   }
-
+*/
   @Override
   protected boolean isQuotedCompound (AnalyzedSentence analyzedSentence, int idx, String token) {
     if (idx > 3 && token.startsWith("-")) {
@@ -1019,14 +1077,6 @@ public class GermanSpellerRule extends CompoundAwareHunspellRule {
           StringUtils.equalsAny(analyzedSentence.getTokens()[idx-3].getToken(), "„", "\"");
     }
     return false;
-  }
-
-  protected void addProhibitedWords(List<String> words) {
-    if(words.size() == 1 && words.get(0).endsWith(".*")) {
-      wordStartsToBeProhibited.add(words.get(0).substring(0, words.get(0).length()-2));
-    } else {
-      super.addProhibitedWords(words);
-    }
   }
 
 }

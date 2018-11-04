@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,14 +26,23 @@ import org.languagetool.language.Demo;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
+import org.languagetool.JLanguageTool;
+import org.languagetool.TestTools;
 
 public class DemoDisambiguator2 extends AbstractDisambiguator {
-  
-  private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Demo());
+
+    // GTODO: Probably remove this class, not really needed since Demo returns from the data broker.
+
+  private final Disambiguator disambiguator; //GTODO = new XmlRuleDisambiguator(new Demo());
+
+  public DemoDisambiguator2() throws Exception {
+      super();
+      disambiguator = TestTools.getTestLanguage().getUseDataBroker().getDisambiguator();
+  }
 
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-          throws IOException {
+          throws Exception {
     return disambiguator.disambiguate(input);
   }
 

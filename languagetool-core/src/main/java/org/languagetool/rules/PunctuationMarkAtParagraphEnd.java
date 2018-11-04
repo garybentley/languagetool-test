@@ -34,7 +34,7 @@ import org.languagetool.Language;
  * @since 4.1
  */
 public class PunctuationMarkAtParagraphEnd extends TextLevelRule {
-  
+
   private final static String PUNCTUATION_MARKS[] = {".", "!", "?", ":", ",", ";"};
   private final static String QUOTATION_MARKS[] = {"„", "»", "«", "\"", "”", "″", "’", "‚", "‘", "›", "‹", "′", "'"};
   private final Language lang;
@@ -55,7 +55,7 @@ public class PunctuationMarkAtParagraphEnd extends TextLevelRule {
   public String getDescription() {
     return messages.getString("punctuation_mark_paragraph_end_desc");
   }
-  
+
   private static boolean stringEqualsAny(String token, String[] any) {
     for (String s : any) {
       if (token.equals(s)) {
@@ -78,7 +78,7 @@ public class PunctuationMarkAtParagraphEnd extends TextLevelRule {
   }
 
   @Override
-  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     int lastPara = -1;
     int pos = 0;
@@ -96,11 +96,11 @@ public class PunctuationMarkAtParagraphEnd extends TextLevelRule {
             while (tokens[lastNWToken].isLinebreak()) {
               lastNWToken--;
             }
-            if (isWord(tokens[lastNWToken]) 
+            if (isWord(tokens[lastNWToken])
                 || (isQuotationMark(tokens[lastNWToken]) && isWord(tokens[lastNWToken - 1]))) {
               int fromPos = pos + tokens[lastNWToken].getStartPos();
               int toPos = pos + tokens[lastNWToken].getEndPos();
-              RuleMatch ruleMatch = new RuleMatch(this, sentence, fromPos, toPos, 
+              RuleMatch ruleMatch = new RuleMatch(this, sentence, fromPos, toPos,
                   messages.getString("punctuation_mark_paragraph_end_msg"));
               List<String> replacements = new ArrayList<>();
               for (String PUNCTUATION_MARK : PUNCTUATION_MARKS) {

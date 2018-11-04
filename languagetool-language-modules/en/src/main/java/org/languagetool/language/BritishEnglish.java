@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
+import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.en.BritishReplaceRule;
@@ -32,9 +34,18 @@ import org.languagetool.rules.en.UnitConversionRuleImperial;
 
 public class BritishEnglish extends English {
 
+    public static final String COUNTRY_ID = "GB";
+
+    public static final Locale LOCALE = new Locale(English.LOCALE.getLanguage(), COUNTRY_ID);
+
   @Override
   public String[] getCountries() {
-    return new String[]{"GB"};
+    return new String[]{COUNTRY_ID};
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
   }
 
   @Override
@@ -43,12 +54,37 @@ public class BritishEnglish extends English {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return true;
+  }
+
+  @Override
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     List<Rule> rules = new ArrayList<>();
-    rules.addAll(super.getRelevantRules(messages, userConfig));
-    rules.add(new BritishReplaceRule(messages));
-    rules.add(new MorfologikBritishSpellerRule(messages, this, userConfig));
-    rules.add(new UnitConversionRuleImperial(messages));
+    rules.addAll(super.getRelevantRules(messages, userConfig, altLanguages));
+    rules.add(createReplaceRule(messages));
+    rules.add(createMorfologikSpellerRule(messages, userConfig));
+    rules.add(createUnitConversionRuleImperialRule(messages));
     return rules;
   }
+
+  @Override
+  public UnitConversionRuleImperial createUnitConversionRuleImperialRule(ResourceBundle messages) throws Exception {
+      return super.createUnitConversionRuleImperialRule(messages);
+  }
+
+  public BritishReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new BritishReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getLocale());
+  }
+
+  public MorfologikBritishSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikBritishSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getSpellingIgnoreWords(), getUseDataBroker().getSpellingProhibitedWords(), getUseDataBroker().getSynthesizer());
+  }
+
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,17 +27,28 @@ import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.MultiWordChunker;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for French
- * 
+ *
  * @author Marcin Miłkowski
  */
 
 public class FrenchHybridDisambiguator extends AbstractDisambiguator {
 
-  private final Disambiguator chunker = new MultiWordChunker("/fr/multiwords.txt");
-  private final Disambiguator disambiguator = new XmlRuleDisambiguator(new French());
+  private final Disambiguator chunker;
+  private final Disambiguator disambiguator;
+
+  public FrenchHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator) {
+      this.chunker = chunker;
+      this.disambiguator = disambiguator;
+      /*
+GTODO Clean up
+      this.chunker = new MultiWordChunker("/fr/multiwords.txt", dataBroker);
+      this.disambiguator = new XmlRuleDisambiguator(new French());
+      */
+  }
 
   /**
    * Calls two disambiguator classes: (1) a chunker; (2) a rule-based
@@ -45,7 +56,7 @@ public class FrenchHybridDisambiguator extends AbstractDisambiguator {
    */
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-      throws IOException {
+      throws Exception {
     return disambiguator.disambiguate(chunker.disambiguate(input));
   }
 

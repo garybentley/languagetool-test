@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà i Font
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,12 +31,13 @@ import morfologik.stemming.WordData;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.Language;
 import org.languagetool.synthesis.BaseSynthesizer;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Catalan word form synthesizer.
- * 
+ *
  * There are special additions:
- * "DT" tag adds "el, la, l', els, les" according to the gender  
+ * "DT" tag adds "el, la, l', els, les" according to the gender
  * and the number of the word and the Catalan rules for apostrophation (l').
  * "DTa" adds "al, a la, a l', als, a les"
  * "DTde" adds "del, de la, de l', dels, de les"
@@ -46,7 +47,7 @@ import org.languagetool.synthesis.BaseSynthesizer;
  * @author Jaume Ortolà i Font
  */
 public class CatalanSynthesizer extends BaseSynthesizer {
-  
+
   /** A special tag to add determiner (el, la, l', els, les). **/
   // private static final String ADD_DETERMINER = "DT";
 
@@ -64,21 +65,21 @@ public class CatalanSynthesizer extends BaseSynthesizer {
   private static final Pattern pMascNo = Pattern.compile("h?[ui][aeioàèéóò].+",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   private static final Pattern pFemYes = Pattern.compile("h?[aeoàèéíòóú].*|h?[ui][^aeiouàèéíòóúüï]+[aeiou][ns]?|urbs",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   private static final Pattern pFemNo = Pattern.compile("host|ira|inxa",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
-  
+
   /** Patterns verb **/
   private static final Pattern pVerb = Pattern.compile("V.*[CVBXYZ0123456]");
 
-  public CatalanSynthesizer() {
-    super("/ca/ca-ES-valencia_synth.dict", 
-        "/ca/ca-ES-valencia_tags.txt");
+  public CatalanSynthesizer(ResourceDataBroker dataBroker) {
+    super("/ca/ca-ES-valencia_synth.dict",
+        "/ca/ca-ES-valencia_tags.txt", dataBroker);
   }
 
   @Override
   public String[] synthesize(final AnalyzedToken token, final String posTag) throws IOException {
     initPossibleTags();
     Pattern p;
-    boolean addDt = false; 
-    String prep = ""; 
+    boolean addDt = false;
+    String prep = "";
     final Matcher mPrep = pPrep.matcher(posTag);
     if (mPrep.matches()) {
       addDt=true; // add definite article before token
@@ -93,7 +94,7 @@ public class CatalanSynthesizer extends BaseSynthesizer {
     }
     final List<String> results = new ArrayList<>();
     final IStemmer synthesizer = createStemmer();
-    
+
     for (final String tag : possibleTags) {
       final Matcher m = p.matcher(tag);
       if (m.matches()) {
@@ -103,8 +104,8 @@ public class CatalanSynthesizer extends BaseSynthesizer {
           lookup(token.getLemma(), tag, results);
         }
       }
-    }       
-    
+    }
+
     // if not found, try verbs from any regional variant
     if ((results.size() == 0) && posTag.startsWith("V")) {
       if (!posTag.endsWith("0")) {
@@ -116,7 +117,7 @@ public class CatalanSynthesizer extends BaseSynthesizer {
     }
     return results.toArray(new String[results.size()]);
   }
-  
+
   @Override
   public String[] synthesize(final AnalyzedToken token, final String posTag,
       final boolean posTagRegExp) throws IOException {
@@ -191,7 +192,7 @@ public class CatalanSynthesizer extends BaseSynthesizer {
         if (prep.equals("per")) {  if (mMascYes.matches() && !mMascNo.matches()) {  results.add("per l'" + word);  }  else {results.add("pel " + word);  } }
         else if (prep.isEmpty()) {  if (mMascYes.matches() && !mMascNo.matches()) {  results.add("l'" + word);  }  else {results.add("el " + word);  } }
         else {  if (mMascYes.matches() && !mMascNo.matches()) {  results.add(prep+" l'" + word);  }  else {results.add(prep+"l " + word);  } }
-        
+
       }
       if (mFS.matches()) {
         final Matcher mFemYes = pFemYes.matcher(word);
@@ -200,12 +201,12 @@ public class CatalanSynthesizer extends BaseSynthesizer {
         else if (prep.isEmpty()) {  if (mFemYes.matches() && !mFemNo.matches()) {  results.add("l'" + word);  }  else {results.add("la " + word);} }
         else {  if (mFemYes.matches() && !mFemNo.matches()) {  results.add(prep+" l'" + word);  }  else {results.add(prep+" la " + word);} }
       }
-      if (mMP.matches()) {    
+      if (mMP.matches()) {
         if (prep.equals("per")) { results.add("pels " + word); }
         else if (prep.isEmpty()) { results.add("els " + word); }
         else { results.add(prep+"ls " + word); }
       }
-      if (mFP.matches()) { 
+      if (mFP.matches()) {
         if (prep.isEmpty()) { results.add("les " + word);  } else {results.add(prep+" les " + word);  }
       }
     }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,6 +18,7 @@
  */
 package org.languagetool.tagging.de;
 
+import morfologik.stemming.Dictionary;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.AnalyzedToken;
@@ -26,8 +27,12 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.tagging.BaseTagger;
 import org.languagetool.tagging.ManualTagger;
 import org.languagetool.tagging.TaggedWord;
-import org.languagetool.tokenizers.de.GermanCompoundTokenizer;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.tagging.Tagger;
+//GTODO import org.languagetool.tokenizers.de.GermanCompoundTokenizer;
 import org.languagetool.tools.StringTools;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.rules.patterns.CaseConverter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * German part-of-speech tagger, requires data file in <code>de/german.dict</code> in the classpath.
@@ -45,10 +51,17 @@ import java.util.List;
  */
 public class GermanTagger extends BaseTagger {
 
-  private final ManualTagger removalTagger;
+  private ManualTagger removalTagger;
+  private Tokenizer compoundTokenizer;
 
-  private GermanCompoundTokenizer compoundTokenizer;
-
+  // GTODO Need an interface rather than ManualTagger, i.e. an interface that describes what the tagger is doing.
+  public GermanTagger(Dictionary baseDict, WordTagger tagger, ManualTagger removalTagger, Tokenizer tokenizer, CaseConverter caseCon) {
+      super(baseDict, tagger, caseCon, true);
+      removalTagger = Objects.requireNonNull(removalTagger, "Removal tagger must be provided.");
+      compoundTokenizer = Objects.requireNonNull(tokenizer, "Tokenizer must be provided.");
+  }
+/*
+GTODO Clean up
   public GermanTagger() {
     super("/de/german.dict");
     try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(getManualRemovalsFileName())) {
@@ -57,7 +70,7 @@ public class GermanTagger extends BaseTagger {
       throw new RuntimeException("Could not load manual tagger data from " + getManualAdditionsFileName(), e);
     }
   }
-
+*/
   private List<TaggedWord> addStem(List<TaggedWord> analyzedWordResults, String stem) {
     List<TaggedWord> result = new ArrayList<>();
     for (TaggedWord tw : analyzedWordResults) {
@@ -69,7 +82,7 @@ public class GermanTagger extends BaseTagger {
     }
     return result;
   }
-  
+
   //Removes the irrelevant part of dash-linked words (SSL-Zertifikat -> Zertifikat)
   private String sanitizeWord(String word) {
     String result = word;
@@ -97,6 +110,8 @@ public class GermanTagger extends BaseTagger {
     return result;
   }
 
+/*
+GTODO Clean up
   @Override
   public String getManualAdditionsFileName() {
     return "/de/added.txt";
@@ -106,6 +121,7 @@ public class GermanTagger extends BaseTagger {
   public String getManualRemovalsFileName() {
     return "/de/removed.txt";
   }
+*/
 
   /**
    * Return only the first reading of the given word or {@code null}.
@@ -135,8 +151,6 @@ public class GermanTagger extends BaseTagger {
   }
 
   public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens, boolean ignoreCase) throws IOException {
-    initializeIfRequired();
-
     boolean firstWord = true;
     List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
@@ -192,7 +206,7 @@ public class GermanTagger extends BaseTagger {
                 } else {
                   word = compoundedWord.get(compoundedWord.size() - 1);
                 }
-                
+
                 List<TaggedWord> linkedTaggerTokens = addStem(getWordTagger().tag(word), wordStem); //Try to analyze the last part found
 
                 //Some words that are linked with a dash ('-') will be written in uppercase, even adjectives
@@ -204,7 +218,7 @@ public class GermanTagger extends BaseTagger {
                 }
 
                 word = wordOrig;
-                
+
                 boolean wordStartsUppercase = StringTools.startsWithUppercase(word);
                 if (linkedTaggerTokens.size() > 0) {
                   if (wordStartsUppercase) { //Choose between uppercase/lowercase Lemma
@@ -313,13 +327,14 @@ public class GermanTagger extends BaseTagger {
     }
     return null;
   }
-
+/*
+GTODO Clean up
   private synchronized void initializeIfRequired() throws IOException {
     if (compoundTokenizer == null) {
       compoundTokenizer = new GermanCompoundTokenizer();
     }
   }
-
+*/
   private AnalyzedToken getNoInfoToken(String word) {
     return new AnalyzedToken(word, null, null);
   }

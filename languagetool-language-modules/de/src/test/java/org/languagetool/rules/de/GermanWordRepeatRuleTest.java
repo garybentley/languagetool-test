@@ -20,21 +20,19 @@ package org.languagetool.rules.de;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
+import org.languagetool.language.German;
 import org.languagetool.Languages;
 import org.languagetool.TestTools;
-
-import java.io.IOException;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
 public class GermanWordRepeatRuleTest {
-  
+
   @Test
-  public void testRule() throws IOException {
-    Language german = Languages.getLanguageForShortCode("de");
-    GermanWordRepeatRule rule = new GermanWordRepeatRule(TestTools.getEnglishMessages(), german);
+  public void testRule() throws Exception {
+    German german = new German();
+    GermanWordRepeatRule rule = german.createWordRepeatRule(null);
     JLanguageTool lt = new JLanguageTool(german);
     assertThat(rule.match(lt.getAnalyzedSentence("Das ist gut so.")).length, is(0));
     assertThat(rule.match(lt.getAnalyzedSentence("Das ist ist gut so.")).length, is(1));

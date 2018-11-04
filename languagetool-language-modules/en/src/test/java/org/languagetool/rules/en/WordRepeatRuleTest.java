@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.rules.en;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.English;
@@ -31,12 +32,18 @@ import static org.junit.Assert.assertEquals;
 
 public class WordRepeatRuleTest {
 
-  private final English english = new English();
-  private final WordRepeatRule rule = new WordRepeatRule(TestTools.getEnglishMessages(), english);
-  private final JLanguageTool langTool = new JLanguageTool(english);
+  private WordRepeatRule rule;
+  private JLanguageTool langTool;
+
+  @Before
+  public void setUp() throws Exception {
+      English lang = new English();
+      langTool = new JLanguageTool(lang);
+      rule = lang.createWordRepeatRule(null);
+  }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     assertMatches("This is a test sentence.", 0);
     assertMatches("This is a test sentence...", 0);
 
@@ -48,7 +55,7 @@ public class WordRepeatRuleTest {
     assertMatches("This is is a a test sentence sentence.", 3);
   }
 
-  private void assertMatches(String input, int expectedMatches) throws IOException {
+  private void assertMatches(String input, int expectedMatches) throws Exception {
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(input));
     assertEquals(expectedMatches, matches.length);
   }

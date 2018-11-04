@@ -33,17 +33,16 @@ import org.languagetool.rules.RuleMatch;
 public class MorfologikNewZealandSpellerRuleTest extends AbstractEnglishSpellerRuleTest {
 
   @Test
-  public void testSuggestions() throws IOException {
-    Language language = new NewZealandEnglish();
-    Rule rule = new MorfologikNewZealandSpellerRule(TestTools.getMessages("en"), language, null);
+  public void testSuggestions() throws Exception {
+    NewZealandEnglish language = new NewZealandEnglish();
+    Rule rule = language.createMorfologikSpellerRule(null, null);
     super.testNonVariantSpecificSuggestions(rule, language);
   }
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     NewZealandEnglish language = new NewZealandEnglish();
-    MorfologikNewZealandSpellerRule rule =
-            new MorfologikNewZealandSpellerRule(TestTools.getMessages("en"), language, null);
+    MorfologikNewZealandSpellerRule rule = language.createMorfologikSpellerRule(null, null);
 
     JLanguageTool langTool = new JLanguageTool(language);
 
@@ -69,7 +68,7 @@ public class MorfologikNewZealandSpellerRuleTest extends AbstractEnglishSpellerR
 
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("aõh")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("a")).length);
-           
+
     //based on replacement pairs:
 
     RuleMatch[] matches2 = rule.match(langTool.getAnalyzedSentence("He teached us."));

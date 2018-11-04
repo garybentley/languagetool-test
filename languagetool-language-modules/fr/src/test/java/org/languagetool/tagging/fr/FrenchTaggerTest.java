@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,27 +23,30 @@ import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.French;
 import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tagging.Tagger;
 
 import java.io.IOException;
 
 public class FrenchTaggerTest {
-  
-  private FrenchTagger tagger;
+
+  private Tagger tagger;
   private WordTokenizer tokenizer;
+  private French lang;
 
   @Before
-  public void setUp() {
-    tagger = new FrenchTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    lang = new French();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new French());
+  public void testDictionary() throws Exception {
+    TestTools.testTaggerDictionary(lang.getUseDataBroker().getWordTaggerDictionary(), new French());
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("C'est la vie.",
         "C/[C]N m sp|C/[c]N m sp|C/[c]R dem e s -- est/[est]N m s|est/[être]V etre ind pres 3 s -- la/[la]N m sp|la/[la]R pers obj 3 f s|la/[le]D f s -- vie/[vie]N f s", tokenizer, tagger);
     TestTools.myAssert("Je ne parle pas français.",

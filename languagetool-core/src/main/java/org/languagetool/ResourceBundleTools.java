@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -49,11 +49,13 @@ final class ResourceBundleTools {
   /**
    * Gets the ResourceBundle (i18n strings) for the given user interface language.
    */
+   /*
+    GTODO Clean up
   static ResourceBundle getMessageBundle(Language lang) {
     try {
       ResourceBundle bundle = ResourceBundle.getBundle(MESSAGE_BUNDLE, lang.getLocaleWithCountryAndVariant());
       if (!isValidBundleFor(lang, bundle)) {
-        bundle = ResourceBundle.getBundle(MESSAGE_BUNDLE, lang.getLocale());
+        bundle = ResourceBundle.getBundle(MESSAGE_BUNDLE, lang.getLocale(), lang.getClass().getClassLoader());
         if (!isValidBundleFor(lang, bundle)) {
           // happens if 'xx' is requested but only a MessagesBundle_xx_YY.properties exists:
           Language defaultVariant = lang.getDefaultLanguageVariant();
@@ -69,7 +71,7 @@ final class ResourceBundleTools {
       return ResourceBundle.getBundle(MESSAGE_BUNDLE, Locale.ENGLISH);
     }
   }
-
+*/
   private static boolean isValidBundleFor(Language lang, ResourceBundle bundle) {
     return lang.getLocale().getLanguage().equals(bundle.getLocale().getLanguage());
   }

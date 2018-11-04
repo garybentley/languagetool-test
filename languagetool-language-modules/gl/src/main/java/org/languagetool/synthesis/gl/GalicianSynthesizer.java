@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.synthesis.gl;
 
 import org.languagetool.synthesis.BaseSynthesizer;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Galician word form synthesizer.
@@ -30,7 +31,7 @@ public class GalicianSynthesizer extends BaseSynthesizer {
   private static final String RESOURCE_FILENAME = "/gl/galician_synth.dict";
   private static final String TAGS_FILE_NAME = "/gl/galician_tags.txt";
 
-  public GalicianSynthesizer() {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME);
+  public GalicianSynthesizer(ResourceDataBroker dataBroker) {
+    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
   }
 }

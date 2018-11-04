@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,6 +30,7 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.chunking.ChunkTag;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.tools.StringTools;
+import org.languagetool.Language;
 
 /**
  * A part of a pattern, represents the 'token' element of the {@code grammar.xml}.
@@ -521,20 +522,21 @@ public class PatternToken implements Cloneable {
    * to refer to some other token).
    * @param token the token specified as {@link AnalyzedTokenReadings}
    * @param synth the language synthesizer ({@link Synthesizer})
+   * @param lang The language to compile for.
    */
-  public PatternToken compile(AnalyzedTokenReadings token, Synthesizer synth) throws IOException {
+  public PatternToken compile(AnalyzedTokenReadings token, Synthesizer synth, Language lang) throws Exception {
     PatternToken compiledPatternToken;
     try {
       compiledPatternToken = (PatternToken) clone();
     } catch (CloneNotSupportedException e) {
       throw new IllegalStateException("Could not clone element", e);
     }
-    compiledPatternToken.doCompile(token, synth);
+    compiledPatternToken.doCompile(token, synth, lang);
     return compiledPatternToken;
   }
 
-  private void doCompile(AnalyzedTokenReadings token, Synthesizer synth) throws IOException {
-    MatchState matchState = tokenReference.createState(synth, token);
+  private void doCompile(AnalyzedTokenReadings token, Synthesizer synth, Language lang) throws Exception {
+    MatchState matchState = tokenReference.createState(synth, lang, token);
     if (StringTools.isEmpty(referenceString)) {
       referenceString = stringToken;
     }
@@ -702,7 +704,7 @@ public class PatternToken implements Cloneable {
    * that depends on whether there was a space before the token matching the exception
    * or not.
    * The same procedure is used for tokens that are valid for previous or current tokens.
-   * 
+   *
    * @param isWhite If true, the space before exception is required.
    */
   public void setExceptionSpaceBefore(boolean isWhite) {

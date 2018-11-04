@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,42 +26,48 @@ import java.util.regex.Pattern;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Check if there is a confusion of two words (which might have a similar spelling) depending on the context.
- * This rule loads the words and their respective context from an external file with the following 
+ * This rule loads the words and their respective context from an external file with the following
  * format (tab-separated):
- * 
+ *
  * <pre>word1 word2 match1 match2 context1 context2 explanation1 explanation2</pre>
- * 
+ *
  * <ul>
  * <li>word1 and word2 are regular expressions of the words that can easily be confused
- * <li>match1 is the substring of word1 that will be replaced with match2 when word1 occurs in a context where it is probably wrong (and vice versa) 
+ * <li>match1 is the substring of word1 that will be replaced with match2 when word1 occurs in a context where it is probably wrong (and vice versa)
  * <li>context1 is the context in which word1 typically occurs (but which is wrong for word2), given as a regular expression
  * <li>context2 is the context in which word2 typically occurs (but which is wrong for word1), given as a regular expression
  * <li>explanation1 is a short description of word1 (optional)
  * <li>explanation2 is a short description of word2 (optional)
  * </ul>
- * 
+ *
  * @author Markus Brenneis
  */
 public abstract class WrongWordInContextRule extends Rule {
 
   private final List<ContextWords> contextWordsSet;
   private boolean matchLemmas = false;
-
+/*
   public WrongWordInContextRule(ResourceBundle messages) {
+      this(messages, JLanguageTool.getDataBroker());
+  }
+*/
+  public WrongWordInContextRule(ResourceBundle messages, List<ContextWords> wrongWords) {
     super.setCategory(new Category(CategoryIds.CONFUSED_WORDS, getCategoryString()));
-    contextWordsSet = loadContextWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream(getFilename()));
+    contextWordsSet = wrongWords;
+    //contextWordsSet = loadContextWords(dataBroker.getFromRulesDirAsStream(getFilename()));
     setLocQualityIssueType(ITSIssueType.Misspelling);
   }
 
-  protected abstract String getFilename();
+  // GTODO protected abstract String getFilename();
 
   protected String getCategoryString() {
     return messages.getString("category_misc");
   }
-  
+
   @Override
   public String getId() {
     return "WRONG_WORD_IN_CONTEXT";
@@ -71,14 +77,14 @@ public abstract class WrongWordInContextRule extends Rule {
   public String getDescription() {
     return "Confusion of words";
   }
-  
+
   /*
    *  Match lemmas instead of word forms
    */
   public void setMatchLemmmas() {
     matchLemmas = true;
   }
-  
+
 
   @Override
   public RuleMatch[] match(AnalyzedSentence sentence) {
@@ -103,7 +109,7 @@ public abstract class WrongWordInContextRule extends Rule {
         token2 = tokens[j].getToken();
         matchedWord[1] = matchers[1].reset(token2).find();
       }
-      
+
       int foundWord = -1;
       int notFoundWord = -1;
       int startPos = 0;
@@ -125,7 +131,7 @@ public abstract class WrongWordInContextRule extends Rule {
         endPos = tokens[j-1].getStartPos() + token2.length();
         matchedToken = token2;
       }
-      
+
       if (foundWord != -1) {
         boolean[] matchedContext = {false, false};
         matchers[foundWord] = contextWords.contexts[foundWord].matcher("");
@@ -169,23 +175,23 @@ public abstract class WrongWordInContextRule extends Rule {
     } // for each contextWords in contextWordsSet
     return toRuleMatchArray(ruleMatches);
   }
-  
+
   /**
    * @return a string like "Possible confusion of words: Did you mean &lt;suggestion&gt;$SUGGESTION&lt;/suggestion&gt; instead of '$WRONGWORD'?"
    */
   protected abstract String getMessageString();
-  
+
   /**
    * @return a string like "Possible confusion of words"
    */
   protected abstract String getShortMessageString();
-  
+
   /**
    * @return a string like "Possible confusion of words: Did you mean &lt;suggestion&gt;$SUGGESTION&lt;/suggestion&gt;
    * (= $EXPLANATION_SUGGESTION) instead of '$WRONGWORD' (= $EXPLANATION_WRONGWORD)?"
    */
   protected abstract String getLongMessageString();
-  
+
   private String getMessage(String wrongWord, String suggestion, String explanationSuggestion, String explanationWrongWord) {
     if (explanationSuggestion.isEmpty() || explanationWrongWord.isEmpty()) {
       return getMessageString().replaceFirst("\\$SUGGESTION", suggestion).replaceFirst("\\$WRONGWORD", wrongWord);
@@ -194,10 +200,13 @@ public abstract class WrongWordInContextRule extends Rule {
               .replaceFirst("\\$EXPLANATION_SUGGESTION", explanationSuggestion).replaceFirst("\\$EXPLANATION_WRONGWORD", explanationWrongWord);
     }
   }
-  
+
   /**
    * Load words, contexts, and explanations.
    */
+   /*
+   GTODO: Clean up
+
   private List<ContextWords> loadContextWords(InputStream stream) {
     List<ContextWords> set = new ArrayList<>();
     try (Scanner scanner = new Scanner(stream, "utf-8")) {
@@ -227,19 +236,35 @@ public abstract class WrongWordInContextRule extends Rule {
     }
     return Collections.unmodifiableList(set);
   }
-  
-  static class ContextWords {
-    
-    String[] matches = {"", ""};
-    String[] explanations = {"", ""};
-    Pattern[] words;
-    Pattern[] contexts;
-    
+  */
+/*
+GTODO: Clean up
+  public static class ContextWords {
+
+      String[] matches = {"", ""};
+      String[] explanations = {"", ""};
+      Pattern[] words;
+      Pattern[] contexts;
+
+      public ContextWords(Pattern word0, Pattern word1, String match0, String match1, Pattern context0, Pattern context1, String explanation0, String explanation1) {
+          words = new Pattern[2];
+          contexts = new Pattern[2];
+
+          words[0] = word0;
+          words[1] = word1;
+          matches[0] = match0;
+          matches[1] = match1;
+          contexts[0] = context0;
+          contexts[1] = context1;
+          explanations[0] = explanation0;
+          explanations[1] = explanation1;
+      }
+
     ContextWords() {
       words = new Pattern[2];
       contexts = new Pattern[2];
     }
-    
+
     private String addBoundaries(String str) {
       String ignoreCase = "";
       if (str.startsWith("(?i)")) {
@@ -248,15 +273,15 @@ public abstract class WrongWordInContextRule extends Rule {
       }
       return ignoreCase + "\\b(" + str + ")\\b";
     }
-    
+
     void setWord(int i, String word) {
       words[i] = Pattern.compile(addBoundaries(word));
     }
-    
+
     void setContext(int i, String context) {
       contexts[i] = Pattern.compile(addBoundaries(context));
-    }
-    
   }
 
+  }
+*/
 }

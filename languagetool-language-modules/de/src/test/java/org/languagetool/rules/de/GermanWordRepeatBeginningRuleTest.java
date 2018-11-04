@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.German;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -32,17 +30,19 @@ import static org.junit.Assert.assertEquals;
 public class GermanWordRepeatBeginningRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    JLanguageTool lt = new JLanguageTool(new German());
+  public void testRule() throws Exception {
+      German german = new German();
+      GermanWordRepeatBeginningRule rule = german.createWordRepeatBeginningRule(null);
+    JLanguageTool lt = new JLanguageTool(german);
     // correct sentences:
-    assertEquals(0, lt.check("Er ist nett. Er heißt Max.").size());
-    assertEquals(0, lt.check("Außerdem kommt er. Ferner kommt sie. Außerdem kommt es.").size());
-    assertEquals(0, lt.check("2011: Dieses passiert. 2011: Jenes passiert. 2011: Nicht passiert").size());
+    assertEquals(0, lt.check(rule, "Er ist nett. Er heißt Max.").size());
+    assertEquals(0, lt.check(rule, "Außerdem kommt er. Ferner kommt sie. Außerdem kommt es.").size());
+    assertEquals(0, lt.check(rule, "2011: Dieses passiert. 2011: Jenes passiert. 2011: Nicht passiert").size());
     // errors:
-    assertEquals(1, lt.check("Er ist nett. Er heißt Max. Er ist 11.").size());
-    assertEquals(1, lt.check("Außerdem kommt er. Außerdem kommt sie.").size());
+    assertEquals(1, lt.check(rule, "Er ist nett. Er heißt Max. Er ist 11.").size());
+    assertEquals(1, lt.check(rule, "Außerdem kommt er. Außerdem kommt sie.").size());
     // this used to cause false alarms because reset() was not implemented
-    assertEquals(0, lt.check("Außerdem ist das ein neuer Text.").size());
+    assertEquals(0, lt.check(rule, "Außerdem ist das ein neuer Text.").size());
   }
 
 }

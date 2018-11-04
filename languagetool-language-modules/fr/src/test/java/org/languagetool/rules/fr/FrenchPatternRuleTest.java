@@ -19,6 +19,7 @@
 package org.languagetool.rules.fr;
 
 import org.junit.Test;
+import org.languagetool.language.French;
 import org.languagetool.rules.patterns.PatternRuleTest;
 
 import java.io.IOException;
@@ -26,8 +27,9 @@ import java.io.IOException;
 public class FrenchPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+      French lang = new French();
+    runTestForLanguage(lang);
   }
 
 }

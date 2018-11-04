@@ -44,10 +44,10 @@ public abstract class RuleFilter {
    *         the arguments) that properly describes the detected error
    */
   @Nullable
-  public abstract RuleMatch acceptRuleMatch(RuleMatch match, Map<String, String> arguments, AnalyzedTokenReadings[] patternTokens);
+  public abstract RuleMatch acceptRuleMatch(RuleMatch match, Map<String, String> arguments, AnalyzedTokenReadings[] patternTokens) throws Exception;
 
   /** @since 3.2 */
-  public boolean matches(Map<String, String> arguments, AnalyzedTokenReadings[] patternTokens) {
+  public boolean matches(Map<String, String> arguments, AnalyzedTokenReadings[] patternTokens) throws Exception {
     RuleMatch fakeMatch = new RuleMatch(new FakeRule(), null, 0, 1, "(internal rule)");
     return acceptRuleMatch(fakeMatch, arguments, patternTokens) != null;
   }
@@ -57,5 +57,5 @@ public abstract class RuleFilter {
     @Override public String getDescription() { return "<none>"; }
     @Override public RuleMatch[] match(AnalyzedSentence sentence) throws IOException { return new RuleMatch[0]; }
   }
-  
+
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,6 +24,7 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.util.*;
  */
 public class MultiWordChunker extends AbstractDisambiguator {
 
-  private final String filename;
+  //GTODO: private final String filename;
   private final boolean allowFirstCapitalized;
 
   private Map<String, Integer> mStartSpace;
@@ -47,23 +48,20 @@ public class MultiWordChunker extends AbstractDisambiguator {
 
   /**
    * @param filename file text with multiwords and tags
-   */
-  public MultiWordChunker(String filename) {
-    this(filename, false);
-  }
-  
-  /**
-   * @param filename file text with multiwords and tags
    * @param allowFirstCapitalized if set to {@code true}, first word of the multiword can be capitalized
    */
-  public MultiWordChunker(String filename, boolean allowFirstCapitalized) {
-    this.filename = filename;
+  public MultiWordChunker(Map<String, Integer> startSpace, Map<String, Integer> startNoSpace, Map<String, String> full, boolean allowFirstCapitalized) {
+    this.mStartSpace = startSpace;
+    this.mStartNoSpace = startNoSpace;
+    this.mFull = full;
     this.allowFirstCapitalized = allowFirstCapitalized;
   }
-  
+
   /*
    * Lazy init, thanks to Artur Trzewik
    */
+   /*
+   GTODO: Clean up
   private void lazyInit() {
 
     if (mStartSpace != null) {
@@ -74,7 +72,7 @@ public class MultiWordChunker extends AbstractDisambiguator {
     Map<String, Integer> mStartNoSpace = new HashMap<>();
     Map<String, String> mFull = new HashMap<>();
 
-    try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(filename)) {
+    try (InputStream stream = dataBroker.getFromResourceDirAsStream(filename)) {
       List<String> posTokens = loadWords(stream);
       for (String posToken : posTokens) {
         String[] tokenAndTag = posToken.split("\t");
@@ -119,7 +117,7 @@ public class MultiWordChunker extends AbstractDisambiguator {
     this.mStartNoSpace = mStartNoSpace;
     this.mFull = mFull;
   }
-
+*/
   /**
    * Implements multiword POS tags, e.g., &lt;ELLIPSIS&gt; for ellipsis (...)
    * start, and &lt;/ELLIPSIS&gt; for ellipsis end.
@@ -130,7 +128,7 @@ public class MultiWordChunker extends AbstractDisambiguator {
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input) {
 
-    lazyInit();
+    //GTODO: lazyInit();
 
     AnalyzedTokenReadings[] anTokens = input.getTokens();
     AnalyzedTokenReadings[] output = anTokens;
@@ -177,7 +175,7 @@ public class MultiWordChunker extends AbstractDisambiguator {
             }
             j++;
             finalLen = j;
-          } 
+          }
         }
 
         if (mStartNoSpace.containsKey(tok.substring(0, 1))) {
@@ -235,11 +233,12 @@ public class MultiWordChunker extends AbstractDisambiguator {
     newAtr.setChunkTags(oldReading.getChunkTags());
     return newAtr;
   }
-  
+
   private String annotateToken(String prevAnot, String oldReading, String newReading) {
     return prevAnot + "\nMULTIWORD_CHUNKER: " + oldReading + " -> " + newReading;
   }
-
+/*
+GTODO: Clean up
   private List<String> loadWords(InputStream stream) {
     List<String> lines = new ArrayList<>();
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
@@ -256,5 +255,5 @@ public class MultiWordChunker extends AbstractDisambiguator {
     }
     return lines;
   }
-
+*/
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -68,7 +68,7 @@ public class Russian extends Language implements AutoCloseable {
   public String[] getCountries() {
     return new String[] {"RU"};
   }
-  
+
   @Override
   public Tagger getTagger() {
     if (tagger == null) {
@@ -80,15 +80,15 @@ public class Russian extends Language implements AutoCloseable {
   @Override
   public Disambiguator getDisambiguator() {
     if (disambiguator == null) {
-      disambiguator = new RussianHybridDisambiguator();
+      disambiguator = new RussianHybridDisambiguator(getUseDataBroker());
     }
     return disambiguator;
   }
-  
+
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new RussianSynthesizer();
+      synthesizer = new RussianSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
@@ -124,8 +124,8 @@ public class Russian extends Language implements AutoCloseable {
             // specific to Russian :
             new RussianUnpairedBracketsRule(messages, this),
             new RussianCompoundRule(messages),
-            new RussianSimpleReplaceRule(messages),
-            new RussianWordCoherencyRule(messages),
+            new RussianSimpleReplaceRule(messages, getUseDataBroker()),
+            new RussianWordCoherencyRule(messages, getUseDataBroker()),
             new RussianWordRepeatRule(messages),
             new RussianVerbConjugationRule(messages),
             new RussianDashRule()
@@ -150,7 +150,7 @@ public class Russian extends Language implements AutoCloseable {
   }
 
   /**
-   * Closes the language model, if any. 
+   * Closes the language model, if any.
    * @since 3.1
    */
   @Override

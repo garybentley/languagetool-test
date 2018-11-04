@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,8 @@
 package org.languagetool.rules.patterns.bitext;
 
 import org.languagetool.rules.patterns.PatternRule;
+import org.languagetool.rules.patterns.RuleFilterCreator;
+
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParser;
@@ -29,24 +31,21 @@ import java.util.List;
 
 /**
  * Loads {@link PatternRule}s from an XML file.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class BitextPatternRuleLoader extends DefaultHandler {
-
-  public final List<BitextPatternRule> getRules(InputStream is, String filename) throws IOException {
+/*
+GTODO: Clean up
+  public final List<BitextPatternRule> getRules(InputStream is, RuleFilterCreator ruleFilterCreator) throws IOException {
     List<BitextPatternRule> rules;
-    try {
-      BitextPatternRuleHandler handler = new BitextPatternRuleHandler();
+      BitextPatternRuleHandler handler = new BitextPatternRuleHandler(ruleFilterCreator);
       SAXParserFactory factory = SAXParserFactory.newInstance();
       SAXParser saxParser = factory.newSAXParser();
       saxParser.getXMLReader().setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
       saxParser.parse(is, handler);
       rules = handler.getBitextRules();
       return rules;
-    } catch (Exception e) {
-      throw new IOException("Cannot load or parse '" + filename + "'", e);
-    }
   }
-
+*/
 }

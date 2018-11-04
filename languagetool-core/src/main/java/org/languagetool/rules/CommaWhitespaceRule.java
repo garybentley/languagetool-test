@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,16 +25,40 @@ import java.util.ResourceBundle;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import static org.languagetool.tools.StringTools.isEmpty;
 
 /**
  * A rule that matches periods, commas and closing parenthesis preceded by whitespace and
  * opening parenthesis followed by whitespace.
- * 
+ *
  * @author Daniel Naber
  */
 public class CommaWhitespaceRule extends Rule {
+
+    public static final String RULE_ID = "COMMA_PARENTHESIS_WHITESPACE";
+    public static final String RULE_DESCRIPTION_MESSAGE_ID = "desc_comma_whitespace";
+    public static final String RULE_MATCH_MESSAGE_NO_SPACE_AFTER_ID = "no_space_after";
+    public static final String RULE_MATCH_MESSAGE_MISSING_SPACE_AFTER_COMMA_ID = "missing_space_after_comma";
+    public static final String RULE_MATCH_MESSAGE_NO_SPACE_BEFORE_ID = "no_space_before";
+    public static final String RULE_MATCH_MESSAGE_SPACE_AFTER_COMMA_ID = "space_after_comma";
+    public static final String RULE_MATCH_MESSAGE_NO_SPACE_BEFORE_DOT_ID = "no_space_before_dot";
+
+    public static final RuleConfiguration RULE_CONFIGURATION;
+
+    static {
+        RULE_CONFIGURATION = new RuleConfiguration(CommaWhitespaceRule.class, RULE_ID, RULE_DESCRIPTION_MESSAGE_ID,
+          RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_NO_SPACE_AFTER_ID),
+          RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_MISSING_SPACE_AFTER_COMMA_ID),
+          RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_NO_SPACE_BEFORE_ID),
+          RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_SPACE_AFTER_COMMA_ID),
+          RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_NO_SPACE_BEFORE_DOT_ID));
+    };
+
+    public static RuleConfiguration getRuleConfiguration() {
+        return RULE_CONFIGURATION;
+    }
 
   /** @since 3.3 */
   public CommaWhitespaceRule(ResourceBundle messages, IncorrectExample incorrectExample, CorrectExample correctExample) {
@@ -47,7 +71,7 @@ public class CommaWhitespaceRule extends Rule {
   }
 
   /**
-   * @deprecated use {@link #CommaWhitespaceRule(ResourceBundle, IncorrectExample, CorrectExample)} instead (deprecated since 3.3)
+   * @deprecated use {@link #CommaWhitespaceRule(ResourceBundle, IncorrectExample, CorrectExample, ResourceDataBroker)} instead (deprecated since 3.3)
    */
   public CommaWhitespaceRule(ResourceBundle messages) {
     this(messages, null, null);
@@ -60,9 +84,9 @@ public class CommaWhitespaceRule extends Rule {
 
   @Override
   public final String getDescription() {
-    return messages.getString("desc_comma_whitespace");
+    return messages.getString(RULE_DESCRIPTION_MESSAGE_ID);
   }
-  
+
   public String getCommaCharacter() {
     return ",";
   }
@@ -83,7 +107,7 @@ public class CommaWhitespaceRule extends Rule {
       if (isWhitespace && isLeftBracket(prevToken)) {
         boolean isException = i + 1 < tokens.length && prevToken.equals("[") && token.equals(" ") && tokens[i+1].getToken().equals("]");  // "- [ ]" syntax e.g. on GitHub
         if (!isException) {
-          msg = messages.getString("no_space_after");
+          msg = messages.getString(RULE_MATCH_MESSAGE_NO_SPACE_AFTER_ID);
           suggestionText = prevToken;
         }
       } else if (!isWhitespace && prevToken.equals(getCommaCharacter())
@@ -91,17 +115,17 @@ public class CommaWhitespaceRule extends Rule {
           && !containsDigit(prevPrevToken)
           && !containsDigit(token)
           && !",".equals(prevPrevToken)) {
-        msg = messages.getString("missing_space_after_comma");
+        msg = messages.getString(RULE_MATCH_MESSAGE_MISSING_SPACE_AFTER_COMMA_ID);
         suggestionText = getCommaCharacter() + " " + tokens[i].getToken();
       } else if (prevWhite) {
         if (isRightBracket(token)) {
           boolean isException = token.equals("]") && prevToken.equals(" ") && prevPrevToken.equals("["); // "- [ ]" syntax e.g. on GitHub
           if (!isException) {
-            msg = messages.getString("no_space_before");
+            msg = messages.getString(RULE_MATCH_MESSAGE_NO_SPACE_BEFORE_ID);
             suggestionText = token;
           }
         } else if (token.equals(getCommaCharacter())) {
-          msg = messages.getString("space_after_comma");
+          msg = messages.getString(RULE_MATCH_MESSAGE_SPACE_AFTER_COMMA_ID);
           suggestionText = getCommaCharacter();
           // exception for duplicated comma (we already have another rule for that)
           if (i + 1 < tokens.length
@@ -109,7 +133,7 @@ public class CommaWhitespaceRule extends Rule {
             msg = null;
           }
         } else if (token.equals(".")) {
-          msg = messages.getString("no_space_before_dot");
+          msg = messages.getString(RULE_MATCH_MESSAGE_NO_SPACE_BEFORE_DOT_ID);
           suggestionText = ".";
           // exception case for figures such as ".5" and ellipsis
           if (i + 1 < tokens.length

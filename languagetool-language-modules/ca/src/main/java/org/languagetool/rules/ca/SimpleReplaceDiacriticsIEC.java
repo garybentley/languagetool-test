@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,7 @@ import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Category;
 import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,30 +31,33 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * Dicritics with IEC rules. 
- * 
+ * Dicritics with IEC rules.
+ *
  * Catalan implementations. Loads the
  * relevant word forms from <code>rules/ca/replace_diacritics_iec.txt</code>.
- * 
+ *
  * @author Jaume Ortolà
  */
 public class SimpleReplaceDiacriticsIEC extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/ca/replace_diacritics_iec.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale CA_LOCALE = new Locale("CA");
 
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      if (wrongWords == null) {
+           wrongWords = load("/ca/replace_diacritics_iec.txt", dataBroker);
+      }
     return wrongWords;
   }
-  
-  public SimpleReplaceDiacriticsIEC(final ResourceBundle messages) throws IOException {
-    super(messages);
+
+  public SimpleReplaceDiacriticsIEC(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
     super.setCategory(new Category(new CategoryId("DIACRITICS_IEC"), "Z) Accents diacrítics segons l'IEC"));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     super.setDefaultOff();
     this.setCheckLemmas(false);
-  }  
+  }
 
   @Override
   public final String getId() {
@@ -69,17 +73,17 @@ public class SimpleReplaceDiacriticsIEC extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Sobra l'accent (IEC 2017)";
   }
-  
+
   @Override
   public String getMessage(String tokenStr,List<String> replacements) {
     return "Sobra l'accent diacrític (IEC 2017).";
   }
-  
+
   @Override
   public boolean isCaseSensitive() {
     return false;
   }
-  
+
   @Override
   public Locale getLocale() {
     return CA_LOCALE;

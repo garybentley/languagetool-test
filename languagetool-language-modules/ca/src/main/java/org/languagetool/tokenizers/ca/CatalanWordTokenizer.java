@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,13 +28,14 @@ import java.util.regex.Pattern;
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpeller;
 import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.databroker.ResourceDataBroker;
 
 
 /**
  * Tokenizes a sentence into words. Punctuation and whitespace gets its own token.
  * Special treatment for hyphens and apostrophes in Catalan.
  *
- * @author Jaume Ortolà 
+ * @author Jaume Ortolà
  */
 public class CatalanWordTokenizer extends WordTokenizer {
 
@@ -43,7 +44,7 @@ public class CatalanWordTokenizer extends WordTokenizer {
 
   private final int maxPatterns = 11;
   private final Pattern[] patterns = new Pattern[maxPatterns];
-  
+
   private static final String DICT_FILENAME = "/ca/ca-ES-valencia.dict";
   protected MorfologikSpeller speller;
 
@@ -51,15 +52,15 @@ public class CatalanWordTokenizer extends WordTokenizer {
   // allows correcting typographical errors in "ela geminada"
   private static final Pattern ELA_GEMINADA = Pattern.compile("([aeiouàéèíóòúïüAEIOUÀÈÉÍÒÓÚÏÜ])l[.\u2022]l([aeiouàéèíóòúïü])",Pattern.UNICODE_CASE);
   private static final Pattern ELA_GEMINADA_UPPERCASE = Pattern.compile("([AEIOUÀÈÉÍÒÓÚÏÜ])L[.\u2022]L([AEIOUÀÈÉÍÒÓÚÏÜ])",Pattern.UNICODE_CASE);
-  // apostrophe 
+  // apostrophe
   private static final Pattern APOSTROF_RECTE = Pattern.compile("([\\p{L}])'([\\p{L}\"‘“«])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   private static final Pattern APOSTROF_RODO = Pattern.compile("([\\p{L}])’([\\p{L}\"‘“«])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   // apostrophe before number 1. Ex.: d'1 km, és l'1 de gener, és d'1.4 kg
   private static final Pattern APOSTROF_RECTE_1 = Pattern.compile("([dlDL])'(\\d[\\d\\s\\.,]?)",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   private static final Pattern APOSTROF_RODO_1 = Pattern.compile("([dlDL])’(\\d[\\d\\s\\.,]?)",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
-  // nearby hyphens. Ex.: vint-i-quatre 
+  // nearby hyphens. Ex.: vint-i-quatre
   private static final Pattern NEARBY_HYPHENS= Pattern.compile("([\\p{L}])-([\\p{L}])-([\\p{L}])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
-  // hyphens. Ex.: vint-i-quatre 
+  // hyphens. Ex.: vint-i-quatre
   private static final Pattern HYPHENS= Pattern.compile("([\\p{L}])-([\\p{L}\\d])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   // decimal point between digits
   private static final Pattern DECIMAL_POINT= Pattern.compile("([\\d])\\.([\\d])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
@@ -69,13 +70,13 @@ public class CatalanWordTokenizer extends WordTokenizer {
   private static final Pattern SPACE_DIGITS= Pattern.compile("([\\d]) ([\\d])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
 
-  public CatalanWordTokenizer() {
+  public CatalanWordTokenizer(ResourceDataBroker dataBroker) {
 
     // lazy init
     if (speller == null) {
-      if (JLanguageTool.getDataBroker().resourceExists(DICT_FILENAME)) {
+      if (dataBroker.resourceExists(DICT_FILENAME)) {
         try {
-          speller = new MorfologikSpeller(DICT_FILENAME);
+          speller = new MorfologikSpeller(DICT_FILENAME, dataBroker);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -95,7 +96,7 @@ public class CatalanWordTokenizer extends WordTokenizer {
     patterns[2] = Pattern.compile("^([lnmtsd]['’])(.{2,})"+PF+PF+PF+"$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
     patterns[3] = Pattern.compile("^(.{2,})"+PF+PF+PF+"$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
-    // Match verb+2 pronoms febles. Ex: Emporta-te'ls. 
+    // Match verb+2 pronoms febles. Ex: Emporta-te'ls.
     // It creates 3 tokens: <token>Emporta</token><token>-te</token><token>'ls</token>
     patterns[4] = Pattern.compile("^([lnmtsd]['’])(.{2,})"+PF+PF+"$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
     patterns[5] = Pattern.compile("^(.{2,})"+PF+PF+"$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
@@ -109,7 +110,7 @@ public class CatalanWordTokenizer extends WordTokenizer {
     // d'emportar
     patterns[8] = Pattern.compile("^([lnmtsd]['’])(.*)$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
-    //contractions: al, als, pel, pels, del, dels, cal (!), cals (!) 
+    //contractions: al, als, pel, pels, del, dels, cal (!), cals (!)
     patterns[9] = Pattern.compile("^(a|de|pe)(ls?)$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
     //contraction: can

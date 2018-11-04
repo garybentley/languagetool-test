@@ -68,11 +68,13 @@ public abstract class AbstractDashRule extends Rule {
     }
     return matches.toArray(new RuleMatch[matches.size()]);
   }
-
+/*
+GTODO Clean up
+Moved to DefaultResourceDataBroker.loadCompoundPatternRules
   protected static List<PatternRule> loadCompoundFile(String path, String msg, Language lang) {
     List<PatternRule> rules = new ArrayList<>();
     try (
-        InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path);
+        InputStream stream = lang.getUseDataBroker ().getFromResourceDirAsStream(path);
         InputStreamReader reader = new InputStreamReader(stream, "utf-8");
         BufferedReader br = new BufferedReader(reader)
     ) {
@@ -114,5 +116,5 @@ public abstract class AbstractDashRule extends Rule {
   private static String removeLastCharacter(String str) {
     return str.substring(0, str.length() - 1);
   }
-
+*/
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,15 +31,15 @@ public class CommaWhitespaceRuleTest {
 
   private CommaWhitespaceRule rule;
   private JLanguageTool langTool;
-  
+
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     rule = new CommaWhitespaceRule(TestTools.getEnglishMessages());
-    langTool = new JLanguageTool(TestTools.getDemoLanguage());
+    langTool = new JLanguageTool(TestTools.getTestLanguage());
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     assertMatches("This is a test sentence.", 0);
     assertMatches("This, is, a test sentence.", 0);
     assertMatches("This (foo bar) is a test!.", 0);
@@ -81,7 +81,7 @@ public class CommaWhitespaceRuleTest {
     assertMatches("Ellipsis . . . . as suggested by The Chicago Manual of Style", 4);
   }
 
-  private void assertMatches(String text, int expectedMatches) throws IOException {
+  private void assertMatches(String text, int expectedMatches) throws Exception {
     assertEquals(expectedMatches, rule.match(langTool.getAnalyzedSentence(text)).length);
   }
 

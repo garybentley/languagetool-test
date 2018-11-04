@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,21 +28,21 @@ import java.util.ResourceBundle;
 
 /**
  * A rule that matches lemmas found only in DNV (AVL dictionary) and suggests
- * alternative words. 
- * 
+ * alternative words.
+ *
  * Catalan implementations. Loads the
  * relevant lemmas from <code>rules/ca/replace_dnv_secondary.txt</code>.
- * 
+ *
  * @author Jaume Ortolà
  */
 public class SimpleReplaceDNVSecondaryRule extends AbstractSimpleReplaceLemmasRule {
-  
+
   public SimpleReplaceDNVSecondaryRule(final ResourceBundle messages, Language language) throws IOException {
     super(messages, language);
     super.setCategory(Categories.REGIONALISMS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Style);
-    wrongLemmas = load("/ca/replace_dnv_secondary.txt");
-  }  
+    wrongLemmas = load("/ca/replace_dnv_secondary.txt", language.getUseDataBroker());
+  }
 
   @Override
   public final String getId() {
@@ -58,10 +58,10 @@ public class SimpleReplaceDNVSecondaryRule extends AbstractSimpleReplaceLemmasRu
   public String getShort() {
     return "Forma secundària";
   }
-  
+
   @Override
   public String getMessage(String tokenStr,List<String> replacements) {
     return "Paraula o forma secundària.";
   }
-  
+
 }

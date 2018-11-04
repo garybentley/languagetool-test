@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -42,7 +42,8 @@ import java.util.Scanner;
 class SpellingData {
 
   private final List<SpellingRuleWithSuggestion> spellingRules = new ArrayList<>();
-  
+/*
+GTODO Clean up
   SpellingData(String ruleDesc, String filePath, String message, String shortMessage, String ruleId, ITSIssueType issueType) {
     try (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(filePath);
          Scanner scanner = new Scanner(inputStream, "utf-8")) {
@@ -96,7 +97,7 @@ class SpellingData {
       throw new RuntimeException(e);
     }
   }
-
+*/
   public List<SpellingRuleWithSuggestion> get() {
     return spellingRules;
   }

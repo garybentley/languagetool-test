@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,15 +35,19 @@ import static org.junit.Assert.assertEquals;
 
 public class WordCoherencyRuleTest {
 
-  private final JLanguageTool lt = new JLanguageTool(new German());
+    private WordCoherencyRule rule;
+  private JLanguageTool lt;
 
   @Before
-  public void before() throws IOException {
-    TestTools.disableAllRulesExcept(lt, "DE_WORD_COHERENCY");
+  public void before() throws Exception {
+      German language = new German();
+      lt = new JLanguageTool(language);
+      rule = language.createWordCoherencyRule(null);
+    //TestTools.disableAllRulesExcept(lt, "DE_WORD_COHERENCY");
   }
-  
+
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     assertGood("Das ist aufwendig, aber nicht zu aufwendig.");
     assertGood("Das ist aufwendig. Aber nicht zu aufwendig.");
@@ -101,47 +105,45 @@ public class WordCoherencyRuleTest {
   }
 
   @Test
-  public void testCallIndependence() throws IOException {
+  public void testCallIndependence() throws Exception {
     assertGood("Das ist aufwendig.");
     assertGood("Aber nicht zu aufwändig.");  // this won't be noticed, the calls are independent of each other
   }
 
   @Test
-  public void testMatchPosition() throws IOException {
-    List<RuleMatch> ruleMatches = lt.check("Das ist aufwendig. Aber nicht zu aufwändig");
+  public void testMatchPosition() throws Exception {
+    List<RuleMatch> ruleMatches = lt.check(rule, "Das ist aufwendig. Aber nicht zu aufwändig");
     assertThat(ruleMatches.size(), is(1));
     assertThat(ruleMatches.get(0).getFromPos(), is(33));
     assertThat(ruleMatches.get(0).getToPos(), is(42));
   }
 
-  private void assertError(String s) throws IOException {
-    WordCoherencyRule rule = new WordCoherencyRule(TestTools.getEnglishMessages());
+  private void assertError(String s) throws Exception {
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     assertEquals(1, rule.match(analyzedSentences).length);
   }
 
-  private void assertGood(String s) throws IOException {
-    WordCoherencyRule rule = new WordCoherencyRule(TestTools.getEnglishMessages());
+  private void assertGood(String s) throws Exception {
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     assertEquals(0, rule.match(analyzedSentences).length);
   }
 
   @Test
-  public void testRuleCompleteTexts() throws IOException {
-    assertEquals(0, lt.check("Das ist aufwändig. Aber hallo. Es ist wirklich aufwändig.").size());
-    assertEquals(1, lt.check("Das ist aufwendig. Aber hallo. Es ist wirklich aufwändig.").size());
-    assertEquals(1, lt.check("Das ist aufwändig. Aber hallo. Es ist wirklich aufwendig.").size());
-    
+  public void testRuleCompleteTexts() throws Exception {
+    assertEquals(0, lt.check(rule, "Das ist aufwändig. Aber hallo. Es ist wirklich aufwändig.").size());
+    assertEquals(1, lt.check(rule, "Das ist aufwendig. Aber hallo. Es ist wirklich aufwändig.").size());
+    assertEquals(1, lt.check(rule, "Das ist aufwändig. Aber hallo. Es ist wirklich aufwendig.").size());
+
     // also find full forms:
-    assertEquals(0, lt.check("Das ist aufwendig. Aber hallo. Es ist wirklich aufwendiger als so.").size());
-    assertEquals(1, lt.check("Das ist aufwendig. Aber hallo. Es ist wirklich aufwändiger als so.").size());
-    
-    assertEquals(1, lt.check("Das ist aufwändig. Aber hallo. Es ist wirklich aufwendiger als so.").size());
-    assertEquals(1, lt.check("Das ist das aufwändigste. Aber hallo. Es ist wirklich aufwendiger als so.").size());
-    assertEquals(1, lt.check("Das ist das aufwändigste. Aber hallo. Es ist wirklich aufwendig.").size());
+    assertEquals(0, lt.check(rule, "Das ist aufwendig. Aber hallo. Es ist wirklich aufwendiger als so.").size());
+    assertEquals(1, lt.check(rule, "Das ist aufwendig. Aber hallo. Es ist wirklich aufwändiger als so.").size());
+
+    assertEquals(1, lt.check(rule, "Das ist aufwändig. Aber hallo. Es ist wirklich aufwendiger als so.").size());
+    assertEquals(1, lt.check(rule, "Das ist das aufwändigste. Aber hallo. Es ist wirklich aufwendiger als so.").size());
+    assertEquals(1, lt.check(rule, "Das ist das aufwändigste. Aber hallo. Es ist wirklich aufwendig.").size());
 
     // cross-paragraph checks
-    assertEquals(1, lt.check("Das ist das aufwändigste.\n\nAber hallo. Es ist wirklich aufwendig.").size());
+    assertEquals(1, lt.check(rule, "Das ist das aufwändigste.\n\nAber hallo. Es ist wirklich aufwendig.").size());
   }
 
 }

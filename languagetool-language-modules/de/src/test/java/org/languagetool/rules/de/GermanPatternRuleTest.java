@@ -20,14 +20,14 @@ package org.languagetool.rules.de;
 
 import org.junit.Test;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
+import org.languagetool.language.German;
 
 public class GermanPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+      German german = new German();
+      runTestForLanguage(german);
   }
 
 }

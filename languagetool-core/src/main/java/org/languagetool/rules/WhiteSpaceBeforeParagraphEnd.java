@@ -34,7 +34,7 @@ import org.languagetool.Language;
 public class WhiteSpaceBeforeParagraphEnd extends TextLevelRule {
 
   private final Language lang;
-  
+
   public WhiteSpaceBeforeParagraphEnd(ResourceBundle messages, Language lang, boolean defaultActive) {
     super(messages);
     super.setCategory(Categories.STYLE.getCategory(messages));
@@ -59,11 +59,11 @@ public class WhiteSpaceBeforeParagraphEnd extends TextLevelRule {
   public String getDescription() {
     return messages.getString("whitespace_before_parapgraph_end_desc");
   }
-  
+
   @Override
-  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
-    int pos = 0; 
+    int pos = 0;
     for (int n = 0; n < sentences.size(); n++) {
       AnalyzedSentence sentence = sentences.get(n);
       if(n == sentences.size() - 1 || sentence.hasParagraphEndMark(lang)) {

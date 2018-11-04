@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,9 +21,11 @@ package org.languagetool.synthesis.en;
 
 import org.junit.Test;
 import org.languagetool.AnalyzedToken;
+import org.languagetool.language.*;
 
 import java.io.IOException;
 import java.util.Arrays;
+import org.languagetool.synthesis.Synthesizer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,8 +40,8 @@ public class EnglishSynthesizerTest {
   }
 
   @Test
-  public void testSynthesizeStringString() throws IOException {
-    EnglishSynthesizer synth = new EnglishSynthesizer();
+  public void testSynthesizeStringString() throws Exception {
+    Synthesizer synth = new English().getSynthesizer();
     assertEquals(synth.synthesize(dummyToken("blablabla"),
         "blablabla").length, 0);
 

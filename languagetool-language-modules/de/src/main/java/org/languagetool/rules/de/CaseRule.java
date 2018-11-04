@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,6 +27,7 @@ import org.languagetool.language.German;
 import org.languagetool.rules.*;
 import org.languagetool.rules.patterns.PatternToken;
 import org.languagetool.rules.patterns.PatternTokenBuilder;
+import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.de.GermanTagger;
 import org.languagetool.tagging.de.GermanToken;
 import org.languagetool.tagging.de.GermanToken.POSType;
@@ -44,7 +45,7 @@ import java.util.regex.Pattern;
  * first letter (except at the start of a sentence) and cases
  * like this: <tt>Das laufen f&auml;llt mir leicht.</tt> (<tt>laufen</tt> needs
  * to be uppercased).
- *   
+ *
  * @author Daniel Naber
  */
 public class CaseRule extends Rule {
@@ -281,12 +282,12 @@ public class CaseRule extends Rule {
      Arrays.asList( // "Das schließen Forscher aus ..."
        new PatternTokenBuilder().pos(JLanguageTool.SENTENCE_START_TAGNAME).build(),
        new PatternTokenBuilder().csToken("Das").build(),
-       new PatternTokenBuilder().pos("VER:INF:NON").build(), 
+       new PatternTokenBuilder().pos("VER:INF:NON").build(),
        new PatternTokenBuilder().posRegex("SUB:NOM:PLU:.+|ADV:MOD").build()
     ),
     Arrays.asList( // "Tausende Gläubige kamen, um ihn zu sehen."
       new PatternTokenBuilder().tokenRegex("[tT]ausende?").build(),
-      new PatternTokenBuilder().posRegex("SUB:NOM:.+").build(), 
+      new PatternTokenBuilder().posRegex("SUB:NOM:.+").build(),
       new PatternTokenBuilder().posRegex(JLanguageTool.SENTENCE_END_TAGNAME+"|VER:[1-3]:.+").build()
    ),
     Arrays.asList(
@@ -299,7 +300,7 @@ public class CaseRule extends Rule {
       csToken("Network")
    ),
     Arrays.asList( // "Er befürchtete Schlimmeres."
-      regex("Schlimm(er)?es"), 
+      regex("Schlimm(er)?es"),
       pos(JLanguageTool.SENTENCE_END_TAGNAME)
     ),
     Arrays.asList(
@@ -353,7 +354,7 @@ public class CaseRule extends Rule {
     nounIndicators.add("euer");
     nounIndicators.add("unser");
   }
-  
+
   private static final Set<String> sentenceStartExceptions = new HashSet<>();
   static {
     sentenceStartExceptions.add("(");
@@ -456,7 +457,7 @@ public class CaseRule extends Rule {
     "Abriss",
     "Ahne",
     "Ähnlichem",
-    "Ähnliches",   // je nach Kontext groß (TODO), z.B. "Er hat Ähnliches erlebt" 
+    "Ähnliches",   // je nach Kontext groß (TODO), z.B. "Er hat Ähnliches erlebt"
     "Allerlei",
     "Anklang",
     "Verlobter",
@@ -488,7 +489,7 @@ public class CaseRule extends Rule {
     "Herzöge",
     "Herzögen",
     "Hinfahrt",
-    "Hundert",   // je nach Kontext groß (TODO) 
+    "Hundert",   // je nach Kontext groß (TODO)
     "Ihnen",
     "Ihr",
     "Ihre",
@@ -620,7 +621,7 @@ public class CaseRule extends Rule {
     "Euren",
     "Eures"
   ));
-  
+
   private static final Set<String> languages = new HashSet<>();
     static {
     // TODO: alle Sprachen
@@ -709,8 +710,6 @@ public class CaseRule extends Rule {
     languages.add("Weißrussisch");
   }
 
-  private static final Set<Pattern[]> exceptionPatterns = CaseRuleExceptions.getExceptionPatterns();
-
   private static final Set<String> substVerbenExceptions = new HashSet<>();
   static {
     substVerbenExceptions.add("hinziehen");
@@ -752,17 +751,20 @@ public class CaseRule extends Rule {
     substVerbenExceptions.add("bedeuten");
   }
 
+  private final Set<Pattern[]> exceptionPatterns;
   private final GermanTagger tagger;
   private final German german;
 
-  public CaseRule(ResourceBundle messages, German german) {
+  public CaseRule(ResourceBundle messages, German german, GermanTagger tagger, Set<Pattern[]> exceptionPatterns) {
     this.german = german;
+    this.exceptionPatterns = exceptionPatterns;
     super.setCategory(Categories.CASING.getCategory(messages));
-    this.tagger = (GermanTagger) german.getTagger();
+    this.tagger = tagger;
+    // GTODO Bad cast (GermanTagger) german.getTagger();
     addExamplePair(Example.wrong("<marker>Das laufen</marker> fällt mir schwer."),
                    Example.fixed("<marker>Das Laufen</marker> fällt mir schwer."));
   }
-  
+
   @Override
   public String getId() {
     return "DE_CASE";
@@ -779,10 +781,10 @@ public class CaseRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = getSentenceWithImmunization(sentence).getTokensWithoutWhitespace();
-    
+
     boolean prevTokenIsDas = false;
     boolean isPrecededByModalOrAuxiliary = false;
     for (int i = 0; i < tokens.length; i++) {
@@ -839,7 +841,7 @@ public class CaseRule extends Rule {
       if (analyzedToken.matchesPosTagRegex("VER:(MOD|AUX):[1-3]:.*")) {
         isPrecededByModalOrAuxiliary = true;
       }
-      AnalyzedTokenReadings lowercaseReadings = tagger.lookup(token.toLowerCase());
+      AnalyzedTokenReadings lowercaseReadings = lookup(token.toLowerCase());
       if (hasNounReading(analyzedToken)) { // it's the spell checker's task to check that nouns are uppercase
         if (!isPotentialUpperCaseError(i, tokens, lowercaseReadings, isPrecededByModalOrAuxiliary)) {
           continue;
@@ -849,7 +851,7 @@ public class CaseRule extends Rule {
                  Character.isLowerCase(tokens[i+1].getToken().charAt(0)) &&
                  tokens[i+1].matchesPosTagRegex("VER:[123]:.*")) {
         // "Viele Minderjährige sind" but not "Das wirklich Wichtige Verfahren ist"
-        continue;  
+        continue;
       }
       if (analyzedToken.getAnalyzedToken(0).getPOSTag() == null && lowercaseReadings == null) {
         continue;
@@ -921,12 +923,12 @@ public class CaseRule extends Rule {
       if (!nextToken.hasPartialPosTag("SUB:") &&
           !analyzedToken.getToken().matches("bitte|einen|sein|habe") &&
           !analyzedToken.hasPartialPosTag("ADJ:") &&
-          !prevTokenStr.matches("einen|zu") && 
+          !prevTokenStr.matches("einen|zu") &&
           (prevToken.hasPartialPosTag("PRP:") ||
            prevToken.matchesPosTagRegex("^ART:.*") ||
            prevToken.getToken().matches("seiner|seine|seinen|seinem|seines"))) {
         if (!StringTools.startsWithUppercase(analyzedToken.getToken())
-                && analyzedToken.matchesPosTagRegex("^VER:.*") 
+                && analyzedToken.matchesPosTagRegex("^VER:.*")
                 && !analyzedToken.matchesPosTagRegex("^PA2:.*")) {
           String ucToken = StringTools.uppercaseFirstChar(analyzedToken.getToken());
           AnalyzedTokenReadings ucLookup = tagger.lookup(ucToken);
@@ -1250,4 +1252,5 @@ public class CaseRule extends Rule {
     }
     return lookupResult;
   }
+
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,7 +27,6 @@ import org.languagetool.rules.patterns.PatternToken;
 import org.languagetool.rules.patterns.PatternRule;
 import org.languagetool.tools.StringTools;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +47,7 @@ public class MissingVerbRule extends Rule {
   private final PatternRule rule2;
   private final Language language;
 
+  // GTODO Consider passing tagger...
   public MissingVerbRule(ResourceBundle messages, German language) {
     this.language = language;
     rule1 = new PatternRule("internal", language, Arrays.asList(
@@ -73,7 +73,7 @@ public class MissingVerbRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     if (!isRealSentence(sentence)) {
       return new RuleMatch[0];
     }
@@ -116,11 +116,11 @@ public class MissingVerbRule extends Rule {
     return false;
   }
 
-  private boolean isSpecialCase(AnalyzedSentence sentence) throws IOException {
+  private boolean isSpecialCase(AnalyzedSentence sentence) throws Exception {
     return rule1.match(sentence).length > 0 || rule2.match(sentence).length > 0;
   }
 
-  private boolean verbAtSentenceStart(AnalyzedTokenReadings readings) throws IOException {
+  private boolean verbAtSentenceStart(AnalyzedTokenReadings readings) throws Exception {
     // start of sentence is mis-tagged because of the uppercase first character, work around that:
     String lowercased = StringTools.lowercaseFirstChar(readings.getToken());
     List<AnalyzedTokenReadings> lcReadings = language.getTagger().tag(Collections.singletonList(lowercased));

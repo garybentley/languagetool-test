@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Helper methods to list all supported languages and to get language objects
@@ -35,11 +36,24 @@ import java.util.*;
  */
 public final class Languages {
 
-  private static final List<Language> LANGUAGES = getAllLanguages();
+  //private static final List<Language> LANGUAGES = getAllLanguages();
   private static final String PROPERTIES_PATH = "META-INF/org/languagetool/language-module.properties";
   private static final String PROPERTIES_KEY = "languageClasses";
 
+  private static LanguageProvider LANG_PROV = null;
+
   private Languages() {
+  }
+
+  public static void setLanguageProvider(LanguageProvider prov) {
+      LANG_PROV = prov;
+  }
+
+  public static LanguageProvider getLanguageProvider() {
+      if (LANG_PROV == null) {
+          setLanguageProvider(new DefaultResourceLanguageProvider());
+      }
+      return LANG_PROV;
   }
 
   /**
@@ -50,6 +64,10 @@ public final class Languages {
    * more than one class.
    * @return an unmodifiable list of all supported languages
    */
+   public static List<Language> get() {
+       return Languages.getLanguageProvider().getAll(l -> !"xx".equals(l.getLocale().getLanguage()));
+   }
+   /*
   public static List<Language> get() {
     List<Language> result = new ArrayList<>();
     for (Language lang : LANGUAGES) {
@@ -59,16 +77,21 @@ public final class Languages {
     }
     return Collections.unmodifiableList(result);
   }
-
+*/
   /**
    * Like {@link #get()} but the list contains also LanguageTool's internal 'Demo'
    * language, if available. Only useful for tests.
    * @return an unmodifiable list
    */
+   /*
   public static List<Language> getWithDemoLanguage() {
     return LANGUAGES;
   }
-
+  */
+  public static List<Language> getWithDemoLanguage() {
+      return Languages.getLanguageProvider().getAll();
+  }
+/*
   private static List<Language> getAllLanguages() {
     List<Language> languages = new ArrayList<>();
     Set<String> languageClassNames = new HashSet<>();
@@ -104,7 +127,8 @@ public final class Languages {
     }
     return Collections.unmodifiableList(languages);
   }
-
+*/
+/*
   private static Language createLanguageObjects(URL url, String className) {
     try {
       Class<?> aClass = Class.forName(className);
@@ -116,13 +140,14 @@ public final class Languages {
       throw new RuntimeException("Object for class '" + className + "' specified in " + url + " could not created", e);
     }
   }
-
+*/
   /**
    * Get the Language object for the given language name.
    *
    * @param languageName e.g. <code>English</code> or <code>German</code> (case is significant)
    * @return a Language object or {@code null} if there is no such language
    */
+   /*
   @Nullable
   public static Language getLanguageForName(String languageName) {
     for (Language element : LANGUAGES) {
@@ -132,6 +157,18 @@ public final class Languages {
     }
     return null;
   }
+*/
+
+  /**
+     * Get the Language object for the given language name.
+     *
+     * @param languageName e.g. <code>English</code> or <code>German</code> (case is significant)
+     * @return a Language object or {@code null} if there is no such language
+     */
+    @Nullable
+    public static Language getLanguageForName(String languageName) {
+        return Languages.getLanguageProvider().get(l -> l.getName().equals(languageName));
+    }
 
   /**
    * Get the Language object for the given language code.
@@ -139,11 +176,13 @@ public final class Languages {
    * @throws IllegalArgumentException if the language is not supported or if the language code is invalid
    * @since 3.6
    */
+   /*
+   GTODO Clean up
   public static Language getLanguageForShortCode(String langCode) {
     Language language = getLanguageForShortCodeOrNull(langCode);
-    if (language == null) {
+    if (language == null) {xxx
       List<String> codes = new ArrayList<>();
-      for (Language realLanguage : LANGUAGES) {
+      for (Language realLanguage : getLanguageProvider().getAll()) {
         codes.add(realLanguage.getShortCodeWithCountryAndVariant());
       }
       Collections.sort(codes);
@@ -153,7 +192,7 @@ public final class Languages {
     }
     return language;
   }
-
+*/
   /**
    * Return whether a language with the given language code is supported. Which languages
    * are supported depends on the classpath when the {@code Language} object is initialized.
@@ -162,15 +201,40 @@ public final class Languages {
    * @throws IllegalArgumentException in some cases of an invalid language code format
    */
   public static boolean isLanguageSupported(String langCode) {
-    return getLanguageForShortCodeOrNull(langCode) != null;
+    return getLanguage(langCode) != null;
+  }
+
+  /**
+   * Return whether a language with the given locale is supported.
+   *
+   * @param locale The locale.
+   * @return true if the language is supported.
+   */
+  public static boolean isLanguageSupported(Locale locale) {
+      return getLanguage(locale) != null;
+  }
+
+  /**
+   * Gets a new instance of a Language subclass for the specified locale.
+   *
+   * @param locale The locale.
+   * @return The new language instance or null if the language isn't supported.
+   */
+  public static Language getNewLanguageInstance(Locale locale) throws Exception {
+      Language l = getLanguage(locale);
+      if (l == null) {
+          return null;
+      }
+      return l.getClass().newInstance();
   }
 
   /**
    * Get the best match for a locale, using American English as the final fallback if nothing
    * else fits. The returned language will be a country variant language (e.g. British English, not just English)
    * if available.
-   * @throws RuntimeException if no language was found and American English as a fallback is not available
    */
+   /*
+   GTODO Clean up
   public static Language getLanguageForLocale(Locale locale) {
     Language language = getLanguageForLanguageNameAndCountry(locale);
     if (language != null) {
@@ -181,71 +245,104 @@ public final class Languages {
         return firstFallbackLanguage;
       }
     }
-    for (Language aLanguage : LANGUAGES) {
-      if (aLanguage.getShortCodeWithCountryAndVariant().equals("en-US")) {
-        return aLanguage;
-      }
-    }
-    throw new RuntimeException("No appropriate language found, not even en-US. Supported languages: " + get());
+    language = getLanguageProvider().get(l -> l.getShortCodeWithCountryAndVariant().equals("en-US"));
+    return language;
+  }
+*/
+
+  @Nullable
+  public static Language getLanguage(String languageTag) {
+        Objects.requireNonNull(languageTag);
+        return getLanguage(Locale.forLanguageTag(languageTag));
   }
 
+  @Nullable
+  public static Language getLanguage(Locale locale) {
+      Objects.requireNonNull(locale);
+      Language lang = getLanguageProvider().get(l -> l.getLocale().equals(locale));
+      return lang;
+  }
+
+  @Nullable
+  public static Language getBestMatchLanguage(Locale locale) {
+    Objects.requireNonNull(locale);
+    // Check for an exact match...
+    Language lang = getLanguageProvider().get(l -> l.getLocale().equals(locale));
+
+    if (lang == null) {
+        if (!"".equals(locale.getCountry())) {
+            // There is a country.  Search for a match with language/country only.
+            lang = getLanguageProvider().get(l -> new Locale(l.getLocale().getLanguage(), l.getLocale().getCountry()).equals (new Locale(locale.getLanguage(), locale.getCountry())));
+        }
+        if (lang == null) {
+            // Just do a language lookup.
+            lang = getLanguageProvider().get(l -> l.getLocale().getLanguage().equals(locale.getLanguage()));
+        }
+    }
+
+    if (lang == null) {
+        // Can't find any match.
+        return null;
+    }
+
+    Language defl = lang.getDefaultLanguageVariant();
+    // Is our best match a base level language, like "en", if so return the default variant.
+    if (!lang.isVariant() && defl != null && !defl.getLocale().equals(lang.getLocale())) {
+        return defl;
+    }
+    return lang;
+  }
+
+  @Nullable
+  public static Language getBestMatchLanguage(String languageTag) {
+      Objects.requireNonNull(languageTag);
+      return getBestMatchLanguage(Locale.forLanguageTag(languageTag));
+  }
+/*
+GTODO Clean up
   @Nullable
   private static Language getLanguageForShortCodeOrNull(String langCode) {
     StringTools.assureSet(langCode, "langCode");
     Language result = null;
     if (langCode.contains("-x-")) {
       // e.g. "de-DE-x-simple-language"
-      for (Language element : LANGUAGES) {
-        if (element.getShortCode().equalsIgnoreCase(langCode)) {
-          return element;
-        }
-      }
+      result = getLanguageProvider().get(l -> l.getShortCode().equalsIgnoreCase(langCode));
     } else if (langCode.contains("-")) {
       String[] parts = langCode.split("-");
       if (parts.length == 2) { // e.g. en-US
-        for (Language element : LANGUAGES) {
-          if (parts[0].equalsIgnoreCase(element.getShortCode())
-                  && element.getCountries().length == 1
-                  && parts[1].equalsIgnoreCase(element.getCountries()[0])) {
-            result = element;
-            break;
-          }
-        }
+          result = getLanguageProvider().get(l -> (parts[0].equalsIgnoreCase(l.getShortCode())
+                                                    && l.getCountries().length == 1
+                                                    && parts[1].equalsIgnoreCase(l.getCountries()[0])));
+
       } else if (parts.length == 3) { // e.g. ca-ES-valencia
-        for (Language element : LANGUAGES) {
-          if (parts[0].equalsIgnoreCase(element.getShortCode())
-                  && element.getCountries().length == 1
-                  && parts[1].equalsIgnoreCase(element.getCountries()[0])
-                  && parts[2].equalsIgnoreCase(element.getVariant())) {
-            result = element;
-            break;
-          }
-        }
+          result = getLanguageProvider().get(l -> (parts[0].equalsIgnoreCase(l.getShortCode())
+                                                    && l.getCountries().length == 1
+                                                    && parts[1].equalsIgnoreCase(l.getCountries()[0])
+                                                    && parts[2].equalsIgnoreCase(l.getVariant())));
+
       } else {
         throw new IllegalArgumentException("'" + langCode + "' isn't a valid language code");
       }
+
     } else {
-      for (Language element : LANGUAGES) {
-        if (langCode.equalsIgnoreCase(element.getShortCode())) {
-          result = element;
-            /* TODO: It should return the DefaultLanguageVariant,
-             * not the first language found */
-          break;
-        }
-      }
+      result = getLanguageProvider().get(l -> langCode.equalsIgnoreCase(l.getShortCode()));
+      // TODO: It should return the DefaultLanguageVariant,
+      // * not the first language found
     }
     return result;
   }
-
+*/
+/*
+GTODO Clean up
   @Nullable
   private static Language getLanguageForLanguageNameAndCountry(Locale locale) {
-    for (Language language : LANGUAGES) {
-      if (language.getShortCode().equals(locale.getLanguage())) {
-        List<String> countryVariants = Arrays.asList(language.getCountries());
-        if (countryVariants.contains(locale.getCountry())) {
-          return language;
-        }
-      }
+    Language lang = getLanguageProvider().get(l -> l.getShortCode().equals(locale.getLanguage()));
+    if (lang == null) {
+        return null;
+    }
+    List<String> countryVariants = Arrays.asList(lang.getCountries());
+    if (countryVariants.contains(locale.getCountry())) {
+      return lang;
     }
     return null;
   }
@@ -253,21 +350,14 @@ public final class Languages {
   @Nullable
   private static Language getLanguageForLanguageNameOnly(Locale locale) {
     // use default variant if available:
-    for (Language language : LANGUAGES) {
-      if (language.getShortCode().equals(locale.getLanguage()) && language.hasVariant()) {
-        Language defaultVariant = language.getDefaultLanguageVariant();
+    Language lang = getLanguageProvider().get(l -> l.getShortCode().equals(locale.getLanguage()) && l.hasVariant());
+    if (lang != null) {
+        Language defaultVariant = lang.getDefaultLanguageVariant();
         if (defaultVariant != null) {
           return defaultVariant;
         }
-      }
     }
-    // use the first match otherwise (which should be the only match):
-    for (Language language : LANGUAGES) {
-      if (language.getShortCode().equals(locale.getLanguage()) && !language.hasVariant()) {
-        return language;
-      }
-    }
-    return null;
+    return lang;
   }
-
+*/
 }

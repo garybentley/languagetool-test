@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,17 +27,23 @@ import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.MultiWordChunker;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for Russian.
- * 
+ *
  * @author Yakov Reztsov
  */
 
 public class RussianHybridDisambiguator extends AbstractDisambiguator {
 
-  private final Disambiguator chunker = new MultiWordChunker("/ru/multiwords.txt");
+  private final Disambiguator chunker;
   private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Russian());
+
+  public RussianHybridDisambiguator (ResourceDataBroker dataBroker) {
+      super(dataBroker);
+     chunker = new MultiWordChunker("/ru/multiwords.txt", dataBroker);
+  }
 
   /**
    * Calls two disambiguator classes: (1) a chunker; (2) a rule-based

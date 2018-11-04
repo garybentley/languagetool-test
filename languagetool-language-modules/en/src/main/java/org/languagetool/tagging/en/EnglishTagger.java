@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,28 +20,23 @@ package org.languagetool.tagging.en;
 
 import java.util.Locale;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * English Part-of-speech tagger.
  * The POS tagset is described in
  * <a href="https://github.com/languagetool-org/languagetool/blob/master/languagetool-language-modules/en/src/main/resources/org/languagetool/resource/en/tagset.txt">tagset.txt</a>
- * 
+ *
  * @author Marcin Milkowski
  */
 public class EnglishTagger extends BaseTagger {
 
-  @Override
-  public String getManualAdditionsFileName() {
-    return "/en/added.txt";
-  }
+    public EnglishTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+        super(baseDict, tagger, caseCon, false);
+    }
 
-  @Override
-  public String getManualRemovalsFileName() {
-    return "/en/removed.txt";
-  }
-
-  public EnglishTagger() {
-    super("/en/english.dict", Locale.ENGLISH, false);
-  }
 }

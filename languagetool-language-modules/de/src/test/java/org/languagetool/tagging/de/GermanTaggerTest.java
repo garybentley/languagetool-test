@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,11 +22,12 @@ import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.WordData;
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
+import org.languagetool.language.German;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -34,9 +35,16 @@ import static org.junit.Assert.*;
 @SuppressWarnings("ConstantConditions")
 public class GermanTaggerTest {
 
+    private GermanTagger tagger;
+
+  @Before
+  public void setUp() throws Exception {
+      German german = new German();
+      tagger = german.getDefaultDataBroker().getTagger();
+  }
+
   @Test
-  public void testLemmaOfForDashCompounds() throws IOException {
-    GermanTagger tagger = new GermanTagger();
+  public void testLemmaOfForDashCompounds() throws Exception {
     AnalyzedTokenReadings aToken = tagger.lookup("Zahn-Arzt-Verband");
     List<String> lemmas = new ArrayList<>();
     for (AnalyzedToken analyzedToken : aToken) {
@@ -44,11 +52,9 @@ public class GermanTaggerTest {
     }
     assertTrue(lemmas.contains("Zahnarztverband"));
   }
-  
-  @Test
-  public void testTagger() throws IOException {
-    GermanTagger tagger = new GermanTagger();
 
+  @Test
+  public void testTagger() throws Exception {
     AnalyzedTokenReadings aToken = tagger.lookup("Haus");
     assertEquals("Haus[Haus/SUB:AKK:SIN:NEU, Haus/SUB:DAT:SIN:NEU, Haus/SUB:NOM:SIN:NEU]", toSortedString(aToken));
     assertEquals("Haus", aToken.getReadings().get(0).getLemma());
@@ -140,9 +146,7 @@ public class GermanTaggerTest {
 
   // make sure we use the version of the POS data that was extended with post spelling reform data
   @Test
-  public void testExtendedTagger() throws IOException {
-    GermanTagger tagger = new GermanTagger();
-
+  public void testExtendedTagger() throws Exception {
     assertEquals("Kuß[Kuß/SUB:AKK:SIN:MAS, Kuß/SUB:DAT:SIN:MAS, Kuß/SUB:NOM:SIN:MAS]", toSortedString(tagger.lookup("Kuß")));
     assertEquals("Kuss[Kuss/SUB:AKK:SIN:MAS, Kuss/SUB:DAT:SIN:MAS, Kuss/SUB:NOM:SIN:MAS]", toSortedString(tagger.lookup("Kuss")));
 
@@ -154,9 +158,7 @@ public class GermanTaggerTest {
   }
 
   @Test
-  public void testTaggerBaseforms() throws IOException {
-    GermanTagger tagger = new GermanTagger();
-
+  public void testTaggerBaseforms() throws Exception {
     List<AnalyzedToken> readings1 = tagger.lookup("übrigbleibst").getReadings();
     assertEquals(1, readings1.size());
     assertEquals("übrigbleiben", readings1.get(0).getLemma());
@@ -175,8 +177,7 @@ public class GermanTaggerTest {
   }
 
   @Test
-  public void testTag() throws IOException {
-    GermanTagger tagger = new GermanTagger();
+  public void testTag() throws Exception {
     List<String> upperCaseWord = Arrays.asList("Das");
     List<AnalyzedTokenReadings> readings = tagger.tag(upperCaseWord, false);
     assertEquals("[Das[Das/null*]]", readings.toString());
@@ -185,19 +186,16 @@ public class GermanTaggerTest {
   }
 
   @Test
-  public void testTagWithManualDictExtension() throws IOException {
+  public void testTagWithManualDictExtension() throws Exception {
     // words not originally in Morphy but added in LT 1.8 (moved from added.txt to german.dict)
-    GermanTagger tagger = new GermanTagger();
     List<AnalyzedTokenReadings> readings = tagger.tag(Collections.singletonList("Wichtigtuerinnen"));
     assertEquals("[Wichtigtuerinnen[Wichtigtuerin/SUB:AKK:PLU:FEM*," +
             "Wichtigtuerin/SUB:DAT:PLU:FEM*,Wichtigtuerin/SUB:GEN:PLU:FEM*,Wichtigtuerin/SUB:NOM:PLU:FEM*]]", readings.toString());
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    Dictionary dictionary = Dictionary.read(
-            JLanguageTool.getDataBroker().getFromResourceDirAsUrl("/de/german.dict"));
-    DictionaryLookup dl = new DictionaryLookup(dictionary);
+  public void testDictionary() throws Exception {
+    DictionaryLookup dl = new DictionaryLookup(tagger.getDictionary());
     for (WordData wd : dl) {
       if (wd.getTag() == null || wd.getTag().length() == 0) {
         System.err.println("**** Warning: the word " + wd.getWord() + "/" + wd.getStem()

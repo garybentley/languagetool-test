@@ -18,49 +18,54 @@
  */
 package org.languagetool.rules.en;
 
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.Example;
 import org.languagetool.rules.WrongWordInContextRule;
+import org.languagetool.rules.ContextWords;
+import org.languagetool.databroker.ResourceDataBroker;
 
 public class EnglishWrongWordInContextRule extends WrongWordInContextRule {
 
-  public EnglishWrongWordInContextRule(ResourceBundle messages) {
-    super(messages);
+  public EnglishWrongWordInContextRule(ResourceBundle messages, List<ContextWords> wrongWords) {
+    super(messages, wrongWords);
     addExamplePair(Example.wrong("I have <marker>proscribed</marker> you a course of antibiotics."),
                    Example.fixed("I have <marker>prescribed</marker> you a course of antibiotics."));
   }
-  
+
   @Override
   protected String getCategoryString() {
     return "Commonly Confused Words";
   }
-  
+
   @Override
   public String getId() {
     return "ENGLISH_WRONG_WORD_IN_CONTEXT";
   }
-  
+
   @Override
   public String getDescription() {
     return "commonly confused words (proscribe/prescribe, heroine/heroin etc.)";
   }
-  
+
+/*
+GTODO Clean up
   @Override
   protected String getFilename() {
     return "/en/wrongWordInContext.txt";
   }
-  
+*/
   @Override
   protected String getMessageString() {
     return "Possibly confused word: Did you mean <suggestion>$SUGGESTION</suggestion> instead of '$WRONGWORD'?";
   }
-  
+
   @Override
   protected String getShortMessageString() {
     return "Possibly confused word";
   }
-  
+
   @Override
   protected String getLongMessageString() {
     return "Possibly confused word: Did you mean <suggestion>$SUGGESTION</suggestion> (= $EXPLANATION_SUGGESTION) instead of '$WRONGWORD' (= $EXPLANATION_WRONGWORD)?";

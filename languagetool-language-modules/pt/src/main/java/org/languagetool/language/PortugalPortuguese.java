@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -48,8 +48,8 @@ public class PortugalPortuguese extends Portuguese {
     rules.addAll(super.getRelevantRules(messages, userConfig));
     rules.add(new PostReformPortugueseCompoundRule(messages));
     rules.add(new PostReformPortugueseDashRule());
-    rules.add(new PortugalPortugueseReplaceRule(messages));
-    rules.add(new PortugueseAgreementReplaceRule(messages));
+    rules.add(new PortugalPortugueseReplaceRule(messages, getUseDataBroker()));
+    rules.add(new PortugueseAgreementReplaceRule(messages, getUseDataBroker()));
     return rules;
   }
 

@@ -32,7 +32,6 @@ import org.languagetool.tagging.de.GermanTagger;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
 import org.languagetool.tools.Tools;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -57,7 +56,7 @@ public class SubjectVerbAgreementRule extends Rule {
   private static final ChunkTag PP = new ChunkTag("PP");   // prepositional phrase etc.
   private static final List<String> QUESTION_PRONOUNS = Arrays.asList("wie");
   private static final List<String> CURRENCIES = Arrays.asList("Dollar", "Euro", "Yen");
-  
+
   private static final List<SingularPluralPair> PAIRS = Arrays.asList(
     new SingularPluralPair("ist", "sind"),
     new SingularPluralPair("war", "waren")
@@ -102,10 +101,12 @@ public class SubjectVerbAgreementRule extends Rule {
   private final GermanTagger tagger;
   private final German language;
 
-  public SubjectVerbAgreementRule(ResourceBundle messages, German language) {
+  public SubjectVerbAgreementRule(ResourceBundle messages, German language, GermanTagger tagger) {
     super.setCategory(Categories.GRAMMAR.getCategory(messages));
     this.language = language;
-    tagger = (GermanTagger) language.getTagger();
+    this.tagger = tagger;
+    // GTODO Bad cast...
+    //tagger = (GermanTagger) language.getTagger();
     for (SingularPluralPair pair : PAIRS) {
       singular.add(pair.singular);
       plural.add(pair.plural);
@@ -135,7 +136,7 @@ public class SubjectVerbAgreementRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = getSentenceWithImmunization(sentence).getTokensWithoutWhitespace();
     for (int i = 1; i < tokens.length; i++) {   // start at 1 to skip SENT_START
@@ -158,7 +159,7 @@ public class SubjectVerbAgreementRule extends Rule {
   }
 
   @Nullable
-  private RuleMatch getSingularMatchOrNull(AnalyzedTokenReadings[] tokens, int i, AnalyzedTokenReadings token, String tokenStr, AnalyzedSentence sentence) throws IOException {
+  private RuleMatch getSingularMatchOrNull(AnalyzedTokenReadings[] tokens, int i, AnalyzedTokenReadings token, String tokenStr, AnalyzedSentence sentence) throws Exception {
     if (singular.contains(tokenStr)) {
       AnalyzedTokenReadings prevToken = tokens[i - 1];
       AnalyzedTokenReadings nextToken = i + 1 < tokens.length ? tokens[i + 1] : null;
@@ -275,7 +276,7 @@ public class SubjectVerbAgreementRule extends Rule {
   }
 
   // No false alarm on ""Das Kopieren und Einfügen ist sehr nützlich." etc.
-  private boolean containsOnlyInfinitivesToTheLeft(AnalyzedTokenReadings[] tokens, int startPos) throws IOException {
+  private boolean containsOnlyInfinitivesToTheLeft(AnalyzedTokenReadings[] tokens, int startPos) throws Exception {
     int infinitives = 0;
     for (int i = startPos; i > 0; i--) {
       String token = tokens[i].getToken();

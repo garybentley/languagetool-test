@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,18 +19,15 @@
 package org.languagetool.tokenizers;
 
 import org.junit.Test;
+import org.languagetool.TestLanguage;
 import org.languagetool.TestTools;
 
 public class SimpleSentenceTokenizerTest {
 
   @Test
   public void testTokenize() throws Exception {
-    testSplit("Hi! ", "This is a test. ", "Here's more. ", "And even more?? ", "Yes.");
-  }
-
-  private void testSplit(String... sentences) {
-    SimpleSentenceTokenizer tokenizer = new SimpleSentenceTokenizer();
-    TestTools.testSplit(sentences, tokenizer);
+    TestLanguage lang = TestTools.getTestLanguage();
+    TestTools.testSplit(lang.getUseDataBroker().createSimpleSentenceTokenizerFromResourcePath(), "Hi! ", "This is a test. ", "Here's more. ", "And even more?? ", "Yes.");
   }
 
 }

@@ -24,6 +24,7 @@ package org.languagetool.rules.en;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.language.English;
 import org.languagetool.Languages;
 import org.languagetool.rules.AbstractUnitConversionRule;
 import org.languagetool.rules.UnitConversionRuleTestHelper;
@@ -49,10 +50,10 @@ public class UnitConversionRuleTest {
    */
 
   @Test
-  public void match() throws IOException {
-    Language lang = Languages.getLanguageForShortCode("en");
+  public void match() throws Exception {
+    English lang = new English();
     JLanguageTool lt = new JLanguageTool(lang);
-    UnitConversionRule rule = new UnitConversionRule(JLanguageTool.getMessageBundle(lang));
+    UnitConversionRule rule = new UnitConversionRule(lang.getMessageBundle());
     unitConversionRuleTestHelper.assertMatches("I am 6 feet tall.", 1, "1.83 m", rule, lt);
     unitConversionRuleTestHelper.assertMatches("I am 6 feet (2.02 m) tall.", 1, "1.83 m", rule, lt);
     unitConversionRuleTestHelper.assertMatches("I am 6 feet (1.82 m) tall.", 0, null, rule, lt);
@@ -65,7 +66,7 @@ public class UnitConversionRuleTest {
     unitConversionRuleTestHelper.assertMatches("It is 100 °F outside.", 1, "37.78 °C", rule, lt);
   }
 
-  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws IOException {
+  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws Exception {
     unitConversionRuleTestHelper.assertMatches(input, expectedMatches, converted, rule, lt);
   }
 }

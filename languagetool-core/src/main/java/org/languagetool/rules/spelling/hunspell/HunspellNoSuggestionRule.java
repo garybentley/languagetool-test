@@ -21,6 +21,7 @@ package org.languagetool.rules.spelling.hunspell;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.ResourceBundle;
 
 import org.languagetool.Language;
@@ -36,15 +37,15 @@ public class HunspellNoSuggestionRule extends HunspellRule {
 
   public static final String RULE_ID = "HUNSPELL_NO_SUGGEST_RULE";
 
-  public HunspellNoSuggestionRule(ResourceBundle messages, Language language, UserConfig userConfig) {
-    super(messages, language, userConfig);
+  public HunspellNoSuggestionRule(ResourceBundle messages, Language language, UserConfig userConfig, Hunspell.Dictionary dict, List<String> wordsToBeIgnored, List<String> prohibitedWords) throws Exception {
+    super(messages, language, userConfig, dict, wordsToBeIgnored, prohibitedWords, null);
   }
 
   /**
    * @since 3.3
    */
-  public HunspellNoSuggestionRule(ResourceBundle messages, Language language, UserConfig userConfig, IncorrectExample incorrectExample, CorrectExample correctedExample) {
-    super(messages, language, userConfig);
+  public HunspellNoSuggestionRule(ResourceBundle messages, Language language, UserConfig userConfig, IncorrectExample incorrectExample, CorrectExample correctedExample) throws Exception {
+    super(messages, language, userConfig, null, null, null, null);
     addExamplePair(incorrectExample, correctedExample);
   }
 
@@ -62,5 +63,5 @@ public class HunspellNoSuggestionRule extends HunspellRule {
   public List<String> getSuggestions(String word) throws IOException {
     return new ArrayList<>();
   }
-  
+
 }

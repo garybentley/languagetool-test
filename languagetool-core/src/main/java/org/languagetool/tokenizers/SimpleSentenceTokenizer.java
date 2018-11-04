@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,10 +18,15 @@
  */
 package org.languagetool.tokenizers;
 
+import net.loomchild.segment.srx.SrxDocument;
+
 import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.language.Contributor;
 import org.languagetool.rules.Rule;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.databroker.DefaultResourceDataBroker;
+import org.languagetool.chunking.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,11 +39,13 @@ import java.util.ResourceBundle;
  */
 public class SimpleSentenceTokenizer extends SRXSentenceTokenizer {
 
-  public SimpleSentenceTokenizer() {
-    super(new AnyLanguage(), "/org/languagetool/tokenizers/segment-simple.srx");
+  public SimpleSentenceTokenizer(Language lang, SrxDocument doc) {
+    super(lang, doc);
   }
-  
-  static class AnyLanguage extends Language {
+
+/*
+GTODO Clean up
+  static class AnyLanguage<E extends ResourceDataBroker> extends Language<E> {
     @Override public String getShortCode() {
       return "xx";
     }
@@ -51,9 +58,30 @@ public class SimpleSentenceTokenizer extends SRXSentenceTokenizer {
     @Override public Contributor[] getMaintainers() {
       return new Contributor[0];
     }
-    @Override public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) {
+    @Override public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) {
       return Collections.emptyList();
     }
-  }
 
+    @Override
+    public Chunker getChunker() throws Exception {
+        return getUseDataBroker().getChunker();
+    }
+
+    @Override
+    public CaseConverter getCaseConverter() throws Exception {
+        return getUseDataBroker().getCaseConverter();
+    }
+    @Override
+    public WordTokenizer getWordTokenizer() throws Exception {
+        return getUseDataBroker().getWordTokenizer();
+    }
+    @Override
+    public SentenceTokenizer getSentenceTokenizer() throws Exception {
+        return getUseDataBroker().getSentenceTokenizer();
+    }
+    @Override public DefaultResourceDataBroker getDefaultDataBroker() {
+        return new DefaultResourceDataBroker(this, getClass().getClassLoader());
+    }
+  }
+*/
 }

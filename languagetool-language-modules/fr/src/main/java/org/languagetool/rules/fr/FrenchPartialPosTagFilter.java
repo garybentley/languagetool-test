@@ -22,8 +22,8 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.language.French;
 import org.languagetool.rules.PartialPosTagFilter;
-import org.languagetool.tagging.Tagger;
-import org.languagetool.tagging.disambiguation.Disambiguator;
+import org.languagetool.tagging.fr.FrenchTagger;
+import org.languagetool.tagging.disambiguation.fr.FrenchHybridDisambiguator;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,13 +37,19 @@ import java.util.List;
  *
  * @since 3.1
  */
+// GTODO French/English use the same type of tag filter, maybe merge...
 public class FrenchPartialPosTagFilter extends PartialPosTagFilter {
 
-  private final Tagger tagger = new French().getTagger();
-  private final Disambiguator disambiguator = new French().getDisambiguator();
+    private final FrenchTagger tagger;
+    private final FrenchHybridDisambiguator disambiguator;
+
+    public FrenchPartialPosTagFilter(FrenchTagger tagger, FrenchHybridDisambiguator disambiguator) {
+        this.tagger = tagger;
+        this.disambiguator = disambiguator;
+    }
 
   @Override
-  protected List<AnalyzedTokenReadings> tag(String token) {
+  protected List<AnalyzedTokenReadings> tag(String token) throws Exception {
     try {
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(token));
       AnalyzedTokenReadings[] atr = tags.toArray(new AnalyzedTokenReadings[tags.size()]);

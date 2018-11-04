@@ -52,7 +52,7 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
 
     AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
@@ -109,7 +109,7 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
               break;
             }
           }
-          
+
           if (allElementsMatch) {
             int skipForMax = skipMaxTokens(tokens, pTokenMatcher, firstMatchToken, prevSkipNext,
                 prevTokenMatcher, m, patternSize - k -1);
@@ -152,7 +152,7 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
   private RuleMatch createRuleMatch(List<Integer> tokenPositions,
                                     AnalyzedTokenReadings[] tokens, int firstMatchToken,
                                     int lastMatchToken, int firstMarkerMatchToken, int lastMarkerMatchToken,
-                                    AnalyzedSentence sentence) throws IOException {
+                                    AnalyzedSentence sentence) throws Exception {
     PatternRule rule = (PatternRule) this.rule;
     String errMessage = formatMatches(tokens, tokenPositions,
             firstMatchToken, rule.getMessage(), rule.getSuggestionMatches());
@@ -215,7 +215,7 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
           AnalyzedTokenReadings[] patternTokens = Arrays.copyOfRange(tokens, firstMatchToken, lastMatchToken + 1);
           return evaluator.runFilter(rule.getFilterArguments(), ruleMatch, patternTokens, tokenPositions);
         } else {
-          return ruleMatch; 
+          return ruleMatch;
         }
       }
     } // failed to create any rule match...
@@ -270,7 +270,7 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
    */
   private String formatMatches(AnalyzedTokenReadings[] tokenReadings,
       List<Integer> positions, int firstMatchTok, String errorMsg,
-      List<Match> suggestionMatches) throws IOException {
+      List<Match> suggestionMatches) throws Exception {
     String errorMessage = errorMsg;
     int matchCounter = 0;
     int[] numbersToMatches = new int[errorMsg.length()];
@@ -400,14 +400,14 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
   private String[] concatMatches(int start, int index,
       int tokenIndex, AnalyzedTokenReadings[] tokens,
       int nextTokenPos, List<Match> suggestionMatches)
-          throws IOException {
+          throws Exception {
     String[] finalMatch;
     int len = phraseLen(index);
     Language language = rule.language;
     if (len == 1) {
       int skippedTokens = nextTokenPos - tokenIndex;
-      MatchState matchState = suggestionMatches.get(start).createState(language.getSynthesizer(), tokens, tokenIndex - 1, skippedTokens);
-      finalMatch = matchState.toFinalString(language);
+      MatchState matchState = suggestionMatches.get(start).createState(language.getSynthesizer(), language, tokens, tokenIndex - 1, skippedTokens);
+      finalMatch = matchState.toFinalString();
       if (suggestionMatches.get(start).checksSpelling()
           && finalMatch.length == 1
           && "".equals(finalMatch[0])) {
@@ -418,8 +418,8 @@ final class PatternRuleMatcher extends AbstractPatternRulePerformer implements R
       List<String[]> matchList = new ArrayList<>();
       for (int i = 0; i < len; i++) {
         int skippedTokens = nextTokenPos - (tokenIndex + i);
-        MatchState matchState = suggestionMatches.get(start).createState(language.getSynthesizer(), tokens, tokenIndex - 1 + i, skippedTokens);
-        matchList.add(matchState.toFinalString(language));
+        MatchState matchState = suggestionMatches.get(start).createState(language.getSynthesizer(), language, tokens, tokenIndex - 1 + i, skippedTokens);
+        matchList.add(matchState.toFinalString());
       }
       return combineLists(matchList.toArray(new String[matchList.size()][]),
           new String[matchList.size()], 0, language);

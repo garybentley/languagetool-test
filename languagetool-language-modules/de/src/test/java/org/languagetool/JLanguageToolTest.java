@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,7 +23,6 @@ import org.languagetool.language.German;
 import org.languagetool.language.GermanyGerman;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 public class JLanguageToolTest {
 
   @Test
-  public void testGerman() throws IOException {
+  public void testGerman() throws Exception {
     JLanguageTool tool = new JLanguageTool(new German());
     assertEquals(0, tool.check("Ein Test, der keine Fehler geben sollte.").size());
     assertEquals(1, tool.check("Ein Test Test, der Fehler geben sollte.").size());
@@ -39,11 +38,11 @@ public class JLanguageToolTest {
     // no spelling mistakes as we have not created a variant:
     assertEquals(0, tool.check("I can give you more a detailed description").size());
     //test unknown words listing
-    assertEquals("[I, can, description, detailed, give, more, you]", tool.getUnknownWords().toString());    
+    assertEquals("[I, can, description, detailed, give, more, you]", tool.getUnknownWords().toString());
   }
 
   @Test
-  public void testGermanyGerman() throws IOException {
+  public void testGermanyGerman() throws Exception {
     JLanguageTool tool = new JLanguageTool(new GermanyGerman());
     assertEquals(0, tool.check("Ein Test, der keine Fehler geben sollte.").size());
     assertEquals(1, tool.check("Ein Test Test, der Fehler geben sollte.").size());
@@ -55,7 +54,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testPositionsWithGerman() throws IOException {
+  public void testPositionsWithGerman() throws Exception {
     JLanguageTool tool = new JLanguageTool(new German());
     List<RuleMatch> matches = tool.check("Stundenkilometer");
     assertEquals(1, matches.size());
@@ -63,15 +62,15 @@ public class JLanguageToolTest {
     assertEquals(0, match.getLine());
     assertEquals(1, match.getColumn());
   }
-  
+
   @Test
-  public void testCleanOverlappingWithGerman() throws IOException {
+  public void testCleanOverlappingWithGerman() throws Exception {
     JLanguageTool tool = new JLanguageTool(new GermanyGerman());
     // Juxtaposed errors in "TRGS - Technische" should not be removed.
     List<RuleMatch> matches = tool.check("TRGS - Technische Regeln für Gefahrstoffe");
     assertEquals(3, matches.size());
   }
-  
-  
+
+
 
 }

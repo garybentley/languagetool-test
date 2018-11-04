@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@ package org.languagetool.tools;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
-import org.languagetool.language.Demo;
+import org.languagetool.Language;
 import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.CategoryIds;
 import org.languagetool.rules.Rule;
@@ -41,7 +41,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ToolsTest {
-  
+
   @Test
   public void testCorrectTextFromMatches() {
     RuleMatch match1 = new RuleMatch(new FakeRule(), null, 0, 9, "msg1");
@@ -53,32 +53,32 @@ public class ToolsTest {
   }
 
   @Test
-  public void testSelectRules() {
-    Demo demo = new Demo();
-    expectDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), false, demo);
-    expectNotDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.singleton("DEMO_RULE"), Collections.emptySet(), false, demo);
-    expectNotDemoRuleId(Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), false, demo);
+  public void testSelectRules() throws Exception {
+    Language lang = TestTools.getTestLanguage();
+    expectDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), false, lang);
+    expectNotDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.singleton("DEMO_RULE"), Collections.emptySet(), false, lang);
+    expectNotDemoRuleId(Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), false, lang);
     // disable category, but enable rule:
-    expectDemoRuleId(Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), Collections.singleton("DEMO_RULE"), false, demo);
+    expectDemoRuleId(Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), Collections.singleton("DEMO_RULE"), false, lang);
 
     // now with enablesOnly=true:
-    expectDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), true, demo);
-    expectNotDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.singleton("DEMO_RULE"), Collections.emptySet(), true, demo);
-    expectNotDemoRuleId(Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), true, demo);
-    expectDemoRuleId(Collections.emptySet(), Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), true, demo);
-    expectNotDemoRuleId(Collections.emptySet(), Collections.singleton(CategoryIds.CASING), Collections.emptySet(), Collections.emptySet(), true, demo);
+    expectDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), true, lang);
+    expectNotDemoRuleId(Collections.emptySet(), Collections.emptySet(), Collections.singleton("DEMO_RULE"), Collections.emptySet(), true, lang);
+    expectNotDemoRuleId(Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), true, lang);
+    expectDemoRuleId(Collections.emptySet(), Collections.singleton(CategoryIds.MISC), Collections.emptySet(), Collections.emptySet(), true, lang);
+    expectNotDemoRuleId(Collections.emptySet(), Collections.singleton(CategoryIds.CASING), Collections.emptySet(), Collections.emptySet(), true, lang);
   }
 
   private void expectDemoRuleId(Set<CategoryId> disabledCategories, Set<CategoryId> enabledCategories,
-                                Set<String> disabledRules, Set<String> enabledRules, boolean useEnabledOnly, Demo demo) {
-    JLanguageTool lt = new JLanguageTool(demo);
+                                Set<String> disabledRules, Set<String> enabledRules, boolean useEnabledOnly, Language lang) throws Exception {
+    JLanguageTool lt = new JLanguageTool(lang);
     Tools.selectRules(lt, disabledCategories, enabledCategories, disabledRules, enabledRules, useEnabledOnly);
     assertTrue(getRuleIds(lt).contains("DEMO_RULE"));
   }
 
   private void expectNotDemoRuleId(Set<CategoryId> disabledCategories, Set<CategoryId> enabledCategories,
-                                   Set<String> disabledRules, Set<String> enabledRules, boolean useEnabledOnly, Demo demo) {
-    JLanguageTool lt = new JLanguageTool(demo);
+                                   Set<String> disabledRules, Set<String> enabledRules, boolean useEnabledOnly, Language lang) throws Exception {
+    JLanguageTool lt = new JLanguageTool(lang);
     Tools.selectRules(lt, disabledCategories, enabledCategories, disabledRules, enabledRules, useEnabledOnly);
     assertFalse(getRuleIds(lt).contains("DEMO_RULE"));
   }
@@ -90,9 +90,9 @@ public class ToolsTest {
 
   private static class FakeRule extends PatternRule {
     FakeRule() {
-      super("FAKE_ID", TestTools.getDemoLanguage(), Collections.singletonList(new PatternToken("foo", true, false, false)),
+      super("FAKE_ID", TestTools.getTestLanguage(), Collections.singletonList(new PatternToken("foo", true, false, false)),
               "My fake description", "Fake message", "Fake short message");
     }
   }
-  
+
 }

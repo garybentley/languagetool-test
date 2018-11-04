@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -37,15 +37,17 @@ import java.util.stream.Collectors;
 
 /**
  * Loads {@link PatternRule}s from a false friends XML file.
- * 
+ *
  * @author Daniel Naber
  */
 public class FalseFriendRuleLoader extends DefaultHandler {
-  
+
   /**
    * @param file XML file with false friend rules
    * @since 2.3
    */
+   /*
+   GTODO: Clean up
   public final List<AbstractPatternRule> getRules(File file, Language language, Language motherTongue) throws IOException {
     try (InputStream inputStream = new FileInputStream(file)) {
       return getRules(inputStream, language, motherTongue);
@@ -53,7 +55,9 @@ public class FalseFriendRuleLoader extends DefaultHandler {
       throw new IOException("Could not load false friend rules from " + file, e);
     }
   }
-
+*/
+/*
+GTODO: Clean up
   public final List<AbstractPatternRule> getRules(InputStream stream,
       Language textLanguage, Language motherTongue)
       throws ParserConfigurationException, SAXException, IOException {
@@ -83,5 +87,5 @@ public class FalseFriendRuleLoader extends DefaultHandler {
   private String formatSuggestions(List<String> l) {
     return l.stream().map(o -> "<suggestion>" + o + "</suggestion>").collect(Collectors.joining(", "));
   }
-
+*/
 }

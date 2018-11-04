@@ -46,7 +46,7 @@ public class RuleMatchesAsJsonSerializer {
   private static final String START_MARKER = "__languagetool_start_marker";
 
   private final JsonFactory factory = new JsonFactory();
-  
+
   public String ruleMatchesToJson(List<RuleMatch> matches, String text, int contextSize, Language lang, Language detectedLang) {
     return ruleMatchesToJson(matches, new ArrayList<>(), text, contextSize, lang, detectedLang, null);
   }
@@ -120,11 +120,11 @@ public class RuleMatchesAsJsonSerializer {
   private void writeLanguageSection(JsonGenerator g, Language lang, Language detectedLang) throws IOException {
     g.writeObjectFieldStart("language");
     g.writeStringField("name", lang.getName());
-    g.writeStringField("code", lang.getShortCodeWithCountryAndVariant());
+    g.writeStringField("code", JLanguageTool.getLanguageId(lang));
     if (detectedLang != null) {
       g.writeObjectFieldStart("detectedLanguage");
       g.writeStringField("name", detectedLang.getName());
-      g.writeStringField("code", detectedLang.getShortCodeWithCountryAndVariant());
+      g.writeStringField("code", JLanguageTool.getLanguageId(detectedLang));
       g.writeEndObject();
     }
     g.writeEndObject();
@@ -154,7 +154,7 @@ public class RuleMatchesAsJsonSerializer {
   private String cleanSuggestion(String s) throws IOException {
     return s.replace("<suggestion>", "\"").replace("</suggestion>", "\"");
   }
-  
+
   private void writeReplacements(JsonGenerator g, RuleMatch match) throws IOException {
     g.writeArrayFieldStart("replacements");
     for (String replacement : match.getSuggestedReplacements()) {

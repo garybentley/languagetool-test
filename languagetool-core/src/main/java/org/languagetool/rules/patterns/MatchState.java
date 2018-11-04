@@ -48,14 +48,16 @@ public class MatchState {
 
   private final Match match;
   private final Synthesizer synthesizer;
+  private final Language lang;
 
   private AnalyzedTokenReadings formattedToken;
   private AnalyzedTokenReadings matchedToken;
   private String skippedTokens;
 
-  public MatchState(Match match, Synthesizer synthesizer) {
+  public MatchState(Match match, Synthesizer synthesizer, Language lang) {
     this.match = match;
     this.synthesizer = synthesizer;
+    this.lang = lang;
     String lemma = match.getLemma();
     if (!StringUtils.isEmpty(lemma)) {
       formattedToken = new AnalyzedTokenReadings(new AnalyzedToken(lemma, match.getPosTag(), lemma), 0);
@@ -104,7 +106,7 @@ public class MatchState {
     }
   }
 
-  public final AnalyzedTokenReadings filterReadings() {
+  public final AnalyzedTokenReadings filterReadings() throws Exception {
     List<AnalyzedToken> l = new ArrayList<>();
     if (formattedToken != null) {
       if (match.isStaticLemma()) {
@@ -119,7 +121,7 @@ public class MatchState {
         /* only replace if it is something to replace */
         token = regexMatch.matcher(token).replaceAll(regexReplace);
       }
-      token = convertCase(token, token, null);
+      token = convertCase(token, token);
 
       String posTag = match.getPosTag();
       if (posTag != null) {
@@ -178,8 +180,13 @@ public class MatchState {
    * @param sample the sample string used to determine how the original string looks like (used only on case preservation)
    * @return Converted string.
    */
-  String convertCase(String s, String sample, Language lang) {
-    return CaseConversionHelper.convertCase(match.getCaseConversionType(), s, sample, lang);
+  String convertCase(String s, String sample) throws Exception {
+      if (lang != null) {
+          return lang.getCaseConverter().convert(s, match.getCaseConversionType(), sample);
+      } else {
+          return DefaultCaseConverter.getDefault().convert(s, match.getCaseConversionType(), sample);
+      }
+    //GTODO return CaseConversionHelper.convertCase(match.getCaseConversionType(), s, sample, lang);
   }
 
   private List<AnalyzedToken> getNewToken(int numRead, String token) {
@@ -206,7 +213,7 @@ public class MatchState {
   /**
    * Gets all strings formatted using the match element.
    */
-  public final String[] toFinalString(Language lang) throws IOException {
+  public final String[] toFinalString() throws Exception {
     String[] formattedString = new String[1];
     if (formattedToken != null) {
       int readingCount = formattedToken.getReadingsLength();
@@ -283,7 +290,7 @@ public class MatchState {
       original = formattedToken != null ? formattedToken.getToken() : "";
     }
     for (int i = 0; i < formattedString.length; i++) {
-      formattedString[i] = convertCase(formattedString[i], original, lang);
+      formattedString[i] = convertCase(formattedString[i], original);
     }
     // TODO should case conversion happen before or after including skipped tokens?
     IncludeRange includeSkipped = match.getIncludeSkipped();
@@ -374,10 +381,11 @@ public class MatchState {
   /**
    * Method for getting the formatted match as a single string. In case of
    * multiple matches, it joins them using a regular expression operator "|".
+   * @param lang The language to do this for.
    * @return Formatted string of the matched token.
    */
-  final String toTokenString() throws IOException {
-    String[] stringToFormat = toFinalString(null);
+  final String toTokenString() throws Exception {
+    String[] stringToFormat = toFinalString();
     return String.join("|", Arrays.asList(stringToFormat));
   }
 

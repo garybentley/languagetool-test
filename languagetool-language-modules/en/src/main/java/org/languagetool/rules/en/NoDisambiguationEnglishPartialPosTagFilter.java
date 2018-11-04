@@ -22,6 +22,7 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.language.English;
 import org.languagetool.rules.PartialPosTagFilter;
 import org.languagetool.tagging.Tagger;
+import org.languagetool.tagging.en.EnglishTagger;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,7 +36,13 @@ import java.util.List;
  */
 public class NoDisambiguationEnglishPartialPosTagFilter extends PartialPosTagFilter {
 
-  private final Tagger tagger = new English().getTagger();
+  private final EnglishTagger tagger;
+
+  // GTODO private final Tagger tagger = new English().getTagger();
+
+  public NoDisambiguationEnglishPartialPosTagFilter(EnglishTagger tagger) {
+      this.tagger = tagger;
+  }
 
   @Override
   protected List<AnalyzedTokenReadings> tag(String token) {

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Ebrahim Byagowi <ebrahim@gnu.org>
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,7 +29,7 @@ import org.languagetool.rules.WordRepeatBeginningRule;
 
 /**
  * List of Persian adverbs for WordRepeatBeginningRule
- * 
+ *
  * @author Ebrahim Byagowi
  * @since 2.7
  */
@@ -47,18 +47,18 @@ public class PersianWordRepeatBeginningRule extends WordRepeatBeginningRule {
     ADVERBS.add("حتی");
     ADVERBS.add("چنانچه");
   }
-  
-  public PersianWordRepeatBeginningRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+
+  public PersianWordRepeatBeginningRule(ResourceBundle messages) {
+    super(messages);
     addExamplePair(Example.wrong("همچنین، خیابان تقریباً کاملاً مسکونی است. <marker>همچنین</marker>، به افتخار یک شاعر نامگذاری شده‌است."),
                    Example.fixed("همچنین، خیابان تقریباً مسکونی است. <marker>این خیابان</marker> به افتخار یک شاعر نامگذاری شده‌است."));
   }
-  
+
   @Override
   public String getId() {
     return "PERSIAN_WORD_REPEAT_BEGINNING_RULE";
   }
-  
+
   @Override
   protected boolean isAdverb(AnalyzedTokenReadings token) {
     return ADVERBS.contains(token.getToken());

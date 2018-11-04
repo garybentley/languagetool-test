@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,14 +26,16 @@ import org.languagetool.language.English;
 public class EnglishSRXSentenceTokenizerTest {
 
   // accept \n as paragraph:
-  private final SentenceTokenizer stokenizer = new SRXSentenceTokenizer(new English());
+  private SentenceTokenizer stokenizer;
   // accept only \n\n as paragraph:
-  private final SentenceTokenizer stokenizer2 = new SRXSentenceTokenizer(new English());
+  private SentenceTokenizer stokenizer2;
 
   @Before
-  public void setUp() {
-    stokenizer.setSingleLineBreaksMarksParagraph(true);  
-    stokenizer2.setSingleLineBreaksMarksParagraph(false);  
+  public void setUp() throws Exception {
+    stokenizer = new English().getSentenceTokenizer();
+    stokenizer.setSingleLineBreaksMarksParagraph(true);
+    stokenizer2 = new English().getSentenceTokenizer();
+    stokenizer2.setSingleLineBreaksMarksParagraph(false);
   }
 
   // NOTE: sentences here need to end with a space character so they
@@ -87,10 +89,10 @@ public class EnglishSRXSentenceTokenizerTest {
     testSplit("12) Make sure that the lamp is on. ", "12) Make sure that the lamp is on. ");
     testSplit("He also offers a conversion table (see Cohen, 1988, p. 123). ");
     // one/two returns = paragraph = new sentence:
-    TestTools.testSplit(new String[] { "He won't\n\n", "Really." }, stokenizer2);
-    TestTools.testSplit(new String[] { "He won't\n", "Really." }, stokenizer);
-    TestTools.testSplit(new String[] { "He won't\n\n", "Really." }, stokenizer2);
-    TestTools.testSplit(new String[] { "He won't\nReally." }, stokenizer2);
+    TestTools.testSplit(stokenizer2, "He won't\n\n", "Really.");
+    TestTools.testSplit(stokenizer, "He won't\n", "Really.");
+    TestTools.testSplit(stokenizer2, "He won't\n\n", "Really.");
+    TestTools.testSplit(stokenizer2, "He won't\nReally.");
     // Missing space after sentence end:
     testSplit("James is from the Ireland!", "He lives in Spain now.");
     // From the abbreviation list:
@@ -107,7 +109,7 @@ public class EnglishSRXSentenceTokenizerTest {
   }
 
   private void testSplit(String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
-  
+
 }

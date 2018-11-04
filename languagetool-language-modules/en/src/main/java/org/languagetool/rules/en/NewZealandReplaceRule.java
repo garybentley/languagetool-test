@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -38,16 +38,27 @@ public class NewZealandReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String NEW_ZEALAND_SIMPLE_REPLACE_RULE = "EN_NZ_SIMPLE_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/en/en-NZ/replace.txt");
-  private static final Locale EN_NZ_LOCALE = new Locale("en-NZ");
+  //private Map<String, List<String>> wrongWords;
+  //private static final Locale EN_NZ_LOCALE = new Locale("en-NZ");
+  private final Locale locale;
 
+/*
+GTODO: Clean up.
   @Override
   protected Map<String, List<String>> getWrongWords() {
-    return wrongWords;
-  }
+      return dataBroker.getWrongWords();
 
-  public NewZealandReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+      GTODO: Clean up
+      if (wrongWords == null) {
+          wrongWords = load("/en/en-NZ/replace.txt", dataBroker);
+      }
+    return wrongWords;
+
+  }
+*/
+  public NewZealandReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, Locale locale) throws IOException {
+    super(messages, wrongWords);
+    this.locale = locale;
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("A <marker>sidewalk</marker> is a path along the side of a road."),
                    Example.fixed("A <marker>footpath</marker> is a path along the side of a road."));
@@ -67,7 +78,7 @@ public class NewZealandReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Not a New Zealand English word";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " is a non-standard expression, in New Zealand English it is more common to use: "
@@ -81,7 +92,8 @@ public class NewZealandReplaceRule extends AbstractSimpleReplaceRule {
 
   @Override
   public Locale getLocale() {
-    return EN_NZ_LOCALE;
+      return locale;
+    // GTODO: return EN_NZ_LOCALE;
   }
 
 }

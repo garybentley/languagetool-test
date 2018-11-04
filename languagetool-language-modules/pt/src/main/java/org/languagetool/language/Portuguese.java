@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -51,7 +51,7 @@ import java.util.ResourceBundle;
 public class Portuguese extends Language implements AutoCloseable {
 
   private static final Language PORTUGAL_PORTUGUESE = new PortugalPortuguese();
-  
+
   private Tagger tagger;
   private Disambiguator disambiguator;
   private Tokenizer wordTokenizer;
@@ -102,7 +102,7 @@ public class Portuguese extends Language implements AutoCloseable {
   @Override
   public Disambiguator getDisambiguator() {
     if (disambiguator == null) {
-      disambiguator = new PortugueseHybridDisambiguator();
+      disambiguator = new PortugueseHybridDisambiguator(getUseDataBroker());
     }
     return disambiguator;
   }
@@ -121,7 +121,7 @@ public class Portuguese extends Language implements AutoCloseable {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new PortugueseSynthesizer();
+      synthesizer = new PortugueseSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
@@ -158,7 +158,7 @@ public class Portuguese extends Language implements AutoCloseable {
             new PunctuationMarkAtParagraphEnd(messages, this),
             //Specific to Portuguese:
             new PostReformPortugueseCompoundRule(messages),
-            new PortugueseReplaceRule(messages),
+            new PortugueseReplaceRule(messages, getUseDataBroker()),
             new PortugueseBarbarismsRule(messages),
             new PortugueseClicheRule(messages),
             new PortugueseFillerWordsRule(messages, this, userConfig),
@@ -169,8 +169,8 @@ public class Portuguese extends Language implements AutoCloseable {
             new PortugueseWordRepeatRule(messages, this),
             new PortugueseWordRepeatBeginningRule(messages, this),
             new PortugueseAccentuationCheckRule(messages),
-            new PortugueseWrongWordInContextRule(messages),
-            new PortugueseWordCoherencyRule(messages),
+            new PortugueseWrongWordInContextRule(messages, getUseDataBroker()),
+            new PortugueseWordCoherencyRule(messages, getUseDataBroker()),
             new PortugueseUnitConversionRule(messages)
     );
   }

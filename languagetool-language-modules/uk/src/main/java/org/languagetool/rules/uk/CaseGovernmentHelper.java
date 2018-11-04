@@ -22,12 +22,12 @@ public class CaseGovernmentHelper {
   static {
     CASE_GOVERNMENT_MAP.put("згідно з", new HashSet<>(Arrays.asList("v_oru")));
   }
-  
 
-  
-  private static Map<String, Set<String>> loadMap(String path) {
+
+
+  private static Map<String, Set<String>> loadMap(String path, ResourceDataBroker dataBroker) {
     Map<String, Set<String>> result = new HashMap<>();
-    try (InputStream is = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path);
+    try (InputStream is = dataBroker.getFromResourceDirAsStream(path);
         Scanner scanner = new Scanner(is, "UTF-8")) {
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();
@@ -46,7 +46,7 @@ public class CaseGovernmentHelper {
     for(AnalyzedToken token: analyzedTokenReadings.getReadings()) {
       if( rvCase.equals("v_oru") && PosTagHelper.hasPosTagPart(token, "adjp:pasv") )
         return true;
-      
+
       if( CASE_GOVERNMENT_MAP.containsKey(token.getLemma())
           && CASE_GOVERNMENT_MAP.get(token.getLemma()).contains(rvCase) )
         return true;
@@ -54,17 +54,17 @@ public class CaseGovernmentHelper {
     return false;
   }
 
-  public static Set<String> getCaseGovernments(AnalyzedTokenReadings analyzedTokenReadings, String startPosTag) {
+  public static Set<String> getCaseGovernments(AnalyzedTokenReadings analyzedTokenReadings, String startPosTag, ResourceDataBroker dataBroker) {
     LinkedHashSet<String> list = new LinkedHashSet<>();
     for(AnalyzedToken token: analyzedTokenReadings.getReadings()) {
-      if( token.getPOSTag() != null 
-          && (token.getPOSTag().startsWith(startPosTag) 
-              || (startPosTag == "prep" && token.getPOSTag().equals("<prep>")) ) 
+      if( token.getPOSTag() != null
+          && (token.getPOSTag().startsWith(startPosTag)
+              || (startPosTag == "prep" && token.getPOSTag().equals("<prep>")) )
           && CASE_GOVERNMENT_MAP.containsKey(token.getLemma()) ) {
 
         Set<String> rvList = CASE_GOVERNMENT_MAP.get(token.getLemma());
         list.addAll(rvList);
-        
+
         if( token.getPOSTag().contains("adjp:pasv") ) {
           rvList.add("v_oru");
         }
@@ -72,5 +72,5 @@ public class CaseGovernmentHelper {
     }
     return list;
   }
-  
+
 }

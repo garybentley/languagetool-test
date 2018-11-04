@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,46 +42,78 @@ public class MorfologikSpeller {
   // Speed up the server use case, where rules get initialized for every call.
   // See https://github.com/morfologik/morfologik-stemming/issues/69 for confirmation that
   // Dictionary is thread-safe:
+  /*
   private static final LoadingCache<String, Dictionary> dictCache = CacheBuilder.newBuilder()
       //.maximumSize(0)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(new CacheLoader<String, Dictionary>() {
         @Override
         public Dictionary load(@NotNull String fileInClassPath) throws IOException {
-          return Dictionary.read(JLanguageTool.getDataBroker().getFromResourceDirAsUrl(fileInClassPath));
+          return Dictionary.read(dataBroker.getFromResourceDirAsUrl(fileInClassPath));
         }
       });
-
-  private final Dictionary dictionary;
-  private final Speller speller;
+*/
+/*
+GTODO: Clean up
+  private static final LoadingCache<ResourceDataBroker, LoadingCache<String, Dictionary>> brokerCache = CacheBuilder.newBuilder ()
+     .weakKeys ()
+     .build(new CacheLoader<ResourceDataBroker, LoadingCache<String, Dictionary>>() {
+         @Override
+         public LoadingCache<String, Dictionary> load(@NotNull ResourceDataBroker dataBroker) throws IOException {
+             return CacheBuilder.newBuilder()
+                     //.maximumSize(0)
+                     .expireAfterWrite(10, TimeUnit.MINUTES)
+                     .build(new CacheLoader<String, Dictionary>() {
+                       @Override
+                       public Dictionary load(@NotNull String dictFile) throws IOException {
+                         return Dictionary.read(dataBroker.getFromResourceDirAsUrl(dictFile));
+                       }
+                     });
+                 }
+             });
+*/
+  private Dictionary dictionary;
+  private Speller speller;
 
   /**
    * Creates a speller with the given maximum edit distance.
    * @param fileInClassPath path in classpath to morfologik dictionary
    */
-  public MorfologikSpeller(String fileInClassPath, int maxEditDistance) {
-    this(dictCache.getUnchecked(fileInClassPath), maxEditDistance);
+/*
+GTODO: Clean up
+  public MorfologikSpeller(final String dictFile, int maxEditDistance, final ResourceDataBroker dataBroker) {
+      LoadingCache<String, Dictionary> dbCache = brokerCache.getUnchecked(dataBroker);
+      init(dbCache.getUnchecked(dictFile), maxEditDistance);
   }
-
+*/
   /**
    * Creates a speller with a maximum edit distance of one.
    * @param fileInClassPath path in classpath to morfologik dictionary
    */
-  public MorfologikSpeller(String fileInClassPath) throws IOException {
-    this(fileInClassPath, 1);
+   /*
+   GTODO: Clean up
+  public MorfologikSpeller(String fileInClassPath, ResourceDataBroker dataBroker) throws IOException {
+    this(fileInClassPath, 1, dataBroker);
   }
-
-  /** @since 2.9 */
-  MorfologikSpeller(Dictionary dictionary, int maxEditDistance) {
-    if (maxEditDistance <= 0) {
-      throw new RuntimeException("maxEditDistance must be > 0: " + maxEditDistance);
-    }
-    this.dictionary = dictionary;
-    speller = new Speller(dictionary, maxEditDistance);
+*/
+  public MorfologikSpeller(Dictionary dictionary, int maxEditDistance) {
+      if (maxEditDistance <= 0) {
+        throw new IllegalArgumentException("maxEditDistance must be > 0: " + maxEditDistance);
+      }
+      this.dictionary = dictionary;
+      speller = new Speller(dictionary, maxEditDistance);
   }
-
+/*
+  private void init (Dictionary dictionary, int maxEditDistance) {
+      if (maxEditDistance <= 0) {
+        throw new RuntimeException("maxEditDistance must be > 0: " + maxEditDistance);
+      }
+      this.dictionary = dictionary;
+      speller = new Speller(dictionary, maxEditDistance);
+  }
+*/
   public boolean isMisspelled(String word) {
-    return word.length() > 0 
+    return word.length() > 0
             && !SpellingCheckRule.LANGUAGETOOL.equals(word)
             && speller.isMisspelled(word);
   }
@@ -90,6 +123,7 @@ public class MorfologikSpeller {
     suggestions.addAll(speller.findReplacements(word));
     suggestions.addAll(speller.replaceRunOnWords(word));
     // capitalize suggestions if necessary
+    // GTODO Uppercase check should be via CaseConverter
     if (dictionary.metadata.isConvertingCase() && StringTools.startsWithUppercase(word)) {
       for (int i = 0; i < suggestions.size(); i++) {
         String uppercaseFirst = StringTools.uppercaseFirstChar(suggestions.get(i));

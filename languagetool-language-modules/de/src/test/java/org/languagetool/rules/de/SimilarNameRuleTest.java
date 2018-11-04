@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,7 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.German;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.hamcrest.core.Is.is;
@@ -34,9 +33,10 @@ import static org.junit.Assert.*;
 public class SimilarNameRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    SimilarNameRule rule = new SimilarNameRule(TestTools.getEnglishMessages());
-    JLanguageTool lt = new JLanguageTool(new German());
+  public void testRule() throws Exception {
+      German german = new German();
+    SimilarNameRule rule = german.createSimilarNameRule(null);
+    JLanguageTool lt = new JLanguageTool(german);
     assertErrors("Hier steht Angela Müller. Im nächsten Satz dann Miller.", 1, rule, lt);
     assertErrors("Hier steht Angela Müller. Im nächsten Satz dann Müllers Ehemann.", 0, rule, lt);
     assertErrors("Hier steht Angela Müller. Dann Mulla, nicht ähnlich genug.", 0, rule, lt);
@@ -44,7 +44,7 @@ public class SimilarNameRuleTest {
     assertErrors("Hier steht das Rad Deiner Freundin. Und Deinem Hund geht es gut?", 0, rule, lt);
   }
 
-  private void assertErrors(String input, int expectedMatches, SimilarNameRule rule, JLanguageTool lt) throws IOException {
+  private void assertErrors(String input, int expectedMatches, SimilarNameRule rule, JLanguageTool lt) throws Exception {
     AnalyzedSentence sentence = lt.getAnalyzedSentence(input);
     RuleMatch[] matches = rule.match(Collections.singletonList(sentence));
     assertThat(matches.length, is(expectedMatches));

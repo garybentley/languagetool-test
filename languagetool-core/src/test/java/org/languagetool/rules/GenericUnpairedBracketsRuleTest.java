@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,6 @@
 package org.languagetool.rules;
 
 import org.junit.Test;
-import org.languagetool.FakeLanguage;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.TestTools;
@@ -37,8 +36,8 @@ public class GenericUnpairedBracketsRuleTest {
   private JLanguageTool lt;
 
   @Test
-  public void testRule() throws IOException {
-    setUpRule(new FakeLanguage());
+  public void testRule() throws Exception {
+    setUpRule(TestTools.getTestLanguage());
 
     assertMatches(0, "This is »correct«.");
     assertMatches(0, "»Correct«\n»And »here« it ends.«");
@@ -72,8 +71,8 @@ public class GenericUnpairedBracketsRuleTest {
   }
 
   @Test
-  public void testRuleMatchPositions() throws IOException {
-    setUpRule(new FakeLanguage());
+  public void testRuleMatchPositions() throws Exception {
+    setUpRule(TestTools.getTestLanguage());
     RuleMatch match1 = lt.check("This »is a test.").get(0);
     assertThat(match1.getFromPos(), is(5));
     assertThat(match1.getToPos(), is(6));
@@ -91,7 +90,7 @@ public class GenericUnpairedBracketsRuleTest {
     assertThat(match2.getEndColumn(), is(5));
   }
 
-  private void setUpRule(Language language) {
+  private void setUpRule(Language language) throws Exception {
     lt = new JLanguageTool(language);
     for (Rule rule : lt.getAllRules()) {
       lt.disableRule(rule.getId());
@@ -101,7 +100,7 @@ public class GenericUnpairedBracketsRuleTest {
     lt.addRule(rule);
   }
 
-  private void assertMatches(int expectedMatches, String input) throws IOException {
+  private void assertMatches(int expectedMatches, String input) throws Exception {
     List<RuleMatch> ruleMatches = lt.check(input);
     assertEquals("Expected " + expectedMatches + " matches, got: " + ruleMatches, expectedMatches, ruleMatches.size());
   }

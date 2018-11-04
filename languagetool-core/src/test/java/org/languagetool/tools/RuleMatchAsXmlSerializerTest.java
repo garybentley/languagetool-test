@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,7 +24,7 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.TestTools;
 import org.languagetool.rules.*;
-import org.languagetool.FakeLanguage;
+import org.languagetool.TestLanguage;
 import org.languagetool.rules.patterns.PatternToken;
 import org.languagetool.rules.patterns.PatternRule;
 
@@ -43,20 +43,27 @@ import static org.languagetool.tools.StringTools.ApiPrintMode.*;
 
 @SuppressWarnings("MagicNumber")
 public class RuleMatchAsXmlSerializerTest {
-  
+
   private static final RuleMatchAsXmlSerializer SERIALIZER = new RuleMatchAsXmlSerializer();
-  private static final Language LANG = TestTools.getDemoLanguage();
+  private static final Language MOTHER_LANG = new TestLanguage("yy", "YY", "FakeLanguage");
+  private static final Language LANG = new TestLanguage()
+  {
+      @Override
+      public boolean isVariantOf(Language l) {
+          return l == MOTHER_LANG;
+      }
+  };
 
   @Test
   public void testLanguageAttributes() throws IOException {
     String xml1 = SERIALIZER.ruleMatchesToXml(Collections.<RuleMatch>emptyList(), "Fake", 5, NORMAL_API, LANG, Collections.<String>emptyList());
-    assertTrue(xml1.contains("shortname=\"xx-XX\""));
-    assertTrue(xml1.contains("name=\"Testlanguage\""));
-    String xml2 = SERIALIZER.ruleMatchesToXml(Collections.<RuleMatch>emptyList(), "Fake", 5, LANG, new FakeLanguage());
-    assertTrue(xml2.contains("shortname=\"xx-XX\""));
-    assertTrue(xml2.contains("name=\"Testlanguage\""));
-    assertTrue(xml2.contains("shortname=\"yy\""));
-    assertTrue(xml2.contains("name=\"FakeLanguage\""));
+    assertTrue(xml1.contains(String.format("shortname=\"%1$s\"", LANG.getLocale().toLanguageTag())));
+    assertTrue(xml1.contains(String.format("name=\"%1$s\"", LANG.getName())));
+    String xml2 = SERIALIZER.ruleMatchesToXml(Collections.<RuleMatch>emptyList(), "Fake", 5, LANG, MOTHER_LANG);
+    assertTrue(xml2.contains(String.format("shortname=\"%1$s\"", LANG.getLocale().toLanguageTag())));
+    assertTrue(xml2.contains(String.format("name=\"%1$s\"", LANG.getName())));
+    assertTrue(xml2.contains(String.format("shortname=\"%1$s\"", MOTHER_LANG.getLocale().getLanguage())));
+    assertTrue(xml2.contains(String.format("name=\"%1$s\"", MOTHER_LANG.getName())));
     assertThat(StringUtils.countMatches(xml2, "<matches"), is(1));
     assertThat(StringUtils.countMatches(xml2, "</matches>"), is(1));
   }
@@ -181,7 +188,7 @@ public class RuleMatchAsXmlSerializerTest {
 
   private static class FakeRule extends PatternRule {
     FakeRule() {
-      super("FAKE_ID", TestTools.getDemoLanguage(), Collections.singletonList(new PatternToken("foo", true, false, false)),
+      super("FAKE_ID", TestTools.getTestLanguage(), Collections.singletonList(new PatternToken("foo", true, false, false)),
               "My fake description", "Fake message", "Fake short message");
     }
     @Override

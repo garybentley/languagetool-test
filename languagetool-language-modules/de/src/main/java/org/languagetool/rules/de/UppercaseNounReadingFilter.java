@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Accepts rule matches when the uppercased word of the {@code token} parameter
@@ -40,9 +41,9 @@ import java.util.Map;
 public class UppercaseNounReadingFilter extends RuleFilter {
 
   private final Tagger tagger;
-  
-  public UppercaseNounReadingFilter() {
-    tagger = new GermanyGerman().getTagger();
+
+  public UppercaseNounReadingFilter(Tagger tagger) {
+    this.tagger = Objects.requireNonNull(tagger, "Tagger must be provided.");
   }
 
   @Nullable

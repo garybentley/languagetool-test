@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,13 +39,14 @@ public class AvsAnRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new AvsAnRule(TestTools.getEnglishMessages());
-    langTool = new JLanguageTool(new English());
+  public void setUp() throws Exception {
+    English lang = new English();
+    rule = lang.createAvsAnRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertCorrect("This is a test sentence.");
@@ -107,18 +108,18 @@ public class AvsAnRuleTest {
     assertCorrect("A historic event");
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals(1, matches.length);
   }
 
   @Test
-  public void testSuggestions() throws IOException {
+  public void testSuggestions() throws Exception {
     assertEquals("a string", rule.suggestAorAn("string"));
     assertEquals("a university", rule.suggestAorAn("university"));
     assertEquals("an hour", rule.suggestAorAn("hour"));
@@ -128,7 +129,7 @@ public class AvsAnRuleTest {
   }
 
   @Test
-  public void testGetCorrectDeterminerFor() throws IOException {
+  public void testGetCorrectDeterminerFor() throws Exception {
     assertEquals(Determiner.A, getDeterminerFor("string"));
     assertEquals(Determiner.A, getDeterminerFor("university"));
     assertEquals(Determiner.A, getDeterminerFor("UNESCO"));
@@ -148,7 +149,7 @@ public class AvsAnRuleTest {
   }
 
   @Test
-  public void testGetCorrectDeterminerForException() throws IOException {
+  public void testGetCorrectDeterminerForException() throws Exception {
     try {
       rule.getCorrectDeterminerFor(null);
       fail();
@@ -156,7 +157,7 @@ public class AvsAnRuleTest {
   }
 
   @Test
-  public void testPositions() throws IOException {
+  public void testPositions() throws Exception {
     RuleMatch[] matches;
     JLanguageTool langTool = new JLanguageTool(new English());
     // no quotes etc.:

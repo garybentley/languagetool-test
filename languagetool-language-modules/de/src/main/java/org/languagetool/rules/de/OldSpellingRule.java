@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,16 +30,18 @@ import java.util.*;
  */
 public class OldSpellingRule extends Rule {
 
-  private static final String DESC = "Findet Schreibweisen, die nur in der alten Rechtschreibung gültig waren";
-  private static final String FILE_PATH = "/de/alt_neu.csv";
-  private static final String MESSAGE = "Diese Schreibweise war nur in der alten Rechtschreibung korrekt.";
-  private static final String SHORT_MESSAGE = "alte Rechtschreibung";
-  private static final String RULE_INTERNAL = "OLD_SPELLING_INTERNAL";
-  private static final ITSIssueType ISSUE_TYPE = ITSIssueType.Misspelling;
-  private static final SpellingData DATA = new SpellingData(DESC, FILE_PATH, MESSAGE, SHORT_MESSAGE, RULE_INTERNAL, ISSUE_TYPE);
+  public static final String DESC = "Findet Schreibweisen, die nur in der alten Rechtschreibung gültig waren";
+  // GTODO public static final String FILE_PATH = "/de/alt_neu.csv";
+  public static final String MESSAGE = "Diese Schreibweise war nur in der alten Rechtschreibung korrekt.";
+  public static final String SHORT_MESSAGE = "alte Rechtschreibung";
+  public static final String RULE_INTERNAL = "OLD_SPELLING_INTERNAL";
+  public static final ITSIssueType ISSUE_TYPE = ITSIssueType.Misspelling;
+  // GTODO private static final SpellingData DATA = new SpellingData(DESC, FILE_PATH, MESSAGE, SHORT_MESSAGE, RULE_INTERNAL, ISSUE_TYPE);
+  private List<SpellingRuleWithSuggestion> rules;
 
-  public OldSpellingRule(ResourceBundle messages) {
+  public OldSpellingRule(ResourceBundle messages, List<SpellingRuleWithSuggestion> rules) {
     super.setCategory(Categories.TYPOS.getCategory(messages));
+    this.rules = rules;
     setLocQualityIssueType(ISSUE_TYPE);
     addExamplePair(Example.wrong("Der <marker>Abfluß</marker> ist schon wieder verstopft."),
                    Example.fixed("Der <marker>Abfluss</marker> ist schon wieder verstopft."));
@@ -56,9 +58,9 @@ public class OldSpellingRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     String[] exceptions = {"Schloß Holte"};
-    return toRuleMatchArray(SpellingRuleWithSuggestion.computeMatches(sentence, DATA, exceptions));
+    return toRuleMatchArray(SpellingRuleWithSuggestion.computeMatches(sentence, rules, exceptions));
   }
-  
+
 }

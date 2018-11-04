@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,14 +35,14 @@ public abstract class TextLevelRule extends Rule {
   /**
    * @since 3.9
    */
-  public RuleMatch[] match(List<AnalyzedSentence> sentences, AnnotatedText annotatedText) throws IOException {
+  public RuleMatch[] match(List<AnalyzedSentence> sentences, AnnotatedText annotatedText) throws Exception {
     return match(sentences);
   }
 
   /**
    * @deprecated use {@link #match(List, AnnotatedText)} instead
    */
-  public abstract RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException;
+  public abstract RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception;
 
   /**
    * @since 3.7
@@ -59,8 +59,8 @@ public abstract class TextLevelRule extends Rule {
   }
 
   @Override
-  public final RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
-    throw new RuntimeException("Not implemented for a text-level rule");
+  public final RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
+    throw new UnsupportedOperationException("Not implemented for a text-level rule");
   }
 
 }

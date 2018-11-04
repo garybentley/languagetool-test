@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,8 +23,6 @@ import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.German;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -34,20 +32,21 @@ public class GermanWrongWordInContextRuleTest {
 
   private JLanguageTool langTool;
   private GermanWrongWordInContextRule rule;
-  
+
   @Before
-  public void setUp() throws IOException {
-    langTool = new JLanguageTool(new German());
-    rule = new GermanWrongWordInContextRule(null);
+  public void setUp() throws Exception {
+    German german = new German();
+    langTool = new JLanguageTool(german);
+    rule = german.createWrongWordInContextRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // Laiche/Leiche
     assertBad("Eine Laiche ist ein toter Körper.");
     assertGood("Eine Leiche ist ein toter Körper.");
     assertGood("Die Leichen der Verstorbenen wurden ins Wasser geworfen.");
-    
+
     // Lid/Lied
     assertGood("Ihre Lider sind entzündet.");
     assertGood("Er hat entzündete Lider.");
@@ -114,11 +113,11 @@ public class GermanWrongWordInContextRuleTest {
     assertEquals("Seiten", rule.match(langTool.getAnalyzedSentence("Dieses Buch hat sechs Saiten."))[0].getSuggestedReplacements().get(0));
   }
 
-  private void assertGood(String sentence) throws IOException {
+  private void assertGood(String sentence) throws Exception {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence(sentence)).length);
   }
 
-  private void assertBad(String sentence) throws IOException {
+  private void assertBad(String sentence) throws Exception {
     assertEquals(1, rule.match(langTool.getAnalyzedSentence(sentence)).length);
   }
 

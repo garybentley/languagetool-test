@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Abstract test case for CompoundRule.
  * Based on an original version for [en] and [pl].
- *    
+ *
  * @author Daniel Naber
  */
 public abstract class AbstractCompoundRuleTest {
@@ -39,17 +39,17 @@ public abstract class AbstractCompoundRuleTest {
   // the rule that checks that compounds (if in the list) are not written as separate words. Language specific.
   protected AbstractCompoundRule rule;
 
-  public void check(int expectedErrors, String text) throws IOException {
+  public void check(int expectedErrors, String text) throws Exception {
     check(expectedErrors, text, null);
   }
-  
+
   /**
-   * Check the text against the compound rule.    
+   * Check the text against the compound rule.
    * @param expectedErrors the number of expected errors
    * @param text the text to check
    * @param expSuggestions the expected suggestions
    */
-  public void check(int expectedErrors, String text, String[] expSuggestions) throws IOException {
+  public void check(int expectedErrors, String text, String[] expSuggestions) throws Exception {
     assertNotNull("Please initialize langTool!", lt);
     assertNotNull("Please initialize 'rule'!", rule);
     RuleMatch[] ruleMatches = rule.match(lt.getAnalyzedSentence(text));
@@ -72,5 +72,5 @@ public abstract class AbstractCompoundRuleTest {
       }
     }
   }
-  
+
 }

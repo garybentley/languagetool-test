@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,6 +31,7 @@ import org.languagetool.rules.patterns.AbstractPatternRule;
 import org.languagetool.rules.patterns.FalseFriendRuleLoader;
 import org.languagetool.rules.patterns.PatternRule;
 import org.languagetool.rules.patterns.PatternRuleLoader;
+import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -53,13 +54,13 @@ import java.util.regex.Pattern;
  * <li>built-in pattern rules loaded from external XML files (usually called {@code grammar.xml})
  * <li>your own implementation of the abstract {@link Rule} classes added with {@link #addRule(Rule)}
  * </ul>
- * 
+ *
  * <p>You will probably want to use the sub class {@link MultiThreadedJLanguageTool} for best performance.
- * 
+ *
  * <p><b>Thread-safety:</b> this class is not thread safe. Create one instance per thread,
  * but create the language only once (e.g. {@code new AmericanEnglish()}) and use it for all
  * instances of JLanguageTool.</p>
- * 
+ *
  * @see MultiThreadedJLanguageTool
  */
 public class JLanguageTool {
@@ -85,6 +86,32 @@ public class JLanguageTool {
   private final ResultCache cache;
   private final UserConfig userConfig;
   private float maxErrorsPerWordRate;
+
+  //private static ResourceDataBroker globalDataBroker;
+
+  /**
+   * Returns a language's locale formatted as:
+   *   <language>-[<country>[-<variant>]]
+   *
+   * Examples: en-GB, ca-ES-valencia
+   *
+   * @return A formatted string from the locale of the language.
+   */
+  public static String getLanguageId(Language lang) {
+      Locale loc = lang.getLocale();
+      String l = loc.getLanguage();
+      String c = loc.getCountry();
+      String v = loc.getVariant();
+      List<String> parts = new ArrayList<>();
+      parts.add(l);
+      if (!"".equals(c)) {
+          parts.add(c);
+      }
+      if (!"".equals(v)) {
+          parts.add(v);
+      }
+      return String.join("-", parts);
+  }
 
   /**
    * Returns the build date or {@code null} if not run from JAR.
@@ -116,8 +143,8 @@ public class JLanguageTool {
   public static boolean isPremiumVersion() {
     return false;
   }
-  
-  private static ResourceDataBroker dataBroker = new DefaultResourceDataBroker();
+
+  //private ResourceDataBroker dataBroker = null; //new DefaultResourceDataBroker();
 
   private final List<Rule> builtinRules;
   private final List<Rule> userRules = new ArrayList<>(); // rules added via addRule() method
@@ -125,6 +152,7 @@ public class JLanguageTool {
   private final Set<CategoryId> disabledRuleCategories = new HashSet<>();
   private final Set<String> enabledRules = new HashSet<>();
   private final Set<CategoryId> enabledRuleCategories = new HashSet<>();
+  private final List<Language> altLanguages;
   private final Language language;
   private final Language motherTongue;
 
@@ -159,7 +187,7 @@ public class JLanguageTool {
     /** Use all activate rules for checking except the text-level rules. */
     ALL_BUT_TEXTLEVEL_ONLY
   }
-  
+
   private static final List<File> temporaryFiles = new ArrayList<>();
 
   /**
@@ -170,7 +198,7 @@ public class JLanguageTool {
    * @param motherTongue the user's mother tongue, used for false friend rules, or <code>null</code>.
    *          The mother tongue may also be used as a source language for checking bilingual texts.
    */
-  public JLanguageTool(Language lang, Language motherTongue) {
+  public JLanguageTool(Language lang, Language motherTongue) throws Exception {
     this(lang, motherTongue, null);
   }
 
@@ -180,8 +208,8 @@ public class JLanguageTool {
    *
    * @param language the language of the text to be checked
    */
-  public JLanguageTool(Language language) {
-    this(language, null, null, null);
+  public JLanguageTool(Language language) throws Exception {
+    this(language, Collections.emptyList(), null, null, null);
   }
 
   /**
@@ -195,14 +223,14 @@ public class JLanguageTool {
    *              e.g. when LT is running as a server and texts are re-checked due to changes
    * @since 3.7
    */
-  public JLanguageTool(Language language, Language motherTongue, ResultCache cache) {
-    this(language, motherTongue, cache, null);
+  public JLanguageTool(Language language, Language motherTongue, ResultCache cache) throws Exception {
+    this(language, Collections.emptyList(), motherTongue, cache, null);
   }
 
   /**
    * Create a JLanguageTool and setup the built-in rules for the
    * given language and false friend rules for the text language / mother tongue pair.
-   * 
+   *
    * @param language the language of the text to be checked
    * @param cache a cache to speed up checking if the same sentences get checked more than once,
    *              e.g. when LT is running as a server and texts are re-checked due to changes. Use
@@ -210,14 +238,14 @@ public class JLanguageTool {
    * @since 4.2
    */
   @Experimental
-  public JLanguageTool(Language language, ResultCache cache, UserConfig userConfig) {
-    this(language, null, cache, userConfig);
+  public JLanguageTool(Language language, ResultCache cache, UserConfig userConfig) throws Exception {
+    this(language, Collections.emptyList(), null, cache, userConfig);
   }
-  
+
   /**
    * Create a JLanguageTool and setup the built-in rules for the
    * given language and false friend rules for the text language / mother tongue pair.
-   * 
+   *
    * @param language the language of the text to be checked
    * @param motherTongue the user's mother tongue, used for false friend rules, or <code>null</code>.
    *          The mother tongue may also be used as a source language for checking bilingual texts.
@@ -226,16 +254,18 @@ public class JLanguageTool {
    * @since 4.2
    */
   @Experimental
-  public JLanguageTool(Language language, Language motherTongue, ResultCache cache, UserConfig userConfig) {
+  public JLanguageTool(Language language, List<Language> altLanguages, Language motherTongue, ResultCache cache, UserConfig userConfig) throws Exception {
     this.language = Objects.requireNonNull(language, "language cannot be null");
+    this.altLanguages = Objects.requireNonNull(altLanguages, "altLanguages cannot be null (but empty)");
     this.motherTongue = motherTongue;
     if(userConfig == null) {
       this.userConfig = new UserConfig();
     } else {
       this.userConfig = userConfig;
     }
-    ResourceBundle messages = ResourceBundleTools.getMessageBundle(language);
-    builtinRules = getAllBuiltinRules(language, messages, this.userConfig);
+    //GTODO ResourceBundle messages = ResourceBundleTools.getMessageBundle(language);
+    builtinRules = language.getRelevantRules(language.getUseDataBroker().getMessageBundle(), this.userConfig, altLanguages);
+    //GTODO builtinRules = getAllBuiltinRules(language, /*GTODO messages,*/ this.userConfig);
     this.cleanOverlappingMatches = true;
     try {
       activateDefaultPatternRules();
@@ -245,7 +275,23 @@ public class JLanguageTool {
     }
     this.cache = cache;
   }
-  
+
+  /**
+   * Create a JLanguageTool and setup the built-in rules for the
+   * given language and false friend rules for the text language / mother tongue pair.
+   *
+   * @param language the language of the text to be checked
+   * @param motherTongue the user's mother tongue, used for false friend rules, or <code>null</code>.
+   *          The mother tongue may also be used as a source language for checking bilingual texts.
+   * @param cache a cache to speed up checking if the same sentences get checked more than once,
+   *              e.g. when LT is running as a server and texts are re-checked due to changes
+   * @since 4.2
+   */
+  @Experimental
+  public JLanguageTool(Language language, Language motherTongue, ResultCache cache, UserConfig userConfig) throws Exception {
+    this(language, Collections.emptyList(), motherTongue, cache, userConfig);
+  }
+
   /**
    * The grammar checker needs resources from following
    * directories:
@@ -259,13 +305,21 @@ public class JLanguageTool {
    * be instantiated and returned.
    * @since 1.0.1
    */
+   /*
   public static synchronized ResourceDataBroker getDataBroker() {
-    if (JLanguageTool.dataBroker == null) {
-      JLanguageTool.dataBroker = new DefaultResourceDataBroker();
+    if (JLanguageTool.globalDataBroker == null) {
+      JLanguageTool.globalDataBroker = new DefaultResourceDataBroker(JLanguageTool.class.getClassLoader());
     }
-    return JLanguageTool.dataBroker;
+    return JLanguageTool.globalDataBroker;
   }
-  
+
+  public ResourceDataBroker getLanguageDataBroker() {
+    if (dataBroker == null) {
+      dataBroker = new DefaultResourceDataBroker(language.getClass ().getClassLoader());
+    }
+    return dataBroker;
+  }
+*/
   /**
    * The grammar checker needs resources from following
    * directories:
@@ -276,10 +330,24 @@ public class JLanguageTool {
    * @param broker The new resource broker to be used.
    * @since 1.0.1
    */
+   /*
+   GTODO Clean up
   public static synchronized void setDataBroker(ResourceDataBroker broker) {
-    JLanguageTool.dataBroker = broker;
+    JLanguageTool.globalDataBroker = broker;
   }
-
+*/
+  /**
+   * Set the broker that the language should be using.  It will be set on the language.
+   *
+   * @param broker The broker.
+   */
+   /*
+   GTODO Clean up
+  public void setLanguageDataBroker(ResourceDataBroker broker) {
+    dataBroker = broker;
+    language.setDataBroker (broker);
+  }
+*/
   /**
    * Whether the {@link #check(String)} methods store unknown words. If set to
    * <code>true</code> (default: false), you can get the list of unknown words
@@ -288,11 +356,11 @@ public class JLanguageTool {
   public void setListUnknownWords(boolean listUnknownWords) {
     this.listUnknownWords = listUnknownWords;
   }
-  
+
   /**
    * Whether the {@link #check(String)} methods return overlapping errors. If set to
-   * <code>true</code> (default: true), it removes overlapping errors according to 
-   * the priorities established for the language. 
+   * <code>true</code> (default: true), it removes overlapping errors according to
+   * the priorities established for the language.
    * @since 3.6
    */
   public void setCleanOverlappingMatches(boolean cleanOverlappingMatches) {
@@ -310,9 +378,10 @@ public class JLanguageTool {
   public void setMaxErrorsPerWordRate(float maxErrorsPerWordRate) {
     this.maxErrorsPerWordRate = maxErrorsPerWordRate;
   }
-  
+
   /**
    * Gets the ResourceBundle (i18n strings) for the default language of the user's system.
+   // GTODO This is needed, relates to getting messages in the users locale, NOT the rule!
    */
   public static ResourceBundle getMessageBundle() {
     return ResourceBundleTools.getMessageBundle();
@@ -322,14 +391,15 @@ public class JLanguageTool {
    * Gets the ResourceBundle (i18n strings) for the given user interface language.
    * @since 2.4 (public since 2.4)
    */
-  public static ResourceBundle getMessageBundle(Language lang) {
-    return ResourceBundleTools.getMessageBundle(lang);
+  public static ResourceBundle getMessageBundle(Language lang) throws Exception {
+      return lang.getUseDataBroker().getMessageBundle();
+    //GTODO return ResourceBundleTools.getMessageBundle(lang);
   }
-  
+
   private List<Rule> getAllBuiltinRules(Language language, ResourceBundle messages, UserConfig userConfig) {
     try {
-      return language.getRelevantRules(messages, userConfig);
-    } catch (IOException e) {
+      return language.getRelevantRules(language.getUseDataBroker().getMessageBundle(), userConfig, altLanguages);
+    } catch (Exception e) {
       throw new RuntimeException("Could not get rules of language " + language, e);
     }
   }
@@ -348,8 +418,10 @@ public class JLanguageTool {
    * @param filename path to an XML file in the classpath or in the filesystem - the classpath is checked first
    * @return a List of {@link PatternRule} objects
    */
+   /*
+   GTODO: Clean up
   public List<AbstractPatternRule> loadPatternRules(String filename) throws IOException {
-    PatternRuleLoader ruleLoader = new PatternRuleLoader();
+    PatternRuleLoader ruleLoader = new PatternRuleLoader(language.getUseDataBroker());
     try (InputStream is = this.getClass().getResourceAsStream(filename)) {
       if (is == null) {
         // happens for external rules plugged in as an XML file:
@@ -359,7 +431,7 @@ public class JLanguageTool {
       }
     }
   }
-
+*/
   /**
    * Load false friend rules from an XML file. Only those pairs will be loaded
    * that match the current text language and the mother tongue specified in the
@@ -368,6 +440,7 @@ public class JLanguageTool {
    * @param filename path to an XML file in the classpath or in the filesystem - the classpath is checked first
    * @return a List of {@link PatternRule} objects, or an empty list if mother tongue is not set
    */
+   /*
   public List<AbstractPatternRule> loadFalseFriendRules(String filename)
       throws ParserConfigurationException, SAXException, IOException {
     if (motherTongue == null) {
@@ -382,15 +455,15 @@ public class JLanguageTool {
       }
     }
   }
-
+*/
   /**
    * Activate rules that depend on a language model. The language model currently
    * consists of Lucene indexes with ngram occurrence counts.
    * @param indexDir directory with a '3grams' sub directory which contains a Lucene index with 3gram occurrence counts
    * @since 2.7
    */
-  public void activateLanguageModelRules(File indexDir) throws IOException {
-    LanguageModel languageModel = language.getLanguageModel(indexDir);
+  public void activateLanguageModelRules(/*GTODO File indexDir*/) throws Exception {
+    LanguageModel languageModel = language.getLanguageModel(/*GTODO indexDir*/);
     if (languageModel != null) {
       ResourceBundle messages = getMessageBundle(language);
       List<Rule> rules = language.getRelevantLanguageModelRules(messages, languageModel);
@@ -403,20 +476,25 @@ public class JLanguageTool {
    * @param indexDir directory with a subdirectories like 'en', each containing dictionary.txt and final_embeddings.txt
    * @since 4.0
    */
-  public void activateWord2VecModelRules(File indexDir) throws IOException {
+   // GTODO Sort out
+  public void activateWord2VecModelRules(File indexDir) throws Exception {
+      /*
+      GTODO Sort out
     Word2VecModel word2vecModel = language.getWord2VecModel(indexDir);
     if (word2vecModel != null) {
       ResourceBundle messages = getMessageBundle(language);
       List<Rule> rules = language.getRelevantWord2VecModelRules(messages, word2vecModel);
       userRules.addAll(rules);
     }
+    */
   }
 
   /**
    * Loads and activates the pattern rules from
    * {@code org/languagetool/rules/<languageCode>/grammar.xml}.
    */
-  private void activateDefaultPatternRules() throws IOException {
+  private void activateDefaultPatternRules() throws Exception {
+      // GTODO: Handle this...
     List<AbstractPatternRule> patternRules = language.getPatternRules();
     List<String> enabledRules = language.getDefaultEnabledRulesForVariant();
     List<String> disabledRules = language.getDefaultDisabledRulesForVariant();
@@ -437,10 +515,11 @@ public class JLanguageTool {
    * Loads and activates the false friend rules from
    * <code>rules/false-friends.xml</code>.
    */
-  private void activateDefaultFalseFriendRules()
-      throws ParserConfigurationException, SAXException, IOException {
-    String falseFriendRulesFilename = JLanguageTool.getDataBroker().getRulesDir() + "/" + FALSE_FRIEND_FILE;
-    userRules.addAll(loadFalseFriendRules(falseFriendRulesFilename));
+  private void activateDefaultFalseFriendRules() throws Exception {
+    if (motherTongue == null) {
+        return;
+    }
+    userRules.addAll(language.getUseDataBroker().getFalseFriendPatternRules(motherTongue));
   }
 
   /**
@@ -453,7 +532,7 @@ public class JLanguageTool {
   /**
    * Disable a given rule so the check methods like {@link #check(String)} won't use it.
    * @param ruleId the id of the rule to disable - no error will be thrown if the id does not exist
-   * @see #enableRule(String) 
+   * @see #enableRule(String)
    */
   public void disableRule(String ruleId) {
     disabledRules.add(ruleId);
@@ -474,7 +553,7 @@ public class JLanguageTool {
    * Disable the given rule category so the check methods like {@link #check(String)} won't use it.
    * @param id the id of the category to disable - no error will be thrown if the id does not exist
    * @since 3.3
-   * @see #enableRuleCategory(CategoryId) 
+   * @see #enableRuleCategory(CategoryId)
    */
   public void disableCategory(CategoryId id) {
     disabledRuleCategories.add(id);
@@ -483,11 +562,11 @@ public class JLanguageTool {
 
   /**
    * Returns true if a category is explicitly disabled.
-   * 
+   *
    * @param id the id of the category to check - no error will be thrown if the id does not exist
    * @return true if this category is explicitly disabled.
    * @since 3.5
-   * @see #disableCategory(org.languagetool.rules.CategoryId) 
+   * @see #disableCategory(org.languagetool.rules.CategoryId)
    */
   public boolean isCategoryDisabled(CategoryId id) {
     return disabledRuleCategories.contains(id);
@@ -522,7 +601,7 @@ public class JLanguageTool {
    * Enable all rules of the given category so the check methods like {@link #check(String)} will use it.
    * This will <em>not</em> throw an exception if the given rule id doesn't exist.
    * @since 3.3
-   * @see #disableCategory(org.languagetool.rules.CategoryId) 
+   * @see #disableCategory(org.languagetool.rules.CategoryId)
    */
   public void enableRuleCategory(CategoryId id) {
     disabledRuleCategories.remove(id);
@@ -532,65 +611,65 @@ public class JLanguageTool {
   /**
    * Tokenizes the given text into sentences.
    */
-  public List<String> sentenceTokenize(String text) {
+  public List<String> sentenceTokenize(String text) throws Exception {
     return language.getSentenceTokenizer().tokenize(text);
   }
 
   /**
    * The main check method. Tokenizes the text into sentences and matches these
    * sentences against all currently active rules.
-   * 
+   *
    * @param text the text to be checked
    * @return a List of {@link RuleMatch} objects
    */
-  public List<RuleMatch> check(String text) throws IOException {
+  public List<RuleMatch> check(String text) throws Exception {
     return check(text, true, ParagraphHandling.NORMAL);
   }
 
   /**
    * The main check method. Tokenizes the text into sentences and matches these
    * sentences against all currently active rules.
-   * 
+   *
    * @param text the text to be checked
    * @return a List of {@link RuleMatch} objects
    * @since 3.7
    */
-  public List<RuleMatch> check(String text, RuleMatchListener listener) throws IOException {
+  public List<RuleMatch> check(String text, RuleMatchListener listener) throws Exception {
     return check(text, true, ParagraphHandling.NORMAL, listener);
   }
 
-  public List<RuleMatch> check(String text, boolean tokenizeText, ParagraphHandling paraMode) throws IOException {
+  public List<RuleMatch> check(String text, boolean tokenizeText, ParagraphHandling paraMode) throws Exception {
     return check(new AnnotatedTextBuilder().addText(text).build(), tokenizeText, paraMode);
   }
 
   /**
    * @since 3.7
    */
-  public List<RuleMatch> check(String text, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener) throws IOException {
+  public List<RuleMatch> check(String text, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener) throws Exception {
     return check(new AnnotatedTextBuilder().addText(text).build(), tokenizeText, paraMode, listener);
   }
 
   /**
    * The main check method. Tokenizes the text into sentences and matches these
-   * sentences against all currently active rules, adjusting error positions so they refer 
+   * sentences against all currently active rules, adjusting error positions so they refer
    * to the original text <em>including</em> markup.
    * @since 2.3
    */
-  public List<RuleMatch> check(AnnotatedText text) throws IOException {
+  public List<RuleMatch> check(AnnotatedText text) throws Exception {
     return check(text, true, ParagraphHandling.NORMAL);
   }
-  
+
   /**
    * @since 3.9
    */
-  public List<RuleMatch> check(AnnotatedText text, RuleMatchListener listener) throws IOException {
+  public List<RuleMatch> check(AnnotatedText text, RuleMatchListener listener) throws Exception {
     return check(text, true, ParagraphHandling.NORMAL, listener);
   }
-  
+
   /**
    * The main check method. Tokenizes the text into sentences and matches these
    * sentences against all currently active rules.
-   * @param annotatedText The text to be checked, created with {@link AnnotatedTextBuilder}. 
+   * @param annotatedText The text to be checked, created with {@link AnnotatedTextBuilder}.
    *          Call this method with the complete text to be checked. If you call it
    *          repeatedly with smaller chunks like paragraphs or sentence, those rules that work across
    *          paragraphs/sentences won't work (their status gets reset whenever this method is called).
@@ -600,61 +679,84 @@ public class JLanguageTool {
    * @return a List of {@link RuleMatch} objects, describing potential errors in the text
    * @since 2.3
    */
-  public List<RuleMatch> check(AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode) throws IOException {
+  public List<RuleMatch> check(AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode) throws Exception {
     return check(annotatedText, tokenizeText, paraMode, null);
   }
-  
+
   /**
    * The main check method. Tokenizes the text into sentences and matches these
    * sentences against all currently active rules.
    * @since 3.7
    */
-  public List<RuleMatch> check(AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener) throws IOException {
+  public List<RuleMatch> check(AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener) throws Exception {
     return check(annotatedText, tokenizeText, paraMode, listener, Mode.ALL);
   }
-  
+
   /**
    * The main check method. Tokenizes the text into sentences and matches these
    * sentences against all currently active rules depending on {@code mode}.
    * @since 4.3
    */
-  public List<RuleMatch> check(AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener, Mode mode) throws IOException {
-    List<String> sentences;
-    if (tokenizeText) { 
-      sentences = sentenceTokenize(annotatedText.getPlainText());
-    } else {
-      sentences = new ArrayList<>();
-      sentences.add(annotatedText.getPlainText());
-    }
-    List<Rule> allRules = getAllRules();
-    if (printStream != null) {
-      printIfVerbose(allRules.size() + " rules activated for language " + language);
-    }
-
-    unknownWords = new HashSet<>();
-    List<AnalyzedSentence> analyzedSentences = analyzeSentences(sentences);
-    
-    List<RuleMatch> ruleMatches = performCheck(analyzedSentences, sentences, allRules, paraMode, annotatedText, listener, mode);
-    ruleMatches = new SameRuleGroupFilter().filter(ruleMatches);
-    // no sorting: SameRuleGroupFilter sorts rule matches already
-    if (cleanOverlappingMatches) {
-      ruleMatches = new CleanOverlappingFilter(language).filter(ruleMatches);
-    }
-    return ruleMatches;
+  public List<RuleMatch> check(AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener, Mode mode) throws Exception {
+      return check(new LinkedHashSet<>(getAllRules()), annotatedText, tokenizeText, paraMode, listener, mode);
   }
-  
+
+  /**
+   * Checks a specific list of rules.
+   */
+  public List<RuleMatch> check(Set<Rule> rules, AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener, Mode mode) throws Exception {
+      List<String> sentences;
+      if (tokenizeText) {
+        sentences = sentenceTokenize(annotatedText.getPlainText());
+      } else {
+        sentences = new ArrayList<>();
+        sentences.add(annotatedText.getPlainText());
+      }
+      unknownWords = new HashSet<>();
+      List<AnalyzedSentence> analyzedSentences = analyzeSentences(sentences);
+
+      // GTODO: Change list to set.
+      List<RuleMatch> ruleMatches = performCheck(analyzedSentences, sentences, new ArrayList<>(rules), paraMode, annotatedText, listener, mode);
+      ruleMatches = new SameRuleGroupFilter().filter(ruleMatches);
+      // no sorting: SameRuleGroupFilter sorts rule matches already
+      if (cleanOverlappingMatches) {
+        ruleMatches = new CleanOverlappingFilter(language).filter(ruleMatches);
+      }
+      return ruleMatches;
+  }
+
+  public List<RuleMatch> check(Rule rule, String text) throws Exception {
+    return check(rule, text, null);
+  }
+
+  public List<RuleMatch> check(Rule rule, String text, RuleMatchListener listener) throws Exception {
+    return check(rule, text, true, ParagraphHandling.NORMAL, listener);
+  }
+
+  public List<RuleMatch> check(Rule rule, String text, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener) throws Exception {
+    return check(rule, new AnnotatedTextBuilder().addText(text).build(), tokenizeText, paraMode, listener);
+  }
+
+  /**
+   */
+  public List<RuleMatch> check(Rule rule, AnnotatedText annotatedText, boolean tokenizeText, ParagraphHandling paraMode, RuleMatchListener listener) throws Exception {
+      Set<Rule> rules = new LinkedHashSet<>();
+      rules.add(rule);
+      return check(rules, annotatedText, tokenizeText, paraMode, listener, Mode.ALL);
+  }
+
   /**
    * Use this method if you want to access LanguageTool's otherwise
    * internal analysis of the text. For actual text checking, use the {@code check...} methods instead.
-   * @param text The text to be analyzed 
+   * @param text The text to be analyzed
    * @since 2.5
    */
-  public List<AnalyzedSentence> analyzeText(String text) throws IOException {
+  public List<AnalyzedSentence> analyzeText(String text) throws Exception {
     List<String> sentences = sentenceTokenize(text);
     return analyzeSentences(sentences);
   }
-  
-  protected List<AnalyzedSentence> analyzeSentences(List<String> sentences) throws IOException {
+
+  protected List<AnalyzedSentence> analyzeSentences(List<String> sentences) throws Exception {
     List<AnalyzedSentence> analyzedSentences = new ArrayList<>();
     int j = 0;
     for (String sentence : sentences) {
@@ -677,7 +779,7 @@ public class JLanguageTool {
       printIfVerbose(analyzedSentence.getAnnotations());
     }
   }
-  
+
   protected List<RuleMatch> performCheck(List<AnalyzedSentence> analyzedSentences, List<String> sentences,
                                          List<Rule> allRules, ParagraphHandling paraMode, AnnotatedText annotatedText, Mode mode) throws IOException {
     return performCheck(analyzedSentences, sentences, allRules, paraMode, annotatedText, null, mode);
@@ -700,11 +802,11 @@ public class JLanguageTool {
 
   /**
    * This is an internal method that's public only for technical reasons, please use one
-   * of the {@link #check(String)} methods instead. 
+   * of the {@link #check(String)} methods instead.
    * @since 2.3
    */
   public List<RuleMatch> checkAnalyzedSentence(ParagraphHandling paraMode,
-        List<Rule> rules, AnalyzedSentence analyzedSentence) throws IOException {
+        List<Rule> rules, AnalyzedSentence analyzedSentence) throws Exception {
     List<RuleMatch> sentenceMatches = new ArrayList<>();
     for (Rule rule : rules) {
       if (rule instanceof TextLevelRule) {
@@ -725,14 +827,15 @@ public class JLanguageTool {
         sentenceMatches.add(elem);
       }
     }
-    return new SameRuleGroupFilter().filter(sentenceMatches);
+    List<RuleMatch> ret = new SameRuleGroupFilter().filter(sentenceMatches);
+    return ret;
   }
 
   private boolean ignoreRule(Rule rule) {
     Category ruleCategory = rule.getCategory();
-    boolean isCategoryDisabled = (disabledRuleCategories.contains(ruleCategory.getId()) || rule.getCategory().isDefaultOff()) 
+    boolean isCategoryDisabled = (disabledRuleCategories.contains(ruleCategory.getId()) || rule.getCategory().isDefaultOff())
             && !enabledRuleCategories.contains(ruleCategory.getId());
-    boolean isRuleDisabled = disabledRules.contains(rule.getId()) 
+    boolean isRuleDisabled = disabledRules.contains(rule.getId())
             || (rule.isDefaultOff() && !enabledRules.contains(rule.getId()));
     boolean isDisabled;
     if (isCategoryDisabled) {
@@ -745,7 +848,7 @@ public class JLanguageTool {
 
   /**
    * Change RuleMatch positions so they are relative to the complete text,
-   * not just to the sentence. 
+   * not just to the sentence.
    * @param charCount Count of characters in the sentences before
    * @param columnCount Current column number
    * @param lineCount Current line number
@@ -835,13 +938,23 @@ public class JLanguageTool {
    * and then disambiguates POS tags.
    * @param sentence sentence to be analyzed
    */
-  public AnalyzedSentence getAnalyzedSentence(String sentence) throws IOException {
+  public AnalyzedSentence getAnalyzedSentence(String sentence) throws Exception {
     SimpleInputSentence cacheKey = new SimpleInputSentence(sentence, language);
     AnalyzedSentence cachedSentence = cache != null ? cache.getIfPresent(cacheKey) : null;
     if (cachedSentence != null) {
       return cachedSentence;
     } else {
-      AnalyzedSentence analyzedSentence = language.getDisambiguator().disambiguate(getRawAnalyzedSentence(sentence));
+      AnalyzedSentence analyzedSentence = getRawAnalyzedSentence(sentence);
+      Disambiguator disamb = language.getDisambiguator();
+      // Not all languages (for example "fa") have a disambiguator.
+      if (disamb != null) {
+          analyzedSentence = disamb.disambiguate(analyzedSentence);
+      }
+      // GTODO Only German (de) has a post disambiguator and this call is ONLY used here.
+      // GTODO Why not have the german disambiguator apply the chunk tags?
+      // GTODO Also why does German return a chunker but English doesn't?
+      // GTODO The question is why are german chunk tags added AFTER disambiguation rather than before
+      // GTODO like with English?
       if (language.getPostDisambiguationChunker() != null) {
         language.getPostDisambiguationChunker().addChunkTags(Arrays.asList(analyzedSentence.getTokens()));
       }
@@ -859,7 +972,7 @@ public class JLanguageTool {
    * @param sentence sentence to be analyzed
    * @since 0.9.8
    */
-  public AnalyzedSentence getRawAnalyzedSentence(String sentence) throws IOException {
+  public AnalyzedSentence getRawAnalyzedSentence(String sentence) throws Exception {
     List<String> tokens = language.getWordTokenizer().tokenize(sentence);
     Map<Integer, String> softHyphenTokens = replaceSoftHyphens(tokens);
 
@@ -868,7 +981,7 @@ public class JLanguageTool {
       language.getChunker().addChunkTags(aTokens);
     }
     int numTokens = aTokens.size();
-    int posFix = 0; 
+    int posFix = 0;
     for (int i = 1; i < numTokens; i++) {
       aTokens.get(i).setWhitespaceBefore(aTokens.get(i - 1).isWhitespace());
       aTokens.get(i).setStartPos(aTokens.get(i).getStartPos() + posFix);
@@ -879,7 +992,7 @@ public class JLanguageTool {
         }
       }
     }
-        
+
     AnalyzedTokenReadings[] tokenArray = new AnalyzedTokenReadings[tokens.size() + 1];
     AnalyzedToken[] startTokenArray = new AnalyzedToken[1];
     int toArrayCount = 0;
@@ -928,7 +1041,7 @@ public class JLanguageTool {
 
   /**
    * Get all rule categories for the current language.
-   * 
+   *
    * @return a map of {@link Category Categories}, keyed by their {@link CategoryId id}.
    * @since 3.5
    */
@@ -954,9 +1067,9 @@ public class JLanguageTool {
     rules.addAll(userRules);
     return rules;
   }
-  
+
   /**
-   * Get all active (not disabled) rules for the current language that are built-in or that 
+   * Get all active (not disabled) rules for the current language that are built-in or that
    * have been added using e.g. {@link #addRule(Rule)}. See {@link #getAllRules()} for hints
    * about rule ids.
    * @return a List of {@link Rule} objects
@@ -969,15 +1082,15 @@ public class JLanguageTool {
     // Some rules have an internal state so they can do checks over sentence
     // boundaries. These need to be reset so the checks don't suddenly
     // work on different texts with the same data. However, it could be useful
-    // to keep the state information if we're checking a continuous text.    
+    // to keep the state information if we're checking a continuous text.
     for (Rule rule : rules) {
       if (!ignoreRule(rule)) {
         rulesActive.add(rule);
       }
-    }    
+    }
     return rulesActive;
   }
-  
+
   /**
    * Works like getAllActiveRules but overrides defaults by officeefaults
    * @return a List of {@link Rule} objects
@@ -997,10 +1110,10 @@ public class JLanguageTool {
       } else if (!ignoreRule(rule) && rule.isOfficeDefaultOff()) {
         disableRule(rule.getId());
       }
-    }    
+    }
     return rulesActive;
   }
-  
+
   /**
    * Get pattern rules by Id and SubId. This returns a list because rules that use {@code <or>...</or>}
    * are internally expanded into several rules.
@@ -1009,23 +1122,23 @@ public class JLanguageTool {
    */
   public List<AbstractPatternRule> getPatternRulesByIdAndSubId(String Id, String subId) {
     List<Rule> rules = getAllRules();
-    List<AbstractPatternRule> rulesById = new ArrayList<>();   
+    List<AbstractPatternRule> rulesById = new ArrayList<>();
     for (Rule rule : rules) {
       if (rule instanceof AbstractPatternRule) {
         if (rule.getId().equals(Id) && ((AbstractPatternRule) rule).getSubId().equals(subId)) {
           rulesById.add((AbstractPatternRule) rule);
         }
       }
-    }    
+    }
     return rulesById;
   }
-  
+
   protected void printIfVerbose(String s) {
     if (printStream != null) {
       printStream.println(s);
     }
   }
-  
+
   /**
    * Adds a temporary file to the internal list
    * (internal method, you should never need to call this as a user of LanguageTool)
@@ -1034,7 +1147,7 @@ public class JLanguageTool {
   public static void addTemporaryFile(File file) {
     temporaryFiles.add(file);
   }
-  
+
   /**
    * Clean up all temporary files, if there are any.
    */
@@ -1053,7 +1166,7 @@ public class JLanguageTool {
     private final List<AnalyzedSentence> analyzedSentences;
     private final RuleMatchListener listener;
     private final Mode mode;
-    
+
     private int charCount;
     private int lineCount;
     private int columnCount;
@@ -1086,13 +1199,14 @@ public class JLanguageTool {
         ruleMatches.addAll(getOtherRuleMatches());
       } else if (mode == Mode.TEXTLEVEL_ONLY) {
         ruleMatches.addAll(getTextLevelRuleMatches());
+
       } else {
         throw new IllegalArgumentException("Unknown mode: " + mode);
       }
       return ruleMatches;
     }
 
-    private List<RuleMatch> getTextLevelRuleMatches() throws IOException {
+    private List<RuleMatch> getTextLevelRuleMatches() throws Exception {
       List<RuleMatch> ruleMatches = new ArrayList<>();
       for (Rule rule : rules) {
         if (rule instanceof TextLevelRule && !ignoreRule(rule) && paraMode != ParagraphHandling.ONLYNONPARA) {
@@ -1209,7 +1323,7 @@ public class JLanguageTool {
           charCount += token.length();
           if (charCount == match.getFromPos()) {
             fromPos = new LineColumnPosition(pos.line, pos.column);
-          } 
+          }
           if (charCount == match.getToPos()) {
             toPos = new LineColumnPosition(pos.line, pos.column);
           }
@@ -1217,7 +1331,7 @@ public class JLanguageTool {
       }
       return new LineColumnRange(fromPos, toPos);
     }
-    
+
     private class LineColumnPosition {
       int line;
       int column;
@@ -1226,7 +1340,7 @@ public class JLanguageTool {
         this.column = column;
       }
     }
-  
+
     private class LineColumnRange {
       LineColumnPosition from;
       LineColumnPosition to;
@@ -1235,9 +1349,9 @@ public class JLanguageTool {
         this.to = to;
       }
     }
-  
+
   }
-  
+
   public void setConfigValues(Map<String, Integer> v) {
     userConfig.insertConfigValues(v);
   }

@@ -18,15 +18,15 @@
  */
 package org.languagetool.rules.ngrams;
 
-import org.languagetool.Language;
+import org.languagetool.tokenizers.WordTokenizer;
 
 import java.util.*;
 
 public class GoogleTokenUtil {
 
-    public static List<String> getGoogleTokensForString(String sentence, boolean addStartToken, Language language) {
+    public static List<String> getGoogleTokensForString(String sentence, boolean addStartToken, WordTokenizer tokenizer) throws Exception {
         List<String> tokens = new LinkedList<>();
-        for (GoogleToken token : GoogleToken.getGoogleTokens(sentence, addStartToken, language.getWordTokenizer())) {
+        for (GoogleToken token : GoogleToken.getGoogleTokens(sentence, addStartToken, tokenizer)) {
           tokens.add(token.token);
         }
         return tokens;

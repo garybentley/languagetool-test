@@ -46,6 +46,8 @@ import org.languagetool.tokenizers.el.GreekWordTokenizer;
  */
 public class Greek extends Language {
 
+    public static final Locale LOCALE = new Locale("el", "GR");
+
   private Disambiguator disambiguator;
   private SentenceTokenizer sentenceTokenizer;
   private Synthesizer synthesizer;
@@ -76,7 +78,7 @@ public class Greek extends Language {
   @Override
   public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
     return Arrays.asList(
-            new CommaWhitespaceRule(messages, 
+            new CommaWhitespaceRule(messages,
                     Example.wrong("Το κόμμα χωρίζει προτάσεις<marker> ,</marker> όρους προτάσεων και φράσεις."),
                     Example.fixed("Το κόμμα χωρίζει προτάσεις<marker>,</marker> όρους προτάσεων και φράσεις.")),
             new DoublePunctuationRule(messages),
@@ -119,7 +121,7 @@ public class Greek extends Language {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new GreekSynthesizer();
+      synthesizer = new GreekSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }

@@ -35,31 +35,35 @@ import org.languagetool.UserConfig;
 public class LongSentenceRule extends Rule {
 
   public static final String RULE_ID = "TOO_LONG_SENTENCE";
-  
+  public static final String RULE_MATCH_MESSAGE_ID = "long_sentence_rule_msg2";
+  public static final String RULE_DESCRIPTION_MESSAGE_ID = "long_sentence_rule_desc";
+
   private static final int DEFAULT_MAX_WORDS = 50;
   private static final Pattern NON_WORD_REGEX = Pattern.compile("[.?!…:;,~’'\"„“”»«‚‘›‹()\\[\\]\\-–—*×∗·+÷/=]");
-  private static final boolean DEFAULT_ACTIVATION = false;
 
   protected int maxWords = DEFAULT_MAX_WORDS;
+
+  public static final RuleConfiguration RULE_CONFIGURATION;
+
+  static {
+      RULE_CONFIGURATION = new RuleConfiguration(LongSentenceRule.class, RULE_ID, RuleConfiguration.newDescription(RULE_DESCRIPTION_MESSAGE_ID, Integer.class),
+                    RuleConfiguration.newMatch(RULE_MATCH_MESSAGE_ID, Integer.class));
+  }
+
+  public static RuleConfiguration getRuleConfiguration() {
+      return RULE_CONFIGURATION;
+  }
 
   /**
    * @since 4.2
    */
-  public LongSentenceRule(ResourceBundle messages, UserConfig userConfig, int defaultWords, boolean defaultActive) {
+  public LongSentenceRule(ResourceBundle messages, int defaultWords, boolean defaultActive) {
     super(messages);
     super.setCategory(Categories.STYLE.getCategory(messages));
     if (!defaultActive) {
       setDefaultOff();
     }
-    if(defaultWords > 0) {
-      this.maxWords = defaultWords;
-    }
-    if (userConfig != null) {
-      int confWords = userConfig.getConfigValueByID(getId());
-      if(confWords > 0) {
-        this.maxWords = confWords;
-      }
-    }
+    this.maxWords = (defaultWords > 0 ? defaultWords : DEFAULT_MAX_WORDS);
     setLocQualityIssueType(ITSIssueType.Style);
   }
 
@@ -67,29 +71,29 @@ public class LongSentenceRule extends Rule {
    * Creates a rule with default inactive
    * @since 4.2
    */
-  public LongSentenceRule(ResourceBundle messages, UserConfig userConfig, int defaultWords) {
-    this(messages, userConfig, defaultWords, DEFAULT_ACTIVATION);
+  public LongSentenceRule(ResourceBundle messages, int defaultWords) {
+    this(messages, defaultWords, false);
   }
 
 
   /**
-   * Creates a rule with default values can be overwritten by configuration settings
+   * Creates a rule with default values.
    * @since 4.2
    */
-  public LongSentenceRule(ResourceBundle messages, UserConfig userConfig) {
-    this(messages, userConfig, -1, DEFAULT_ACTIVATION);
+  public LongSentenceRule(ResourceBundle messages) {
+    this(messages, DEFAULT_MAX_WORDS);
   }
 
   @Override
   public String getDescription() {
-    return MessageFormat.format(messages.getString("long_sentence_rule_desc"), maxWords);
+    return MessageFormat.format(messages.getString(RULE_DESCRIPTION_MESSAGE_ID), maxWords);
   }
 
   /**
    * Override this ID by adding a language acronym (e.g. TOO_LONG_SENTENCE_DE)
    * to use adjustment of maxWords by option panel
    * @since 4.1
-   */   
+   */
   @Override
   public String getId() {
     return RULE_ID;
@@ -117,6 +121,7 @@ public class LongSentenceRule extends Rule {
    */
   @Override
   public int getMinConfigurableValue() {
+      // GTODO Sort this, never used, arbitrary...
     return 5;
   }
 
@@ -125,6 +130,7 @@ public class LongSentenceRule extends Rule {
    */
   @Override
   public int getMaxConfigurableValue() {
+      // GTODO Sort this, never used, arbitrary...
     return 100;
   }
 
@@ -133,11 +139,20 @@ public class LongSentenceRule extends Rule {
    */
   @Override
   public String getConfigureText() {
+      // GTODO This shouldn't be here, maybe use a "RuleConfiguration" object... or return json/xml that contains the relevant data.
     return messages.getString("guiLongSentencesText");
   }
 
   public String getMessage() {
-		return MessageFormat.format(messages.getString("long_sentence_rule_msg2"), maxWords);
+      // GTODO Not very useful since it doesn't tell you how long the sentence is in words...
+		return MessageFormat.format(messages.getString(RULE_MATCH_MESSAGE_ID), maxWords);
+  }
+
+  public void setMaxWords(int v) {
+      if (v < 1) {
+          throw new IllegalArgumentException("Value must be greater than 0.");
+      }
+      this.maxWords = v;
   }
 
   @Override

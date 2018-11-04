@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,46 +34,29 @@ import java.util.ResourceBundle;
  */
 public class LongSentenceRule extends org.languagetool.rules.LongSentenceRule {
 
+    public static final String RULE_ID = "TOO_LONG_SENTENCE_DE";
+
+    public static String getRuleId() {
+        return RULE_ID;
+    }
+
   private static final boolean DEFAULT_ACTIVATION = false;
 
   /**
    * @param defaultActive allows default granularity
    */
-  public LongSentenceRule(ResourceBundle messages, UserConfig userConfig, int defaultWords, boolean defaultActive) {
-    super(messages, userConfig, defaultWords);
-    super.setCategory(Categories.STYLE.getCategory(messages));
-    setLocQualityIssueType(ITSIssueType.Style);
+  public LongSentenceRule(ResourceBundle messages, int defaultWords, boolean defaultActive) {
+    super(messages, defaultWords, defaultActive);
     addExamplePair(Example.wrong("<marker>Dies ist ein Bandwurmsatz, der immer weiter geht, obwohl das kein guter Stil ist, den man eigentlich berücksichtigen sollte, obwohl es auch andere Meinungen gibt, die aber in der Minderzahl sind, weil die meisten Autoren sich doch an die Stilvorgaben halten, wenn auch nicht alle, was aber letztendlich wiederum eine Sache des Geschmacks ist</marker>."),
                    Example.fixed("<marker>Dies ist ein kurzer Satz.</marker>"));
-    if (defaultActive) {
-      setDefaultOn();
-    }
-    if(defaultWords > 0) {
-      this.maxWords = defaultWords;
-    }
-    if (userConfig != null) {
-      int confWords = userConfig.getConfigValueByID(getId());
-      if(confWords > 0) {
-        this.maxWords = confWords;
-      }
-    }
   }
 
   /**
    * Creates a rule with default inactive
    * @since 4.2
    */
-  public LongSentenceRule(ResourceBundle messages, UserConfig userConfig, int defaultWords) {
-    this(messages, userConfig, defaultWords, DEFAULT_ACTIVATION);
-  }
-
-
-  /**
-   * Creates a rule with default values can be overwritten by configuration settings
-   * @since 4.2
-   */
-  public LongSentenceRule(ResourceBundle messages, UserConfig userConfig) {
-    this(messages, userConfig, -1, DEFAULT_ACTIVATION);
+  public LongSentenceRule(ResourceBundle messages, int defaultWords) {
+    this(messages, defaultWords, DEFAULT_ACTIVATION);
   }
 
   @Override
@@ -97,11 +80,11 @@ public class LongSentenceRule extends org.languagetool.rules.LongSentenceRule {
       if (((firstChar >= 'A' && firstChar <= 'Z')
                 || (firstChar >= 'a' && firstChar <= 'z')
                 || firstChar == 'ä' || firstChar == 'ö' || firstChar == 'ü'
-                || firstChar == 'Ä' || firstChar == 'Ö' || firstChar == 'Ü' 
+                || firstChar == 'Ä' || firstChar == 'Ö' || firstChar == 'Ü'
                 || firstChar == 'ß')) {
       return true;
       }
-    } 
+    }
     return false;
   }
 
@@ -124,9 +107,9 @@ public class LongSentenceRule extends org.languagetool.rules.LongSentenceRule {
       }
       int numWords = 1;
       //  Text before and after ':' and ';' is handled as separated sentences
-      //  Direct speech is splitted 
+      //  Direct speech is splitted
       while (i < tokens.length && !tokens[i].getToken().equals(":") && !tokens[i].getToken().equals(";")
-              && !tokens[i].getToken().equals("\n") && !tokens[i].getToken().equals("\r\n") 
+              && !tokens[i].getToken().equals("\n") && !tokens[i].getToken().equals("\r\n")
               && !tokens[i].getToken().equals("\n\r")
               && ((i < tokens.length - 1 && !tokens[i + 1].getToken().equals(","))
               || (!tokens[i].getToken().equals("“") && !tokens[i].getToken().equals("»")
@@ -147,7 +130,7 @@ public class LongSentenceRule extends org.languagetool.rules.LongSentenceRule {
           int fromPosInt = 0;
           int toPosInt = 0;
           int k;
-          for (k = i + 1; k < tokens.length && !tokens[k].getToken().equals(endChar) 
+          for (k = i + 1; k < tokens.length && !tokens[k].getToken().equals(endChar)
                 && !isWordCount(tokens[k].getToken()); k++);
           if (k < tokens.length) {
             fromPosInt = tokens[k].getStartPos();

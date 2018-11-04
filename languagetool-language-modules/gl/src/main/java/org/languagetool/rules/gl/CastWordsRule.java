@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
@@ -41,7 +42,7 @@ public class CastWordsRule extends AbstractSimpleReplaceRule {
 
   public static final String GL_CAST_WORDS_RULE = "GL_CAST_WORDS";
 
-  private static final Map<String, List<String>> wrongWords = load("/gl/spanish.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale GL_LOCALE = new Locale("gl");
 
   @Override
@@ -49,8 +50,9 @@ public class CastWordsRule extends AbstractSimpleReplaceRule {
     return wrongWords;
   }
 
-  public CastWordsRule(ResourceBundle messages) throws IOException {
-    super(messages);
+  public CastWordsRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
+    wrongWords = load("/gl/spanish.txt", dataBroker);
   }
 
   @Override
@@ -67,7 +69,7 @@ public class CastWordsRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Castelanismos léxicos";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " é un castelanismo. Empregue no seu sitio: "

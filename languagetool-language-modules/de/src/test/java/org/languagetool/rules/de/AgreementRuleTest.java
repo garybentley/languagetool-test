@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,10 +22,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
+import org.languagetool.language.German;
 import org.languagetool.language.GermanyGerman;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,15 +39,16 @@ public class AgreementRuleTest {
 
   private AgreementRule rule;
   private JLanguageTool lt;
-  
+
   @Before
-  public void setUp() throws IOException {
-    rule = new AgreementRule(TestTools.getMessages("de"), new GermanyGerman());
-    lt = new JLanguageTool(new GermanyGerman());
+  public void setUp() throws Exception {
+      German german = new German();
+    rule = german.createAgreementRule(null);
+    lt = new JLanguageTool(german);
   }
 
   @Test
-  public void testDetNounRule() throws IOException {
+  public void testDetNounRule() throws Exception {
     // correct sentences:
     assertGood("So ist es in den USA.");
     assertGood("Das ist der Tisch.");
@@ -136,7 +137,7 @@ public class AgreementRuleTest {
 
     assertGood("... wo Krieg den Unschuldigen Leid und Tod bringt.");
     assertGood("Der Abschuss eines Papageien.");
-    
+
     assertGood("Die Beibehaltung des Art. 1 ist geplant.");
     assertGood("Die Verschiebung des bisherigen Art. 1 ist geplant.");
 
@@ -228,7 +229,7 @@ public class AgreementRuleTest {
     assertBad("Das Auto einem Mannes.", "einem Mann", "einem Manne", "eines Mannes");
     assertBad("Das Auto einer Mannes.", "eines Mannes");
     assertBad("Das Auto einen Mannes.", "einen Mann", "eines Mannes");
-    
+
     //assertBad("Das erwähnt Auto bog nach rechts ab.");    // TODO
     assertGood("Das erlaubt Forschern, neue Versuche durchzuführen.");
     assertGood("Dies ermöglicht Forschern, neue Versuche durchzuführen.");
@@ -237,12 +238,12 @@ public class AgreementRuleTest {
     assertBad("Die erwähnten Konferenz ist am Samstag.");
     assertBad("Die erwähnter Konferenz ist am Samstag.");
     assertBad("Die erwähntem Konferenz ist am Samstag.");
-    
+
     assertBad("Des großer Mannes.");
 
     assertBad("Das Dach von meine Auto.", "mein Auto", "meine Autos", "meinem Auto");
     assertBad("Das Dach von meinen Auto.", "mein Auto", "meinem Auto", "meinen Autos");
-    
+
     assertBad("Das Dach mein Autos.", "mein Auto", "meine Autos", "meinen Autos", "meiner Autos", "meines Autos");
     assertBad("Das Dach meinem Autos.", "meine Autos", "meinem Auto", "meinen Autos", "meiner Autos", "meines Autos");
 
@@ -254,7 +255,7 @@ public class AgreementRuleTest {
 
     assertBad("Der Haus ist groß", "Das Haus", "Dem Haus", "Der Häuser");
     assertBad("Aber der Haus ist groß", "das Haus", "dem Haus", "der Häuser");
-    
+
     assertBad("Ich habe einen Feder gefunden.", "eine Feder", "einer Feder");
 
     assertGood("Wenn die Gott zugeschriebenen Eigenschaften stimmen, dann...");
@@ -284,10 +285,10 @@ public class AgreementRuleTest {
     assertGood("Dein Vorschlag befindet sich unter meinen Top 5.");
     assertGood("Unter diesen rief das großen Unmut hervor.");
     assertGood("Bei mir löste das Panik aus.");
-    
+
     assertBad("Hier steht Ihre Text.");
     assertBad("Hier steht ihre Text.");
-    
+
     assertBad("Ich weiß nicht mehr, was unser langweiligen Thema war.");
     assertGood("Aber mein Wissen über die Antike ist ausbaufähig.");
     assertBad("Er ging ins Küche.");
@@ -309,7 +310,7 @@ public class AgreementRuleTest {
   }
 
   @Test
-  public void testVieleWenige() throws IOException {
+  public void testVieleWenige() throws Exception {
     assertGood("Zusammenschluss mehrerer dörflicher Siedlungen an einer Furt");
     assertGood("Für einige markante Szenen");
     assertGood("Für einige markante Szenen baute Hitchcock ein Schloss.");
@@ -324,7 +325,7 @@ public class AgreementRuleTest {
   }
 
   @Test
-  public void testDetNounRuleErrorMessages() throws IOException {
+  public void testDetNounRuleErrorMessages() throws Exception {
     // check detailed error messages:
     assertBadWithMessage("Das Fahrrads.", "bezüglich Kasus");
     assertBadWithMessage("Der Fahrrad.", "bezüglich Genus");
@@ -336,7 +337,7 @@ public class AgreementRuleTest {
   }
 
   @Test
-  public void testRegression() throws IOException {
+  public void testRegression() throws Exception {
       JLanguageTool lt = new JLanguageTool(new GermanyGerman());
       // used to be not detected > 1.0.1:
       String str = "Und so.\r\nDie Bier.";
@@ -345,7 +346,7 @@ public class AgreementRuleTest {
   }
 
   @Test
-  public void testDetAdjNounRule() throws IOException {
+  public void testDetAdjNounRule() throws Exception {
     // correct sentences:
     assertGood("Das ist der riesige Tisch.");
     assertGood("Der riesige Tisch ist groß.");
@@ -358,7 +359,7 @@ public class AgreementRuleTest {
     assertGood("Der riesigen Tische wegen.");
     assertGood("An der roten Ampel.");
     assertGood("Dann hat das natürlich Nachteile.");
-    
+
     // incorrect sentences:
     assertBad("Es sind die riesigen Tisch.");
     //assertBad("Dort, die riesigen Tischs!");    // TODO: error not detected because of comma
@@ -378,12 +379,12 @@ public class AgreementRuleTest {
     //assertBad("An der rot Ampel.");
   }
 
-  private void assertGood(String s) throws IOException {
+  private void assertGood(String s) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(s));
     assertEquals("Found unexpected match in sentence '" + s + "': " + Arrays.toString(matches), 0, matches.length);
   }
 
-  private void assertBad(String s, String... expectedSuggestions) throws IOException {
+  private void assertBad(String s, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(s));
     assertEquals("Did not find one match in sentence '" + s + "'", 1, matches.length);
     if (expectedSuggestions.length > 0) {
@@ -393,11 +394,11 @@ public class AgreementRuleTest {
     }
   }
 
-  private void assertBadWithMessage(String s, String expectedErrorSubstring) throws IOException {
+  private void assertBadWithMessage(String s, String expectedErrorSubstring) throws Exception {
     assertEquals(1, rule.match(lt.getAnalyzedSentence(s)).length);
     String errorMessage = rule.match(lt.getAnalyzedSentence(s))[0].getMessage();
     assertTrue("Got error '" + errorMessage + "', expected substring '" + expectedErrorSubstring + "'",
             errorMessage.contains(expectedErrorSubstring));
   }
-  
+
 }

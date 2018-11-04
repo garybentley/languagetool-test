@@ -23,12 +23,10 @@ package org.languagetool.rules.de;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
+import org.languagetool.language.German;
 import org.languagetool.Languages;
 import org.languagetool.rules.AbstractUnitConversionRule;
 import org.languagetool.rules.UnitConversionRuleTestHelper;
-
-import java.io.IOException;
 
 public class UnitConversionRuleTest {
 
@@ -48,10 +46,10 @@ public class UnitConversionRuleTest {
   private final UnitConversionRuleTestHelper unitConversionRuleTestHelper = new UnitConversionRuleTestHelper();
 
   @Test
-  public void match() throws IOException {
-    Language lang = Languages.getLanguageForShortCode("de");
-    JLanguageTool lt = new JLanguageTool(lang);
-    UnitConversionRule rule = new UnitConversionRule(JLanguageTool.getMessageBundle(lang));
+  public void match() throws Exception {
+    German german = new German();
+    JLanguageTool lt = new JLanguageTool(german);
+    UnitConversionRule rule = german.createUnitConversionRule(null);
     assertMatches("Ich bin 6 Fuß groß.", 1, "1,83 Meter", rule, lt);
     assertMatches("Ich bin 6 Fuß (2,02 m) groß.", 1, "1,83 Meter", rule, lt);
     assertMatches("Ich bin 6 Fuß (1,82 m) groß.", 0, null, rule, lt);
@@ -64,7 +62,7 @@ public class UnitConversionRuleTest {
     assertMatches("Meine neue Wohnung ist 500 sq ft groß.", 1, "46,45 Quadratmeter", rule, lt);
   }
 
-  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws IOException {
+  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws Exception {
     unitConversionRuleTestHelper.assertMatches(input, expectedMatches, converted, rule, lt);
   }
 }

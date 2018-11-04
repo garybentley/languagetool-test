@@ -39,41 +39,45 @@ import static org.junit.Assert.assertTrue;
 
 public class MorfologikAmericanSpellerRuleTest extends AbstractEnglishSpellerRuleTest {
 
-  private static final AmericanEnglish language = new AmericanEnglish();
-  
+  private static AmericanEnglish language;
+
   private static MorfologikAmericanSpellerRule rule;
   private static JLanguageTool langTool;
   private static MorfologikCanadianSpellerRule caRule;
   private static JLanguageTool caLangTool;
 
   @BeforeClass
-  public static void setup() throws IOException {
-    rule = new MorfologikAmericanSpellerRule(TestTools.getMessages("en"), language);
+  public static void setup() throws Exception {
+    language = new AmericanEnglish();
+    rule = language.createMorfologikSpellerRule(null, null);
     langTool = new JLanguageTool(language);
     CanadianEnglish canadianEnglish = new CanadianEnglish();
-    caRule = new MorfologikCanadianSpellerRule(TestTools.getMessages("en"), canadianEnglish, null);
+    caRule = canadianEnglish.createMorfologikSpellerRule(null, null);
     caLangTool = new JLanguageTool(canadianEnglish);
   }
 
   @Test
-  public void testSuggestions() throws IOException {
-    Language language = new AmericanEnglish();
-    Rule rule = new MorfologikAmericanSpellerRule(TestTools.getMessages("en"), language);
+  public void testSuggestions() throws Exception {
+      /*
+    Rule rule = new MorfologikAmericanSpellerRule(language.getMessageBundle(), language, null, language.getUseDataBroker().getDictionaries(null),
+                language.getUseDataBroker().getSpellingIgnoreWords(), language.getUseDataBroker().getSpellingProhibitedWords());
+                */
     super.testNonVariantSpecificSuggestions(rule, language);
   }
 
   @Test
-  public void testUserDict() throws IOException {
-    Language language = new AmericanEnglish();
+  public void testUserDict() throws Exception {
     UserConfig userConfig = new UserConfig(Arrays.asList("mytestword", "mytesttwo"));
-    Rule rule = new MorfologikAmericanSpellerRule(TestTools.getMessages("en"), language, userConfig);
+
+    rule = language.createMorfologikSpellerRule(null, userConfig);
+
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("mytestword")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("mytesttwo")).length);
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("mytestthree")).length);
   }
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("This is an example: we get behavior as a dictionary word.")).length);
@@ -100,7 +104,7 @@ public class MorfologikAmericanSpellerRuleTest extends AbstractEnglishSpellerRul
 
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("aõh")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("a")).length);
-    
+
     //based on replacement pairs:
 
     RuleMatch[] matches2 = rule.match(langTool.getAnalyzedSentence("He teached us."));
@@ -109,7 +113,7 @@ public class MorfologikAmericanSpellerRuleTest extends AbstractEnglishSpellerRul
     assertEquals(3, matches2[0].getFromPos());
     assertEquals(10, matches2[0].getToPos());
     assertEquals("taught", matches2[0].getSuggestedReplacements().get(0));
-    
+
     // hyphens - accept words if all their parts are okay:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("A web-based software.")).length);
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("A wxeb-based software.")).length);
@@ -120,16 +124,16 @@ public class MorfologikAmericanSpellerRuleTest extends AbstractEnglishSpellerRul
   }
 
   @Test
-  public void testIgnoredChars() throws IOException {
+  public void testIgnoredChars() throws Exception {
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("software")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("soft\u00ADware")).length);
 
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("A software")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("A soft\u00ADware")).length);
-  }  
-  
+  }
+
   @Test
-  public void testSuggestionForIrregularWords() throws IOException {
+  public void testSuggestionForIrregularWords() throws Exception {
     // verbs:
     assertSuggestion("He teached us.", "taught");
     assertSuggestion("He buyed the wrong brand", "bought");
@@ -162,7 +166,7 @@ public class MorfologikAmericanSpellerRuleTest extends AbstractEnglishSpellerRul
     assertSuggestion("criterions", "criteria");
     //accepted by spell checker, e.g. as third-person verb:
     // foots, mouses, man
-    
+
     // adjectives (comparative):
     assertSuggestion("gooder", "better");
     assertSuggestion("bader", "worse");
@@ -183,11 +187,11 @@ public class MorfologikAmericanSpellerRuleTest extends AbstractEnglishSpellerRul
     assertSuggestion("CATestWordToBeIgnore", "USTestWordToBeIgnored");  // test again because of caching
   }
 
-  private void assertSuggestion(String input, String... expectedSuggestions) throws IOException {
+  private void assertSuggestion(String input, String... expectedSuggestions) throws Exception {
     assertSuggestion(input, rule, langTool, expectedSuggestions);
   }
 
-  private void assertSuggestion(String input, Rule rule, JLanguageTool lt, String... expectedSuggestions) throws IOException {
+  private void assertSuggestion(String input, Rule rule, JLanguageTool lt, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat(matches.length, is(1));
     assertTrue("Expected >= " + expectedSuggestions.length + ", got: " + matches[0].getSuggestedReplacements(),

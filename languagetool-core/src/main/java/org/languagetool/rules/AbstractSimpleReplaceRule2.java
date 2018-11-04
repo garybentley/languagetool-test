@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
- * A rule that matches words which should not be used and suggests correct ones instead. 
+ * A rule that matches words which should not be used and suggests correct ones instead.
  * Romanian implementations. Loads the list of words from
  * <code>/ro/replace.txt</code>.
  *
@@ -54,7 +54,7 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
   public abstract String getShort();
   public abstract String getSuggestion();
   /**
-   * @return the word used to separate multiple suggestions; used only before last suggestion, the rest are comma-separated.  
+   * @return the word used to separate multiple suggestions; used only before last suggestion, the rest are comma-separated.
    */
   public abstract String getSuggestionsSeparator();
   /**
@@ -63,14 +63,21 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
   public abstract Locale getLocale();
 
   // list of maps containing error-corrections pairs.
-  // the n-th map contains key strings of (n+1) words 
+  // the n-th map contains key strings of (n+1) words
   private final List<Map<String, String>> wrongWords;
-  
-  public AbstractSimpleReplaceRule2(ResourceBundle messages, Language language) throws IOException {
+
+  public AbstractSimpleReplaceRule2(ResourceBundle messages, Language language, List<Map<String, String>> wrongWords) throws IOException {
     super(messages);
     this.language = Objects.requireNonNull(language);
     super.setCategory(Categories.MISC.getCategory(messages));
-    wrongWords = loadWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream(getFileName()));
+    this.wrongWords = wrongWords;
+    /*
+    try {
+        wrongWords = loadWords(dataBroker.getFromRulesDirAsStream(getFileName()));
+    } catch (IOException e) {
+        throw new IOException(String.format ("Format error in file %s.", dataBroker.getFromRulesDirAsUrl(getFileName())), e);
+    }
+    */
   }
 
   /**
@@ -89,16 +96,18 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
 
   /**
    * Load the list of words.
-   * Same as {@link AbstractSimpleReplaceRule#load} but allows multiple words.   
+   * Same as {@link AbstractSimpleReplaceRule#load} but allows multiple words.
    * @param stream the stream to load.
    * @return the list of maps containing the error-corrections pairs. The n-th map contains key strings of (n+1) words.
    */
+   /*
+   GTODO: Clean up
   private List<Map<String, String>> loadWords(InputStream stream)
           throws IOException {
     List<Map<String, String>> list = new ArrayList<>();
     try (
       InputStreamReader isr = new InputStreamReader(stream, "utf-8");
-      BufferedReader br = new BufferedReader(isr)) 
+      BufferedReader br = new BufferedReader(isr))
     {
       String line;
       while ((line = br.readLine()) != null) {
@@ -109,9 +118,7 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
 
         String[] parts = line.split("=");
         if (parts.length != 2) {
-          throw new IOException("Format error in file "
-                  + JLanguageTool.getDataBroker().getFromRulesDirAsUrl(getFileName())
-                  + ". Expected exactly 1 '=' character. Line: " + line);
+          throw new IOException("Expected exactly 1 '=' character. Line: " + line);
         }
 
         String[] wrongForms = parts[0].split("\\|"); // multiple incorrect forms
@@ -138,7 +145,7 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
     }
     return Collections.unmodifiableList(result);
   }
-
+*/
   private void addToQueue(AnalyzedTokenReadings token,
                           Queue<AnalyzedTokenReadings> prevTokens) {
     boolean inserted = prevTokens.offer(token);

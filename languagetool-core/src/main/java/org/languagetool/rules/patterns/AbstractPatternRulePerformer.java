@@ -54,7 +54,7 @@ public abstract class AbstractPatternRulePerformer {
   protected boolean testAllReadings(AnalyzedTokenReadings[] tokens,
       PatternTokenMatcher matcher, PatternTokenMatcher prevElement,
       int tokenNo, int firstMatchToken, int prevSkipNext)
-          throws IOException {
+          throws Exception {
     boolean thisMatched = false;
     int numberOfReadings = tokens[tokenNo].getReadingsLength();
     matcher.prepareAndGroup(firstMatchToken, tokens, rule.getLanguage());
@@ -65,13 +65,13 @@ public abstract class AbstractPatternRulePerformer {
       prevMatched = prevMatched || prevSkipNext > 0
           && prevElement != null
           && prevElement.isMatchedByScopeNextException(matchToken);
-      
+
       // a workaround to allow exception with scope="next" without "skip" in previous token
       // this allows to check for exception in the next token even if the current one is the last one in the sentence
       prevMatched = prevMatched || prevSkipNext == 0
           && tokenNo <= tokens.length-2
           && matcher.isMatchedByScopeNextException(tokens[tokenNo+1].getAnalyzedToken(0));
-      
+
       if (prevMatched) {
         return false;
       }
@@ -191,7 +191,7 @@ public abstract class AbstractPatternRulePerformer {
   /**
    * @since 2.5
    */
-  protected int skipMaxTokens(AnalyzedTokenReadings[] tokens, PatternTokenMatcher elem, int firstMatchToken, int prevSkipNext, PatternTokenMatcher prevElement, int m, int remainingElems) throws IOException {
+  protected int skipMaxTokens(AnalyzedTokenReadings[] tokens, PatternTokenMatcher elem, int firstMatchToken, int prevSkipNext, PatternTokenMatcher prevElement, int m, int remainingElems) throws Exception {
     int maxSkip = 0;
     int maxOccurrences = elem.getPatternToken().getMaxOccurrence() == -1 ? Integer.MAX_VALUE : elem.getPatternToken().getMaxOccurrence();
     for (int j = 1; j < maxOccurrences && m+j < tokens.length - remainingElems; j++) {

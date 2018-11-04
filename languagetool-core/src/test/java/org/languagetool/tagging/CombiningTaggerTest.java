@@ -2,6 +2,8 @@ package org.languagetool.tagging;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
+import org.languagetool.TestLanguage;
+import org.languagetool.TestTools;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,7 +17,8 @@ public class CombiningTaggerTest {
 
   @Test
   public void testTagNoOverwrite() throws Exception {
-    CombiningTagger tagger = getCombiningTagger(false, null);
+    // Don't include removal, don't overwrite.
+    CombiningTagger tagger = TestTools.getTestLanguage().getUseDataBroker().getWordTagger(false, false);
     assertThat(tagger.tag("nosuchword").size(), is(0));
     List<TaggedWord> result = tagger.tag("fullform");
     assertThat(result.size(), is(2));
@@ -26,7 +29,8 @@ public class CombiningTaggerTest {
 
   @Test
   public void testTagOverwrite() throws Exception {
-    CombiningTagger tagger = getCombiningTagger(true, null);
+    // Don't include removal, overwrite.
+    CombiningTagger tagger = TestTools.getTestLanguage().getUseDataBroker().getWordTagger(false, true);
     assertThat(tagger.tag("nosuchword").size(), is(0));
     List<TaggedWord> result = tagger.tag("fullform");
     assertThat(result.size(), is(1));
@@ -36,24 +40,28 @@ public class CombiningTaggerTest {
 
   @Test
   public void testTagRemoval() throws Exception {
-    CombiningTagger tagger = getCombiningTagger(false, "/xx/removed.txt");
+      // Include removal, don't overwrite.
+    CombiningTagger tagger = TestTools.getTestLanguage().getUseDataBroker().getWordTagger(true, false);
     assertThat(tagger.tag("nosuchword").size(), is(0));
     List<TaggedWord> result = tagger.tag("fullform");
     String asString = getAsString(result);
     assertFalse(asString.contains("baseform1/POSTAG1"));  // first tagged, but in removed.txt
     assertTrue(asString.contains("baseform2/POSTAG2"));
   }
-
-  private CombiningTagger getCombiningTagger(boolean overwrite, String removalPath) throws IOException {
-    ManualTagger tagger1 = new ManualTagger(JLanguageTool.getDataBroker().getFromResourceDirAsStream("/xx/added1.txt"));
-    ManualTagger tagger2 = new ManualTagger(JLanguageTool.getDataBroker().getFromResourceDirAsStream("/xx/added2.txt"));
+/*
+GTODO Cleanup
+  private CombiningTagger getCombiningTagger(boolean overwrite, boolean includeRemovalTagger) throws Exception {
+      // GTODO Need a better way of getting this, it's too low level.
+    TestLanguage demo = TestTools.getTestLanguage();
+    ManualTagger tagger1 = new ManualTagger(demo.getUseDataBroker().getFromResourceDirAsStream(String.format("/%1$s/added1.txt", demo.getShortCode())));
+    ManualTagger tagger2 = new ManualTagger(demo.getUseDataBroker().getFromResourceDirAsStream(String.format("/%1$s/added2.txt", demo.getShortCode())));
     ManualTagger removalTagger = null;
-    if (removalPath != null) {
-      removalTagger = new ManualTagger(JLanguageTool.getDataBroker().getFromResourceDirAsStream(removalPath));
+    if (includeRemovalTagger) {
+      removalTagger = new ManualTagger(demo.getUseDataBroker().getFromResourceDirAsStream(String.format("/%1$s/removed.txt", demo.getShortCode())));
     }
     return new CombiningTagger(tagger1, tagger2, removalTagger, overwrite);
   }
-
+*/
   private String getAsString(List<TaggedWord> result) {
     StringBuilder sb = new StringBuilder();
     for (TaggedWord taggedWord : result) {
@@ -64,10 +72,13 @@ public class CombiningTaggerTest {
     }
     return sb.toString();
   }
-
-  @Test(expected = IOException.class)
+/*
+GTODO Not needed
+  @Test(expected = Exception.class)
   public void testInvalidFile() throws Exception {
-    new ManualTagger(JLanguageTool.getDataBroker().getFromResourceDirAsStream("/xx/added-invalid.txt"));
+      TestLanguage demo = TestTools.getTestLanguage();
+      new ManualTagger(demo.getUseDataBroker().getFromResourceDirAsStream(String.format("/%1$s/added-invalid.txt", demo.getShortCode())));
+    //GTODO: new ManualTagger(JLanguageTool.getDataBroker().getFromResourceDirAsStream("/xx/added-invalid.txt"));
   }
-
+*/
 }

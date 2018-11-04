@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,6 +24,8 @@ import java.io.IOException;
 
 public class ValidateFalseFriendsXmlTest {
 
+/*
+GTODO: Allow for validation of XML
   @Test
   public void testFalseFriendsXML() throws IOException {
     System.out.println("Validating false-friends.xml...");
@@ -32,12 +34,15 @@ public class ValidateFalseFriendsXmlTest {
             JLanguageTool.getDataBroker().getRulesDir() + "/false-friends.dtd", "rules");
     System.out.println("Validation successfully finished.");
   }
-
+*/
   /**
    * Validator, for non-programmers developing rules.
    */
+/*
+GTODO: Need a better way than this...
   public static void main(String[] args) throws IOException {
     ValidateFalseFriendsXmlTest test = new ValidateFalseFriendsXmlTest();
     test.testFalseFriendsXML();
   }
+  */
 }

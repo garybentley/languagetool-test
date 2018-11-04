@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,6 +30,9 @@ import org.languagetool.rules.patterns.PasswordAuthenticator;
 import org.languagetool.rules.patterns.bitext.BitextPatternRule;
 import org.languagetool.rules.patterns.bitext.BitextPatternRuleLoader;
 import org.languagetool.rules.patterns.bitext.FalseFriendsAsBitextLoader;
+import org.languagetool.rules.patterns.RuleFilterCreator;
+import org.languagetool.databroker.DefaultResourceDataBroker;
+
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -65,13 +68,13 @@ public final class Tools {
    * @param trg   Target text.
    * @param srcLt Source JLanguageTool (used to analyze the text).
    * @param trgLt Target JLanguageTool (used to analyze the text).
-   * @param bRules  Bilingual rules used in addition to target standard rules.  
+   * @param bRules  Bilingual rules used in addition to target standard rules.
    * @return  The list of rule matches on the bitext.
    * @since 1.0.1
    */
   public static List<RuleMatch> checkBitext(String src, String trg,
                                             JLanguageTool srcLt, JLanguageTool trgLt,
-                                            List<BitextRule> bRules) throws IOException {
+                                            List<BitextRule> bRules) throws Exception {
     AnalyzedSentence srcText = srcLt.getAnalyzedSentence(src);
     AnalyzedSentence trgText = trgLt.getAnalyzedSentence(trg);
     List<Rule> nonBitextRules = trgLt.getAllRules();
@@ -100,14 +103,14 @@ public final class Tools {
     return ruleMatches;
   }
 
-  /** 
+  /**
    * Gets default bitext rules for a given pair of languages
    * @param source  Source language.
    * @param target  Target language.
    * @return  List of Bitext rules
    */
   public static List<BitextRule> getBitextRules(Language source,
-      Language target) throws IOException, ParserConfigurationException, SAXException {
+      Language target) throws Exception {
     return getBitextRules(source, target, null);
   }
 
@@ -120,25 +123,43 @@ public final class Tools {
    * @since 2.9
    */
   public static List<BitextRule> getBitextRules(Language source,
-      Language target, File externalBitextRuleFile) throws IOException, ParserConfigurationException, SAXException {
+      Language target, File externalBitextRuleFile) throws Exception {
+      List<BitextRule> bRules = target.getUseDataBroker().getBitextRules();
+/*
+GTODO: Clean up
     List<BitextRule> bRules = new ArrayList<>();
     //try to load the bitext pattern rules for the language...
-    BitextPatternRuleLoader ruleLoader = new BitextPatternRuleLoader();          
+    BitextPatternRuleLoader ruleLoader = new BitextPatternRuleLoader();
     String name = "/" + target.getShortCode() + "/bitext.xml";
-    if (JLanguageTool.getDataBroker().ruleFileExists(name)) {
-      InputStream is = JLanguageTool.getDataBroker().getFromRulesDirAsStream(name);
+    if (target.getUseDataBroker().ruleFileExists(name)) {
+      InputStream is = target.getUseDataBroker().getFromRulesDirAsStream(name);
       if (is != null) {
-        bRules.addAll(ruleLoader.getRules(is, name));
+        bRules.addAll(ruleLoader.getRules(is, name, target.getUseDataBroker()));
       }
     }
+*/
+/*
+GTODO: Clean up
     if (externalBitextRuleFile != null) {
-      bRules.addAll(ruleLoader.getRules(new FileInputStream(externalBitextRuleFile), externalBitextRuleFile.getAbsolutePath()));
+      bRules.addAll(ruleLoader.getRules(new FileInputStream(externalBitextRuleFile), externalBitextRuleFile.getAbsolutePath(), target.getUseDataBroker()));
     }
-    
+*/
+
+
+    if (externalBitextRuleFile != null && externalBitextRuleFile.exists()) {
+        // GTODO: Convert to use a Path.
+        try {
+            bRules.addAll(DefaultResourceDataBroker.createBittextPatternRules(externalBitextRuleFile.toPath(), source.getUseDataBroker().getRuleFilterCreator()));
+        } catch(Exception e) {
+            throw new IOException(String.format("Unable to load bitext rules from file: %1$s", externalBitextRuleFile), e);
+        }
+    }
+
     //load the false friend rules in the bitext mode:
     FalseFriendsAsBitextLoader fRuleLoader = new FalseFriendsAsBitextLoader();
-    String falseFriendsFile = "/false-friends.xml";
-    List<BitextPatternRule> rules = fRuleLoader.getFalseFriendsAsBitext(falseFriendsFile, source, target);
+    // GTODO: String falseFriendsFile = "/false-friends.xml";
+    // GTODO: List<BitextPatternRule> rules = fRuleLoader.getFalseFriendsAsBitext(falseFriendsFile, source, target);
+    List<BitextPatternRule> rules = fRuleLoader.getFalseFriendsAsBitext(source, target);
     bRules.addAll(rules);
 
     //load Java bitext rules:
@@ -193,7 +214,7 @@ public final class Tools {
    * @return the number of rule matches
    */
   public static int profileRulesOnLine(String contents,
-      JLanguageTool lt, Rule rule) throws IOException {
+      JLanguageTool lt, Rule rule) throws Exception {
     int count = 0;
     for (String sentence : lt.sentenceTokenize(contents)) {
       count += rule.match(lt.getAnalyzedSentence(sentence)).length ;
@@ -211,12 +232,12 @@ public final class Tools {
    * @param lt Initialized LanguageTool object
    * @return Corrected text as String.
    */
-  public static String correctText(String contents, JLanguageTool lt) throws IOException {
+  public static String correctText(String contents, JLanguageTool lt) throws Exception {
     List<RuleMatch> ruleMatches = lt.check(contents);
     if (ruleMatches.isEmpty()) {
-      return contents;  
-    }    
-    return correctTextFromMatches(contents, ruleMatches);    
+      return contents;
+    }
+    return correctTextFromMatches(contents, ruleMatches);
   }
 
   /**
@@ -247,9 +268,9 @@ public final class Tools {
         counter++;
       }
     }
-    return sb.toString();  
+    return sb.toString();
   }
-  
+
   /**
    * Get a stacktrace as a string.
    */
@@ -265,6 +286,7 @@ public final class Tools {
    * Please load files in the {@code rules} and {@code resource} directories with
    * {@link org.languagetool.databroker.ResourceDataBroker} instead.
    */
+   /*
   public static InputStream getStream(String path) throws IOException {
     // the other ways to load the stream like
     // "Tools.class.getClass().getResourceAsStream(filename)"
@@ -275,7 +297,7 @@ public final class Tools {
     }
     return is;
   }
-
+*/
   /**
    * Enable and disable rules of the given LanguageTool instance.
    * @param lt LanguageTool object

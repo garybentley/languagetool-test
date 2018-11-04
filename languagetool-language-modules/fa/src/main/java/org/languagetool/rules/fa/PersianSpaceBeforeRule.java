@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,15 +26,15 @@ import org.languagetool.rules.AbstractSpaceBeforeRule;
 
 /**
  * A Persian rule that checks if there is a missing space before some conjunctions.
- * 
+ *
  * @since 2.7
  */
 public class PersianSpaceBeforeRule extends AbstractSpaceBeforeRule {
 
   private static final Pattern CONJUNCTIONS = Pattern.compile("و|به|با|تا|زیرا|چون|بنابراین|چونکه");
 
-  public PersianSpaceBeforeRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public PersianSpaceBeforeRule(ResourceBundle messages) {
+    super(messages);
   }
 
   @Override

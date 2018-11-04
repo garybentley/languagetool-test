@@ -18,28 +18,24 @@
  */
 package org.languagetool.rules.neuralnetwork;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.util.Objects;
 
 public class Word2VecModel {
 
   private final Embedding embedding;
-  private final File path;
+  //GTODO private final File path;
 
-  public Word2VecModel(String path) throws FileNotFoundException {
-    Dictionary dictionary = new org.languagetool.rules.neuralnetwork.Dictionary(new FileInputStream(path + File.separator + "dictionary.txt"));
-    Matrix embedding = new Matrix(new FileInputStream(path + File.separator + "final_embeddings.txt"));
-    this.embedding = new Embedding(dictionary, embedding);
-    this.path = new File(path);
+  public Word2VecModel(Embedding embedding) {
+    this.embedding = Objects.requireNonNull(embedding, "Embedding must be provided.");
   }
 
   public Embedding getEmbedding() {
     return embedding;
   }
-
+/*
+GTODO Clean up
   public File getPath() {
     return path;
   }
-
+*/
 }

@@ -31,10 +31,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 public class SpellIgnoreTest {
-  
+
   // code also used in http://wiki.languagetool.org/java-api
   @Test
-  public void testIgnore() throws IOException {
+  public void testIgnore() throws Exception {
     String text = "This is a text with specialword and myotherword";
     JLanguageTool lt = new JLanguageTool(new AmericanEnglish());
     assertThat(lt.check(text).size(), is(2));

@@ -19,7 +19,9 @@
 package org.languagetool.rules.en;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.*;
+import org.languagetool.language.English;
 
 import java.io.IOException;
 
@@ -28,14 +30,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class EnglishWordRepeatRuleTest {
 
-  private final Language english = Languages.getLanguageForShortCode("en");
-  private final EnglishWordRepeatRule rule = new EnglishWordRepeatRule(TestTools.getEnglishMessages(), english);
-  
+  private Language english;
+  private EnglishWordRepeatRule rule;
+
   private JLanguageTool langTool;
 
+  @Before
+  public void setUp() throws Exception {
+      English english = new English();
+      rule = english.createWordRepeatRule(null);
+      langTool = new JLanguageTool(english);
+  }
+
   @Test
-  public void testRepeatRule() throws IOException {
-    langTool = new JLanguageTool(english);
+  public void testRepeatRule() throws Exception {
     assertGood("This is a test.");
     assertGood("If I had had time, I would have gone to see him.");
     assertGood("I don't think that that is a problem.");
@@ -58,15 +66,15 @@ public class EnglishWordRepeatRuleTest {
     assertBad("This is is a test.");
   }
 
-  private void assertGood(String sentence) throws IOException {
+  private void assertGood(String sentence) throws Exception {
     assertMatches(sentence, 0);
   }
 
-  private void assertBad(String sentence) throws IOException {
+  private void assertBad(String sentence) throws Exception {
     assertMatches(sentence, 1);
   }
 
-  private void assertMatches(String sentence, int expectedMatches) throws IOException {
+  private void assertMatches(String sentence, int expectedMatches) throws Exception {
     AnalyzedSentence aSentence = langTool.getAnalyzedSentence(sentence);
     assertThat(rule.match(aSentence).length, is(expectedMatches));
   }

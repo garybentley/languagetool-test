@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -55,7 +55,7 @@ public class Galician extends Language {
     }
     return sentenceTokenizer;
   }
-  
+
   @Override
   public String getName() {
     return "Galician";
@@ -70,7 +70,7 @@ public class Galician extends Language {
   public String[] getCountries() {
     return new String[]{"ES"};
   }
-  
+
   @Override
   public Tagger getTagger() {
     if (tagger == null) {
@@ -90,15 +90,15 @@ public class Galician extends Language {
   @Override
   public Synthesizer getSynthesizer() {
     if (synthesizer == null) {
-      synthesizer = new GalicianSynthesizer();
+      synthesizer = new GalicianSynthesizer(getUseDataBroker());
     }
     return synthesizer;
   }
-  
+
   @Override
   public Disambiguator getDisambiguator() {
     if (disambiguator == null) {
-      disambiguator = new GalicianHybridDisambiguator();
+      disambiguator = new GalicianHybridDisambiguator(getUseDataBroker());
     }
     return disambiguator;
   }
@@ -140,8 +140,8 @@ public class Galician extends Language {
             new ParagraphRepeatBeginningRule(messages, this),
             new PunctuationMarkAtParagraphEnd(messages, this),
             // Specific to Galician:
-            new SimpleReplaceRule(messages),
-            new CastWordsRule(messages),
+            new SimpleReplaceRule(messages, getUseDataBroker()),
+            new CastWordsRule(messages, getUseDataBroker()),
             new GalicianRedundancyRule(messages),
             new GalicianWordinessRule(messages),
             new GalicianBarbarismsRule(messages),

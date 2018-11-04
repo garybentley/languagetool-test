@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,10 +26,13 @@ import org.languagetool.Language;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.tools.StringTools;
 
+// GTODO TWO_CONNECTED_MODAL_VERBS
+// GTODO PHRASE_REPETITION
+
 /**
  * A Rule that describes a language error as a simple pattern of words or of
  * part-of-speech tags.
- * 
+ *
  * @author Daniel Naber
  */
 public class PatternRule extends AbstractPatternRule {
@@ -99,7 +102,7 @@ public class PatternRule extends AbstractPatternRule {
     simpleRuleTokens = getSet(false);
     inflectedRuleTokens = getSet(true);
   }
-  
+
   public PatternRule(String id, Language language,
       List<PatternToken> patternTokens, String description,
       String message, String shortMessage) {
@@ -144,10 +147,13 @@ public class PatternRule extends AbstractPatternRule {
    * Return the rule's definition as an XML string, loaded from the XML rule files.
    * @since 0.9.3
    */
+   /*
+    GTODO: Need a better way to do this, maybe add to data broker, it ties the source of the rule to the
+    rule...
   public final String toXML() {
     return new PatternRuleXmlCreator().toXML(new PatternRuleId(getId(), getSubId()), getLanguage());
   }
-
+*/
   @Override
   public final RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
     try {
@@ -200,5 +206,5 @@ public class PatternRule extends AbstractPatternRule {
   String getShortMessage() {
     return shortMessage;
   }
-  
+
 }

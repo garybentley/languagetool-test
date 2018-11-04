@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,10 +18,13 @@
  */
 package org.languagetool.synthesis;
 
+import morfologik.stemming.IStemmer;
+
 import org.jetbrains.annotations.NotNull;
 import org.languagetool.AnalyzedToken;
-import org.languagetool.tokenizers.de.GermanCompoundTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,15 +36,11 @@ import java.util.*;
  */
 public class GermanSynthesizer extends BaseSynthesizer {
 
-  private final GermanCompoundTokenizer splitter;
-  
-  public GermanSynthesizer() {
-    super("/de/german_synth.dict", "/de/german_tags.txt");
-    try {
-      splitter = new GermanCompoundTokenizer();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  private final Tokenizer splitter;
+
+  public GermanSynthesizer(IStemmer stemmer, Set<String> tags, Tokenizer splitter) {
+    super(stemmer, tags);
+    this.splitter = Objects.requireNonNull(splitter);
   }
 
   @Override
@@ -52,7 +51,7 @@ public class GermanSynthesizer extends BaseSynthesizer {
     }
     return result;
   }
-  
+
   @Override
   public String[] synthesize(AnalyzedToken token, String posTag, boolean posTagRegExp) throws IOException {
     String[] result = super.synthesize(token, posTag, posTagRegExp);

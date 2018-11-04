@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,36 +25,31 @@ import org.languagetool.TestTools;
 import org.languagetool.language.German;
 import org.languagetool.rules.Rule;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Fred Kruse
  */
 public class GermanParagraphRepeatBeginningRuleTest {
-  
-  private final Language lang = new German();
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
+      German lang = new German();
+      GermanParagraphRepeatBeginningRule rule = lang.createParagraphRepeatBeginningRule(null);
     JLanguageTool lt = new JLanguageTool(lang);
-    setUpRule(lt);
+
+    for (Rule r : lt.getAllRules()) {
+      lt.disableRule(r.getId());
+    }
+
+    lt.addRule(rule);
+    lt.enableRule(rule.getId());
 
     assertEquals(2, lt.check("Der Hund spazierte über die Straße.\n\nDer Hund ignorierte den Verkehr.").size());
     assertEquals(0, lt.check("Der Hund spazierte über die Straße.\n\nDas Tier ignorierte den Verkehr.").size());
     assertEquals(2, lt.check("Peter spazierte über die Straße.\n\nPeter ignorierte den Verkehr.").size());
     assertEquals(0, lt.check("Peter spazierte über die Straße.\n\nDer Junge ignorierte den Verkehr.").size());
     assertEquals(2, lt.check("»Peter spazierte über die Straße.«\n\n»Peter ignorierte den Verkehr.«").size());
-  }
-
-  private void setUpRule(JLanguageTool lt) {
-    for (Rule rule : lt.getAllRules()) {
-      lt.disableRule(rule.getId());
-    }
-    GermanParagraphRepeatBeginningRule rule = new GermanParagraphRepeatBeginningRule(TestTools.getMessages(lang.getShortCode()), lang);
-    lt.addRule(rule);
-    lt.enableRule(rule.getId());
   }
 
 }

@@ -3,12 +3,12 @@ package org.languagetool.rules.neuralnetwork;
 import java.util.Arrays;
 import java.util.Objects;
 
-class Embedding {
-  
+public class Embedding {
+
   private final Dictionary dictionary;
   private final Matrix embedding;
 
-  Embedding(Dictionary dictionary, Matrix embedding) {
+  public Embedding(Dictionary dictionary, Matrix embedding) {
     this.dictionary = Objects.requireNonNull(dictionary);
     this.embedding = Objects.requireNonNull(embedding);
   }

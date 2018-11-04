@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -62,11 +62,10 @@ public class ProhibitedCompoundRule extends Rule {
           new Pair("verklärung", "Beschönigung, Darstellung in einem besseren Licht", "erklärung", "Darstellung, Erläuterung"),
           new Pair("spitze", "spitzes Ende eines Gegenstandes", "spritze", "medizinisches Instrument zur Injektion")
   );
-  private static final GermanSpellerRule spellerRule = new GermanSpellerRule(JLanguageTool.getMessageBundle(), new GermanyGerman(), null, null);
   private static final List<String> ignoreWords = Arrays.asList("Die", "De");
-  private static final List<Pair> pairs = new ArrayList<>();
-  static {
-    addUpperCaseVariants();
+  // GTODO private static final List<Pair> pairs = new ArrayList<>();
+  //GTODO static {
+    // GTODO addUpperCaseVariants();
   /* Performance impact: Before / After /
     Optimized: only nouns / + at least 6 characters / + AhoCorasick
    --------------------------------------------------------------
@@ -107,9 +106,35 @@ public class ProhibitedCompoundRule extends Rule {
    */
 
 
-    addItemsFromConfusionSets("/de/confusion_sets.txt", true);
-  }
+    // GTODO addItemsFromConfusionSets("/de/confusion_sets.txt", true);
+  //GTODO }
 
+    public static List<Pair> createPairs(Map<String, List<ConfusionSet>> confusionSet) {
+        boolean isUpperCase = true;
+        List<Pair> pairs = new ArrayList<>();
+        addUpperCaseVariants(pairs);
+        for (Map.Entry<String, List<ConfusionSet>> entry : confusionSet.entrySet()) {
+          for (ConfusionSet set : entry.getValue()) {
+            boolean allUpper = set.getSet().stream().allMatch(k -> startsWithUppercase(k.getString()) && !ignoreWords.contains(k.getString()));
+            if (allUpper || !isUpperCase) {
+              Set<ConfusionString> cSet = set.getSet();
+              if (cSet.size() != 2) {
+                throw new RuntimeException("Got confusion set with != 2 items: " + cSet);
+              }
+              Iterator<ConfusionString> it = cSet.iterator();
+              ConfusionString part1 = it.next();
+              ConfusionString part2 = it.next();
+              pairs.add(new Pair(part1.getString(), part1.getDescription(), part2.getString(), part2.getDescription()));
+              if (isUpperCase) {
+                pairs.add(new Pair(lowercaseFirstChar(part1.getString()), part1.getDescription(), lowercaseFirstChar(part2.getString()), part2.getDescription()));
+              } else {
+                pairs.add(new Pair(uppercaseFirstChar(part1.getString()), part1.getDescription(), uppercaseFirstChar(part2.getString()), part2.getDescription()));
+              }
+            }
+          }
+        }
+        return pairs;
+    }
 
   private static void addAllCaseVariants(List<Pair> candidatePairs, Pair lcPair) {
     candidatePairs.add(new Pair(lcPair.part1, lcPair.part1Desc, lcPair.part2, lcPair.part2Desc));
@@ -120,7 +145,7 @@ public class ProhibitedCompoundRule extends Rule {
     }
   }
 
-  private static void addUpperCaseVariants() {
+  private static void addUpperCaseVariants(List<Pair> pairs) {
     for (Pair lcPair : lowercasePairs) {
       if (StringTools.startsWithUppercase(lcPair.part1)) {
         throw new IllegalArgumentException("Use all-lowercase word in " + ProhibitedCompoundRule.class + ": " + lcPair.part1);
@@ -131,7 +156,8 @@ public class ProhibitedCompoundRule extends Rule {
       addAllCaseVariants(pairs, lcPair);
     }
   }
-
+/*
+GTODO Clean up
   private static void addItemsFromConfusionSets(String confusionSetsFile, boolean isUpperCase) {
     try {
       ResourceDataBroker dataBroker = JLanguageTool.getDataBroker();
@@ -163,16 +189,19 @@ public class ProhibitedCompoundRule extends Rule {
       throw new RuntimeException(e);
     }
   }
-
+*/
+  private final GermanSpellerRule spellerRule;
   private final BaseLanguageModel lm;
   private Pair confusionPair = null; // specify single pair for evaluation
   private AhoCorasickDoubleArrayTrie<String> ahoCorasickDoubleArrayTrie = null;
   private Map<String, List<Pair>> pairMap = new HashMap<>();
 
-  public ProhibitedCompoundRule(ResourceBundle messages, LanguageModel lm) {
-    this.lm = (BaseLanguageModel) Objects.requireNonNull(lm);
+  public ProhibitedCompoundRule(ResourceBundle messages, BaseLanguageModel lm, GermanSpellerRule spellerRule, Map<String, List<ConfusionSet>> confusionSet) {
+    this.lm = Objects.requireNonNull(lm);
+    this.spellerRule = Objects.requireNonNull(spellerRule, "Speller rule must be provided.");
     super.setCategory(Categories.TYPOS.getCategory(messages));
-    setupAhoCorasickSearch();
+    List<Pair> pairs = createPairs(confusionSet);
+    setupAhoCorasickSearch(pairs);
   }
 
   @Override
@@ -185,7 +214,7 @@ public class ProhibitedCompoundRule extends Rule {
     return "Markiert wahrscheinlich falsche Komposita wie 'Lehrzeile', wenn 'Leerzeile' häufiger vorkommt.";
   }
 
-  private void setupAhoCorasickSearch() {
+  private void setupAhoCorasickSearch(List<Pair> pairs) {
     TreeMap<String, String> map = new TreeMap<String, String>();
     for (Pair pair : pairs)
     {
@@ -287,5 +316,5 @@ public class ProhibitedCompoundRule extends Rule {
       return part1 + "/" + part2;
     }
   }
-  
+
 }

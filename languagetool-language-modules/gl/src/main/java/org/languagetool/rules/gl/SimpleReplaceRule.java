@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
@@ -41,7 +42,7 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String GL_SIMPLE_REPLACE_RULE = "GL_SIMPLE_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/gl/words.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale GL_LOCALE = new Locale("gl");
 
   @Override
@@ -49,8 +50,9 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
     return wrongWords;
   }
 
-  public SimpleReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+  public SimpleReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
+    wrongWords = load("/gl/words.txt", dataBroker);
   }
 
   @Override
@@ -67,7 +69,7 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Erros léxicos";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " non existe en galego. Talvez quería vostede dicir: "

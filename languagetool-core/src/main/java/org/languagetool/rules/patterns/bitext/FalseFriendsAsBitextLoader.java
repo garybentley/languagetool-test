@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Marcin Miłkowski (www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,29 +31,33 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.rules.patterns.AbstractPatternRule;
 import org.languagetool.rules.patterns.FalseFriendRuleLoader;
+import org.languagetool.rules.patterns.FalseFriendPatternRule;
 import org.xml.sax.SAXException;
 
 /**
  * Loads the false friend rules as bitext pattern rules. Note that the resulting
  * rules have suggestions that are not really customizable, in contradistinction
  * to the 'real' bitext pattern rules.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class FalseFriendsAsBitextLoader {
 
-  public List<BitextPatternRule> getFalseFriendsAsBitext(
-          String filename, Language motherTongue,
-          Language language) throws ParserConfigurationException,
-          SAXException, IOException {
+  public List<BitextPatternRule> getFalseFriendsAsBitext(Language motherTongue, Language language) throws Exception {
     FalseFriendRuleLoader ruleLoader = new FalseFriendRuleLoader();
     List<BitextPatternRule> bRules = new ArrayList<>();
+    List<FalseFriendPatternRule> rules1 = motherTongue.getUseDataBroker().getFalseFriendPatternRules(motherTongue);
+    List<FalseFriendPatternRule> rules2 = language.getUseDataBroker().getFalseFriendPatternRules(language);
+
+/*
+GTODO: Clean up
     List<AbstractPatternRule> rules1 = ruleLoader.getRules(
-            JLanguageTool.getDataBroker().getFromRulesDirAsStream(filename),
+            language.getUseDataBroker().getFromRulesDirAsStream(filename),
             motherTongue, language);
     List<AbstractPatternRule> rules2 = ruleLoader.getRules(
-            JLanguageTool.getDataBroker().getFromRulesDirAsStream(filename),
+            language.getUseDataBroker().getFromRulesDirAsStream(filename),
             language, motherTongue);
+*/
     Map<String, AbstractPatternRule> srcRules = new HashMap<>();
     for (AbstractPatternRule rule : rules1) {
       srcRules.put(rule.getId(), rule);

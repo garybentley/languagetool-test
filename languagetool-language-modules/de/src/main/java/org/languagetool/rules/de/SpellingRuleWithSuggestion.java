@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,21 +31,21 @@ import java.util.Objects;
 /**
  * @since 4.3
  */
-class SpellingRuleWithSuggestion {
+public class SpellingRuleWithSuggestion {
 
   private final Rule rule;
   private final String alternative;
   private final String suggestion;
 
-  SpellingRuleWithSuggestion(Rule rule, String alternative, String suggestion) {
+  public SpellingRuleWithSuggestion(Rule rule, String alternative, String suggestion) {
     this.rule = Objects.requireNonNull(rule);
     this.alternative = Objects.requireNonNull(alternative);
     this.suggestion = Objects.requireNonNull(suggestion);
   }
 
-  static List<RuleMatch> computeMatches(AnalyzedSentence sentence, SpellingData data, String[] exceptions) throws IOException {
+  static List<RuleMatch> computeMatches(AnalyzedSentence sentence, List<SpellingRuleWithSuggestion> rules, String[] exceptions) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
-    for (SpellingRuleWithSuggestion ruleWithSuggestion : data.get()) {
+    for (SpellingRuleWithSuggestion ruleWithSuggestion : rules) {
       Rule rule = ruleWithSuggestion.rule;
       RuleMatch[] matches = rule.match(sentence);
       for (RuleMatch match : matches) {

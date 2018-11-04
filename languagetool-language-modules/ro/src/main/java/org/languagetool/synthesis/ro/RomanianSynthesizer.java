@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import java.util.List;
 import org.languagetool.JLanguageTool;
 import org.languagetool.synthesis.BaseSynthesizer;
 import org.languagetool.synthesis.ManualSynthesizer;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Romanian word form synthesizer.
@@ -39,8 +40,8 @@ public class RomanianSynthesizer extends BaseSynthesizer {
 
   private static ManualSynthesizer manualSynthesizer;
 
-  public RomanianSynthesizer() {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME);
+  public RomanianSynthesizer(ResourceDataBroker dataBroker) {
+    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
   }
 
   @Override
@@ -69,7 +70,7 @@ public class RomanianSynthesizer extends BaseSynthesizer {
   private synchronized void initSynth() {
     if (manualSynthesizer == null) {
       try {
-        try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(USER_DICT_FILENAME)) {
+        try (InputStream stream = dataBroker.getFromResourceDirAsStream(USER_DICT_FILENAME)) {
           manualSynthesizer = new ManualSynthesizer(stream);
         }
       } catch (IOException e) {

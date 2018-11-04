@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -31,7 +30,7 @@ import org.languagetool.Language;
 /**
  * Check if to paragraphs begin with the same word.
  * If the first word is an article it checks if the first two words are identical
- * 
+ *
  * @author Fred Kruse
  * @since 4.1
  */
@@ -57,12 +56,12 @@ public class ParagraphRepeatBeginningRule extends TextLevelRule {
   public String getDescription() {
     return messages.getString("repetition_paragraph_beginning_desc");
   }
-  
+
   public boolean isArticle(AnalyzedTokenReadings token) {
     return token.hasPosTagStartingWith("DT");
   }
-  
-  private int numCharEqualBeginning(AnalyzedTokenReadings[] lastTokens, AnalyzedTokenReadings[] nextTokens) throws IOException {
+
+  private int numCharEqualBeginning(AnalyzedTokenReadings[] lastTokens, AnalyzedTokenReadings[] nextTokens) throws Exception {
     if(lastTokens.length < 2 || nextTokens.length < 2) {
       return 0;
     }
@@ -92,7 +91,7 @@ public class ParagraphRepeatBeginningRule extends TextLevelRule {
   }
 
   @Override
-  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+  public RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
 
     List<RuleMatch> ruleMatches = new ArrayList<>();
 
@@ -107,7 +106,7 @@ public class ParagraphRepeatBeginningRule extends TextLevelRule {
     AnalyzedTokenReadings[] lastTokens = lastSentence.getTokensWithoutWhitespace();
     AnalyzedSentence nextSentence = null;
     AnalyzedTokenReadings[] nextTokens = null;
-    
+
     for (int n = 0; n < sentences.size() - 1; n++) {
       nextPos += sentences.get(n).getText().length();
       if(sentences.get(n).hasParagraphEndMark(lang)) {
@@ -119,7 +118,7 @@ public class ParagraphRepeatBeginningRule extends TextLevelRule {
           String msg = messages.getString("repetition_paragraph_beginning_last_msg");
           RuleMatch ruleMatch = new RuleMatch(this, lastSentence, startPos, lastPos+endPos, msg);
           ruleMatches.add(ruleMatch);
-          
+
           startPos = nextPos + nextTokens[1].getStartPos();
           msg = messages.getString("repetition_paragraph_beginning_last_msg");
           ruleMatch = new RuleMatch(this, nextSentence, startPos, nextPos+endPos, msg);
@@ -133,5 +132,4 @@ public class ParagraphRepeatBeginningRule extends TextLevelRule {
     return toRuleMatchArray(ruleMatches);
   }
 
-}  
-  
+}

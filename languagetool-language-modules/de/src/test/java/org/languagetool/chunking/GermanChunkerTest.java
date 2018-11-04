@@ -19,10 +19,12 @@
 package org.languagetool.chunking;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.German;
+import org.languagetool.chunking.GermanChunker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +34,15 @@ import static org.junit.Assert.fail;
 
 public class GermanChunkerTest {
 
-  private final JLanguageTool lt = new JLanguageTool(new German());
-  private final GermanChunker chunker = new GermanChunker();
+  private JLanguageTool lt;
+  private GermanChunker chunker;
+
+  @Before
+  public void setUp() throws Exception {
+      German german = new German();
+      lt = new JLanguageTool(german);
+      chunker = new GermanChunker();
+  }
 
   @Test
   public void testChunking() throws Exception {
@@ -163,6 +172,8 @@ public class GermanChunkerTest {
     String plainInput = getPlainInput(input);
     AnalyzedSentence analyzedSentence = lt.getAnalyzedSentence(plainInput);
     AnalyzedTokenReadings[] result = analyzedSentence.getTokensWithoutWhitespace();
+    // GTODO This is testing a package private method, meaning it has intimate knowledge of how the GermanChunker is working...
+    // GTODO In other words, if the internal implementation of GermanChunker changes then this test will break.
     List<ChunkTaggedToken> basicChunks = chunker.getBasicChunks(Arrays.asList(result));
     List<String> expectedChunks = getExpectedChunks(input);
     assertChunks(input, plainInput, basicChunks, expectedChunks);

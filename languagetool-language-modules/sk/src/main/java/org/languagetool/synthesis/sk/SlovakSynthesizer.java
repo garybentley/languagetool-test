@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.synthesis.sk;
 
 import org.languagetool.synthesis.BaseSynthesizer;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Slovak word form synthesizer.
@@ -29,7 +30,7 @@ public class SlovakSynthesizer extends BaseSynthesizer {
   private static final String RESOURCE_FILENAME = "/sk/slovak_synth.dict";
   private static final String TAGS_FILE_NAME = "/sk/slovak_tags.txt";
 
-  public SlovakSynthesizer() {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME);
+  public SlovakSynthesizer(ResourceDataBroker dataBroker) {
+    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
   }
 }

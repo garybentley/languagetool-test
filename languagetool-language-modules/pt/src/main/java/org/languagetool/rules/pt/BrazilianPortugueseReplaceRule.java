@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,7 @@ import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,12 +37,12 @@ import java.util.ResourceBundle;
  * @author Tiago F. Santos
  * @since 3.8
  */
- 
+
 public class BrazilianPortugueseReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String BRAZILIAN_PORTUGUESE_SIMPLE_REPLACE_RULE = "PT_BR_SIMPLE_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/pt/pt-BR/replace.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale PT_BR_LOCALE = new Locale("pt-BR");
 
   @Override
@@ -49,8 +50,9 @@ public class BrazilianPortugueseReplaceRule extends AbstractSimpleReplaceRule {
     return wrongWords;
   }
 
-  public BrazilianPortugueseReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+  public BrazilianPortugueseReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
+    wrongWords = load("/pt/pt-BR/replace.txt", dataBroker);
     super.setCategory(Categories.REGIONALISMS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("Onde está o <marker>toilet</marker>?"),
@@ -71,7 +73,7 @@ public class BrazilianPortugueseReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Palavra de Português do Brasil";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " é uma expressão de Portugal, em Português do Brasil utiliza-se: "

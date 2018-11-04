@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,7 @@
 package org.languagetool.tools;
 
 import org.junit.Test;
-import org.languagetool.FakeLanguage;
+import org.languagetool.TestLanguage;
 import org.languagetool.Language;
 import org.languagetool.TestTools;
 
@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.charset.*;
 
 import static org.junit.Assert.*;
 
@@ -53,12 +54,16 @@ public class StringToolsTest {
     StringTools.assureSet("foo", "varName");
   }
 
+/*
+GTODO Test no longer needed or appropriate
   @Test
   public void testReadStream() throws IOException {
-    String content = StringTools.readStream(new FileInputStream("src/test/resources/testinput.txt"), "utf-8");
+      // GTODO: Note: file moved to /resources/org/languagetool/testinput.txt
+    String content = StringTools.readStream(TestTools.getTestLanguage().getUseDataBroker().getFromResourceDirAsStream("testinput.txt"), StandardCharsets.UTF_8.name());
+    //GTODO get FileInputStream("src/test/resources/testinput.txt"), "utf-8");
     assertEquals("one\ntwo\nöäüß\nșțîâăȘȚÎÂĂ\n", content);
   }
-
+*/
   @Test
   public void testIsAllUppercase() {
     assertTrue(StringTools.isAllUppercase("A"));
@@ -66,7 +71,7 @@ public class StringToolsTest {
     assertTrue(StringTools.isAllUppercase("ASV-EDR"));
     assertTrue(StringTools.isAllUppercase("ASV-ÖÄÜ"));
     assertTrue(StringTools.isAllUppercase(""));
-    
+
     assertFalse(StringTools.isAllUppercase("ß"));
     assertFalse(StringTools.isAllUppercase("AAAAAAAAAAAAq"));
     assertFalse(StringTools.isAllUppercase("a"));
@@ -79,7 +84,7 @@ public class StringToolsTest {
     assertTrue(StringTools.isMixedCase("MixedCase"));
     assertTrue(StringTools.isMixedCase("iPod"));
     assertTrue(StringTools.isMixedCase("AbCdE"));
-    
+
     assertFalse(StringTools.isMixedCase(""));
     assertFalse(StringTools.isMixedCase("ABC"));
     assertFalse(StringTools.isMixedCase("abc"));
@@ -92,7 +97,7 @@ public class StringToolsTest {
     assertTrue(StringTools.isCapitalizedWord("Abc"));
     assertTrue(StringTools.isCapitalizedWord("Uppercase"));
     assertTrue(StringTools.isCapitalizedWord("Ipod"));
-    
+
     assertFalse(StringTools.isCapitalizedWord(""));
     assertFalse(StringTools.isCapitalizedWord("ABC"));
     assertFalse(StringTools.isCapitalizedWord("abc"));
@@ -104,7 +109,7 @@ public class StringToolsTest {
   public void testStartsWithUppercase() {
     assertTrue(StringTools.startsWithUppercase("A"));
     assertTrue(StringTools.startsWithUppercase("ÄÖ"));
-    
+
     assertFalse(StringTools.startsWithUppercase(""));
     assertFalse(StringTools.startsWithUppercase("ß"));
     assertFalse(StringTools.startsWithUppercase("-"));
@@ -185,15 +190,15 @@ public class StringToolsTest {
 
   @Test
   public void testAddSpace() {
-    Language demoLanguage = TestTools.getDemoLanguage();
+    Language demoLanguage = TestTools.getTestLanguage();
     assertEquals(" ", StringTools.addSpace("word", demoLanguage));
     assertEquals("", StringTools.addSpace(",", demoLanguage));
     assertEquals("", StringTools.addSpace(",", demoLanguage));
     assertEquals("", StringTools.addSpace(",", demoLanguage));
-    assertEquals("", StringTools.addSpace(".", new FakeLanguage("fr")));
-    assertEquals("", StringTools.addSpace(".", new FakeLanguage("de")));
-    assertEquals(" ", StringTools.addSpace("!", new FakeLanguage("fr")));
-    assertEquals("", StringTools.addSpace("!", new FakeLanguage("de")));
+    assertEquals("", StringTools.addSpace(".", new TestLanguage("fr")));
+    assertEquals("", StringTools.addSpace(".", new TestLanguage("de")));
+    assertEquals(" ", StringTools.addSpace("!", new TestLanguage("fr")));
+    assertEquals("", StringTools.addSpace("!", new TestLanguage("de")));
   }
 
   @Test

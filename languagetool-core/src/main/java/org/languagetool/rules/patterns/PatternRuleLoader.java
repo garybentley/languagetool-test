@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,27 +28,38 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.ResourceDataBroker;
+
 import org.xml.sax.helpers.DefaultHandler;
+
+// GTODO: Remove this class.
 
 /**
  * Loads {@link PatternRule}s from an XML file.
- * 
+ *
  * @author Daniel Naber
  */
 public class PatternRuleLoader extends DefaultHandler {
 
   private boolean relaxedMode = false;
+  private ResourceDataBroker dataBroker;
+
+  public PatternRuleLoader(ResourceDataBroker dataBroker) {
+      this.dataBroker = dataBroker;
+  }
 
   /**
    * @param file XML file with pattern rules
    */
+   /*
+   GTODO: Clean up
   public final List<AbstractPatternRule> getRules(File file) throws IOException {
     try (InputStream inputStream = new FileInputStream(file)) {
-      PatternRuleLoader ruleLoader = new PatternRuleLoader();
+      PatternRuleLoader ruleLoader = new PatternRuleLoader(dataBroker);
       return ruleLoader.getRules(inputStream, file.getAbsolutePath());
     }
   }
-
+*/
   /**
    * If set to true, don't throw an exception if id or name is not set.
    * Used for online rule editor.
@@ -62,9 +73,10 @@ public class PatternRuleLoader extends DefaultHandler {
    * @param is stream with the XML rules
    * @param filename used only for verbose exception message - should refer to where the stream comes from
    */
+   /*
   public final List<AbstractPatternRule> getRules(InputStream is, String filename) throws IOException {
     try {
-      PatternRuleHandler handler = new PatternRuleHandler();
+      PatternRuleHandler handler = new PatternRuleHandler(dataBroker);
       handler.setRelaxedMode(relaxedMode);
       SAXParserFactory factory = SAXParserFactory.newInstance();
       SAXParser saxParser = factory.newSAXParser();
@@ -76,6 +88,5 @@ public class PatternRuleLoader extends DefaultHandler {
       throw new IOException("Cannot load or parse input stream of '" + filename + "'", e);
     }
   }
-
+*/
 }
-

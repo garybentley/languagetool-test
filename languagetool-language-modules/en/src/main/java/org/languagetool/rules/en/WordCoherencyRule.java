@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,7 @@ package org.languagetool.rules.en;
 import org.languagetool.rules.AbstractWordCoherencyRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,12 +32,14 @@ import java.util.ResourceBundle;
  */
 public class WordCoherencyRule extends AbstractWordCoherencyRule {
 
-  private static final Map<String, String> wordMap = new WordCoherencyDataLoader().loadWords("/en/coherency.txt");
+  private Map<String, String> wordMap;
 
-  public WordCoherencyRule(ResourceBundle messages) throws IOException {
+  public WordCoherencyRule(ResourceBundle messages, Map<String, String> wordMap) throws IOException {
     super(messages);
     addExamplePair(Example.wrong("He likes archaeology. Really? She likes <marker>archeology</marker>, too."),
                    Example.fixed("He likes archaeology. Really? She likes <marker>archaeology</marker>, too."));
+    this.wordMap = wordMap;
+    //GTODO wordMap = new WordCoherencyDataLoader().loadWords("/en/coherency.txt", dataBroker);
   }
 
   @Override
@@ -48,7 +51,7 @@ public class WordCoherencyRule extends AbstractWordCoherencyRule {
   protected String getMessage(String word1, String word2) {
     return "Do not mix variants of the same word ('" + word1 + "' and '" + word2 + "') within a single text.";
   }
-  
+
   @Override
   public String getId() {
     return "EN_WORD_COHERENCY";

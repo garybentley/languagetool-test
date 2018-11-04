@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.rules;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
@@ -30,13 +31,19 @@ import static org.junit.Assert.assertEquals;
 
 public class UppercaseSentenceStartRuleTest {
 
-  private final UppercaseSentenceStartRule rule = new UppercaseSentenceStartRule(TestTools.getEnglishMessages(),
-          TestTools.getDemoLanguage(), Example.wrong("<marker>a</marker> sentence."), Example.fixed("<marker>A</marker> sentence."));
+  private UppercaseSentenceStartRule rule;
 
-  private final JLanguageTool lt = new JLanguageTool(TestTools.getDemoLanguage());
+  private JLanguageTool lt;
+
+  @Before
+  public void setUp() throws Exception {
+      lt = new JLanguageTool(TestTools.getTestLanguage());
+      rule = new UppercaseSentenceStartRule(TestTools.getEnglishMessages(),
+             TestTools.getTestLanguage(), Example.wrong("<marker>a</marker> sentence."), Example.fixed("<marker>A</marker> sentence."));
+  }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     assertGood("this");
     assertGood("a) This is a test sentence.");
@@ -48,7 +55,7 @@ public class UppercaseSentenceStartRuleTest {
     assertGood("This is a test sentence");
     assertGood("");
     assertGood("http://www.languagetool.org");
-    
+
     // incorrect sentences:
     RuleMatch[] matches = rule.match(lt.analyzeText("this is a test sentence."));
     assertEquals(1, matches.length);
@@ -69,8 +76,8 @@ public class UppercaseSentenceStartRuleTest {
     RuleMatch[] matches7 = rule.match(lt.analyzeText("‘this is a sentence."));
     assertEquals(1, matches7.length);
   }
-  
-  private void assertGood(String  s) throws IOException {
+
+  private void assertGood(String  s) throws Exception {
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     RuleMatch[] matches = rule.match(analyzedSentences);
     assertEquals(0, matches.length);

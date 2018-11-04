@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber, Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,7 +25,7 @@ import java.util.*;
 
 /**
  * A sentence that has been tokenized and analyzed.
- * 
+ *
  * @author Daniel Naber
  */
 public final class AnalyzedSentence {
@@ -272,7 +272,7 @@ public final class AnalyzedSentence {
     if (getClass() != o.getClass()) return false;
     AnalyzedSentence other = (AnalyzedSentence) o;
     // tokenSet and lemmaSet are a subset of tokens and don't need to be included
-    return Arrays.equals(nonBlankTokens, other.nonBlankTokens) 
+    return Arrays.equals(nonBlankTokens, other.nonBlankTokens)
         && Arrays.equals(tokens, other.tokens)
         && Arrays.equals(whPositions, other.whPositions);
   }
@@ -285,9 +285,12 @@ public final class AnalyzedSentence {
 
   /**
    * Returns true if sentences ends with a paragraph break.
+   * @param lang The language to check.
+   * @return True if the text in this sentence has a paragraph end mark.
+   * @throws Exception If the sentence tokenizer for the language cannot be obtained.
    * @since 4.3
    */
-  public boolean hasParagraphEndMark(Language lang) {
+  public boolean hasParagraphEndMark(Language lang) throws Exception {
     return StringTools.isParagraphEnd(getText(), lang.getSentenceTokenizer().singleLineBreaksMarksPara());
   }
 

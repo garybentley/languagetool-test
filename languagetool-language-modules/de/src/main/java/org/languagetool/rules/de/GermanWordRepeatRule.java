@@ -27,15 +27,15 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.WordRepeatRule;
 
 /**
- * Check if a word is repeated twice, taking into account an exception 
+ * Check if a word is repeated twice, taking into account an exception
  * for German where e.g. "..., die die ..." is often okay.
- *   
+ *
  * @author Daniel Naber
  */
 public class GermanWordRepeatRule extends WordRepeatRule {
 
-  public GermanWordRepeatRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public GermanWordRepeatRule(ResourceBundle messages) {
+    super(messages);
     super.setCategory(Categories.REDUNDANCY.getCategory(messages));
     addExamplePair(Example.wrong("In diesem Satz <marker>ist ist</marker> ein Wort doppelt."),
                    Example.fixed("In diesem Satz <marker>ist</marker> ein Wort doppelt."));

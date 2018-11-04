@@ -24,6 +24,7 @@ import org.languagetool.language.English;
 import org.languagetool.rules.PartialPosTagFilter;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
+import org.languagetool.tagging.en.EnglishTagger;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,18 +36,23 @@ import java.util.List;
  * that the disambiguator is called with a single token, so only rules
  * will apply that have a single {@code <match>} element.
  * <b>Warning: Do not use this in disambiguation.xml, it would cause an endless loop,
- * use {@link NoDisambiguationEnglishPartialPosTagFilter} instead.</b> 
+ * use {@link NoDisambiguationEnglishPartialPosTagFilter} instead.</b>
  *
  * @since 2.8
  * @see NoDisambiguationEnglishPartialPosTagFilter
  */
 public class EnglishPartialPosTagFilter extends PartialPosTagFilter {
 
-  private final Tagger tagger = new English().getTagger();
-  private final Disambiguator disambiguator = new English().getDisambiguator();
+  private final Tagger tagger;
+  private final Disambiguator disambiguator;
+
+  public EnglishPartialPosTagFilter(EnglishTagger tagger, Disambiguator disambiguator) {
+      this.tagger = tagger;
+      this.disambiguator = disambiguator;
+  }
 
   @Override
-  protected List<AnalyzedTokenReadings> tag(String token) {
+  protected List<AnalyzedTokenReadings> tag(String token) throws Exception {
     try {
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(token));
       AnalyzedTokenReadings[] atr = tags.toArray(new AnalyzedTokenReadings[tags.size()]);

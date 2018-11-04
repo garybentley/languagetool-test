@@ -28,8 +28,9 @@ import java.io.IOException;
 public class EnglishPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+      English lang = new English();
+      runTestForLanguage(lang);
   }
 
   // used to cause an ArrayIndexOutOfBoundsException in MatchState.setToken()

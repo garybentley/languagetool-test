@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,7 +44,7 @@ import java.util.*;
 public class MultiWordChunker2 extends AbstractDisambiguator {
   private static final String WRAP_TAG = "<%s>";
 
-  private final String filename;
+  //GTODO: private final String filename;
   private final boolean allowFirstCapitalized;
   private boolean removeOtherReadings = false;
   private String tagFormat = WRAP_TAG;
@@ -51,18 +52,21 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
 
 
   /**
+   * @param dataBroker The broker to use for resource lookups.
    * @param filename file text with multiwords and tags
    */
-  public MultiWordChunker2(String filename) {
-    this(filename, false);
+   /*
+   GTODO: Clean up
+  public MultiWordChunker2(String filename, ResourceDataBroker dataBroker) {
+    this(filename, false, dataBroker);
   }
-  
+*/
   /**
-   * @param filename file text with multiwords and tags
-   * @param allowFirstCapitalized if set to {@code true}, first word of the multiword can be capitalized
+   * @param tokenToPosTagMap The token to MultiWordEntry list mapping to use.
+   * @param allowFirstCapitalized When analyzing tokens allow the first word of the multi word to be capitalized.
    */
-  public MultiWordChunker2(String filename, boolean allowFirstCapitalized) {
-    this.filename = filename;
+  public MultiWordChunker2(Map<String, List<MultiWordEntry>> tokenToPosTagMap, boolean allowFirstCapitalized) {
+    this.tokenToPosTagMap = tokenToPosTagMap;
     this.allowFirstCapitalized = allowFirstCapitalized;
   }
 
@@ -79,7 +83,7 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
   public void setWrapTag(boolean wrapTag) {
     tagFormat = wrapTag ? WRAP_TAG : null;
   }
-  
+
   /**
    * Override this method if you want format POS tag differently
    * @param posTag POS tag for the multiword
@@ -89,10 +93,12 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
   protected String formatPosTag(String posTag, int position, int multiwordLength) {
     return tagFormat != null ? String.format(tagFormat, posTag) : posTag;
   }
-  
+
   /*
    * Lazy init, thanks to Artur Trzewik
    */
+   /*
+   GTODO: Clean up
   private void lazyInit() {
 
     if (tokenToPosTagMap != null) {
@@ -101,7 +107,7 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
 
     Map<String, List<MultiWordEntry>> map = new HashMap<>();
 
-    try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(filename)) {
+    try (InputStream stream = dataBroker.getFromResourceDirAsStream(filename)) {
       List<String> posTokens = loadWords(stream);
 
       for (String posToken : posTokens) {
@@ -109,10 +115,10 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
         if (tokenAndTag.length != 2) {
           throw new RuntimeException("Invalid format in " + filename + ": '" + posToken + "', expected two tab-separated parts");
         }
-        
+
         String[] tokens = tokenAndTag[0].split(" ");
         String posTag = tokenAndTag[1];
-        
+
         List<MultiWordEntry> multiwordItems;
         if( map.containsKey(tokens[0]) ) {
           multiwordItems = map.get(tokens[0]);
@@ -121,38 +127,39 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
           multiwordItems = new ArrayList<>();
           map.put(tokens[0], multiwordItems);
         }
-        
+
         multiwordItems.add(new MultiWordEntry(Arrays.asList(tokens), posTag));
       }
-      
+
       tokenToPosTagMap = map;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
-
+*/
   /**
    * Implements multiword POS tags, e.g., &lt;ELLIPSIS&gt; for ellipsis (...)
    * start, and &lt;/ELLIPSIS&gt; for ellipsis end.
    *
    * @param input The tokens to be chunked.
+   * @param dataBroker The data broker to be used for resource lookup.
    * @return AnalyzedSentence with additional markers.
    */
   @Override
   public AnalyzedSentence disambiguate(AnalyzedSentence input) {
 
-    lazyInit();
+    //GTODO: lazyInit();
 
     AnalyzedTokenReadings[] inputTokens = input.getTokens();
     AnalyzedTokenReadings[] outputTokens = inputTokens;
-    
+
     for (int i = 1; i < inputTokens.length; i++) {
       AnalyzedTokenReadings analyzedToken = inputTokens[i];
-      
+
       String firstToken = analyzedToken.getToken();
-      
+
       List<MultiWordEntry> multiwordItems = tokenToPosTagMap.get(firstToken);
-      
+
       if( multiwordItems == null ) {
         if (allowFirstCapitalized && StringTools.isCapitalizedWord(firstToken) ) {
           multiwordItems = tokenToPosTagMap.get(StringTools.lowercaseFirstChar(firstToken));
@@ -160,26 +167,29 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
         if( multiwordItems == null )
           continue;
       }
-      
-      MultiWordEntry multiwordEntry = findMultiwordEntry(inputTokens, i, multiwordItems);
-      
-      if( multiwordEntry == null )
-        continue;
 
-      for(int multiwordPos=0, inputTokenPos=i; multiwordPos<multiwordEntry.tokens.size(); inputTokenPos++) {
+      MultiWordEntry multiwordEntry = findMultiwordEntry(inputTokens, i, multiwordItems);
+
+      if( multiwordEntry == null ) {
+        continue;
+      }
+
+      int size = multiwordEntry.getTokens().size();
+
+      for(int multiwordPos=0, inputTokenPos=i; multiwordPos < size; inputTokenPos++) {
         AnalyzedTokenReadings currentToken = inputTokens[inputTokenPos];
-        
+
         if( currentToken.isWhitespace() ) {
           continue;
         }
-        
-        String multiwordTag = formatPosTag(multiwordEntry.tag, multiwordPos, multiwordEntry.tokens.size());
+
+        String multiwordTag = formatPosTag(multiwordEntry.getTag(), multiwordPos, size);
 
         outputTokens[inputTokenPos] = prepareNewReading(multiwordEntry.getLemma(), currentToken.getToken(), currentToken, multiwordTag);
         ++multiwordPos;
       }
     }
-    
+
     return new AnalyzedSentence(outputTokens);
   }
 
@@ -188,26 +198,27 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
       if( isMatching(inputTokens, startingPosition, multiWordEntry) )
         return multiWordEntry;
     }
-    
+
     return null;
   }
 
   private boolean isMatching(AnalyzedTokenReadings[] inputTokens, int startingPosition, MultiWordEntry multiWordEntry) {
     int j=1;  // we already matched the first token from multiword
-    for(int i=1; j<multiWordEntry.tokens.size() && startingPosition+i<inputTokens.length; i++) {
-  
+    int size = multiWordEntry.getTokens().size();
+    for(int i=1; j < size && startingPosition+i < inputTokens.length; i++) {
+
       if( inputTokens[startingPosition+i].isWhitespace() ) {
         continue;
       }
-      
-      if( ! matches(multiWordEntry.tokens.get(j), inputTokens[startingPosition+i]) )
+
+      if( ! matches(multiWordEntry.getTokens().get(j), inputTokens[startingPosition+i]) )
        return false;
-      
+
       ++j;
     }
-    return j == multiWordEntry.tokens.size();
+    return j == multiWordEntry.getTokens().size();
   }
-  
+
   protected boolean matches(String matchText, AnalyzedTokenReadings inputTokens) {
     return matchText.equals(inputTokens.getToken());
   }
@@ -229,14 +240,15 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
     }
     newAtr.setHistoricalAnnotations(annotateToken(prevAnot, old, newAtr.toString()));
     newAtr.setChunkTags(oldReading.getChunkTags());
-    
+
     return newAtr;
   }
-  
+
   private String annotateToken(String prevAnot, String oldReading, String newReading) {
     return prevAnot + "\nMULTIWORD_CHUNKER: " + oldReading + " -> " + newReading;
   }
-
+/*
+GTODO: Clean up
   private List<String> loadWords(InputStream stream) {
     List<String> lines = new ArrayList<>();
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
@@ -253,26 +265,6 @@ public class MultiWordChunker2 extends AbstractDisambiguator {
     }
     return lines;
   }
-
-  
-  private static final class MultiWordEntry {
-    List<String> tokens;
-    String tag;
-
-    public MultiWordEntry(List<String> tokens, String tag) {
-      this.tokens = tokens;
-      this.tag = tag;
-    }
-    
-    String getLemma() {
-      return StringUtils.join(tokens, " ");
-    }
-
-    @Override
-    public String toString() {
-      return "MultiWordEntry [tokens=" + tokens + ", tag=" + tag + "]";
-    }
-    
-  }
+*/
 
 }

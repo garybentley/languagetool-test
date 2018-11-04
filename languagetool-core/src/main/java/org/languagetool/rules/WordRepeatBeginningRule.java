@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,12 +30,12 @@ import org.languagetool.Language;
 /**
  * Check if three successive sentences begin with the same word, e.g. "I am Max. I am living in Germany. I like ice cream.",
  * and if two successive sentences begin with the same adverb, e.g. "Furthermore, he is ill. Furthermore, he likes her."
- * 
+ *
  * @author Markus Brenneis
  */
 public class WordRepeatBeginningRule extends TextLevelRule {
-  
-  public WordRepeatBeginningRule(ResourceBundle messages, Language language) {
+
+  public WordRepeatBeginningRule(ResourceBundle messages) {
     super(messages);
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
@@ -50,11 +50,11 @@ public class WordRepeatBeginningRule extends TextLevelRule {
   public String getDescription() {
     return messages.getString("desc_repetition_beginning");
   }
-  
+
   protected boolean isAdverb(AnalyzedTokenReadings token) {
     return false;
   }
-  
+
   public boolean isException(String token) {
     // avoid warning when having lists like "2007: ..." or the like
     return token.equals(":") || token.equals("–") || token.equals("-");

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,9 +18,9 @@
  */
 package org.languagetool.rules;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.*;
 
 import org.jetbrains.annotations.Nullable;
 import org.languagetool.AnalyzedSentence;
@@ -30,6 +30,7 @@ import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.patterns.PatternToken;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Abstract rule class. A Rule describes a language error and can test whether a
@@ -42,7 +43,7 @@ import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
  * make sure that their initialization works fast. For example, if a rule needs
  * to load data from disk, it should store it in a static variable to make sure
  * the loading happens only once.
- * 
+ *
  * @author Daniel Naber
  */
 public abstract class Rule {
@@ -63,9 +64,6 @@ public abstract class Rule {
     this(null);
   }
 
-  /**
-   * Called by rules that require a translation of their messages.
-   */
   public Rule(ResourceBundle messages) {
     this.messages = messages;
     if (messages != null) {
@@ -78,7 +76,7 @@ public abstract class Rule {
   /**
    * A string used to identify the rule in e.g. configuration files.
    * This string is supposed to be unique and to stay the same in all upcoming
-   * versions of LanguageTool. It's supposed to contain only the characters {@code A-Z} 
+   * versions of LanguageTool. It's supposed to contain only the characters {@code A-Z}
    * and the underscore.
    */
   public abstract String getId();
@@ -99,7 +97,7 @@ public abstract class Rule {
    * @param sentence a pre-analyzed sentence
    * @return an array of {@link RuleMatch} objects
    */
-  public abstract RuleMatch[] match(AnalyzedSentence sentence) throws IOException;
+  public abstract RuleMatch[] match(AnalyzedSentence sentence) throws Exception;
 
   /**
    * Overwrite this to avoid false alarms by ignoring these patterns -
@@ -157,16 +155,12 @@ public abstract class Rule {
    * {@link #getAntiPatterns()} to be considered.
    * @since 3.1
    */
-  protected AnalyzedSentence getSentenceWithImmunization(AnalyzedSentence sentence) {
+  protected AnalyzedSentence getSentenceWithImmunization(AnalyzedSentence sentence) throws Exception {
     if (!getAntiPatterns().isEmpty()) {
       //we need a copy of the sentence, not reference to the old one
       AnalyzedSentence immunizedSentence = sentence.copy(sentence);
       for (DisambiguationPatternRule patternRule : getAntiPatterns()) {
-        try {
           immunizedSentence = patternRule.replace(immunizedSentence);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
       }
       return immunizedSentence;
     }
@@ -185,24 +179,20 @@ public abstract class Rule {
     }
     return rules;
   }
-  
+
   /**
    * Whether this rule can be used for text in the given language.
    * Since LanguageTool 2.6, this also works {@link org.languagetool.rules.patterns.PatternRule}s
    * (before, it used to always return {@code false} for those).
    */
-  public boolean supportsLanguage(Language language) {
-    try {
+  public boolean supportsLanguage(Language<ResourceDataBroker> language) throws Exception {
       List<Class<? extends Rule>> relevantRuleClasses = new ArrayList<>();
-      List<Rule> relevantRules = language.getRelevantRules(JLanguageTool.getMessageBundle(), 
-          new UserConfig());  //  empty UserConfig has to be added to prevent null pointer exception
+      List<Rule> relevantRules = language.getRelevantRules(JLanguageTool.getMessageBundle(),
+          new UserConfig(), Collections.emptyList());  //  empty UserConfig has to be added to prevent null pointer exception
       for (Rule relevantRule : relevantRules) {
         relevantRuleClasses.add(relevantRule.getClass());
       }
       return relevantRuleClasses.contains(this.getClass());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
@@ -215,7 +205,7 @@ public abstract class Rule {
   public boolean isDictionaryBasedSpellingRule() {
     return false;
   }
-  
+
   /**
    * Whether this rule should be forced to be used in LO/OO extension.
    * Rules that return {@code true} will be enabled always in LO/OO extension
@@ -306,7 +296,7 @@ public abstract class Rule {
   public final void setDefaultOn() {
     defaultOff = false;
   }
-  
+
   /**
    * Checks whether the rule has been turned off by default for Office Extension by the rule author.
    * @return True if the rule is turned off. Overrides the default for LO/OO.
@@ -340,7 +330,7 @@ public abstract class Rule {
   public final void setOfficeDefaultOn() {
     officeDefaultOn = true;
   }
-  
+
   /**
    * An optional URL describing the rule match in more detail. Typically points to a dictionary or grammar website
    * with explanations and examples. Will return {@code null} for rules that have no URL.
@@ -391,6 +381,11 @@ public abstract class Rule {
   protected void addExamplePair(IncorrectExample incorrectSentence, CorrectExample correctSentence) {
     incorrectExamples.add(incorrectSentence);
     correctExamples.add(correctSentence);
+  }
+
+  public static String createAltRuleId(Locale locale, String... parts) {
+      Objects.requireNonNull(parts, "At least one rule id part must be provided.");
+      return String.format("%1$s/%2$s", locale.toLanguageTag(), Arrays.asList(parts).stream().collect(Collectors.joining("/")));
   }
 
 }

@@ -39,22 +39,22 @@ import static org.junit.Assert.fail;
 public class MultiThreadedJLanguageToolTest {
 
   @Test
-  public void testCheck() throws IOException {
-    MultiThreadedJLanguageTool lt1 = new MultiThreadedJLanguageTool(new Demo());
+  public void testCheck() throws Exception {
+    MultiThreadedJLanguageTool lt1 = new MultiThreadedJLanguageTool(TestTools.getTestLanguage());
     lt1.setCleanOverlappingMatches(false);
     List<String> ruleMatchIds1 = getRuleMatchIds(lt1);
-    assertEquals(9, ruleMatchIds1.size()); 
+    assertEquals(9, ruleMatchIds1.size());
     lt1.shutdown();
 
-    JLanguageTool lt2 = new JLanguageTool(new Demo());
+    JLanguageTool lt2 = new JLanguageTool(TestTools.getTestLanguage());
     lt2.setCleanOverlappingMatches(false);
     List<String> ruleMatchIds2 = getRuleMatchIds(lt2);
     assertEquals(ruleMatchIds1, ruleMatchIds2);
   }
-  
+
   @Test
-  public void testShutdownException() throws IOException {
-    MultiThreadedJLanguageTool tool = new MultiThreadedJLanguageTool(new Demo());
+  public void testShutdownException() throws Exception {
+    MultiThreadedJLanguageTool tool = new MultiThreadedJLanguageTool(TestTools.getTestLanguage());
     getRuleMatchIds(tool);
     tool.shutdown();
     try {
@@ -62,11 +62,12 @@ public class MultiThreadedJLanguageToolTest {
       fail("should have been rejected as the thread pool has been shut down");
     } catch (RejectedExecutionException ignore) {}
   }
-  
+
   @Test
-  public void testTextAnalysis() throws IOException {
-    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(new Demo());
+  public void testTextAnalysis() throws Exception {
+    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(TestTools.getTestLanguage());
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText("This is a sentence. And another one.");
+    System.out.println ("----> " + analyzedSentences);
     assertThat(analyzedSentences.size(), is(2));
     assertThat(analyzedSentences.get(0).getTokens().length, is(10));
     assertThat(analyzedSentences.get(0).getTokensWithoutWhitespace().length, is(6));  // sentence start has its own token
@@ -74,15 +75,15 @@ public class MultiThreadedJLanguageToolTest {
     assertThat(analyzedSentences.get(1).getTokensWithoutWhitespace().length, is(5));
     lt.shutdown();
   }
-  
+
   @Test
-  public void testConfigurableThreadPoolSize() throws IOException {
-    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(new Demo());
+  public void testConfigurableThreadPoolSize() throws Exception {
+    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(TestTools.getTestLanguage());
     assertEquals(Runtime.getRuntime().availableProcessors(), lt.getThreadPoolSize());
     lt.shutdown();
   }
 
-  private List<String> getRuleMatchIds(JLanguageTool langTool) throws IOException {
+  private List<String> getRuleMatchIds(JLanguageTool langTool) throws Exception {
     String input = "A small toast. No error here. Foo go bar. First goes last there, please!";
     List<RuleMatch> matches = langTool.check(input);
     List<String> ruleMatchIds = new ArrayList<>();
@@ -93,15 +94,15 @@ public class MultiThreadedJLanguageToolTest {
   }
 
   @Test
-  public void testTwoRulesOnly() throws IOException {
-    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(new FakeLanguage() {
+  public void testTwoRulesOnly() throws Exception {
+    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(new TestLanguage() {
       @Override
-      protected synchronized List<AbstractPatternRule> getPatternRules() {
+      public synchronized List<AbstractPatternRule> getPatternRules() {
         return Collections.emptyList();
       }
 
       @Override
-      public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) {
+      public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) {
         // less rules than processors (depending on the machine), should at least not crash
         return Arrays.asList(
                 new UppercaseSentenceStartRule(messages, this),
@@ -114,12 +115,12 @@ public class MultiThreadedJLanguageToolTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testIllegalThreadPoolSize1() {
-    new MultiThreadedJLanguageTool(new Demo(), 0);
+  public void testIllegalThreadPoolSize1() throws Exception {
+    new MultiThreadedJLanguageTool(TestTools.getTestLanguage(), 0);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testIllegalThreadPoolSize2() {
-    new MultiThreadedJLanguageTool(new Demo(), null, 0, null);
+  public void testIllegalThreadPoolSize2() throws Exception {
+    new MultiThreadedJLanguageTool(TestTools.getTestLanguage(), null, 0, null);
   }
 }

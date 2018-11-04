@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,10 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
-import org.languagetool.language.GermanyGerman;
+import org.languagetool.language.German;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,15 +38,16 @@ public class VerbAgreementRuleTest {
 
   private JLanguageTool lt;
   private VerbAgreementRule rule;
-  
+
   @Before
-  public void setUp() throws IOException {
-    lt = new JLanguageTool(new GermanyGerman());
-    rule = new VerbAgreementRule(TestTools.getMessages("de"), new GermanyGerman());
+  public void setUp() throws Exception {
+      German german = new German();
+    lt = new JLanguageTool(german);
+    rule = german.createVerbAgreementRule(null);
   }
 
   @Test
-  public void testPositions() throws IOException {
+  public void testPositions() throws Exception {
     RuleMatch[] match1 = rule.match(lt.analyzeText("Du erreichst ich unter 12345"));
     assertThat(match1.length, is(1));
     assertThat(match1[0].getFromPos(), is(3));
@@ -61,9 +61,9 @@ public class VerbAgreementRuleTest {
     assertThat(match3[0].getFromPos(), is(97));
     assertThat(match3[0].getToPos(), is(107));
   }
-  
+
   @Test
-  public void testWrongVerb() throws IOException {
+  public void testWrongVerb() throws Exception {
     // correct sentences:
     assertGood("Du bist in dem Moment angekommen, als ich gegangen bin.");
     assertGood("Kümmere du dich mal nicht darum!");
@@ -116,7 +116,7 @@ public class VerbAgreementRuleTest {
   }
 
   @Test
-  public void testWrongVerbSubject() throws IOException {
+  public void testWrongVerbSubject() throws Exception {
     // correct sentences:
     assertGood("Auch morgen lebe ich.");
     assertGood("Auch morgen leben wir noch.");
@@ -223,29 +223,29 @@ public class VerbAgreementRuleTest {
     assertBad("Wir lebst noch.", 2, "Wir leben", "Wir lebten", "Du lebst");
   }
 
-  private void assertGood(String s) throws IOException {
+  private void assertGood(String s) throws Exception {
     RuleMatch[] matches = rule.match(lt.analyzeText(s));
     if (matches.length != 0) {
       fail("Got > 0 matches for '" + s + "': " + Arrays.toString(matches));
     }
   }
 
-  private void assertBad(String s, int n) throws IOException {
+  private void assertBad(String s, int n) throws Exception {
     assertEquals(n, rule.match(lt.analyzeText(s)).length);
   }
 
-  private void assertBad(String s) throws IOException {
+  private void assertBad(String s) throws Exception {
     assertBad(s, 1);
   }
 
-  private void assertBad(String s, String expectedErrorSubstring) throws IOException {
+  private void assertBad(String s, String expectedErrorSubstring) throws Exception {
     assertEquals(1, rule.match(lt.analyzeText(s)).length);
     final String errorMessage = rule.match(lt.analyzeText(s))[0].getMessage();
     assertTrue("Got error '" + errorMessage + "', expected substring '" + expectedErrorSubstring + "'",
             errorMessage.contains(expectedErrorSubstring));
   }
 
-  private void assertBad(String s, int n, String... expectedSuggestions) throws IOException {
+  private void assertBad(String s, int n, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.analyzeText(s));
     assertEquals("Did not find " + n + " match(es) in sentence '" + s + "'", n, matches.length);
     if (expectedSuggestions.length > 0) {
@@ -259,8 +259,8 @@ public class VerbAgreementRuleTest {
     }
   }
 
-  private void assertBad(String s, String... expectedSuggestions) throws IOException {
+  private void assertBad(String s, String... expectedSuggestions) throws Exception {
     assertBad(s, 1, expectedSuggestions);
   }
-  
+
 }

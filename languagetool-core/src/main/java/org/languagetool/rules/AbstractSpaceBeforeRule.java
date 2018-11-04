@@ -37,7 +37,7 @@ public abstract class AbstractSpaceBeforeRule extends Rule {
 
   protected abstract Pattern getConjunctions();
 
-  public AbstractSpaceBeforeRule(ResourceBundle messages, Language language) {
+  public AbstractSpaceBeforeRule(ResourceBundle messages) {
     super.setCategory(Categories.MISC.getCategory(messages));
   }
 

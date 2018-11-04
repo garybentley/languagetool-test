@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,8 @@
 package org.languagetool.tagging.disambiguation;
 
 import org.languagetool.AnalyzedSentence;
+import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Abstract Disambiguator class to provide default (empty) implementation
@@ -26,6 +28,9 @@ import org.languagetool.AnalyzedSentence;
  * @since 3.7
  */
 public abstract class AbstractDisambiguator implements Disambiguator {
+
+    public AbstractDisambiguator() {
+    }
 
   @Override
   public AnalyzedSentence preDisambiguate(AnalyzedSentence input) {

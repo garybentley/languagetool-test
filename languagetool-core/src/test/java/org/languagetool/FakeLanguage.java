@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,30 +21,73 @@ package org.languagetool;
 import org.languagetool.language.Contributor;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.patterns.AbstractPatternRule;
+import org.languagetool.databroker.DefaultResourceDataBroker;
+import org.languagetool.tokenizers.*;
+import org.languagetool.rules.patterns.CaseConverter;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
-public class FakeLanguage extends Language {
+import java.nio.charset.*;
+
+public class FakeLanguage extends Language<DefaultResourceDataBroker> {
+
+// GTODO Remove this class
 
   private final String langCode;
   private final String country;
 
-  public FakeLanguage() {
+  private FakeLanguage() {
     this.langCode = "yy";
     this.country = "YY";
   }
 
-  public FakeLanguage(String langCode) {
+  private FakeLanguage(String langCode) {
     this.langCode = langCode;
     this.country = "YY";
   }
 
-  public FakeLanguage(String langCode, String country) {
+  private FakeLanguage(String langCode, String country) {
     this.langCode = langCode;
     this.country = country;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return new Locale(langCode, country);
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return this;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public CaseConverter getCaseConverter() throws Exception {
+      return getUseDataBroker().getCaseConverter();
+  }
+
+  @Override
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
+  }
+
+  @Override
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
+  }
+
+  @Override
+  public DefaultResourceDataBroker getDefaultDataBroker() throws Exception {
+      return DefaultResourceDataBroker.newClassPathInstance(this, getClass().getClassLoader());
   }
 
   @Override
@@ -52,11 +95,12 @@ public class FakeLanguage extends Language {
     return Collections.emptyList();
   }
 
+/*
   @Override
   public String getShortCode() {
     return langCode;
   }
-
+*/
   @Override
   public String getName() {
     return "FakeLanguage";
@@ -73,7 +117,7 @@ public class FakeLanguage extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     return Collections.emptyList();
   }
 }

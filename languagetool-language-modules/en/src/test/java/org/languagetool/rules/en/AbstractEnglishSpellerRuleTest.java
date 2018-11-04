@@ -36,11 +36,11 @@ public class AbstractEnglishSpellerRuleTest {
   private JLanguageTool lt;
   private Rule rule;
 
-  public void testNonVariantSpecificSuggestions(Rule rule, Language language) throws IOException {
+  public void testNonVariantSpecificSuggestions(Rule rule, Language language) throws Exception {
     this.lt = new JLanguageTool(language);
     this.rule = rule;
     assertFirstMatch("teh", "the");
-    
+
     // from http://waxy.org/2003/04/typo_popularity/:
     assertFirstMatch("transexual", "transsexual");
     //assertFirstMatch("didnt", "didn't"); - covered by ContractionSpellingRule
@@ -72,7 +72,7 @@ public class AbstractEnglishSpellerRuleTest {
     assertFirstMatch("hygeine", "hygiene");
     assertFirstMatch("vehical", "medical", "vehicle");
     //assertFirstMatch("calender", "calendar");  // handled by grammar.xml
-    
+
     assertEquals(0, rule.match(lt.getAnalyzedSentence("You couldn't; he didn't; it doesn't; they aren't; I hadn't; etc.")).length);
 
     // currently solved as a special case, also see https://github.com/morfologik/morfologik-stemming/issues/32:
@@ -83,13 +83,13 @@ public class AbstractEnglishSpellerRuleTest {
     // TODO: these are not very good, maybe caused by https://github.com/morfologik/morfologik-stemming/issues/30?
     assertFirstMatch("rythem", "them", "rather", "rhythm");
     assertFirstMatch("vacume", "value", "volume", "acute", "vacuum");
-    
+
     // TODO:
     // http://grammar.yourdictionary.com/spelling-and-word-lists/misspelled.html
     // https://en.wikipedia.org/wiki/Commonly_misspelled_English_words#cite_note-YD-4
   }
 
-  private void assertFirstMatch(String text, String... expectedSuggestions) throws IOException {
+  private void assertFirstMatch(String text, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(text));
     assertTrue("Expected 1 match for '" + text + "', got " + matches.length, matches.length == 1);
     List<String> suggestions = matches[0].getSuggestedReplacements();

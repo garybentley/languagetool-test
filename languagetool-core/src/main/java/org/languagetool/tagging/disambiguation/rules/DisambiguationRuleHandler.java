@@ -21,6 +21,7 @@ package org.languagetool.tagging.disambiguation.rules;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.Languages;
 import org.languagetool.rules.patterns.*;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -29,13 +30,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-class DisambiguationRuleHandler extends XMLRuleHandler {
+public class DisambiguationRuleHandler extends XMLRuleHandler<DisambiguationPatternRule> {
 
   private static final String WD = "wd";
   private static final String ACTION = "action";
   private static final String DISAMBIG = "disambig";
 
-  private final List<DisambiguationPatternRule> rules = new ArrayList<>();
+  //GTODO private final List<DisambiguationPatternRule> rules = new ArrayList<>();
 
   private boolean inDisambiguation;
   private int subId;
@@ -73,8 +74,15 @@ class DisambiguationRuleHandler extends XMLRuleHandler {
 
   private DisambiguationPatternRule.DisambiguatorAction disambigAction;
 
-  List<DisambiguationPatternRule> getDisambRules() {
+/*
+GTODO: Clean up
+  public List<DisambiguationPatternRule> getDisambRules() {
     return rules;
+  }
+*/
+
+  public DisambiguationRuleHandler(RuleFilterCreator ruleFilterCreator) {
+      super(ruleFilterCreator);
   }
 
   // ===========================================================
@@ -98,8 +106,12 @@ class DisambiguationRuleHandler extends XMLRuleHandler {
           name = ruleGroupName;
         }
         break;
-      case "rules":
-        language = Languages.getLanguageForShortCode(attrs.getValue("lang"));
+      case RULES:
+        String langCode = attrs.getValue("lang");
+        language = Languages.getBestMatchLanguage(langCode);
+        if (language == null) {
+            throw new RuntimeException(String.format("Unable to find language: %1$s", langCode));
+        }
         break;
       case PATTERN:
         inPattern = true;
@@ -287,8 +299,12 @@ class DisambiguationRuleHandler extends XMLRuleHandler {
         if (untouchedExamples != null) {
           rule.setUntouchedExamples(untouchedExamples);
         }
-        setRuleFilter(filterClassName, filterArgs, rule);
-        rules.add(rule);
+        try {
+            setRuleFilter(filterClassName, filterArgs, rule);
+        } catch(Exception e) {
+            throw new SAXException(String.format("Unable to set rule filter: %1$s with args %2$s for rule %3$s", filterClassName, filterArgs, rule.getClass().getName()), e);
+        }
+        addRule(rule);
         if (disambigAction == DisambiguationPatternRule.DisambiguatorAction.UNIFY && matchedTokenCount != uniCounter) {
           throw new SAXException(language.getName() + " rule error. The number unified tokens: "
                   + uniCounter + " must be equal to the number of matched tokens: " + matchedTokenCount

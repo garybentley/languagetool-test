@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,9 +19,10 @@
 package org.languagetool.rules;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
-import org.languagetool.language.Demo;
+import org.languagetool.TestLanguage;
 
 import java.io.IOException;
 
@@ -30,12 +31,17 @@ import static org.junit.Assert.*;
 
 public class WordRepeatRuleTest {
 
-  private final Demo demoLanguage = new Demo();
-  private final JLanguageTool lt = new JLanguageTool(demoLanguage);
-  private final WordRepeatRule rule = new WordRepeatRule(TestTools.getEnglishMessages(), demoLanguage);
+  private JLanguageTool lt;
+  private WordRepeatRule rule;
+
+  @Before
+  public void setUp() throws Exception {
+      lt = new JLanguageTool(TestTools.getTestLanguage());
+      rule = new WordRepeatRule(TestTools.getTestLanguage().getMessageBundle());
+  }
 
   @Test
-  public void test() throws IOException {
+  public void test() throws Exception {
     assertGood("A test");
     assertGood("A test.");
     assertGood("A test...");
@@ -47,12 +53,12 @@ public class WordRepeatRuleTest {
     assertBad("This is is a test");
   }
 
-  private void assertGood(String s) throws IOException {
+  private void assertGood(String s) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(s));
     assertThat(matches.length, is(0));
   }
 
-  private void assertBad(String s) throws IOException {
+  private void assertBad(String s) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(s));
     assertThat(matches.length, is(1));
   }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -40,6 +40,11 @@ import static org.junit.Assert.assertThat;
 
 public class MorfologikGermanyGermanSpellerRuleTest {
 
+/*
+GTODO Clean up, the GermanSpellerRule is already effectively a Morfologik speller.
+*/
+/*
+ GTODO Clean up, tests moved to GermanSpellerRuleTest
   @Test
   public void testMorfologikSpeller() throws IOException {
     MorfologikGermanyGermanSpellerRule rule =
@@ -51,13 +56,15 @@ public class MorfologikGermanyGermanSpellerRuleTest {
 
     assertEquals(0, rule.match(lt.getAnalyzedSentence("Überall äußerst böse Umlaute!")).length);
     assertEquals(1, rule.match(lt.getAnalyzedSentence("Üperall äußerst böse Umlaute!")).length);
-    
+
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence("daß"));
     assertEquals(1, matches.length);
     assertEquals("das", matches[0].getSuggestedReplacements().get(0));  // "dass" would actually be better...
     assertEquals("dass", matches[0].getSuggestedReplacements().get(1));
   }
-  
+*/
+/*
+ GTODO Moved to GermanSpellerRuleTest
   @Test
   @Ignore("testing for https://github.com/languagetool-org/languagetool/issues/236")
   public void testFrequency() throws IOException {
@@ -69,7 +76,9 @@ public class MorfologikGermanyGermanSpellerRuleTest {
     assertThat(speller.getFrequency("schön"), is(9));
     assertThat(speller.getFrequency("gippsnicht"), is(0));
   }
-
+*/
+/*
+GTODO Moved to GermanSpellerRuleTest
   @Test
   @Ignore("help testing for https://github.com/morfologik/morfologik-stemming/issues/34")
   public void testCommonMisspellings() throws IOException {
@@ -92,13 +101,15 @@ public class MorfologikGermanyGermanSpellerRuleTest {
       check(word, speller);
     }
   }
-
+*/
+/*
+GTODO Moved to GermanSpellerRuleTest
   private void check(String word, Speller speller) throws CharacterCodingException {
     List<String> suggestions = speller.findReplacements(word);
-    /*if (suggestions.size() > 10) {
-      suggestions = suggestions.subList(0, 9);
-    }*/
+    //if (suggestions.size() > 10) {
+    //  suggestions = suggestions.subList(0, 9);
+    //}
     System.out.println(word + ": " + String.join(", ", suggestions));
   }
-
+*/
 }

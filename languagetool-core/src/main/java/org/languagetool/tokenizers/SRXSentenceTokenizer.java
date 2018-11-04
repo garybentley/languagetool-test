@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -40,23 +40,28 @@ public class SRXSentenceTokenizer implements SentenceTokenizer {
    * Build a sentence tokenizer based on the rules in the {@code segment.srx} file
    * that comes with LanguageTool.
    */
+   /*
+   GTODO: Clean up
   public SRXSentenceTokenizer(Language language) {
     this(language, "/segment.srx");
   }
-
+*/
   /**
-   * @param srxInClassPath the path to an SRX file in the classpath 
+   * @param language The language to tokenize.
+   * @param doc The document to use to tokenize.
    * @since 3.2
    */
-  public SRXSentenceTokenizer(Language language, String srxInClassPath) {
+  public SRXSentenceTokenizer(Language language, SrxDocument doc) {
     this.language = Objects.requireNonNull(language);
-    this.srxDocument = SrxTools.createSrxDocument(srxInClassPath);
+    this.srxDocument = Objects.requireNonNull(doc);
+    //GTODO: this.srxDocument = SrxTools.createSrxDocument(srxInClassPath, language.getUseDataBroker());
     setSingleLineBreaksMarksParagraph(false);
   }
 
   @Override
   public final List<String> tokenize(String text) {
-    return SrxTools.tokenize(text, srxDocument, language.getShortCode() + parCode);
+    // GTODO: This may break if the language code is greater than 3 characters.
+    return SrxTools.tokenize(text, srxDocument, language.getLocale().getLanguage() + parCode);
   }
 
   @Override

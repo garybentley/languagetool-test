@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,8 @@
 package org.languagetool.rules.ngrams;
 
 import org.junit.Test;
-import org.languagetool.FakeLanguage;
+import org.junit.Before;
+import org.languagetool.TestLanguage;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.languagemodel.LanguageModel;
@@ -35,18 +36,26 @@ import static org.junit.Assert.assertThat;
 
 public class ConfusionProbabilityRuleTest {
 
-  private final ConfusionProbabilityRule rule = new FakeRule(new FakeLanguageModel(), new FakeLanguage());
-  private final JLanguageTool lt = new JLanguageTool(new FakeLanguage());
+  private ConfusionProbabilityRule rule;
+  private JLanguageTool lt;
+  private TestLanguage lang;
+
+  @Before
+  public void setUp() throws Exception {
+      lang = new TestLanguage();
+      rule = new FakeRule(new FakeLanguageModel(), lang);
+      lt = new JLanguageTool(lang);
+  }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     assertMatch("Their are new ideas to explore.");
     assertGood("There are new ideas to explore.");
     assertMatch("Why is there car broken again?");
     assertGood("Why is their car broken again?");
     assertGood("Is this their useful test?");
     assertGood("Is this there useful test?");  // error not found b/c no data
-    ConfusionProbabilityRule ruleWithException = new FakeRule(new FakeLanguageModel(), new FakeLanguage()) {
+    ConfusionProbabilityRule ruleWithException = new FakeRule(new FakeLanguageModel(), lang) {
       @Override
       protected boolean isException(String sentenceText) {
         return sentenceText.contains("Their are");
@@ -112,27 +121,27 @@ public class ConfusionProbabilityRuleTest {
     assertThat(rule.getContext(token, tokens, "XX", 3, 0).toString(), is("[_START_, XX]"));
   }
 
-  private void assertMatch(String input, Rule rule) throws IOException {
+  private void assertMatch(String input, Rule rule) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat("Did not find match in: " + input, matches.length, is(1));
   }
 
-  private void assertMatch(String input) throws IOException {
+  private void assertMatch(String input) throws Exception {
     assertMatch(input, rule);
   }
 
-  private void assertGood(String input, Rule rule) throws IOException {
+  private void assertGood(String input, Rule rule) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat("Got unexpected match in: " + input, matches.length, is(0));
   }
 
-  private void assertGood(String input) throws IOException {
+  private void assertGood(String input) throws Exception {
     assertGood(input, rule);
   }
 
   private static class FakeRule extends ConfusionProbabilityRule {
-    private FakeRule(LanguageModel languageModel, Language language) {
-      super(JLanguageTool.getMessageBundle(), languageModel, language);
+    private FakeRule(LanguageModel languageModel, TestLanguage language) throws Exception {
+      super(JLanguageTool.getMessageBundle(), languageModel, language, language.getUseDataBroker().getConfusionSets());
     }
   }
 

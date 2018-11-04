@@ -24,67 +24,78 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.languagetool.Languages;
 import org.languagetool.rules.*;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationPatternRule;
+import org.languagetool.databroker.ResourceDataBroker;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-public class PatternRuleHandler extends XMLRuleHandler {
+public class PatternRuleHandler extends AbstractPatternRuleHandler<AbstractPatternRule> {
 
-  public static final String TYPE = "type";
+// GTODO: Clean up unused vars
+  //public static final String TYPE = "type";
 
-  static final String MARKER_TAG = "<marker>";
-  static final String PLEASE_SPELL_ME = "<pleasespellme/>";
+  //static final String MARKER_TAG = "<marker>";
+  //static final String PLEASE_SPELL_ME = "<pleasespellme/>";
 
-  private static final String EXTERNAL = "external";
+  //private static final String EXTERNAL = "external";
 
-  protected Category category;
-  protected String categoryIssueType;
-  protected String ruleGroupIssueType;
-  protected String ruleIssueType;
-  protected String name;
-  protected String filterClassName;
-  protected String filterArgs;
+  //protected Category category;
+  //protected String categoryIssueType;
+  //protected String ruleGroupIssueType;
+  //protected String ruleIssueType;
+  //protected String name;
+  //protected String filterClassName;
+  //protected String filterArgs;
 
-  private final List<DisambiguationPatternRule> rulegroupAntiPatterns = new ArrayList<>();
-  private final List<DisambiguationPatternRule> ruleAntiPatterns = new ArrayList<>();
+  //private final List<DisambiguationPatternRule> rulegroupAntiPatterns = new ArrayList<>();
+  //private final List<DisambiguationPatternRule> ruleAntiPatterns = new ArrayList<>();
 
-  private int subId;
+  //private int subId;
 
-  private boolean defaultOff;
-  private boolean ruleGroupDefaultOff;
+  //private boolean defaultOff;
+  //private boolean ruleGroupDefaultOff;
 
-  private String ruleGroupDescription;
-  private int startPos = -1;
-  private int endPos = -1;
-  private int tokenCountForMarker;
+  //private String ruleGroupDescription;
+  //private int startPos = -1;
+  //private int endPos = -1;
+  //private int tokenCountForMarker;
 
-  private int antiPatternCounter;
+  //private int antiPatternCounter;
 
-  private boolean inRule;
+  //private boolean inRule;
 
   private boolean relaxedMode = false;
-  private boolean inAntiPattern;
+  //private boolean inAntiPattern;
 
-  /**
-   * If set to true, don't throw an exception if id or name is not set.
-   * Used for online rule editor.
-   * @since 2.1
-   */
-  void setRelaxedMode(boolean relaxedMode) {
-    this.relaxedMode = relaxedMode;
+  public PatternRuleHandler (RuleFilterCreator ruleFilterCreator, boolean relaxedMode) {
+      super(ruleFilterCreator);
+      this.relaxedMode = relaxedMode;
+  }
+
+  @Override
+  public void handleStartElementRulesCase(Attributes attrs) {
+      String languageStr = attrs.getValue("lang");
+      language = Languages.getBestMatchLanguage(languageStr);
+      if (language == null) {
+          throw new RuntimeException(String.format("Unable to find language: %1$s", languageStr));
+      }
   }
 
   // ===========================================================
   // SAX DocumentHandler methods
   // ===========================================================
 
-  @Override
-  public void startElement(String namespaceURI, String lName,
+  //@Override
+  /*
+  //GTODO Clean up.
+  public void XstartElement(String namespaceURI, String lName,
                            String qName, Attributes attrs) throws SAXException {
     switch (qName) {
       case "category":
@@ -296,9 +307,79 @@ public class PatternRuleHandler extends XMLRuleHandler {
         break;
     }
   }
+*/
+  @Override
+  public void handleEndElementRuleCase() throws Exception {
+      suggestionMatchesOutMsg = addLegacyMatches(suggestionMatchesOutMsg, suggestionsOutMsg.toString(), false);
+      if (relaxedMode && id == null) {
+        id = "";
+      }
+      if (relaxedMode && getName() == null) {
+        setName("");
+      }
+      if (phrasePatternTokens.isEmpty()) {
+        // Elements contain information whether they are inside a <marker>...</marker>,
+        // but for phraserefs this depends on the position where the phraseref is used
+        // not where it's defined. Thus we have to copy the elements so each use of
+        // the phraseref can carry their own information:
+
+        List<PatternToken> tmpPatternTokens = new ArrayList<>();
+        createRules(new ArrayList<>(patternTokens), tmpPatternTokens, 0);
+
+      } else {
+        if (!patternTokens.isEmpty()) {
+          for (List<PatternToken> ph : phrasePatternTokens) {
+            ph.addAll(new ArrayList<>(patternTokens));
+          }
+        }
+        for (List<PatternToken> phrasePatternToken : phrasePatternTokens) {
+          processElement(phrasePatternToken);
+          List<PatternToken> tmpPatternTokens = new ArrayList<>();
+          createRules(phrasePatternToken, tmpPatternTokens, 0);
+        }
+      }
+      patternTokens.clear();
+      if (phrasePatternTokens != null) {
+        phrasePatternTokens.clear();
+      }
+      ruleIssueType = null;
+      filterClassName = null;
+      filterArgs = null;
+  }
 
   @Override
-  public void endElement(String namespaceURI, String sName,
+  public void handleEndElementExampleCase() {
+      if (inCorrectExample) {
+        correctExamples.add(new CorrectExample(correctExample.toString()));
+      } else if (inIncorrectExample) {
+        IncorrectExample example;
+        List<String> corrections = new ArrayList<>();
+        corrections.addAll(Arrays.asList(exampleCorrection.toString().split("\\|")));
+        if (corrections.size() > 0) {
+          if (exampleCorrection.toString().endsWith("|")) {  // split() will ignore trailing empty items
+            corrections.add("");
+          }
+          example = new IncorrectExample(incorrectExample.toString(), corrections);
+        } else {
+          example = new IncorrectExample(incorrectExample.toString());
+        }
+        incorrectExamples.add(example);
+      } else if (inErrorTriggerExample) {
+        errorTriggeringExamples.add(new ErrorTriggeringExample(errorTriggerExample.toString()));
+      }
+      inCorrectExample = false;
+      inIncorrectExample = false;
+      inErrorTriggerExample = false;
+      correctExample = new StringBuilder();
+      incorrectExample = new StringBuilder();
+      errorTriggerExample = new StringBuilder();
+      exampleCorrection = new StringBuilder();
+  }
+
+  //@Override
+  /*
+  //GTODO Clean up
+  public void endElementX(String namespaceURI, String sName,
       String qName) throws SAXException {
     switch (qName) {
       case "category":
@@ -307,6 +388,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
       case "regexp":
         inRegex = false;
         break;
+
       case RULE:
         suggestionMatchesOutMsg = addLegacyMatches(suggestionMatchesOutMsg, suggestionsOutMsg.toString(), false);
         if (relaxedMode && id == null) {
@@ -345,6 +427,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
         filterClassName = null;
         filterArgs = null;
         break;
+
       case EXCEPTION:
         finalizeExceptions();
         break;
@@ -400,6 +483,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
         tokenCounter = 0;
         inAntiPattern = false;
         break;
+
       case EXAMPLE:
         if (inCorrectExample) {
           correctExamples.add(new CorrectExample(correctExample.toString()));
@@ -427,6 +511,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
         errorTriggerExample = new StringBuilder();
         exampleCorrection = new StringBuilder();
         break;
+
       case MESSAGE:
         suggestionMatches = addLegacyMatches(suggestionMatches, message.toString(), true);
         inMessage = false;
@@ -515,30 +600,33 @@ public class PatternRuleHandler extends XMLRuleHandler {
       case UNIFY_IGNORE:
         inUnificationNeutral = false;
         break;
+      default:
+        super.endElement(namespaceURI, sName, qName);
     }
   }
-
+*/
   /**
    * Create rule from an Element list.
    * In case of OR groups, several rules are created recursively.
    * @since 2.3
-   * 
+   *
    * @param elemList The complete original Element list
    * @param tmpPatternTokens Temporary list being created
    * @param numElement Index of elemList being analyzed
+   * @param classLoader The class loader to use to load classes needed for the rule.
    */
   private void createRules(List<PatternToken> elemList,
-    List<PatternToken> tmpPatternTokens, int numElement) {
+    List<PatternToken> tmpPatternTokens, int numElement) throws Exception {
     String shortMessage = "";
     if (this.shortMessage != null && this.shortMessage.length() > 0) {
       shortMessage = this.shortMessage.toString();
     } else if (shortMessageForRuleGroup != null && shortMessageForRuleGroup.length() > 0) {
       shortMessage = this.shortMessageForRuleGroup.toString();
-    }
+  }
     if (numElement >= elemList.size()) {
       AbstractPatternRule rule;
       if (tmpPatternTokens.size() > 0) {
-        rule = new PatternRule(id, language, tmpPatternTokens, name,
+        rule = new PatternRule(id, language, tmpPatternTokens, getName(),
                 message.toString(), shortMessage,
                 suggestionsOutMsg.toString(), phrasePatternTokens.size() > 1);
       } else if (regex.length() > 0) {
@@ -549,15 +637,15 @@ public class PatternRuleHandler extends XMLRuleHandler {
           regexStr = replaceSpacesInRegex(regexStr);
         }
         if (ruleAntiPatterns.size() > 0 || rulegroupAntiPatterns.size() > 0) {
-          throw new RuntimeException("<regexp> rules currently cannot be used together with <antipattern>. Rule id: " + id + "[" + subId + "]");
+          throw new RuntimeException("<regexp> rules currently cannot be used together with <antipattern>. Rule id: " + id + "[" + getSubId() + "]");
         }
-        rule = new RegexPatternRule(id, name, message.toString(), suggestionsOutMsg.toString(), language, Pattern.compile(regexStr, flags), regexpMark);
+        rule = new RegexPatternRule(id, getName(), message.toString(), suggestionsOutMsg.toString(), language, Pattern.compile(regexStr, flags), regexpMark);
       } else {
         throw new IllegalStateException("Neither '<pattern>' tokens nor '<regex>' is set in rule '" + id + "'");
       }
       setRuleFilter(filterClassName, filterArgs, rule);
       prepareRule(rule);
-      rules.add(rule);
+      addRule(rule);
     } else {
       PatternToken patternToken = elemList.get(numElement);
       if (patternToken.hasOrGroup()) {
@@ -569,17 +657,16 @@ public class PatternRuleHandler extends XMLRuleHandler {
         // are backed-up.
         List<Match> suggestionMatchesBackup = new ArrayList<>(suggestionMatches);
         List<Match> suggestionMatchesOutMsgBackup =  new ArrayList<>(suggestionMatchesOutMsg);
-        int startPosBackup = startPos;
-        int endPosBackup = endPos;
+        int startPosBackup = getStartPosition();
+        int endPosBackup = getEndPosition();
         List<DisambiguationPatternRule> ruleAntiPatternsBackup = new ArrayList<>(ruleAntiPatterns);
         for (PatternToken patternTokenOfOrGroup : patternToken.getOrGroup()) {
           List<PatternToken> tmpElements2 = new ArrayList<>();
           tmpElements2.addAll(tmpPatternTokens);
           tmpElements2.add((PatternToken) ObjectUtils.clone(patternTokenOfOrGroup));
           createRules(elemList, tmpElements2, numElement + 1);
-
-          startPos = startPosBackup;
-          endPos = endPosBackup;
+          resetStartPositionTo(startPosBackup);
+          resetEndPositionTo(endPosBackup);
           suggestionMatches = suggestionMatchesBackup;
           suggestionMatchesOutMsg = suggestionMatchesOutMsgBackup;
           ruleAntiPatterns.addAll(ruleAntiPatternsBackup);
@@ -608,7 +695,8 @@ public class PatternRuleHandler extends XMLRuleHandler {
     }
     return sb.toString();
   }
-
+/*
+GTODO: Clean up, base has this method.
   protected void prepareRule(AbstractPatternRule rule) {
     if (startPos != -1 && endPos != -1) {
       rule.setStartPositionCorrection(startPos);
@@ -628,7 +716,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
       ruleAntiPatterns.clear();
     }
     if (inRuleGroup) {
-      rule.setSubId(Integer.toString(subId));
+      rule.setSubId(Integer.toString(getSubId()));
     } else {
       rule.setSubId("1");
     }
@@ -671,7 +759,7 @@ public class PatternRuleHandler extends XMLRuleHandler {
       rule.setLocQualityIssueType(ITSIssueType.getIssueType(categoryIssueType));
     }
   }
-
+*/
   @Override
   public void characters(char[] buf, int offset, int len) {
     String s = new String(buf, offset, len);

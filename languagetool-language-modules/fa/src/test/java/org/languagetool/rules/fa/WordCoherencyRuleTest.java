@@ -20,7 +20,6 @@ package org.languagetool.rules.fa;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.TestTools;
 import org.languagetool.language.Persian;
 import org.languagetool.rules.TextLevelRule;
 import org.languagetool.rules.patterns.PatternRuleTest;
@@ -34,9 +33,10 @@ import static org.hamcrest.core.Is.is;
 public class WordCoherencyRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    JLanguageTool langTool = new JLanguageTool(new Persian());
-    TextLevelRule rule = new WordCoherencyRule(TestTools.getMessages("fa"));
+  public void testRules() throws Exception {
+    Persian lang = new Persian();
+    JLanguageTool langTool = new JLanguageTool(lang);
+    TextLevelRule rule = lang.createWordCoherencyRule(null);
     assertThat(rule.match(Collections.singletonList(langTool.getAnalyzedSentence("این یک اتاق است."))).length, is(0));
     assertThat(rule.match(Collections.singletonList(langTool.getAnalyzedSentence("این یک اتاق است. این یک اطاق است."))).length, is(1));
   }

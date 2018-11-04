@@ -32,7 +32,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
-import org.languagetool.language.Demo;
+import org.languagetool.TestTools;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.patterns.Match.CaseConversion;
 import org.languagetool.rules.patterns.Match.IncludeRange;
@@ -43,8 +43,8 @@ public class PatternRuleMatcherTest {
   private static JLanguageTool langTool;
 
   @BeforeClass
-  public static void setup() {
-    langTool = new JLanguageTool(new Demo());
+  public static void setup() throws Exception {
+    langTool = new JLanguageTool(TestTools.getTestLanguage());
   }
 
   @Test
@@ -83,7 +83,7 @@ public class PatternRuleMatcherTest {
     PatternToken patternTokenB2 = makeElement("bb");
     patternTokenB2.setMinOccurrence(0);
     PatternRuleMatcher matcher = getMatcher(makeElement("a"), patternTokenB1, patternTokenB2, makeElement("c"));  // regex syntax: a (ba)? (bb)? c
-    
+
     assertNoMatch("ba a", matcher);
     assertNoMatch("c a bb", matcher);
     assertPartialMatch("z a c", matcher);
@@ -94,7 +94,7 @@ public class PatternRuleMatcherTest {
     assertCompleteMatch("a bb c", matcher);
     assertCompleteMatch("a c", matcher);
     assertNoMatch("a X c", matcher);
-    
+
     RuleMatch[] matches = getMatches("a ba c FOO a bb c FOO a c a ba bb c", matcher);
     //......................................^^^^^.....^^^^^.....^^^.^^^^^
     assertThat(matches.length, is(4));
@@ -168,14 +168,14 @@ public class PatternRuleMatcherTest {
   public void testZeroMinOccurrencesWithSuggestion() throws Exception {
     PatternToken patternTokenB = makeElement("b");
     patternTokenB.setMinOccurrence(0);
-    
+
     List<PatternToken> patternTokens = Arrays.asList(makeElement("a"), patternTokenB, makeElement("c"));   // regex: a b? c
-    PatternRule rule = new PatternRule("", new Demo(), patternTokens, "my description", "<suggestion>\\1 \\2 \\3</suggestion>", "short message");
+    PatternRule rule = new PatternRule("", TestTools.getTestLanguage(), patternTokens, "my description", "<suggestion>\\1 \\2 \\3</suggestion>", "short message");
     PatternRuleMatcher matcher = new PatternRuleMatcher(rule, false);
-    
+
     // we need to add this line to trigger proper replacement but I am not sure why :(
     rule.addSuggestionMatch(new Match(null, null, false, null, null, CaseConversion.NONE, false, false, IncludeRange.NONE));
-    
+
     RuleMatch[] matches = getMatches("a b c", matcher);
     assertEquals(Arrays.asList("a b c"), matches[0].getSuggestedReplacements());
 
@@ -451,7 +451,7 @@ public class PatternRuleMatcherTest {
 
   @Test
   public void testEquals() throws Exception {
-    PatternRule patternRule1 = new PatternRule("id1", Languages.getLanguageForShortCode("xx"),
+    PatternRule patternRule1 = new PatternRule("id1", TestTools.getTestLanguage(),
             Collections.<PatternToken>emptyList(), "desc1", "msg1", "short1");
     RuleMatch ruleMatch1 = new RuleMatch(patternRule1, null, 0, 1, "message");
     RuleMatch ruleMatch2 = new RuleMatch(patternRule1, null, 0, 1, "message");
@@ -461,7 +461,7 @@ public class PatternRuleMatcherTest {
     assertFalse(ruleMatch2.equals(ruleMatch3));
   }
 
-  private RuleMatch[] getMatches(String input, PatternRuleMatcher matcher) throws IOException {
+  private RuleMatch[] getMatches(String input, PatternRuleMatcher matcher) throws Exception {
     return matcher.match(langTool.getAnalyzedSentence(input));
   }
 
@@ -474,19 +474,19 @@ public class PatternRuleMatcherTest {
     assertThat("Wrong end position", match.getToPos(), is(expectedToPos));
   }
 
-  private void assertNoMatch(String input, PatternRuleMatcher matcher) throws IOException {
+  private void assertNoMatch(String input, PatternRuleMatcher matcher) throws Exception {
     RuleMatch[] matches = getMatches(input, matcher);
     assertThat(matches.length , is(0));
   }
 
-  private void assertPartialMatch(String input, PatternRuleMatcher matcher) throws IOException {
+  private void assertPartialMatch(String input, PatternRuleMatcher matcher) throws Exception {
     RuleMatch[] matches = getMatches(input, matcher);
     assertThat(matches.length , is(1));
     assertTrue("Expected partial match, got '" + matches[0] + "' for '" + input + "'",
         matches[0].getFromPos() > 0 || matches[0].getToPos() < input.length());
   }
 
-  private void assertCompleteMatch(String input, PatternRuleMatcher matcher) throws IOException {
+  private void assertCompleteMatch(String input, PatternRuleMatcher matcher) throws Exception {
     RuleMatch[] matches = getMatches(input, matcher);
     assertThat("Got matches: " + Arrays.toString(matches), matches.length , is(1));
     assertThat("Wrong start position", matches[0].getFromPos(), is(0));
@@ -507,6 +507,6 @@ public class PatternRuleMatcherTest {
   }
 
   private PatternRule getPatternRule(List<PatternToken> patternTokens) {
-    return new PatternRule("", new Demo(), patternTokens, "my description", "my message", "short message");
+    return new PatternRule("", TestTools.getTestLanguage(), patternTokens, "my description", "my message", "short message");
   }
 }

@@ -28,15 +28,15 @@ import org.languagetool.Language;
 
 /**
  * A rule that checks for empty lines. Useful especially for office extension
- * It checks only linebreaks because empty paragraphs can't be handled in LO/OO 
- * 
+ * It checks only linebreaks because empty paragraphs can't be handled in LO/OO
+ *
  * @author Fred Kruse
  */
 
 public class EmptyLineRule extends TextLevelRule {
 
   private final Language lang;
-  
+
   public EmptyLineRule(ResourceBundle messages, Language lang, boolean defaultActive) {
     super(messages);
     super.setCategory(Categories.STYLE.getCategory(messages));
@@ -63,7 +63,7 @@ public class EmptyLineRule extends TextLevelRule {
   }
 
   @Override
-  public org.languagetool.rules.RuleMatch[] match(List<AnalyzedSentence> sentences) throws IOException {
+  public org.languagetool.rules.RuleMatch[] match(List<AnalyzedSentence> sentences) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     int pos = 0;
     for (int n = 0; n < sentences.size() - 1; n++) {

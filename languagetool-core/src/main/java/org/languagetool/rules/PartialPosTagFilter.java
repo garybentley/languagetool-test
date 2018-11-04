@@ -47,10 +47,10 @@ import java.util.regex.Pattern;
 public abstract class PartialPosTagFilter extends RuleFilter {
 
   @Nullable
-  protected abstract List<AnalyzedTokenReadings> tag(String token);
+  protected abstract List<AnalyzedTokenReadings> tag(String token) throws Exception;
 
   @Override
-  public RuleMatch acceptRuleMatch(RuleMatch match, Map<String, String> args, AnalyzedTokenReadings[] patternTokens) {
+  public RuleMatch acceptRuleMatch(RuleMatch match, Map<String, String> args, AnalyzedTokenReadings[] patternTokens) throws Exception {
     if (!(args.containsKey("no") && args.containsKey("regexp") && args.containsKey("postag_regexp"))) {
       throw new RuntimeException("Set 'no', 'regexp' and 'postag_regexp' for filter " + PartialPosTagFilter.class.getSimpleName());
     }
@@ -71,7 +71,7 @@ public abstract class PartialPosTagFilter extends RuleFilter {
       String partialToken = matcher.group(1);
       if (matcher.groupCount() == 2) {
       partialToken = partialToken + matcher.group(2);
-      } 
+      }
       List<AnalyzedTokenReadings> tags = tag(partialToken);
       if (tags != null && partialTagHasRequiredTag(tags, requiredTagRegexp, negatePos)) {
         return match;

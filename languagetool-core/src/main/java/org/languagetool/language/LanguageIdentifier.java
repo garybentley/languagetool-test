@@ -71,7 +71,7 @@ public class LanguageIdentifier {
   private BufferedReader fasttextIn;
   private BufferedWriter fasttextOut;
 
-  public LanguageIdentifier() {
+  public LanguageIdentifier() throws Exception {
     this(1000);
   }
 
@@ -82,8 +82,7 @@ public class LanguageIdentifier {
    * @throws IllegalArgumentException if {@code maxLength} is less than 10
    * @since 4.2
    */
-  public LanguageIdentifier(int maxLength) {
-    try {
+  public LanguageIdentifier(int maxLength) throws Exception {
       List<LanguageProfile> profiles = loadProfiles(getLanguageCodes());
       languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
         .minimalConfidence(MINIMAL_CONFIDENCE)
@@ -96,9 +95,6 @@ public class LanguageIdentifier {
         .withTextFilter(RemoveMinorityScriptsTextFilter.forThreshold(0.3))
         .withTextFilter(new RemoveEMailSignatureFilter())
         .build();
-    } catch (IOException e) {
-      throw new RuntimeException("Could not set up language identifier", e);
-    }
     if (maxLength < 10) {
       throw new IllegalArgumentException("maxLength must be >= 10 (but values > 100 are recommended): " + maxLength);
     }
@@ -121,7 +117,7 @@ public class LanguageIdentifier {
   private static List<String> getLanguageCodes() {
     List<String> langCodes = new ArrayList<>();
     for (Language lang : Languages.get()) {
-      String langCode = lang.getShortCode();
+      String langCode = lang.getLocale().getLanguage();
       boolean ignore = lang.isVariant() || ignoreLangCodes.contains(langCode) || externalLangCodes.contains(langCode);
       if (ignore) {
         continue;
@@ -136,16 +132,29 @@ public class LanguageIdentifier {
     return langCodes;
   }
 
-  private List<LanguageProfile> loadProfiles(List<String> langCodes) throws IOException {
-    LanguageProfileReader profileReader = new LanguageProfileReader();
-    List<LanguageProfile> profiles = profileReader.read(langCodes);
+  private List<LanguageProfile> loadProfiles(List<String> langCodes) throws Exception {
+    //GTODO LanguageProfileReader profileReader = new LanguageProfileReader();
+    List<LanguageProfile> profiles = new ArrayList<>();
+    for (String lang : langCodes) {
+        Language l = Languages.getLanguage(new Locale(lang));
+        if (l != null) {
+            profiles.add(l.getUseDataBroker().getLanguageProfile());
+        }
+    }
+    //GTODO List<LanguageProfile> profiles = profileReader.read(langCodes);
     for (String externalLangCode : externalLangCodes) {
+        Language l = Languages.getLanguage(new Locale(externalLangCode));
+        if (l != null) {
+            profiles.add(l.getUseDataBroker().getLanguageProfile());
+        }
+        /*
+        GTODO: Clean up
       String profilePath = "/" + externalLangCode + "/" + externalLangCode + ".profile";
-      if (JLanguageTool.getDataBroker().resourceExists(profilePath)) {  // not all languages are always available
-        try (InputStream profile = JLanguageTool.getDataBroker().getFromResourceDirAsStream(profilePath)) {
+      if (dataBroker.resourceExists(profilePath)) {  // not all languages are always available
+        try (InputStream profile = dataBroker.getFromResourceDirAsStream(profilePath)) {
           profiles.add(new LanguageProfileReader().read(profile));
         }
-      }
+        */
     }
     return profiles;
   }
@@ -170,13 +179,12 @@ public class LanguageIdentifier {
     if (!fasttextEnabled) { // no else, value can change in if clause
       languageCode = detectLanguageCode(shortText);
     }
-    if (languageCode != null && Languages.isLanguageSupported(languageCode)) {
-      return Languages.getLanguageForShortCode(languageCode);
+    if (languageCode != null) {
+      return Languages.getBestMatchLanguage(languageCode);
     } else {
       return null;
     }
   }
-
 
   private void startFasttext(File modelPath, File binaryPath) throws IOException {
     fasttextProcess = new ProcessBuilder(binaryPath.getPath(), "predict-prob", modelPath.getPath(), "-", "" + K_HIGHEST_SCORES).start();

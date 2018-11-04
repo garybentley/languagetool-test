@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,9 +32,9 @@ import static org.languagetool.tools.StringTools.*;
 
 /**
  * Generate XML to represent matching rules.
- * 
+ *
  * @since 2.5 (as 'RuleAsXmlSerializer' up to 3.1)
- * @deprecated don't use for new use cases, the only place this should still be used is for the API mode of the command-line client (deprecated since 3.5) 
+ * @deprecated don't use for new use cases, the only place this should still be used is for the API mode of the command-line client (deprecated since 3.5)
  */
 public class RuleMatchAsXmlSerializer {
 
@@ -44,6 +44,7 @@ public class RuleMatchAsXmlSerializer {
    * Get the string to begin the XML. After this, use {@link #ruleMatchesToXmlSnippet} and then {@link #getXmlEnd()}
    * or better, simply use {@link #ruleMatchesToXml}.
    */
+   // GTODO Not a good way to build XML.
   public String getXmlStart(Language lang, Language motherTongue) {
     StringBuilder xml = new StringBuilder(CAPACITY);
     xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
@@ -54,14 +55,16 @@ public class RuleMatchAsXmlSerializer {
       String languageXml = "<language ";
       String warning = "";
       if (lang != null) {
-        languageXml += "shortname=\"" + lang.getShortCodeWithCountryAndVariant() + "\" name=\"" + lang.getName() + "\"";
-        String longCode = lang.getShortCodeWithCountryAndVariant();
-        if ("en".equals(longCode) || "de".equals(longCode)) {
-          xml.append("<!-- NOTE: The language code you selected ('").append(longCode).append("') doesn't support spell checking. Consider using a code with a variant like 'en-US'. -->\n");
+          // Maybe change to language/langcode or add attribute.
+        languageXml += "shortname=\"" + lang.getLocale().toLanguageTag() + "\" name=\"" + lang.getName() + "\"";
+        String langCode = lang.getLocale().getLanguage();
+        if (!lang.isVariant() && ("en".equals(langCode) || "de".equals(langCode))) {
+          xml.append("<!-- NOTE: The language code you selected ('").append(langCode).append("') doesn't support spell checking. Consider using a code with a variant like 'en-US'. -->\n");
         }
-      }
-      if (motherTongue != null && (lang == null || !motherTongue.getShortCode().equals(lang.getShortCodeWithCountryAndVariant()))) {
-        languageXml += " mothertongueshortname=\"" + motherTongue.getShortCode() + "\" mothertonguename=\"" + motherTongue.getName() + "\"";
+    }
+    // The isVariantOf check here may not be valid.  Also may need to add a "mothertonguelanguage".
+      if (motherTongue != null && (lang == null || lang.isVariantOf(motherTongue))) {
+        languageXml += " mothertongueshortname=\"" + motherTongue.getLocale().getLanguage() + "\" mothertonguename=\"" + motherTongue.getName() + "\"";
       }
       languageXml += "/>\n";
       xml.append(languageXml);
@@ -204,5 +207,5 @@ public class RuleMatchAsXmlSerializer {
     // this is simplified XML, i.e. put the "<error>" in one line:
     return escapeForXmlAttribute(s).replaceAll("[\n\r]", " ");
   }
-  
+
 }

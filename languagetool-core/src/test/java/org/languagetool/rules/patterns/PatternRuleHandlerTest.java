@@ -23,11 +23,16 @@ import org.junit.Test;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
+import org.languagetool.*;
+
 public class PatternRuleHandlerTest {
-  
+
   @Test
-  public void testReplaceSpacesInRegex() {
-    PatternRuleHandler handler = new PatternRuleHandler();
+  public void testReplaceSpacesInRegex() throws Exception {
+    // GTODO: This tests a class internal method, this should be handled by a real test.  It's not testing a public interface so isn't our business.
+    TestLanguage lang = new TestLanguage();
+    PatternRuleHandler handler = new PatternRuleHandler(lang.getUseDataBroker().getRuleFilterCreator(), false);
+    //GTODO JLanguageTool.getDataBroker());
     String s = "(?:[\\s\u00A0\u202F]+)";
     assertThat(handler.replaceSpacesInRegex("foo bar"), is("foo" + s + "bar"));
     assertThat(handler.replaceSpacesInRegex("foo bar x"), is("foo" + s + "bar" + s + "x"));

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Marcin Miłkowski (www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.*;
 
 import static org.junit.Assert.*;
 
@@ -41,15 +42,17 @@ public class BitextPatternRuleTest {
    * much sense actually as we don't have any languages.
    */
   @Test
-  public void testBitextRulesFromXML() throws IOException {
-    testBitextRulesFromXML(null);
+  public void testBitextRules() throws Exception {
+    testBitextRules(null);
   }
 
-  private void testBitextRulesFromXML(Set<Language> ignoredLanguages) throws IOException {
+  private void testBitextRules(Set<Language> ignoredLanguages) throws Exception {
     for (Language lang : Languages.getWithDemoLanguage()) {
       if (ignoredLanguages != null && ignoredLanguages.contains(lang)) {
         continue;
       }
+      /*
+      GTODO: Clean up
       BitextPatternRuleLoader ruleLoader = new BitextPatternRuleLoader();
       String name = "/" + lang.getShortCode() + "/bitext.xml";
       InputStream is;
@@ -60,23 +63,30 @@ public class BitextPatternRuleTest {
         continue;
       }
       System.out.println("Running tests for " + lang.getName() + "...");
+      */
       JLanguageTool languageTool = new JLanguageTool(lang);
-      List<BitextPatternRule> rules = ruleLoader.getRules(is, name);
-      testBitextRulesFromXML(rules, languageTool, lang);
+      // Bit of cheating here...
+      List<BitextPatternRule> rules = lang.getUseDataBroker().getBitextRules()
+            .stream()
+            .filter(r -> r instanceof BitextPatternRule)
+            .map(r -> (BitextPatternRule) r)
+            .collect(Collectors.toList());
+      //List<BitextPatternRule> rules = ruleLoader.getRules(is, name, lang.getUseDataBroker());
+      testBitextRules(rules, languageTool, lang);
     }
   }
-  
-  private void testBitextRulesFromXML(List<BitextPatternRule> rules,
-      JLanguageTool languageTool, Language lang) throws IOException {    
+
+  private void testBitextRules(List<BitextPatternRule> rules,
+      JLanguageTool languageTool, Language lang) throws Exception {
     for (BitextPatternRule rule : rules) {
       testBitextRule(rule, lang, languageTool);
     }
   }
 
   private String cleanSentence(String str) {
-    return cleanXML(str.replaceAll("[\\n\\t]+", ""));    
+    return cleanXML(str.replaceAll("[\\n\\t]+", ""));
   }
-  
+
   private void testMarker(int expectedMatchStart,
       int expectedMatchEnd, Rule rule, Language lang) {
     if (expectedMatchStart == -1 || expectedMatchEnd == -1) {
@@ -91,7 +101,7 @@ public class BitextPatternRuleTest {
                                List<String> suggestedCorrection, int expectedMatchStart,
                                int expectedMatchEnd, AbstractPatternRule rule,
                                Language lang,
-                               JLanguageTool languageTool) throws IOException {
+                               JLanguageTool languageTool) throws Exception {
     String badSentence = cleanXML(origBadSentence);
     assertTrue(badSentence.trim().length() > 0);
     RuleMatch[] matches = getMatches(rule, badSentence, languageTool);
@@ -137,7 +147,7 @@ public class BitextPatternRuleTest {
   }
 
   private void testBitextRule(BitextPatternRule rule, Language lang,
-                              JLanguageTool languageTool) throws IOException {
+                              JLanguageTool languageTool) throws Exception {
     JLanguageTool srcTool = new JLanguageTool(rule.getSourceLanguage());
     List<StringPair> goodSentences = rule.getCorrectBitextExamples();
     for (StringPair goodSentence : goodSentences) {
@@ -181,19 +191,19 @@ public class BitextPatternRuleTest {
   private String cleanXML(String str) {
     return str.replaceAll("<([^<].*?)>", "");
   }
-  
+
   private boolean match(BitextPatternRule rule, String src, String trg,
       JLanguageTool srcLanguageTool,
-      JLanguageTool trgLanguageTool) throws IOException {
+      JLanguageTool trgLanguageTool) throws Exception {
     AnalyzedSentence srcText = srcLanguageTool.getAnalyzedSentence(src);
     AnalyzedSentence trgText = trgLanguageTool.getAnalyzedSentence(trg);
     RuleMatch[] matches = rule.match(srcText, trgText);
     return matches.length > 0;
   }
 
-  
+
   private RuleMatch[] getMatches(Rule rule, String sentence,
-      JLanguageTool languageTool) throws IOException {
+      JLanguageTool languageTool) throws Exception {
     AnalyzedSentence analyzedSentence = languageTool.getAnalyzedSentence(sentence);
     RuleMatch[] matches = rule.match(analyzedSentence);
     return matches;
@@ -203,14 +213,14 @@ public class BitextPatternRuleTest {
    * Test XML patterns, as a help for people developing rules that are not
    * programmers.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     BitextPatternRuleTest prt = new BitextPatternRuleTest();
-    System.out.println("Running XML bitext pattern tests...");   
+    System.out.println("Running XML bitext pattern tests...");
     if (args.length == 0) {
-      prt.testBitextRulesFromXML(null);
+      prt.testBitextRules(null);
     } else {
       Set<Language> ignoredLanguages = TestTools.getLanguagesExcept(args);
-      prt.testBitextRulesFromXML(ignoredLanguages);
+      prt.testBitextRules(ignoredLanguages);
     }
     System.out.println("Tests successful.");
   }

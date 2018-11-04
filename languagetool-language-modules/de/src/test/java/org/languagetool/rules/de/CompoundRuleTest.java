@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,8 +18,6 @@
  */
 package org.languagetool.rules.de;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
@@ -31,12 +29,13 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    lt = new JLanguageTool(new German());
-    rule = new CompoundRule(TestTools.getMessages("de"));
+      German language = new German();
+    lt = new JLanguageTool(language);
+    rule = language.createCompoundRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "Eine tolle CD-ROM");
     check(0, "Eine tolle CD-ROM.");
@@ -93,5 +92,5 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
     check(0, "y-Achse");
     check(1, "y Achse", new String[]{"y-Achse"});
   }
-  
+
 }

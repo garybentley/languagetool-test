@@ -50,7 +50,8 @@ public class Hunspell {
      * The instance of the HunspellManager, looks for the native lib in the
      * default directories
      */
-    public static Hunspell getInstance() throws UnsatisfiedLinkError, UnsupportedOperationException { 
+     // GTODO Fix this!!!  Needs to work on paths or streams or something else...
+    public static Hunspell getInstance() throws UnsatisfiedLinkError, UnsupportedOperationException {
         return getInstance(null);
     }
 
@@ -58,7 +59,7 @@ public class Hunspell {
      * The instance of the HunspellManager, looks for the native lib in
      * the directory specified.
      *
-     * @param libDir Optional absolute directory where the native lib can be found. 
+     * @param libDir Optional absolute directory where the native lib can be found.
      */
     public static synchronized Hunspell getInstance(String libDir) throws UnsatisfiedLinkError, UnsupportedOperationException {
         if (hunspell != null) {
@@ -82,13 +83,13 @@ public class Hunspell {
      * 2) libFile stripped back to the base name (^lib(.*)\.so on unix)
      * 3) The library is searched for in the classpath, extracted to disk and loaded.
      *
-     * @param libDir Optional absolute directory where the native lib can be found. 
+     * @param libDir Optional absolute directory where the native lib can be found.
      * @throws UnsupportedOperationException if the OS or architecture is simply not supported.
      */
     protected Hunspell(String libDir) throws UnsatisfiedLinkError, UnsupportedOperationException {
 
         libFile = libDir != null ? libDir+"/"+libName() : libNameBare();
-        try {	   
+        try {
             hsl = (HunspellLibrary)Native.loadLibrary(libFile, HunspellLibrary.class);
         } catch (UnsatisfiedLinkError urgh) {
 
@@ -148,7 +149,7 @@ public class Hunspell {
 
         } else {
             return "lib"+libNameBare()+".so";
-        }  
+        }
     }
 
     public static String libNameBare() throws UnsupportedOperationException {
@@ -163,7 +164,7 @@ public class Hunspell {
             if (x86) {
                 return "hunspell-win-x86-32";
             }
-            if (amd64) { 
+            if (amd64) {
                 return "hunspell-win-x86-64";
             }
 
@@ -174,7 +175,7 @@ public class Hunspell {
             if (amd64) {
                 return "hunspell-darwin-x86-64";
             }
-            if (arch.equals("ppc")) {		    
+            if (arch.equals("ppc")) {
                 return "hunspell-darwin-ppc-32";
             }
 
@@ -187,10 +188,10 @@ public class Hunspell {
             }
 
         } else if (os.startsWith("sunos")) {
-            //if (arch.equals("sparc")) { 
+            //if (arch.equals("sparc")) {
             //	return "hunspell-sunos-sparc-64";
-            //}		
-            
+            //}
+
         } else if (os.startsWith("freebsd")) {
             // Patch by Koen Vervloesem - FreeBSD is not supported yet, but: "... not a real solution, but
             // having this fixed makes it easier for me to build new LanguageTool releases without always
@@ -204,29 +205,29 @@ public class Hunspell {
 
         } else if (os.startsWith("aix")) {
             // added by Martin Kallinger (https://github.com/languagetool-org/languagetool/pull/1090)
-            return "hunspell-ppc64"; 
+            return "hunspell-ppc64";
         }
 
         throw new UnsupportedOperationException("Unknown OS/arch: "+os+"/"+arch);
-    }    
+    }
 
     /**
      * This is the cache where we keep the already loaded dictionaries around
      */
     private HashMap<String, Dictionary> map = new HashMap<>();
 
-    
+
     private static CharBuffer ensureCapacity(CharBuffer buffer, int capacity) {
         if (buffer == null || buffer.capacity() < capacity) {
             buffer = CharBuffer.allocate(capacity);
         }
         return buffer;
     }
-    
+
     /**
-     * Gets an instance of the dictionary. 
+     * Gets an instance of the dictionary.
      *
-     * @param baseFileName the base name of the dictionary, 
+     * @param baseFileName the base name of the dictionary,
      * passing /dict/da_DK means that the files /dict/da_DK.dic
      * and /dict/da_DK.aff get loaded
      */
@@ -241,7 +242,7 @@ public class Hunspell {
             map.put(baseFileName, d);
             return d;
         }
-    }   
+    }
 
     /**
      * Removes a dictionary from the internal cache
@@ -277,7 +278,7 @@ public class Hunspell {
 
         /**
          * Creates an instance of the dictionary.
-         * @param baseFileName the base name of the dictionary, 
+         * @param baseFileName the base name of the dictionary,
          */
         Dictionary(String baseFileName) throws IOException {
             File dic = new File(baseFileName + ".dic");
@@ -292,7 +293,7 @@ public class Hunspell {
             hunspellDict = hsl.Hunspell_create(aff.toString(), dic.toString());
             encoding = hsl.Hunspell_get_dic_encoding(hunspellDict);
 
-            //hunspell uses non-standard names of charsets 
+            //hunspell uses non-standard names of charsets
             if ("microsoft1251".equals(encoding)) {
                 encoding = "windows-1251";
             } else if ("ISCII-DEVANAGARI".equals(encoding)) {
@@ -320,7 +321,7 @@ public class Hunspell {
         public String getWordChars() {
             return wordChars;
         }
-        
+
         /**
          * Check if a word is spelled correctly
          *
@@ -351,13 +352,13 @@ public class Hunspell {
         }
 
         /**
-         * Returns a list of suggestions 
+         * Returns a list of suggestions
          *
          * @param word The word to check and offer suggestions for
          */
         public List<String> suggest(String word) throws CharacterCodingException {
             List<String> res = new ArrayList<>();
-            try {		
+            try {
                 int suggestionsCount = 0;
                 PointerByReference suggestions = new PointerByReference();
                 final byte[] wordAsBytes = stringToBytes(word);
@@ -375,7 +376,7 @@ public class Hunspell {
                         getPointerArray(0, suggestionsCount);
 
                 for (int i=0; i<suggestionsCount; i++) {
-                    long len = pointerArray[i].indexOf(0, (byte)0); 
+                    long len = pointerArray[i].indexOf(0, (byte)0);
                     if (len != -1) {
                         if (len > Integer.MAX_VALUE) {
                             throw new RuntimeException(
@@ -391,7 +392,7 @@ public class Hunspell {
 
             return res;
         }
-        
+
         private String getWordCharsFromFile(final File affixFile) throws IOException {
             String affixWordChars = "";
           try (Scanner scanner = new Scanner(affixFile, encoding)) {
@@ -404,7 +405,7 @@ public class Hunspell {
           }
             return affixWordChars;
           }
-        
+
         /**
          * Adds a word to the runtime dictionary.
          * @param word Word to be added.
@@ -412,7 +413,7 @@ public class Hunspell {
         public void addWord(final String word) throws UnsupportedEncodingException {
             hsl.Hunspell_add(hunspellDict, stringToBytes(word));
         }
-                
+
     }
 
 }

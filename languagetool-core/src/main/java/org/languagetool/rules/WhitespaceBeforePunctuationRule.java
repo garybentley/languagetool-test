@@ -1,7 +1,7 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
  *                    Paolo Bianchini
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,17 +26,18 @@ import java.util.ResourceBundle;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * A rule that matches several punctuation signs such as {@code :} {@code ;} and {@code %} preceded by whitespace.
- * 
+ *
  * Checks for:
  * <pre>
  *    &lt;a word&gt; : and suggests &lt;a word&gt;:
  *    &lt;a word&gt; ; and suggests &lt;a word&gt;;
  *    &lt;a number&gt; % and suggests &lt;a number&gt;%
  * </pre>
- * 
+ *
  * @author Paolo Bianchini
  */
 public class WhitespaceBeforePunctuationRule extends Rule {
@@ -87,7 +88,7 @@ public class WhitespaceBeforePunctuationRule extends Rule {
           if (prevPrevToken.length() > 0 && Character.isDigit(prevPrevToken.charAt(0))) {
             msg = messages.getString("no_space_before_percentage");
             suggestionText = "%";
-          }            
+          }
         }
       }
       if (msg != null) {

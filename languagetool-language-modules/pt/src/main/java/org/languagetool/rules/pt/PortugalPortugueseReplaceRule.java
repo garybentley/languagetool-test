@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,7 @@ import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,12 +38,12 @@ import java.util.ResourceBundle;
  * @author Tiago F. Santos
  * @since 3.6
  */
- 
+
 public class PortugalPortugueseReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String PORTUGAL_PORTUGUESE_SIMPLE_REPLACE_RULE = "PT_PT_SIMPLE_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/pt/pt-PT/replace.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale PT_PT_LOCALE = new Locale("pt-PT");
 
   @Override
@@ -50,8 +51,9 @@ public class PortugalPortugueseReplaceRule extends AbstractSimpleReplaceRule {
     return wrongWords;
   }
 
-  public PortugalPortugueseReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+  public PortugalPortugueseReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
+    wrongWords = load("/pt/pt-PT/replace.txt", dataBroker);
     super.setCategory(Categories.REGIONALISMS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("Onde está o <marker>banheiro</marker>?"),
@@ -72,7 +74,7 @@ public class PortugalPortugueseReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "Palavra brasileira";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " é uma expressão brasileira, em Português de Portugal utiliza-se: "

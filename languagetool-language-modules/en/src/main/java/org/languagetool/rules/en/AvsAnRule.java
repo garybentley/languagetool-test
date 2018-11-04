@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,9 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.HashSet;
 
-import static org.languagetool.rules.en.AvsAnData.getWordsRequiringA;
-import static org.languagetool.rules.en.AvsAnData.getWordsRequiringAn;
+//GTODO import static org.languagetool.rules.en.AvsAnData.getWordsRequiringA;
+//GTODO import static org.languagetool.rules.en.AvsAnData.getWordsRequiringAn;
 
 /**
  * Check if the determiner (if any) preceding a word is:
@@ -40,7 +42,7 @@ import static org.languagetool.rules.en.AvsAnData.getWordsRequiringAn;
  * </ul>
  *  This rule loads some exceptions from external files {@code det_a.txt} and
  *  {@code det_an.txt} (e.g. for <i>an hour</i>).
- * 
+ *
  * @author Daniel Naber
  */
 public class AvsAnRule extends Rule {
@@ -49,10 +51,15 @@ public class AvsAnRule extends Rule {
     A, AN, A_OR_AN, UNKNOWN
   }
 
+  private final Set<String> requiresA;
+  private final Set<String> requiresAn;
+
   private static final Pattern cleanupPattern = Pattern.compile("[^αa-zA-Z0-9\\.;,:']");
 
-  public AvsAnRule(ResourceBundle messages) {
+  public AvsAnRule(ResourceBundle messages, Set<String> requiresA, Set<String> requiresAn) {
     super.setCategory(Categories.MISC.getCategory(messages));
+    this.requiresA = requiresA != null ? requiresA : new HashSet<>();
+    this.requiresAn = requiresAn != null ? requiresAn : new HashSet<>();
     setLocQualityIssueType(ITSIssueType.Misspelling);
     addExamplePair(Example.wrong("The train arrived <marker>a hour</marker> ago."),
                    Example.fixed("The train arrived <marker>an hour</marker> ago."));
@@ -150,10 +157,10 @@ public class AvsAnRule extends Rule {
         return Determiner.UNKNOWN;
       }
     }
-    if (getWordsRequiringA().contains(word.toLowerCase()) || getWordsRequiringA().contains(word)) {
+    if (requiresA.contains(word.toLowerCase()) || requiresA.contains(word)) {
       determiner = Determiner.A;
     }
-    if (getWordsRequiringAn().contains(word.toLowerCase()) || getWordsRequiringAn().contains(word)) {
+    if (requiresAn.contains(word.toLowerCase()) || requiresAn.contains(word)) {
       if (determiner == Determiner.A) {
         determiner = Determiner.A_OR_AN;   // e.g. for 'historical'
       } else {

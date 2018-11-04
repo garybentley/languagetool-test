@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,12 +29,12 @@ import org.languagetool.Language;
 
 /**
  * Check if a word is repeated twice, e.g. "the the".
- *   
+ *
  * @author Daniel Naber
  */
 public class WordRepeatRule extends Rule {
 
-  public WordRepeatRule(ResourceBundle messages, Language language) {
+  public WordRepeatRule(ResourceBundle messages) {
     super(messages);
     super.setCategory(Categories.MISC.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Duplication);
@@ -45,7 +45,7 @@ public class WordRepeatRule extends Rule {
    * a potential word repetition at the current position that should be ignored,
    * i.e. if no error should be created.
    * @param tokens the tokens of the sentence currently being checked
-   * @param position the current position in the tokens 
+   * @param position the current position in the tokens
    * @return this implementation always returns false
    */
   public boolean ignore(AnalyzedTokenReadings[] tokens, int position) {
@@ -63,7 +63,7 @@ public class WordRepeatRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = getSentenceWithImmunization(sentence).getTokensWithoutWhitespace();
     String prevToken = "";

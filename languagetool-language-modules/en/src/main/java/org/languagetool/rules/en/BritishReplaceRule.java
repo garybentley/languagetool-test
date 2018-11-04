@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -38,16 +38,27 @@ public class BritishReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String BRITISH_SIMPLE_REPLACE_RULE = "EN_GB_SIMPLE_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/en/en-GB/replace.txt");
-  private static final Locale EN_GB_LOCALE = new Locale("en-GB");
+  private Locale locale;
 
+  // GTODO: private Map<String, List<String>> wrongWords;
+  //private static final Locale EN_GB_LOCALE = new Locale("en-GB");
+
+/*
+GTODO: Clean up
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      return dataBroker.getWrongWords();
+      // GTODO: Clean up
+      if (wrongWords == null) {
+          wrongWords = load("/en/en-GB/replace.txt", dataBroker);
+      }
+
     return wrongWords;
   }
-
-  public BritishReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
+*/
+  public BritishReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, Locale locale) throws IOException {
+    super(messages, wrongWords);
+    this.locale = locale;
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("We can produce <marker>drapes</marker> of any size or shape from a choice of over 500 different fabrics."),
                    Example.fixed("We can produce <marker>curtains</marker> of any size or shape from a choice of over 500 different fabrics."));
@@ -67,7 +78,7 @@ public class BritishReplaceRule extends AbstractSimpleReplaceRule {
   public String getShort() {
     return "American word";
   }
-  
+
   @Override
   public String getMessage(String tokenStr, List<String> replacements) {
     return tokenStr + " is a common American expression, in British English it is more common to use: "
@@ -81,7 +92,8 @@ public class BritishReplaceRule extends AbstractSimpleReplaceRule {
 
   @Override
   public Locale getLocale() {
-    return EN_GB_LOCALE;
+    return locale;
+    //GTODO: EN_GB_LOCALE;
   }
 
 }

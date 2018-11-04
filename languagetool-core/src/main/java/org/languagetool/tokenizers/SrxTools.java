@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,6 +24,7 @@ import net.loomchild.segment.srx.SrxParser;
 import net.loomchild.segment.srx.SrxTextIterator;
 import net.loomchild.segment.srx.io.Srx2SaxParser;
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -39,11 +40,12 @@ final class SrxTools {
 
   private SrxTools() {
   }
-
-  static SrxDocument createSrxDocument(String path) {
+/*
+GTODO Clean up
+  static SrxDocument createSrxDocument(String path, ResourceDataBroker dataBroker) {
     try {
       try (
-        InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path);
+        InputStream inputStream = dataBroker.getFromResourceDirAsStream(path);
         BufferedReader srxReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"))
       ) {
         Map<String, Object> parserParameters = new HashMap<>();
@@ -55,7 +57,7 @@ final class SrxTools {
       throw new RuntimeException("Could not load SRX rules", e);
     }
   }
-
+*/
   static List<String> tokenize(String text, SrxDocument srxDocument, String code) {
     List<String> segments = new ArrayList<>();
     TextIterator textIterator = new SrxTextIterator(srxDocument, code, text);

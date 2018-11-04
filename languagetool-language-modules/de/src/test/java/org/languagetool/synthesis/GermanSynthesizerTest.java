@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,9 +19,10 @@
 package org.languagetool.synthesis;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.AnalyzedToken;
+import org.languagetool.language.German;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.hamcrest.core.Is.is;
@@ -29,10 +30,15 @@ import static org.junit.Assert.assertThat;
 
 public class GermanSynthesizerTest {
 
-  private final GermanSynthesizer synthesizer = new GermanSynthesizer();
+  private Synthesizer synthesizer;
+
+  @Before
+  public void setUp() throws Exception {
+      synthesizer = new German().getSynthesizer();
+  }
 
   @Test
-  public void testSynthesize() throws IOException {
+  public void testSynthesize() throws Exception {
     assertThat(synth("Äußerung", "SUB:NOM:PLU:FEM"), is("[Äußerungen]"));
     assertThat(synth("Äußerung", "SUB:NOM:PLU:MAS"), is("[]"));
     assertThat(synth("Haus", "SUB:AKK:PLU:NEU"), is("[Häuser]"));
@@ -40,7 +46,7 @@ public class GermanSynthesizerTest {
   }
 
   @Test
-  public void testSynthesizeCompounds() throws IOException {
+  public void testSynthesizeCompounds() throws Exception {
     assertThat(synth("Regelsystem", "SUB:NOM:PLU:NEU"), is("[Regelsysteme]"));
     assertThat(synth("Regelsystem", "SUB:DAT:PLU:NEU"), is("[Regelsystemen]"));
     assertThat(synth("Regelsystem", ".*:PLU:.*", true), is("[Regelsysteme, Regelsystemen]"));
@@ -48,16 +54,16 @@ public class GermanSynthesizerTest {
   }
 
   @Test
-  public void testMorfologikBug() throws IOException {
+  public void testMorfologikBug() throws Exception {
     // see https://github.com/languagetool-org/languagetool/issues/586
     assertThat(synth("anfragen", "VER:1:PLU:KJ1:SFT:NEB"), is("[anfragen, Anfragen]"));
   }
 
-  private String synth(String word, String posTag) throws IOException {
+  private String synth(String word, String posTag) throws Exception {
     return Arrays.toString(synthesizer.synthesize(dummyToken(word), posTag));
   }
 
-  private String synth(String word, String posTag, boolean regEx) throws IOException {
+  private String synth(String word, String posTag, boolean regEx) throws Exception {
     return Arrays.toString(synthesizer.synthesize(dummyToken(word), posTag, regEx));
   }
 

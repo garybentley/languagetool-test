@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 /**
  * Tools for working with strings.
- * 
+ *
  * @author Daniel Naber
  */
 public final class StringTools {
@@ -179,7 +179,7 @@ public final class StringTools {
   /**
    * Return <code>str</code> modified so that its first character is now an
    * uppercase character. If <code>str</code> starts with non-alphabetic
-   * characters, such as quotes or parentheses, the first character is 
+   * characters, such as quotes or parentheses, the first character is
    * determined as the first alphabetic character.
    */
   @Nullable
@@ -188,14 +188,31 @@ public final class StringTools {
   }
 
   /**
-   * Like {@link #uppercaseFirstChar(String)}, but handles a special case for Dutch (IJ in 
+   * Like {@link #uppercaseFirstChar(String)}, but handles a special case for Dutch (IJ in
    * e.g. "ijsselmeer" -&gt; "IJsselmeer").
    * @param language the language, will be ignored if it's {@code null}
    * @since 2.7
    */
   @Nullable
   public static String uppercaseFirstChar(String str, Language language) {
-    if (language != null && "nl".equals(language.getShortCode()) && str != null && str.toLowerCase().startsWith("ij")) {
+    if (language != null && "nl".equals(language.getLocale().getLanguage()) && str != null && str.toLowerCase().startsWith("ij")) {
+      // hack to fix https://github.com/languagetool-org/languagetool/issues/148
+      return "IJ" + str.substring(2);
+    } else {
+      return changeFirstCharCase(str, true);
+    }
+  }
+
+  /**
+   * Like {@link #uppercaseFirstChar(String)}, but handles a special case for Dutch (IJ in
+   * e.g. "ijsselmeer" -&gt; "IJsselmeer").
+   * @param language the language, will be ignored if it's {@code null}
+   * @since 2.7
+   */
+  @Nullable
+  public static String uppercaseFirstChar(String str, Locale locale) {
+      // GTODO Need a constant for the dutch language id.
+    if (locale != null && "nl".equals(locale.getLanguage()) && str != null && str.toLowerCase().startsWith("ij")) {
       // hack to fix https://github.com/languagetool-org/languagetool/issues/148
       return "IJ" + str.substring(2);
     } else {
@@ -206,7 +223,7 @@ public final class StringTools {
   /**
    * Return <code>str</code> modified so that its first character is now an
    * lowercase character. If <code>str</code> starts with non-alphabetic
-   * characters, such as quotes or parentheses, the first character is 
+   * characters, such as quotes or parentheses, the first character is
    * determined as the first alphabetic character.
    */
   @Nullable
@@ -218,7 +235,7 @@ public final class StringTools {
    * Return <code>str</code> modified so that its first character is now an
    * lowercase or uppercase character, depending on <code>toUpperCase</code>.
    * If <code>str</code> starts with non-alphabetic
-   * characters, such as quotes or parentheses, the first character is 
+   * characters, such as quotes or parentheses, the first character is
    * determined as the first alphabetic character.
    */
   @Nullable
@@ -234,8 +251,8 @@ public final class StringTools {
     while (!Character.isLetterOrDigit(str.charAt(pos)) && len > pos) {
       pos++;
     }
-    char firstChar = str.charAt(pos);    
-    return str.substring(0, pos) 
+    char firstChar = str.charAt(pos);
+    return str.substring(0, pos)
         + (toUpperCase ? Character.toUpperCase(firstChar) : Character.toLowerCase(firstChar))
         + str.substring(pos + 1);
   }
@@ -258,8 +275,8 @@ public final class StringTools {
     try (InputStreamReader isr = new InputStreamReader(is, charsetName)) {
       return readerToString(isr);
     }
-  } 
-  
+  }
+
   /**
    * Calls {@link #escapeHTML(String)}.
    */
@@ -316,7 +333,7 @@ public final class StringTools {
    * token elements that cannot possibly contain any spaces, with the exception
    * for a single space in a word (for example, if the language supports numbers
    * formatted with spaces as single tokens, as Catalan in LanguageTool).
-   * 
+   *
    * @param s String to be filtered.
    * @return Filtered s.
    */
@@ -350,7 +367,7 @@ public final class StringTools {
 
   /**
    * Adds spaces before words that are not punctuation.
-   * 
+   *
    * @param word Word to add the preceding space.
    * @param language
    *          Language of the word (to check typography conventions). Currently
@@ -363,7 +380,7 @@ public final class StringTools {
     String space = " ";
     if (word.length() == 1) {
       char c = word.charAt(0);
-      if ("fr".equals(language.getShortCode())) {
+      if ("fr".equals(language.getLocale().getLanguage())) {
         if (c == '.' || c == ',') {
           space = "";
         }
@@ -407,7 +424,7 @@ public final class StringTools {
     }
     return false;
   }
-  
+
   /**
    * Checks if a string is the non-breaking whitespace (<code>\u00A0</code>).
    * @since 2.1
@@ -426,7 +443,7 @@ public final class StringTools {
 
   /**
    * Helper method to replace calls to {@code "".equals()}.
-   * 
+   *
    * @param str String to check
    * @return true if string is empty or {@code null}
    */
@@ -440,7 +457,7 @@ public final class StringTools {
    * @return Filtered string without XML tags.
    */
   public static String filterXML(String str) {
-    String s = str;       
+    String s = str;
     if (s.contains("<")) { // don't run slow regex unless we have to
       s = XML_COMMENT_PATTERN.matcher(s).replaceAll(" ");
       s = XML_PATTERN.matcher(s).replaceAll("");
@@ -470,5 +487,5 @@ public final class StringTools {
     }
     return isParaEnd;
   }
-  
+
 }

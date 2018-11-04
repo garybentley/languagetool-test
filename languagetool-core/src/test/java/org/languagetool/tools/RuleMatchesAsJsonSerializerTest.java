@@ -19,12 +19,15 @@
 package org.languagetool.tools;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.JLanguageTool;
+import org.languagetool.TestLanguage;
 import org.languagetool.Languages;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
+import org.languagetool.TestTools;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -35,25 +38,31 @@ import static org.junit.Assert.*;
 public class RuleMatchesAsJsonSerializerTest {
 
   private final RuleMatchesAsJsonSerializer serializer = new RuleMatchesAsJsonSerializer();
-  
-  private final List<RuleMatch> matches = Arrays.asList(
-          new RuleMatch(new FakeRule(),
-          new JLanguageTool(Languages.getLanguageForShortCode("xx")).getAnalyzedSentence("This is an test sentence."),
-          1, 3, "My Message, use <suggestion>foo</suggestion> instead", "short message")
-  );
 
-  public RuleMatchesAsJsonSerializerTest() throws IOException {
+  private List<RuleMatch> matches;
+
+  public RuleMatchesAsJsonSerializerTest() {
+  }
+
+  @Before
+  public void setUp() throws Exception {
+      matches  = Arrays.asList(
+              new RuleMatch(new FakeRule(),
+              new JLanguageTool(TestTools.getTestLanguage()).getAnalyzedSentence("This is an test sentence."),
+              1, 3, "My Message, use <suggestion>foo</suggestion> instead", "short message")
+      );
   }
 
   @Test
   public void testJson() {
-    String json = serializer.ruleMatchesToJson(matches, "This is an text.", 5, Languages.getLanguageForShortCode("xx-XX"), null);
+    TestLanguage lang = TestTools.getTestLanguage();
+    String json = serializer.ruleMatchesToJson(matches, "This is an text.", 5, lang, null);
     // Software:
     assertContains("\"LanguageTool\"", json);
     assertContains(JLanguageTool.VERSION, json);
     // Language:
-    assertContains("\"Testlanguage\"", json);
-    assertContains("\"xx-XX\"", json);
+    assertContains(String.format("\"%1$s\"", lang.getName()), json);
+    assertContains(String.format("\"%1$s\"", lang.getLocale().toLanguageTag()), json);
     // Matches:
     assertContains("\"My Message, use \\\"foo\\\" instead\"", json);
     assertContains("\"My rule description\"", json);
@@ -71,16 +80,16 @@ public class RuleMatchesAsJsonSerializerTest {
 
   @Test
   public void testJsonWithUnixLinebreak() {
-    String json = serializer.ruleMatchesToJson(matches, "This\nis an text.", 5, Languages.getLanguageForShortCode("xx-XX"), null);
+    String json = serializer.ruleMatchesToJson(matches, "This\nis an text.", 5, TestTools.getTestLanguage(), null);
     assertTrue(json.contains("This is ..."));  // got filtered out by ContextTools
   }
-  
+
   @Test
   public void testJsonWithWindowsLinebreak() {
-    String json = serializer.ruleMatchesToJson(matches, "This\ris an text.", 5, Languages.getLanguageForShortCode("xx-XX"), null);
+    String json = serializer.ruleMatchesToJson(matches, "This\ris an text.", 5, TestTools.getTestLanguage(), null);
     assertTrue(json.contains("This\\ris ..."));
   }
-  
+
   static class FakeRule extends Rule {
     FakeRule() {
       setLocQualityIssueType(ITSIssueType.Addition);

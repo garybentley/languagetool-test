@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -36,7 +36,7 @@ import org.languagetool.tools.StringTools;
  * A rule that matches words which should not be used and suggests
  * correct ones instead. Loads the relevant words from
  * <code>rules/XX/replace.txt</code>, where XX is a code of the language.
- * 
+ *
  * @author Andriy Rysin
  */
 public abstract class AbstractSimpleReplaceRule extends Rule {
@@ -44,15 +44,21 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
   protected boolean ignoreTaggedWords = false;
   private boolean checkLemmas = true;
 
-  protected abstract Map<String, List<String>> getWrongWords();
+  private Map<String, List<String>> wrongWords;
+/*
+GTODO: Clean up
+  protected static Map<String, List<String>> load(String path, ResourceDataBroker dataBroker) {
+    return new SimpleReplaceDataLoader().loadWords(path, dataBroker);
+  }
+*/
 
-  protected static Map<String, List<String>> load(String path) {
-    return new SimpleReplaceDataLoader().loadWords(path);
+  public Map<String, List<String>> getWrongWords() {
+      return wrongWords;
   }
 
   /**
    * Indicates if the rule is case-sensitive. Default value is <code>true</code>.
-   * 
+   *
    * @return true if the rule is case-sensitive, false otherwise.
    */
   public boolean isCaseSensitive() {
@@ -64,6 +70,7 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
    *         is set to <code>false</code>.
    */
   public Locale getLocale() {
+      // GTODO Need to use a CaseConverter here...
     return Locale.getDefault();
   }
 
@@ -76,8 +83,10 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
     ignoreTaggedWords = true;
   }
 
-  public AbstractSimpleReplaceRule(ResourceBundle messages) {
+  public AbstractSimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords) {
+    super(messages);
     super.setCategory(Categories.MISC.getCategory(messages));
+    this.wrongWords = wrongWords;
   }
 
   @Override
@@ -100,7 +109,7 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
   }
 
   private String cleanup(String word) {
-    return isCaseSensitive() ? word : word.toLowerCase(getLocale()); 
+    return isCaseSensitive() ? word : word.toLowerCase(getLocale());
   }
 
   @Override
@@ -167,7 +176,7 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
         ruleMatches.add(potentialRuleMatch);
       }
     }
-    
+
     return ruleMatches;
   }
 

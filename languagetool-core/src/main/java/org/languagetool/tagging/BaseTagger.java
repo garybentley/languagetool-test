@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,6 +33,8 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * Base tagger using Morfologik binary dictionaries.
@@ -42,72 +44,104 @@ import org.languagetool.tools.StringTools;
 public abstract class BaseTagger implements Tagger {
 
   protected final WordTagger wordTagger;
-  protected final Locale conversionLocale;
+  //protected final Locale conversionLocale;
 
   private final boolean tagLowercaseWithUppercase;
-  private final String dictionaryPath;
+  // GTODO: private final String dictionaryPath;
   private final Dictionary dictionary;
+  private final CaseConverter caseConverter;
 
   /**
    * Get the filename for manual additions, e.g., {@code /en/added.txt}, or {@code null}.
    * @since 2.8
    */
+   /*
+   GTODO Clean up
   @Nullable
   public abstract String getManualAdditionsFileName();
-
+*/
   /**
    * Get the filename for manual removals, e.g., {@code /en/removed.txt}, or {@code null}.
    * @since 3.2
    */
+   /*
+   GTODO: Clean up
   @Nullable
   public String getManualRemovalsFileName() {
     return null;
   }
+*/
+  public BaseTagger(/*Locale locale,*/ Dictionary baseDict, WordTagger tagger, CaseConverter caseCon, boolean tagLowercaseWithUppercase) {
+      //this.conversionLocale = locale;
+      this.tagLowercaseWithUppercase = tagLowercaseWithUppercase;
+      this.dictionary = baseDict;
+      this.wordTagger = tagger;
+      this.caseConverter = caseCon;
+  }
 
   /** @since 2.9 */
+/*
+GTODO Clean up
   public BaseTagger(String filename) {
     this(filename, Locale.getDefault(), true);
   }
-
+*/
   /** @since 2.9 */
+  /*
+  GTODO Clean up
   public BaseTagger(String filename, Locale conversionLocale) {
     this(filename, conversionLocale, true);
   }
+  */
+
+/*
+GTODO Clean up
+  public BaseTagger(String filename, Locale locale, boolean tagLowercaseWithUppercase) {
+      this(filename, locale, tagLowercaseWithUppercase, JLanguageTool.getDataBroker());
+  }
+*/
 
   /** @since 2.9 */
-  public BaseTagger(String filename, Locale locale, boolean tagLowercaseWithUppercase) {
+/*
+GTODO Clean up
+  public BaseTagger(String filename, Locale locale, boolean tagLowercaseWithUppercase, ResourceDataBroker dataBroker) {
     this.dictionaryPath = filename;
     this.conversionLocale = locale;
     this.tagLowercaseWithUppercase = tagLowercaseWithUppercase;
     try {
-      URL url = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(filename);
+      URL url = dataBroker.getFromResourceDirAsUrl(filename);
       this.dictionary = Dictionary.read(url);
     } catch (IOException e) {
       throw new RuntimeException("Could not load dictionary from " + filename, e);
     }
     this.wordTagger = initWordTagger();
   }
-
+*/
   /**
    * @since 2.9
    */
+   /*
+   GTODO Clean up
   public String getDictionaryPath() {
     return dictionaryPath;
   }
-
+*/
   /**
    * If true, tags from the binary dictionary (*.dict) will be overwritten by manual tags
    * from the plain text dictionary.
    * @since 2.9
    */
+   /*
+   GTODO Clean up
   public boolean overwriteWithManualTagger() {
     return false;
   }
-
+*/
   protected WordTagger getWordTagger() {
     return wordTagger;
   }
-
+/*
+GTODO Clean up
   private WordTagger initWordTagger() {
     MorfologikTagger morfologikTagger = new MorfologikTagger(dictionary);
     try {
@@ -131,8 +165,8 @@ public abstract class BaseTagger implements Tagger {
       throw new RuntimeException("Could not load manual tagger data from " + getManualAdditionsFileName(), e);
     }
   }
-
-  protected Dictionary getDictionary() {
+*/
+  public Dictionary getDictionary() {
     return dictionary;
   }
 
@@ -151,9 +185,9 @@ public abstract class BaseTagger implements Tagger {
 
   protected List<AnalyzedToken> getAnalyzedTokens(String word) {
     List<AnalyzedToken> result = new ArrayList<>();
-    String lowerWord = word.toLowerCase(conversionLocale);
+    String lowerWord = caseConverter.toLowerCase(word); //word.toLowerCase(conversionLocale);
     boolean isLowercase = word.equals(lowerWord);
-    boolean isMixedCase = StringTools.isMixedCase(word);
+    boolean isMixedCase = caseConverter.isMixedCase(word); //StringTools.isMixedCase(word);
     List<AnalyzedToken> taggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(word));
     List<AnalyzedToken> lowerTaggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(lowerWord));
     //normal case:
@@ -166,7 +200,7 @@ public abstract class BaseTagger implements Tagger {
     if (tagLowercaseWithUppercase) {
       if (lowerTaggerTokens.isEmpty() && taggerTokens.isEmpty() && isLowercase) {
         List<AnalyzedToken> upperTaggerTokens = asAnalyzedTokenListForTaggedWords(word,
-            getWordTagger().tag(StringTools.uppercaseFirstChar(word)));
+            getWordTagger().tag(caseConverter.uppercaseFirstChar(word))); //StringTools.uppercaseFirstChar(word)));
         if (!upperTaggerTokens.isEmpty()) {
           addTokens(upperTaggerTokens, result);
         }

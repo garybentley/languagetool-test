@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,6 +18,7 @@
  */
 package org.languagetool.rules;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
@@ -31,30 +32,29 @@ import static org.junit.Assert.assertEquals;
  */
 public class PunctuationMarkAtParagraphEndTest {
 
+  private PunctuationMarkAtParagraphEnd rule;
+  private JLanguageTool lt;
+
+  @Before
+  public void setUp() throws Exception {
+      lt = new JLanguageTool(TestTools.getTestLanguage());
+      rule = new PunctuationMarkAtParagraphEnd(TestTools.getEnglishMessages(), TestTools.getTestLanguage());
+  }
+
   @Test
-  public void testRule() throws IOException {
-    JLanguageTool lt = new JLanguageTool(TestTools.getDemoLanguage());
-    setUpRule(lt);
-
-    assertEquals(0, lt.check("This is a test sentence.").size());
-    assertEquals(0, lt.check("This is a test headline").size());
-    assertEquals(1, lt.check("This is a test sentence. And this is a second test sentence").size());
-    assertEquals(1, lt.check("\"This is a test sentence. And this is a second test sentence").size());
-    assertEquals(0, lt.check("This is a test sentence. And this is a second test sentence.").size());
-    assertEquals(0, lt.check("B. v. – Beschluss vom").size());
-    assertEquals(1, 
-        lt.check("This is a test sentence.\nAnd this is a second test sentence. Here is a quotation mark missing").size());
-    assertEquals(0, 
-        lt.check("This is a test sentence.\nAnd this is a second test sentence. Here is a quotation mark missing.").size());
+  public void testRule() throws Exception {
+    check(0, "This is a test sentence.");
+    check(0, "This is a test headline");
+    check(1, "This is a test sentence. And this is a second test sentence");
+    check(1, "\"This is a test sentence. And this is a second test sentence");
+    check(0, "This is a test sentence. And this is a second test sentence.");
+    check(0, "B. v. – Beschluss vom");
+    check(1, "This is a test sentence.\nAnd this is a second test sentence. Here is a quotation mark missing");
+    check(0, "This is a test sentence.\nAnd this is a second test sentence. Here is a quotation mark missing.");
   }
 
-  private void setUpRule(JLanguageTool lt) {
-    for (Rule rule : lt.getAllRules()) {
-      lt.disableRule(rule.getId());
-    }
-    PunctuationMarkAtParagraphEnd rule = new PunctuationMarkAtParagraphEnd(TestTools.getEnglishMessages(), TestTools.getDemoLanguage());
-    lt.addRule(rule);
+  private void check(int v, String str) throws Exception {
+      assertEquals(v, lt.check(rule, str).size());
   }
-
 
 }

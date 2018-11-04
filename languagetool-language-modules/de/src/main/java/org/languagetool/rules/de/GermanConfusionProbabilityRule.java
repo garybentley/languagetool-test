@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,9 +22,11 @@ import org.languagetool.Language;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.ngrams.ConfusionProbabilityRule;
 import org.languagetool.rules.Example;
+import org.languagetool.rules.ConfusionSet;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,12 +40,12 @@ public class GermanConfusionProbabilityRule extends ConfusionProbabilityRule {
     Pattern.compile("fiel(e|en)? .* (aus|auf)")
   );
 
-  public GermanConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language) {
-    this(messages, languageModel, language, 3);
+  public GermanConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, Map<String,List<ConfusionSet>> confusionSets) {
+    this(messages, languageModel, language, 3, confusionSets);
   }
 
-  public GermanConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, int grams) {
-    super(messages, languageModel, language, grams);
+  public GermanConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language, int grams, Map<String,List<ConfusionSet>> confusionSets) {
+    super(messages, languageModel, language, grams, confusionSets);
     addExamplePair(Example.wrong("Während Sie das Ganze <marker>mir</marker> einem Holzlöffel rühren…"),
                    Example.fixed("Während Sie das Ganze <marker>mit</marker> einem Holzlöffel rühren…"));
   }

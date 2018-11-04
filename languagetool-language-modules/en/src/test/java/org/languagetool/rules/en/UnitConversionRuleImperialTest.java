@@ -24,6 +24,7 @@ package org.languagetool.rules.en;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.language.BritishEnglish;
 import org.languagetool.Languages;
 import org.languagetool.rules.AbstractUnitConversionRule;
 import org.languagetool.rules.UnitConversionRuleTestHelper;
@@ -35,15 +36,15 @@ public class UnitConversionRuleImperialTest {
   private final UnitConversionRuleTestHelper unitConversionRuleTestHelper = new UnitConversionRuleTestHelper();
 
   @Test
-  public void match() throws IOException {
-    Language lang = Languages.getLanguageForShortCode("en-GB");
+  public void match() throws Exception {
+    BritishEnglish lang = new BritishEnglish();
     JLanguageTool lt = new JLanguageTool(lang);
-    AbstractUnitConversionRule rule = new UnitConversionRuleImperial(JLanguageTool.getMessageBundle(lang));
+    UnitConversionRuleImperial rule = lang.createUnitConversionRuleImperialRule(null);
     unitConversionRuleTestHelper.assertMatches("I just drank 3 pints.", 1, "1.7 l", rule, lt);
     unitConversionRuleTestHelper.assertMatches("I am 6 feet (2.02 m) tall.", 1, "1.83 metres", rule, lt);
   }
 
-  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws IOException {
+  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws Exception {
     unitConversionRuleTestHelper.assertMatches(input, expectedMatches, converted, rule, lt);
   }
 }

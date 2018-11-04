@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,8 @@
 package org.languagetool.tagging.disambiguation.rules;
 
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.ResourceDataBroker;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -32,11 +34,12 @@ import java.util.List;
 /**
  * Loads {@link DisambiguationPatternRule}s from a disambiguation rules XML
  * file.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class DisambiguationRuleLoader extends DefaultHandler {
-
+/*
+GTODO: Clean up
   public final List<DisambiguationPatternRule> getRules(InputStream stream)
       throws ParserConfigurationException, SAXException, IOException {
     DisambiguationRuleHandler handler = new DisambiguationRuleHandler();
@@ -46,5 +49,5 @@ public class DisambiguationRuleLoader extends DefaultHandler {
     saxParser.parse(stream, handler);
     return handler.getDisambRules();
   }
-
+*/
 }

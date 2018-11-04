@@ -36,9 +36,9 @@ import org.languagetool.rules.RuleMatch;
 public class MorfologikAustralianSpellerRuleTest extends AbstractEnglishSpellerRuleTest {
 
   @Test
-  public void testSuggestions() throws IOException {
-    Language language = new AustralianEnglish();
-    Rule rule = new MorfologikAustralianSpellerRule(TestTools.getMessages("en"), language, null);
+  public void testSuggestions() throws Exception {
+    AustralianEnglish language = new AustralianEnglish();
+    MorfologikAustralianSpellerRule rule = language.createMorfologikSpellerRule(null, null);
     super.testNonVariantSpecificSuggestions(rule, language);
 
     JLanguageTool langTool = new JLanguageTool(language);
@@ -47,10 +47,9 @@ public class MorfologikAustralianSpellerRuleTest extends AbstractEnglishSpellerR
   }
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     AustralianEnglish language = new AustralianEnglish();
-    MorfologikAustralianSpellerRule rule =
-            new MorfologikAustralianSpellerRule(TestTools.getMessages("en"), language, null);
+    MorfologikAustralianSpellerRule rule = language.createMorfologikSpellerRule(null, null);
 
     JLanguageTool langTool = new JLanguageTool(language);
 
@@ -78,7 +77,7 @@ public class MorfologikAustralianSpellerRuleTest extends AbstractEnglishSpellerR
 
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("aõh")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("a")).length);
-    
+
     //based on replacement pairs:
 
     RuleMatch[] matches2 = rule.match(langTool.getAnalyzedSentence("He teached us."));
@@ -89,7 +88,7 @@ public class MorfologikAustralianSpellerRuleTest extends AbstractEnglishSpellerR
     assertEquals("taught", matches2[0].getSuggestedReplacements().get(0));
   }
 
-  private void assertSuggestion(Rule rule, JLanguageTool lt, String input, String... expectedSuggestions) throws IOException {
+  private void assertSuggestion(Rule rule, JLanguageTool lt, String input, String... expectedSuggestions) throws Exception {
     RuleMatch[] matches = rule.match(lt.getAnalyzedSentence(input));
     assertThat(matches.length, is(1));
     assertTrue("Expected >= " + expectedSuggestions.length + ", got: " + matches[0].getSuggestedReplacements(),

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.*;
+import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
@@ -39,16 +40,19 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String POLISH_SIMPLE_REPLACE_RULE = "PL_SIMPLE_REPLACE";
 
-  private static final Map<String, List<String>> wrongWords = load("/pl/replace.txt");
+  private Map<String, List<String>> wrongWords;
   private static final Locale PL_LOCALE = new Locale("pl");
 
   @Override
   protected Map<String, List<String>> getWrongWords() {
+      if (wrongWords == null) {
+          wrongWords = load("/pl/replace.txt", dataBroker);
+      }
     return wrongWords;
   }
 
-  public SimpleReplaceRule(final ResourceBundle messages) throws IOException {
-    super(messages);
+  public SimpleReplaceRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+    super(messages, dataBroker);
     setLocQualityIssueType(ITSIssueType.Misspelling);
     setCategory(new Category(new CategoryId("PRAWDOPODOBNE_LITEROWKI"), "Prawdopodobne literówki"));
     setCheckLemmas(false);

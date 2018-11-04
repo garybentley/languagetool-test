@@ -18,12 +18,14 @@
  */
 package org.languagetool.synthesis;
 
+import java.util.Set;
+import morfologik.stemming.IStemmer;
+
 /**
  * French word form synthesizer.
  */
 public class FrenchSynthesizer extends BaseSynthesizer {
-
-  public FrenchSynthesizer() {
-    super("/fr/french_synth.dict", "/fr/french_tags.txt");
+  public FrenchSynthesizer(IStemmer stemmer, Set<String> tags) {
+      super(stemmer, tags);
   }
 }

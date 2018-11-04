@@ -36,16 +36,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.FakeLanguage;
+import org.languagetool.TestLanguage;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
+import org.languagetool.UserConfig;
 import org.languagetool.MultiThreadedJLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.XMLValidator;
@@ -74,34 +76,37 @@ public class PatternRuleTest {
   private static final Comparator<Match> MATCH_COMPARATOR = (m1, m2) -> Integer.compare( m1.getTokenRef(), m2.getTokenRef());
 
   public void testFake() {
-    // there's no test here - the languages are supposed to extend this class and call runGrammarRulesFromXmlTest() 
+    // there's no test here - the languages are supposed to extend this class and call runGrammarRulesFromXmlTest()
   }
 
   @Test
   public void testSupportsLanguage() {
-    FakeLanguage fakeLanguage1 = new FakeLanguage("yy");
-    FakeLanguage fakeLanguage2 = new FakeLanguage("zz");
+    TestLanguage fakeLanguage1 = new TestLanguage("yy");
+    TestLanguage fakeLanguage2 = new TestLanguage("zz");
     PatternRule patternRule1 = new PatternRule("ID", fakeLanguage1, Collections.<PatternToken>emptyList(), "", "", "");
-    assertTrue(patternRule1.supportsLanguage(fakeLanguage1)); 
+    assertTrue(patternRule1.supportsLanguage(fakeLanguage1));
     assertFalse(patternRule1.supportsLanguage(fakeLanguage2));
-    FakeLanguage fakeLanguage1WithVariant1 = new FakeLanguage("zz", "VAR1");
-    FakeLanguage fakeLanguage1WithVariant2 = new FakeLanguage("zz", "VAR2");
+    TestLanguage fakeLanguage1WithVariant1 = new TestLanguage("zz", "VAR1");
+    TestLanguage fakeLanguage1WithVariant2 = new TestLanguage("zz", "VAR2");
     PatternRule patternRuleVariant1 = new PatternRule("ID", fakeLanguage1WithVariant1, Collections.<PatternToken>emptyList(), "", "", "");
-    assertTrue(patternRuleVariant1.supportsLanguage(fakeLanguage1WithVariant1));    
+    assertTrue(patternRuleVariant1.supportsLanguage(fakeLanguage1WithVariant1));
     assertFalse(patternRuleVariant1.supportsLanguage(fakeLanguage1));
     assertFalse(patternRuleVariant1.supportsLanguage(fakeLanguage2));
     assertFalse(patternRuleVariant1.supportsLanguage(fakeLanguage1WithVariant2));
   }
-  
+
   @Test
-  public void shortMessageIsLongerThanErrorMessage() throws IOException {
+  public void shortMessageIsLongerThanErrorMessage() throws Exception {
     for (Language lang : Languages.get()) {
+        /*
+        GTODO: SHould we be skipping or run rules for all languages?
       if (skipCountryVariant(lang)) {
         // Skipping because there are no specific rules for this variant
         return;
       }
-      JLanguageTool languageTool = new JLanguageTool(lang);
-      for (AbstractPatternRule rule : getAllPatternRules(lang, languageTool)) {
+      */
+      List<AbstractPatternRule> rules = lang.getUseDataBroker().getPatternRules();
+      for (AbstractPatternRule rule : rules) {
         warnIfShortMessageLongerThanErrorMessage(rule);
       }
     }
@@ -127,20 +132,24 @@ public class PatternRuleTest {
       }
     }
   }
-  
-  private List<AbstractPatternRule> getAllPatternRules(Language language, JLanguageTool languageTool) throws IOException {
+
+/*
+GTODO: Clean up
+  private List<AbstractPatternRule> getAllPatternRules(Language language, JLanguageTool languageTool, UserConfig userConfig) throws IOException {
     List<AbstractPatternRule> rules = new ArrayList<>();
     for (String patternRuleFileName : language.getRuleFileNames()) {
       rules.addAll(languageTool.loadPatternRules(patternRuleFileName));
     }
     return rules;
   }
-
+*/
   /**
    * To be called from language modules. Languages.get() knows only the languages that's in the classpath.
-   * @param ignoredLanguage ignore this language - useful to speed up tests from languages that 
+   * @param ignoredLanguage ignore this language - useful to speed up tests from languages that
    *                        have another language as a dependency
    */
+   /*
+   GTODO: Clean up, languages should get their own rules.
   protected void runGrammarRulesFromXmlTest(Language ignoredLanguage) throws IOException {
     int count = 0;
     for (Language lang : Languages.get()) {
@@ -154,11 +163,13 @@ public class PatternRuleTest {
       System.err.println("Warning: no languages found in classpath - cannot run any grammar rule tests");
     }
   }
-  
+*/
   /**
    * To be called from language modules. Languages.get() only knows the languages that are in the classpath,
    * and that's only the demo language for languagetool-core.
    */
+   /*
+   GTODO: Reexamine all this... at present it has knowledge of the rules and their locations but it shouldn't.
   protected void runGrammarRulesFromXmlTest() throws IOException {
     for (Language lang : Languages.get()) {
       runGrammarRuleForLanguage(lang);
@@ -167,7 +178,9 @@ public class PatternRuleTest {
       System.err.println("Warning: no languages found in classpath - cannot run any grammar rule tests");
     }
   }
-
+*/
+/*
+GTODO see runGrammarRulesFromXmlTest
   private void runGrammarRuleForLanguage(Language lang) throws IOException {
     if (skipCountryVariant(lang)) {
       System.out.println("Skipping " + lang + " because there are no specific rules for that variant");
@@ -175,7 +188,9 @@ public class PatternRuleTest {
     }
     runTestForLanguage(lang);
   }
-
+*/
+/*
+GTODO: Reexamine
   private boolean skipCountryVariant(Language lang) {
     if (Languages.get().get(0).equals(lang)) { // test always the first one
       return false;
@@ -189,7 +204,9 @@ public class PatternRuleTest {
     }
     return !hasGrammarFiles && Languages.get().size() > 1;
   }
-
+*/
+/*
+GTODO: Clean up, add to getPatternRules for xx-XX type languages.
   private List<String> getGrammarFileNames(Language lang) {
     String shortNameWithVariant = lang.getShortCodeWithCountryAndVariant();
     List<String> fileNames = new ArrayList<>();
@@ -210,8 +227,8 @@ public class PatternRuleTest {
     }
     return fileNames;
   }
-
-  private void runGrammarRulesFromXmlTestIgnoringLanguages(Set<Language> ignoredLanguages) throws IOException {
+*/
+  private void runGrammarRulesFromXmlTestIgnoringLanguages(Set<Language> ignoredLanguages) throws Exception {
     System.out.println("Known languages: " + Languages.getWithDemoLanguage());
     for (Language lang : Languages.getWithDemoLanguage()) {
       if (ignoredLanguages != null && ignoredLanguages.contains(lang)) {
@@ -221,8 +238,8 @@ public class PatternRuleTest {
     }
   }
 
-  public void runTestForLanguage(Language lang) throws IOException {
-    validatePatternFile(lang);
+  public void runTestForLanguage(Language lang) throws Exception {
+    // GTODO reexamine, this has knowledge fo the rule constructions but shouldn't/need special tests -> validatePatternFile(lang);
     System.out.print("Running pattern rule tests for " + lang.getName() + "... ");
     MultiThreadedJLanguageTool languageTool = new MultiThreadedJLanguageTool(lang);
     if (CHECK_WITH_SENTENCE_SPLITTING) {
@@ -230,7 +247,8 @@ public class PatternRuleTest {
     }
     MultiThreadedJLanguageTool allRulesLanguageTool = new MultiThreadedJLanguageTool(lang);
     validateRuleIds(lang, allRulesLanguageTool);
-    List<AbstractPatternRule> rules = getAllPatternRules(lang, languageTool);
+    List<AbstractPatternRule> rules = lang.getUseDataBroker().getPatternRules();
+    //getAllPatternRules(lang, languageTool);
     for (AbstractPatternRule rule : rules) {
       // Test the rule pattern.
       /* check for useless 'marker' elements commented out - too slow to always run:
@@ -239,10 +257,9 @@ public class PatternRuleTest {
       if (PATTERN_MARKER_START.matcher(xml).matches() && PATTERN_MARKER_END.matcher(xml).matches()) {
         System.err.println("WARNING " + lang + ": useless <marker>: " + rule.getFullId());
       }*/
-
       // too aggressive for now:
       //PatternTestTools.failIfWhitespaceInToken(rule.getPatternTokens(), rule, lang);
-              
+
       PatternTestTools.warnIfRegexpSyntaxNotKosher(rule.getPatternTokens(),
               rule.getId(), rule.getSubId(), lang);
 
@@ -273,6 +290,8 @@ public class PatternRuleTest {
     languageTool.shutdown();
   }
 
+/*
+GTODO: Reexamine, need better way to test/validate through schema.
   private void validatePatternFile(Language lang) throws IOException {
     XMLValidator validator = new XMLValidator();
     List<String> grammarFiles = getGrammarFileNames(lang);
@@ -284,9 +303,9 @@ public class PatternRuleTest {
         if (xmlStream == null) {
           System.out.println("No rule file found at " + ruleFilePath + " in classpath");
           continue;
-        }
-        // if there are multiple xml grammar files we'll prepend all unification elements 
-        // from the first file to the rest of them 
+      }
+        // if there are multiple xml grammar files we'll prepend all unification elements
+        // from the first file to the rest of them
         if (grammarFiles.size() > 1 && !grammarFiles.get(0).equals(grammarFile)) {
           validator.validateWithXmlSchema(rulesDir + "/" + grammarFiles.get(0), ruleFilePath, rulesDir + "/rules.xsd");
         } else {
@@ -295,7 +314,7 @@ public class PatternRuleTest {
       }
     }
   }
-
+*/
   private void validateRuleIds(Language lang, JLanguageTool languageTool) {
     List<Rule> allRules = languageTool.getAllRules();
     Set<String> ids = new HashSet<>();
@@ -304,7 +323,7 @@ public class PatternRuleTest {
     for (Rule rule : allRules) {
       assertIdUniqueness(ids, ruleClasses, lang, rule);
       if (rule.getId().equalsIgnoreCase("ID")) {
-        System.err.println("WARNING: " + lang.getShortCodeWithCountryAndVariant() + " has a rule with id 'ID', this should probably be changed");
+        System.err.println("WARNING: Language " + lang.getLocale() + " has a rule with id 'ID', this should probably be changed");
       }
       Category category = rule.getCategory();
       if (category != null && category.getId() != null) {
@@ -338,7 +357,7 @@ public class PatternRuleTest {
 
   public void testGrammarRulesFromXML(List<AbstractPatternRule> rules,
                                       JLanguageTool languageTool,
-                                      JLanguageTool allRulesLanguageTool, Language lang) throws IOException {
+                                      JLanguageTool allRulesLanguageTool, Language lang) throws Exception {
     Map<String, AbstractPatternRule> complexRules = new HashMap<>();
     for (AbstractPatternRule rule : rules) {
       testCorrectSentences(languageTool, allRulesLanguageTool, lang, rule);
@@ -363,7 +382,7 @@ public class PatternRuleTest {
   }
 
   private void testBadSentences(JLanguageTool languageTool, JLanguageTool allRulesLanguageTool, Language lang,
-                                Map<String, AbstractPatternRule> complexRules, AbstractPatternRule rule) throws IOException {
+                                Map<String, AbstractPatternRule> complexRules, AbstractPatternRule rule) throws Exception {
     List<IncorrectExample> badSentences = rule.getIncorrectExamples();
     if (badSentences.isEmpty()) {
       fail("No incorrect examples found for rule " + rule.getFullId());
@@ -381,13 +400,13 @@ public class PatternRuleTest {
       }
       String badSentence = cleanXML(origBadSentence);
       assertTrue(badSentence.trim().length() > 0);
-      
+
       // necessary for XML Pattern rules containing <or>
       List<RuleMatch> matches = new ArrayList<>();
-      for (Rule auxRule : rules) { 
+      for (Rule auxRule : rules) {
         matches.addAll(getMatches(auxRule, badSentence, languageTool));
       }
-      
+
       if (rule instanceof RegexPatternRule || rule instanceof PatternRule && !((PatternRule)rule).isWithComplexPhrase()) {
         if (matches.size() != 1) {
           AnalyzedSentence analyzedSentence = languageTool.getAnalyzedSentence(badSentence);
@@ -489,7 +508,7 @@ public class PatternRuleTest {
   }
 
   private void testErrorTriggeringSentences(JLanguageTool languageTool, Language lang,
-                                            AbstractPatternRule rule) throws IOException {
+                                            AbstractPatternRule rule) throws Exception {
     for (ErrorTriggeringExample example : rule.getErrorTriggeringExamples()) {
       String sentence = cleanXML(example.getExample());
       List<RuleMatch> matches = getMatches(rule, sentence, languageTool);
@@ -533,7 +552,7 @@ public class PatternRuleTest {
     }
   }
 
-  private void assertSuggestionsDoNotCreateErrors(String badSentence, JLanguageTool languageTool, AbstractPatternRule rule, List<RuleMatch> matches) throws IOException {
+  private void assertSuggestionsDoNotCreateErrors(String badSentence, JLanguageTool languageTool, AbstractPatternRule rule, List<RuleMatch> matches) throws Exception {
     if (matches.get(0).getSuggestedReplacements().size() > 0) {
       int fromPos = matches.get(0).getFromPos();
       int toPos = matches.get(0).getToPos();
@@ -548,7 +567,7 @@ public class PatternRuleTest {
   }
 
   private void testCorrectSentences(JLanguageTool languageTool, JLanguageTool allRulesLanguageTool,
-                                    Language lang, AbstractPatternRule rule) throws IOException {
+                                    Language lang, AbstractPatternRule rule) throws Exception {
     List<CorrectExample> goodSentences = rule.getCorrectExamples();
     // necessary for XML Pattern rules containing <or>
     List<AbstractPatternRule> rules = allRulesLanguageTool.getPatternRulesByIdAndSubId(rule.getId(), rule.getSubId());
@@ -588,15 +607,16 @@ public class PatternRuleTest {
     return str.replaceAll("<([^<].*?)>", "");
   }
 
-  private boolean match(Rule rule, String sentence, JLanguageTool languageTool) throws IOException {
+  private boolean match(Rule rule, String sentence, JLanguageTool languageTool) throws Exception {
     AnalyzedSentence analyzedSentence = languageTool.getAnalyzedSentence(sentence);
     RuleMatch[] matches = rule.match(analyzedSentence);
     return matches.length > 0;
   }
 
   private List<RuleMatch> getMatches(Rule rule, String sentence,
-      JLanguageTool languageTool) throws IOException {
+      JLanguageTool languageTool) throws Exception {
     AnalyzedSentence analyzedSentence = languageTool.getAnalyzedSentence(sentence);
+
     RuleMatch[] matches = rule.match(analyzedSentence);
     if (CHECK_WITH_SENTENCE_SPLITTING) {
       // "real check" with sentence splitting:
@@ -640,7 +660,7 @@ public class PatternRuleTest {
       patternTokens.add(pToken);
       pos = false;
     }
-    PatternRule rule = new PatternRule("ID1", TestTools.getDemoLanguage(), patternTokens,
+    PatternRule rule = new PatternRule("ID1", TestTools.getTestLanguage(), patternTokens,
         "test rule", "user visible message", "short comment");
     return rule;
   }
@@ -649,7 +669,7 @@ public class PatternRuleTest {
    * Test XML patterns, as a help for people developing rules that are not
    * programmers.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     PatternRuleTest test = new PatternRuleTest();
     System.out.println("Running XML pattern tests...");
     if (args.length == 0) {

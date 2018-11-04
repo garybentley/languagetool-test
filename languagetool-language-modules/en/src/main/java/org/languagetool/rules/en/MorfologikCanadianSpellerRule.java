@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,32 +21,41 @@ package org.languagetool.rules.en;
 
 import java.io.IOException;
 import java.util.ResourceBundle;
+import java.util.List;
+import java.util.Set;
 
-import org.languagetool.Language;
+import org.languagetool.language.CanadianEnglish;
 import org.languagetool.UserConfig;
+import morfologik.stemming.Dictionary;
+import org.languagetool.synthesis.Synthesizer;
 
 public final class MorfologikCanadianSpellerRule extends AbstractEnglishSpellerRule {
 
-  private static final String RESOURCE_FILENAME = "/en/hunspell/en_CA.dict";
-  private static final String LANGUAGE_SPECIFIC_PLAIN_TEXT_DICT = "en/hunspell/spelling_en-CA.txt";
+    // GTODO: Clean up
+  //GTODO private static final String RESOURCE_FILENAME = "/en/hunspell/en_CA.dict";
+  //GTODO private static final String LANGUAGE_SPECIFIC_PLAIN_TEXT_DICT = "en/hunspell/spelling_en-CA.txt";
 
   public MorfologikCanadianSpellerRule(ResourceBundle messages,
-                                       Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+                                       CanadianEnglish language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords, Synthesizer synthesizer) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords, synthesizer);
   }
-
+/*
+GTODO
   @Override
   public String getFileName() {
     return RESOURCE_FILENAME;
   }
-
+*/
   @Override
   public String getId() {
     return "MORFOLOGIK_RULE_EN_CA";
   }
 
+/*
+GTODO Clean up
   @Override
   public String getLanguageVariantSpellingFileName() {
     return LANGUAGE_SPECIFIC_PLAIN_TEXT_DICT;
   }
+  */
 }

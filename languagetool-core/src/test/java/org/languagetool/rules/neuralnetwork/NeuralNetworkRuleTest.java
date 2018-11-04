@@ -44,15 +44,15 @@ public class NeuralNetworkRuleTest {
   private static JLanguageTool lt;
 
   @BeforeClass
-  public static void setUp() throws IOException {
+  public static void setUp() throws Exception {
     InputStream confusionSetStream = new ByteArrayInputStream("foo|lorem;bar|ipsum;0.8#blabla\nfizz;buzz;0.8".getBytes(StandardCharsets.UTF_8.name()));
     confusionSets = ScoredConfusionSetLoader.loadConfusionSet(confusionSetStream);
-    language = TestTools.getDemoLanguage();
+    language = TestTools.getTestLanguage();
     lt = new JLanguageTool(language);
   }
 
   @Test
-  public void testNeuralNetworkRule() throws IOException {
+  public void testNeuralNetworkRule() throws Exception {
     NeuralNetworkRule neuralNetworkRule = new NeuralNetworkRule(TestTools.getEnglishMessages(), language, confusionSets.get(0), context -> new float[]{-0.9f, 1.9f});
     assertThat(neuralNetworkRule.getId(), is("XX_foo_VS_bar_NEURALNETWORK"));
 
@@ -64,7 +64,7 @@ public class NeuralNetworkRuleTest {
   }
 
   @Test
-  public void testSuggestionTextRule() throws IOException {
+  public void testSuggestionTextRule() throws Exception {
     NeuralNetworkRule neuralNetworkRule = new NeuralNetworkRule(TestTools.getEnglishMessages(), language, confusionSets.get(0), context -> new float[]{0.9f, -1.9f});
     assertThat(neuralNetworkRule.getId(), is("XX_foo_VS_bar_NEURALNETWORK"));
 
@@ -76,7 +76,7 @@ public class NeuralNetworkRuleTest {
   }
 
   @Test
-  public void testSuggestionTextWithoutDescription() throws IOException {
+  public void testSuggestionTextWithoutDescription() throws Exception {
     NeuralNetworkRule neuralNetworkRule = new NeuralNetworkRule(TestTools.getEnglishMessages(), language, confusionSets.get(1), context -> new float[]{0.9f, -1.9f});
     assertThat(neuralNetworkRule.getId(), is("XX_fizz_VS_buzz_NEURALNETWORK"));
 

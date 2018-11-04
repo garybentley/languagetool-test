@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,19 +22,21 @@ import java.io.IOException;
 
 import org.languagetool.AnalyzedSentence;
 
+import org.languagetool.databroker.ResourceDataBroker;
+
 /**
  * Disambiguator interface. Particular implementations are language-dependent.
- * 
+ *
  * <p>The POS tagger might assign multiple tags to the token.
  * The goal is to filter out the incorrect tags and leave ideally only one per token.
  */
 public interface Disambiguator {
-  
+
   /**
    * If possible, filters out the wrong POS tags.
    * This code will run before disambiguation rules from xml are called.
    * This allows to have some initial disambiguation logic in Java.
-   * 
+   *
    * @param input
    *          The sentence with already tagged words. The words are expected to
    *          have multiple tags.
@@ -46,13 +48,13 @@ public interface Disambiguator {
 
   /**
    * If possible, filters out the wrong POS tags.
-   * 
+   *
    * @param input
    *          The sentence with already tagged words. The words are expected to
    *          have multiple tags.
    * @return Analyzed sentence, where each word has only one (possibly the most
    *         correct) tag.
    */
-  AnalyzedSentence disambiguate(AnalyzedSentence input) throws IOException;
+  AnalyzedSentence disambiguate(AnalyzedSentence input) throws Exception;
 
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,13 +33,14 @@ import org.languagetool.rules.AbstractFillerWordsRule;
 /**
  * A rule that gives Hints about the use of German filler words.
  * The Hints are only given when the percentage of filler words per paragraph exceeds the given limit.
- * A limit of 0 shows all used filler words. Direct speech or citation is excluded otherwise. 
+ * A limit of 0 shows all used filler words. Direct speech or citation is excluded otherwise.
  * This rule detects no grammar error but gives stylistic hints (default off).
  * @author Fred Kruse
  * @since 4.2
  */
 public class GermanFillerWordsRule extends AbstractFillerWordsRule {
 
+    // GTODO This should really be a config file somewhere...
   private static final Set<String> fillerWords = new HashSet<>(Arrays.asList( "aber","abermals","allein","allemal","allenfalls","allenthalben","allerdings","allesamt","allzu","also",
       "alt","andauernd","andererseits","andernfalls","anscheinend","auch","auffallend","augenscheinlich","ausdrücklich","ausgerechnet","ausnahmslos",
       "außerdem","äußerst","beinahe","bekanntlich","bereits","besonders","bestenfalls","bestimmt","bloß","dabei","dadurch","dafür","dagegen","daher","damals",
@@ -59,7 +60,7 @@ public class GermanFillerWordsRule extends AbstractFillerWordsRule {
       "vollkommen","vollständig","wahrscheinlich","weidlich","weitgehend","wenigstens","wieder","wiederum","wirklich","wohl","wohlgemerkt",
       "womöglich","ziemlich","zudem","zugegeben","zumeist","zusehends","zuweilen","zweifellos","zweifelsfrei","zweifelsohne"
   ));
-  
+
   public GermanFillerWordsRule(ResourceBundle messages, Language lang, UserConfig userConfig) {
     super(messages, lang, userConfig);
   }
@@ -81,5 +82,5 @@ public class GermanFillerWordsRule extends AbstractFillerWordsRule {
     }
     return false;
   }
-  
+
 }

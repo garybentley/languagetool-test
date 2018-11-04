@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -153,7 +153,7 @@ public class Ukrainian extends Language {
             Example.wrong("Ми обідали борщем<marker> ,</marker> пловом і салатом."),
             Example.fixed("Ми обідали борщем<marker>,</marker> пловом і салатом")),
 
-        // TODO: does not handle dot in abbreviations in the middle of the sentence, and also !.., ?..          
+        // TODO: does not handle dot in abbreviations in the middle of the sentence, and also !.., ?..
         //            new UppercaseSentenceStartRule(messages),
         new MultipleWhitespaceRule(messages, this),
         new UkrainianWordRepeatRule(messages, this),
@@ -163,7 +163,7 @@ public class Ukrainian extends Language {
         new MorfologikUkrainianSpellerRule(messages, this, userConfig),
 
         new MissingHyphenRule(messages, ((UkrainianTagger)getTagger()).getWordTagger()),
-        
+
         new TokenAgreementNounVerbRule(messages),
         new TokenAgreementAdjNounRule(messages),
         new TokenAgreementPrepNounRule(messages),
@@ -181,7 +181,7 @@ public class Ukrainian extends Language {
   @Override
   public List<String> getRuleFileNames() {
     List<String> ruleFileNames = super.getRuleFileNames();
-    ResourceDataBroker dataBroker = JLanguageTool.getDataBroker();
+    ResourceDataBroker dataBroker = getUseDataBroker();
     String dirBase = dataBroker.getRulesDir() + "/" + getShortCode() + "/";
     for (String ruleFile : RULE_FILES) {
       ruleFileNames.add(dirBase + ruleFile);

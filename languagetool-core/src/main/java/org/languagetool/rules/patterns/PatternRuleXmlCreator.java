@@ -52,6 +52,9 @@ public class PatternRuleXmlCreator {
    * Return the given pattern rule as an indented XML string.
    * @since 2.3
    */
+   /*
+   GTODO: Useful as this is it's not appropriate to hunt through the rules to find the specific one from a specific flie...
+
   public final String toXML(PatternRuleId ruleId, Language language) {
     List<String> filenames = language.getRuleFileNames();
     XPath xpath = XPathFactory.newInstance().newXPath();
@@ -129,5 +132,5 @@ public class PatternRuleXmlCreator {
       .replace("</message><suggestion>", "</message>\n  <suggestion>");
     return xml;
   }
-
+*/
 }

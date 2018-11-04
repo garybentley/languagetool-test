@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,6 +29,8 @@ import static org.junit.Assert.*;
 
 public class HunspellRuleTest {
 
+/*
+GTODO All tests have been merged with FrenchCompoundAwareHunspellRuleTest
   @Test
   public void testRuleWithFrench() throws Exception {
     final French french = new French();
@@ -70,4 +72,5 @@ public class HunspellRuleTest {
     langTool = new JLanguageTool(frenchWithDisambiguator);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("languageTool est génial.")).length);
   }
+  */
 }

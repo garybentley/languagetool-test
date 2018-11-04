@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,21 +20,27 @@ package org.languagetool.rules;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
+import org.languagetool.TestLanguage;
+import org.languagetool.TestTools;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
+import java.nio.file.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("QuestionableName")
 public class ScoredConfusionSetLoaderTest {
-  
+
   @Test
-  public void testLoadConfusionSet() throws IOException {
-    try (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/yy/neuralnetwork_confusion_sets.txt")) {
-      List<ScoredConfusionSet> list = ScoredConfusionSetLoader.loadConfusionSet(inputStream);
+  public void testLoadConfusionSet() throws Exception {
+      TestLanguage lang = TestTools.getTestLanguage();
+      // GTODO: GTODO: (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/yy/neuralnetwork_confusion_sets.txt"))
+      List<ScoredConfusionSet> list = lang.getUseDataBroker().loadScoredConfusionSetFromResourcePath(String.format("/%1$s/neuralnetwork_confusion_sets.txt", lang.getLocale().getLanguage()), null);
+      // GTODO: ScoredConfusionSetLoader.loadConfusionSet(inputStream);
       assertThat(list.size(), is(6));
 
       assertThat(list.get(0).getConfusionTokens().size(), is(2));
@@ -55,7 +61,6 @@ public class ScoredConfusionSetLoaderTest {
       assertThat(list.get(5).getScore(), is(1.0f));
 
       assertThat(list.get(5).getConfusionTokens().get(0), is("im"));
-    }
   }
 
 }

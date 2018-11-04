@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -41,7 +41,7 @@ public class BrazilianPortuguese extends Portuguese {
     List<Rule> rules = new ArrayList<>();
     rules.addAll(super.getRelevantRules(messages, userConfig));
     rules.add(new PostReformPortugueseCompoundRule(messages));
-    rules.add(new BrazilianPortugueseReplaceRule(messages));
+    rules.add(new BrazilianPortugueseReplaceRule(messages, getUseDataBroker()));
     rules.add(new PostReformPortugueseDashRule());
     return rules;
   }

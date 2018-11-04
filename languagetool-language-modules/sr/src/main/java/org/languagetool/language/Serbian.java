@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -54,7 +54,7 @@ import java.util.ResourceBundle;
 public class Serbian extends Language {
 
   private static final Language SERBIA_SERBIAN = new SerbianSerbian();
-  
+
   private SentenceTokenizer sentenceTokenizer;
   private Tagger tagger;
   private Synthesizer synthesizer;
@@ -174,7 +174,7 @@ public class Serbian extends Language {
   public List<String> getRuleFileNames() {
     List<String> ruleFileNames = super.getRuleFileNames();
     // Load all grammar*.xml files
-    ResourceDataBroker dataBroker = JLanguageTool.getDataBroker();
+    ResourceDataBroker dataBroker = getUseDataBroker();
     final String shortCode = getShortCode();
     final String dirBase = dataBroker.getRulesDir();
 

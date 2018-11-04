@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -40,11 +40,11 @@ import java.util.*;
  */
 public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
 
-  private static final Map<File,LuceneSearcher> dirToSearcherMap = new HashMap<>();  // static to save memory for language variants
+  //GTODO private static final Map<File,LuceneSearcher> dirToSearcherMap = new HashMap<>();  // static to save memory for language variants
 
-  private final List<File> indexes = new ArrayList<>();
-  private final Map<Integer,LuceneSearcher> luceneSearcherMap = new HashMap<>();
-  private final File topIndexDir;
+  //GTODO private final List<File> indexes = new ArrayList<>();
+  private Map<Integer,IndexSearcher> luceneSearcherMap = new HashMap<>();
+  //GTODO private final File topIndexDir;
   private final long maxNgram;
 
   /**
@@ -52,6 +52,8 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
    * with sub directories {@code 1grams} etc.
    * @since 3.0
    */
+   /*
+    GTODO Clean up
   public static void validateDirectory(File topIndexDir) {
     if (!topIndexDir.exists() || !topIndexDir.isDirectory()) {
       throw new RuntimeException("Not found or is not a directory:\n" +
@@ -72,14 +74,26 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
       throw new RuntimeException("Expected at least '1grams', '2grams', and '3grams' sub directories but only got " + dirs + " in " + topIndexDir.getAbsolutePath());
     }
   }
-  
+*/
   /**
-   * Only used internally. 
-   * @since 3.2 
+   * Only used internally.
+   * @since 3.2
    */
+/*
+ GTODO Clean up
   @Experimental
   public static void clearCaches() {
     dirToSearcherMap.clear();
+  }
+*/
+  public LuceneSingleIndexLanguageModel(Map<Integer, IndexSearcher> searchers) {
+      if (searchers.size() == 0) {
+          throw new IllegalArgumentException("Expected at least one searcher.");
+      }
+      // TODO: Check to make sure all indexes are contiguous?
+      luceneSearcherMap = searchers;
+      maxNgram = Collections.<Integer>max(luceneSearcherMap.keySet());
+
   }
 
   /**
@@ -87,6 +101,8 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
    *                    which is a Lucene index with ngram occurrences as created by
    *                    {@code org.languagetool.dev.FrequencyIndexCreator}.
    */
+   /*
+    GTODO Clean up
   public LuceneSingleIndexLanguageModel(File topIndexDir)  {
     doValidateDirectory(topIndexDir);
     this.topIndexDir = topIndexDir;
@@ -99,17 +115,20 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
     }
     maxNgram = Collections.<Integer>max(luceneSearcherMap.keySet());
   }
-
+*/
   @Experimental
   public LuceneSingleIndexLanguageModel(int maxNgram) {
     this.maxNgram = maxNgram;
-    this.topIndexDir = null;
+    //GTODO this.topIndexDir = null;
   }
-
+/*
+GTODO Clean up
   protected void doValidateDirectory(File topIndexDir) {
     validateDirectory(topIndexDir);
   }
-
+*/
+/*
+GTODO Clean up
   private void addIndex(File topIndexDir, int ngramSize) {
     File indexDir = new File(topIndexDir, ngramSize + "grams");
     if (indexDir.exists() && indexDir.isDirectory()) {
@@ -120,15 +139,20 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
       indexes.add(indexDir);
     }
   }
-
+*/
   @Override
   public long getCount(List<String> tokens) {
     if (tokens.size() > maxNgram) {
-      throw new RuntimeException("Requested " + tokens.size() + "gram but index has only up to " + maxNgram + "gram: " + tokens);
+      throw new IllegalArgumentException("Requested " + tokens.size() + "gram but index has only up to " + maxNgram + "gram: " + tokens);
     }
     Objects.requireNonNull(tokens);
+    IndexSearcher searcher = luceneSearcherMap.get(tokens.size());
+    if (searcher == null) {
+        throw new UnsupportedOperationException(String.format("No index available for ngram size: %1$s", tokens.size()));
+    }
+
     Term term = new Term("ngram", String.join(" ", tokens));
-    return getCount(term, getLuceneSearcher(tokens.size()));
+    return getCount(term, searcher);
   }
 
   @Override
@@ -143,18 +167,22 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
 
   @Override
   public long getTotalTokenCount() {
-    LuceneSearcher luceneSearcher = getLuceneSearcher(1);
+      IndexSearcher searcher = luceneSearcherMap.get(1);
+      if (searcher == null) {
+          throw new UnsupportedOperationException("No index available for ngram size: 1");
+      }
+
     try {
       RegexpQuery query = new RegexpQuery(new Term("totalTokenCount", ".*"));
-      TopDocs docs = luceneSearcher.searcher.search(query, 1000);  // Integer.MAX_VALUE might cause OOE on wrong index
+      TopDocs docs = searcher.search(query, 1000);  // Integer.MAX_VALUE might cause OOE on wrong index
       if (docs.totalHits == 0) {
-        throw new RuntimeException("Expected 'totalTokenCount' meta documents not found in 1grams index: " + luceneSearcher.directory);
+        throw new RuntimeException("Expected 'totalTokenCount' meta documents not found for ngram size: 1");
       } else if (docs.totalHits > 1000) {
-        throw new RuntimeException("Did not expect more than 1000 'totalTokenCount' meta documents: " + docs.totalHits + " in " + luceneSearcher.directory);
+        throw new RuntimeException("Did not expect more than 1000 'totalTokenCount' meta documents: " + docs.totalHits);
       } else {
         long result = 0;
         for (ScoreDoc scoreDoc : docs.scoreDocs) {
-          long tmp = Long.parseLong(luceneSearcher.reader.document(scoreDoc.doc).get("totalTokenCount"));
+          long tmp = Long.parseLong(searcher.getIndexReader().document(scoreDoc.doc).get("totalTokenCount"));
           if (tmp > result) {
             // due to the way FrequencyIndexCreator adds these totalTokenCount fields, we must not sum them,
             // but take the largest one:
@@ -167,7 +195,8 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
       throw new RuntimeException(e);
     }
   }
-
+/*
+GTODO Clean up
   protected LuceneSearcher getLuceneSearcher(int ngramSize) {
     LuceneSearcher luceneSearcher = luceneSearcherMap.get(ngramSize);
     if (luceneSearcher == null) {
@@ -175,7 +204,9 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
     }
     return luceneSearcher;
   }
-
+*/
+/*
+GTODO Clean up
   private LuceneSearcher getCachedLuceneSearcher(File indexDir) {
     LuceneSearcher luceneSearcher = dirToSearcherMap.get(indexDir);
     if (luceneSearcher == null) {
@@ -190,17 +221,17 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
       return luceneSearcher;
     }
   }
-
-  private long getCount(Term term, LuceneSearcher luceneSearcher) {
+*/
+  private long getCount(Term term, IndexSearcher searcher) {
     long result = 0;
     try {
-      TopDocs docs = luceneSearcher.searcher.search(new TermQuery(term), 2000);
+      // GTODO Make the max configurable
+      TopDocs docs = searcher.search(new TermQuery(term), 2000);
       if (docs.totalHits > 2000) {
-        throw new RuntimeException("More than 2000 matches for '" + term + "' not supported for performance reasons: " +
-                                   docs.totalHits + " matches in " + luceneSearcher.directory);
+        throw new RuntimeException(String.format("More than 2000 matches for '%1$s not supported for performance reasons: %2$s", term, docs.totalHits));
       }
       for (ScoreDoc scoreDoc : docs.scoreDocs) {
-        String countStr = luceneSearcher.reader.document(scoreDoc.doc).get("count");
+        String countStr = searcher.getIndexReader().document(scoreDoc.doc).get("count");
         result += Long.parseLong(countStr);
       }
       //System.out.println(term + " -> " + result);
@@ -210,6 +241,13 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
     return result;
   }
 
+  // GTODO Investigate LanguageModel and why this is even a thing
+  public void close () {
+
+  }
+
+/*
+GTODO Clean up, the searcher resources are already auto closeable
   @Override
   public void close() {
     for (LuceneSearcher searcher : luceneSearcherMap.values()) {
@@ -221,12 +259,16 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
       }
     }
   }
-
+*/
+/*
+GTODO Clean up
   @Override
   public String toString() {
     return indexes.toString();
   }
-
+*/
+/*
+GTODO Clean up
   protected static class LuceneSearcher {
     final FSDirectory directory;
     final IndexReader reader;
@@ -246,4 +288,5 @@ public class LuceneSingleIndexLanguageModel extends BaseLanguageModel {
       return reader;
     }
   }
+  */
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,43 +21,44 @@ package org.languagetool.rules.nl;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.WrongWordInContextRule;
+import org.languagetool.databroker.ResourceDataBroker;
 
 public class DutchWrongWordInContextRule extends WrongWordInContextRule {
-  
-  public DutchWrongWordInContextRule(ResourceBundle messages) {
-    super(messages);
+
+  public DutchWrongWordInContextRule(ResourceBundle messages, ResourceDataBroker dataBroker) {
+    super(messages, dataBroker);
   }
-  
+
   @Override
   protected String getCategoryString() {
     return "Gemakkelijk te verwarren woorden";
   }
-  
+
   @Override
   public String getId() {
     return "DUTCH_WRONG_WORD_IN_CONTEXT";
   }
-  
+
   @Override
   public String getDescription() {
     return "Woordverwarring";
   }
-  
+
   @Override
   protected String getFilename() {
     return "/nl/wrongWordInContext.txt";
   }
-  
+
   @Override
   protected String getMessageString() {
     return "Mogelijk verwarring: Bedoelde u <suggestion>$SUGGESTION</suggestion> i.p.v. '$WRONGWORD'?";
   }
-  
+
   @Override
   protected String getShortMessageString() {
     return "Mogelijk woorden verward";
   }
-  
+
   @Override
   protected String getLongMessageString() {
     return "Mogelijk verwarring: Bedoelde u <suggestion>$SUGGESTION</suggestion> (= $EXPLANATION_SUGGESTION) i.p.v. '$WRONGWORD' (= $EXPLANATION_WRONGWORD)?";

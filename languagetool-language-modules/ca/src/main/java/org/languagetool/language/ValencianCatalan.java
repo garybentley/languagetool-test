@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -68,11 +68,11 @@ public class ValencianCatalan extends Catalan {
   public String getVariant() {
     return "valencia";
   }
-  
+
   @Override
   public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
     return Arrays.asList(
-            new CommaWhitespaceRule(messages, 
+            new CommaWhitespaceRule(messages,
                 Example.wrong("A parer seu<marker> ,</marker> no era veritat."),
                 Example.fixed("A parer seu<marker>,</marker> no era veritat.")),
             new DoublePunctuationRule(messages),
@@ -89,19 +89,19 @@ public class ValencianCatalan extends Catalan {
             new CatalanUnpairedExclamationMarksRule(messages, this),
             new AccentuationCheckRule(messages),
             new ComplexAdjectiveConcordanceRule(messages),
-            new CatalanWrongWordInContextRule(messages),
-            new CatalanWrongWordInContextDiacriticsRule(messages),
+            new CatalanWrongWordInContextRule(messages, getUseDataBroker()),
+            new CatalanWrongWordInContextDiacriticsRule(messages, getUseDataBroker ()),
             new ReflexiveVerbsRule(messages),
             new SimpleReplaceVerbsRule(messages, this),
-            new SimpleReplaceBalearicRule(messages),
-            new SimpleReplaceRule(messages),
+            new SimpleReplaceBalearicRule(messages, getUseDataBroker()),
+            new SimpleReplaceRule(messages, getUseDataBroker()),
             new ReplaceOperationNamesRule(messages, this),
             // Valencian DNV
             new SimpleReplaceDNVRule(messages, this),
             new SimpleReplaceDNVColloquialRule(messages, this),
             new SimpleReplaceDNVSecondaryRule(messages, this),
-            new SimpleReplaceDiacriticsIEC(messages),
-            new SimpleReplaceDiacriticsTraditional(messages)
+            new SimpleReplaceDiacriticsIEC(messages, getUseDataBroker()),
+            new SimpleReplaceDiacriticsTraditional(messages, getUseDataBroker())
     );
   }
 
@@ -121,5 +121,5 @@ public class ValencianCatalan extends Catalan {
         "EXIGEIX_US");
     return Collections.unmodifiableList(rules);
   }
-  
+
 }

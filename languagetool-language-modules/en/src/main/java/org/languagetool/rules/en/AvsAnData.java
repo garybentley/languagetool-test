@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,12 +26,13 @@ import java.util.*;
 /**
  * Data for {@link AvsAnRule}.
  * Loads exceptions (e.g. "hour" as in "an hour") from external files.
- * 
+ *
  * @author Daniel Naber
  * @since 3.0
  */
 final class AvsAnData {
-
+/*
+ GTODO Clean up
   private static final Set<String> requiresA = loadWords("/en/det_a.txt");
   private static final Set<String> requiresAn = loadWords("/en/det_an.txt");
 
@@ -45,10 +46,12 @@ final class AvsAnData {
   static Set<String> getWordsRequiringAn() {
     return requiresAn;
   }
-
+*/
   /**
    * Load words, normalized to lowercase unless starting with '*'.
    */
+/*
+GTODO Clean up
   private static Set<String> loadWords(String path) {
     Set<String> set = new HashSet<>();
     InputStream stream = JLanguageTool.getDataBroker().getFromRulesDirAsStream(path);
@@ -67,5 +70,5 @@ final class AvsAnData {
     }
     return Collections.unmodifiableSet(set);
   }
-
+*/
 }

@@ -29,11 +29,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public abstract class NeuralNetworkRuleCreator {
-
+/*
+GTODO Clean up
   private static final String CONFUSION_SET_FILENAME = "neuralnetwork/confusion_sets.txt";
 
   private NeuralNetworkRuleCreator() {}
-
+xxx move to default resource data broker...
   public static List<Rule> createRules(ResourceBundle messages, Language language, Word2VecModel word2vecModel) throws IOException {
     List<ScoredConfusionSet> confusionSets;
     try(InputStream confusionSetsStream = new FileInputStream(word2vecModel.getPath() + File.separator + CONFUSION_SET_FILENAME)) {
@@ -48,6 +49,5 @@ public abstract class NeuralNetworkRuleCreator {
     }
     return neuralNetworkRules;
   }
-
+*/
 }
-

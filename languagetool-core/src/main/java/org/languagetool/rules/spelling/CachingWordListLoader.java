@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,28 +32,33 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
+import org.languagetool.databroker.ResourceDataBroker;
+
 /**
  * Helper to load text files from classpath.
  * @since 3.3, public since 3.5
  */
 public class CachingWordListLoader {
-
+/**
+GTODO: Clean up
   // Speed up the server use case, where rules get initialized for every call.
   private static final LoadingCache<String, List<String>> cache = CacheBuilder.newBuilder()
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(new CacheLoader<String, List<String>>() {
         @Override
         public List<String> load(@NotNull String fileInClassPath) throws IOException {
-          return loadWordsFromPath(fileInClassPath);
+          return loadWordsFromPath(fileInClassPath, JLanguageTool.getDataBroker());
         }
       });
-
-  private static List<String> loadWordsFromPath(String filePath) throws IOException {
+*/
+/*
+GTODO Clean up
+  public static List<String> loadWordsFromPath(String filePath, ResourceDataBroker dataBroker) throws IOException {
     List<String> result = new ArrayList<>();
-    if (!JLanguageTool.getDataBroker().resourceExists(filePath)) {
+    if (!dataBroker.resourceExists(filePath)) {
       return result;
     }
-    try (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(filePath);
+    try (InputStream inputStream = dataBroker.getFromResourceDirAsStream(filePath);
          Scanner scanner = new Scanner(inputStream, "utf-8")) {
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();
@@ -68,9 +73,12 @@ public class CachingWordListLoader {
     }
     return result;
   }
-
+*/
+/*
+GTODO Clean up
   public List<String> loadWords(String filePath) throws IOException {
-    return cache.getUnchecked(filePath);
+      return null;
+    //GTODO: return cache.getUnchecked(filePath);
   }
-  
+*/
 }

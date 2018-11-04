@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,11 +20,12 @@ package org.languagetool.languagemodel;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.languagetool.JLanguageTool;
+import org.languagetool.TestLanguage;
+import org.languagetool.TestTools;
+import org.languagetool.databroker.DefaultResourceDataBroker;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
+import java.nio.file.Paths;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,14 +34,17 @@ public class LuceneSingleIndexLanguageModelTest extends LanguageModelTest {
 
   @Test
   public void testLanguageModel() throws Exception {
-    URL ngramUrl = JLanguageTool.getDataBroker().getFromResourceDirAsUrl("/yy/ngram-index");
-    try (LuceneLanguageModel model = new LuceneLanguageModel(new File(ngramUrl.getFile()))) {
+      // GTODO: This probably needs more work.
+    TestLanguage lang = TestTools.getTestLanguage();
+    LuceneLanguageModel model = lang.getLanguageModel();
+    // GTODO URL ngramUrl = lang.getUseDataBroker().getFromResourceDirAsUrl(String.format("/%1$s/ngram-index", lang.getShortCode()));
+    // GTODO try (LuceneLanguageModel model = new LuceneLanguageModel(new File(ngramUrl.getFile()))) {
       assertThat(model.getCount("the"), is(55L));
       assertThat(model.getCount(Arrays.asList("the", "nice")), is(3L));
       assertThat(model.getCount(Arrays.asList("the", "nice", "building")), is(1L));
       assertThat(model.getCount("not-in-here"), is(0L));
       assertThat(model.getTotalTokenCount(), is(3L));
-    }
+    //GTODO }
   }
 
   /**
@@ -48,12 +52,12 @@ public class LuceneSingleIndexLanguageModelTest extends LanguageModelTest {
    * -no data in OS cache, index on external USB disk: 17626µs = 17ms
    * -no data in OS cache, index on SSD: 739µs = <0ms
    * -all data in OS cache (by running the test more than once): 163µs = <0ms
-   * 
+   *
    * Some values for average time per lookup on 3grams on a 7.0GB Lucene 4.9 index:
    * -no data in OS cache, index on external USB disk: 13256µs = 13ms
    * -no data in OS cache, index on SSD: 791µs = <0ms
    * -all(?) data in OS cache (by running the test more than once): 162µs = <0ms
-   * 
+   *
    * The tests have been performed on a Dell XSP13 (i7-3537U CPU) under Ubuntu 12.04, with Java 1.7.
    */
   @Test
@@ -64,8 +68,8 @@ public class LuceneSingleIndexLanguageModelTest extends LanguageModelTest {
     //super.testPerformance(model, 2);
     // 3grams:
     //LanguageModel model = new LuceneLanguageModel(new File("/media/Data/google-ngram/3gram/aggregated/lucene-index/merged/"));
-    LuceneLanguageModel model = new LuceneLanguageModel(new File("/data/google-gram-index/"));
+    LuceneLanguageModel model = DefaultResourceDataBroker.createLuceneLanguageModel(Paths.get("/data/google-gram-index/"));
     super.testPerformance(model, 3);
   }
-  
+
 }

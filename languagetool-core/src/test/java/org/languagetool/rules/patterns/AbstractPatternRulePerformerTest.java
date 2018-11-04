@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.chunking.ChunkTag;
-import org.languagetool.language.Demo;
+import org.languagetool.TestTools;
 
 import java.util.Collections;
 
@@ -34,7 +34,7 @@ public class AbstractPatternRulePerformerTest {
   @Test
   public void testTestAllReadings() throws Exception {
     PatternToken patternToken1 = new PatternToken("foo", false, false, false);
-    PatternRule simpleRule = new PatternRule("FAKE", new Demo(), Collections.singletonList(patternToken1), "descr", "message", "short");
+    PatternRule simpleRule = new PatternRule("FAKE", TestTools.getTestLanguage(), Collections.singletonList(patternToken1), "descr", "message", "short");
     PatternTokenMatcher elemMatcher = new PatternTokenMatcher(patternToken1);
 
     AbstractPatternRulePerformer p = new MockAbstractPatternRulePerformer(simpleRule, new Unifier(null, null));
@@ -49,7 +49,7 @@ public class AbstractPatternRulePerformerTest {
   public void testTestAllReadingsWithChunks() throws Exception {
     PatternToken chunkPatternToken = new PatternToken(null, false, false, false);
     chunkPatternToken.setChunkTag(new ChunkTag("myChunk"));
-    PatternRule simpleRule = new PatternRule("FAKE", new Demo(), Collections.singletonList(chunkPatternToken), "descr", "message", "short");
+    PatternRule simpleRule = new PatternRule("FAKE", TestTools.getTestLanguage(), Collections.singletonList(chunkPatternToken), "descr", "message", "short");
     PatternTokenMatcher elemMatcher = new PatternTokenMatcher(chunkPatternToken);
 
     AbstractPatternRulePerformer p = new MockAbstractPatternRulePerformer(simpleRule, new Unifier(null, null));

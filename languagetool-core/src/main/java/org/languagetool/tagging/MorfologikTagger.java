@@ -23,6 +23,7 @@ import morfologik.stemming.DictionaryLookup;
 import morfologik.stemming.IStemmer;
 import morfologik.stemming.WordData;
 import org.languagetool.JLanguageTool;
+import org.languagetool.databroker.ResourceDataBroker;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,39 +37,41 @@ import java.util.Objects;
  */
 public class MorfologikTagger implements WordTagger {
 
-  private final URL dictUrl;
+  //private final URL dictUrl;
 
   private Dictionary dictionary;
-
-  public MorfologikTagger(String dictPath) {
-    dictUrl = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(Objects.requireNonNull(dictPath));
+/*
+GTODO Clean up
+  public MorfologikTagger(String dictPath, ResourceDataBroker dataBroker) {
+    dictUrl = dataBroker.getFromResourceDirAsUrl(Objects.requireNonNull(dictPath));
   }
 
   MorfologikTagger(URL dictUrl) {
     this.dictUrl = Objects.requireNonNull(dictUrl);
   }
-  
+*/
   /**
    * Constructs a MorfologikTagger with the given morfologik dictionary.
    * @since 3.4
    */
   public MorfologikTagger(Dictionary dictionary) {
-    this.dictUrl = null;
+    //GTODO this.dictUrl = null;
     this.dictionary = dictionary;
   }
-
+/*
+ GTODO Clean up
   private synchronized Dictionary getDictionary() throws IOException {
     if (dictionary == null) {
       dictionary = Dictionary.read(dictUrl);
-    }
+  }
     return dictionary;
   }
-
+*/
   @Override
   public List<TaggedWord> tag(String word) {
     List<TaggedWord> result = new ArrayList<>();
-    try {
-      IStemmer dictLookup = new DictionaryLookup(getDictionary());
+        // GTODO Look to passing the stemmer in at init<>...
+      IStemmer dictLookup = new DictionaryLookup(dictionary);
       List<WordData> lookup = dictLookup.lookup(word);
       for (WordData wordData : lookup) {
         String tag = wordData.getTag() == null ? null : wordData.getTag().toString();
@@ -81,9 +84,6 @@ public class MorfologikTagger implements WordTagger {
         TaggedWord taggedWord = new TaggedWord(stem, tag);
         result.add(taggedWord);
       }
-    } catch (IOException e) {
-      throw new RuntimeException("Could not tag word '" + word + "'", e);
-    }
     return result;
   }
 

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,22 +35,19 @@ import static org.junit.Assert.assertEquals;
 public class GermanStyleRepeatedWordRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    JLanguageTool lt = new JLanguageTool(new German());
-    setUpRule(lt);
+  public void testRule() throws Exception {
+    German german = new German();
+    GermanStyleRepeatedWordRule rule = german.createGermanStyleRepeatedWordRule(null, null);
+    JLanguageTool lt = new JLanguageTool(german);
 
-    assertEquals(2, lt.check("Der alte Mann wohnte in einem großen Haus. Es stand in einem großen Garten.").size());
-    assertEquals(0, lt.check("Der alte Mann wohnte in einem großen Haus. Es stand in einem weitläufigen Garten.").size());
-  }
-
-  private void setUpRule(JLanguageTool lt) {
-    for (Rule rule : lt.getAllRules()) {
-      lt.disableRule(rule.getId());
+    for (Rule r : lt.getAllRules()) {
+      lt.disableRule(r.getId());
     }
-    GermanStyleRepeatedWordRule rule = new GermanStyleRepeatedWordRule(TestTools.getMessages(new German().getShortCode()),
-        new UserConfig());
     lt.addRule(rule);
     lt.enableRule(rule.getId());
+
+    assertEquals(2, lt.check(rule, "Der alte Mann wohnte in einem großen Haus. Es stand in einem großen Garten.").size());
+    assertEquals(0, lt.check(rule, "Der alte Mann wohnte in einem großen Haus. Es stand in einem weitläufigen Garten.").size());
   }
 
 }

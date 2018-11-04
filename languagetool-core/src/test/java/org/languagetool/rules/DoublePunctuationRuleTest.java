@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,11 +32,11 @@ import static org.junit.Assert.assertEquals;
 public class DoublePunctuationRuleTest {
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     DoublePunctuationRule rule = new DoublePunctuationRule(TestTools.getEnglishMessages());
     RuleMatch[] matches;
-    JLanguageTool langTool = new JLanguageTool(TestTools.getDemoLanguage());
-    
+    JLanguageTool langTool = new JLanguageTool(TestTools.getTestLanguage());
+
     // correct sentences:
     matches = rule.match(langTool.getAnalyzedSentence("This is a test sentence..."));
     assertEquals(0, matches.length);
@@ -61,5 +61,5 @@ public class DoublePunctuationRuleTest {
     assertEquals(23, matches[0].getFromPos());
     assertEquals(25, matches[0].getToPos());
   }
-  
+
 }

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,10 +27,15 @@ import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.languagetool.rules.spelling.morfologik.suggestions_ordering.SuggestionsOrderer;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import morfologik.stemming.Dictionary;
 
 public abstract class MorfologikSpellerRule extends SpellingCheckRule {
 
@@ -43,30 +48,63 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
   private boolean checkCompound = false;
   private Pattern compoundRegex = Pattern.compile("-");
   private final UserConfig userConfig;
-  private static SuggestionsOrderer suggestionsOrderer = null;
+  private SuggestionsOrderer suggestionsOrderer;
+  //private boolean suggestionOrderingEnabled = true;
 
   /**
    * Get the filename, e.g., <tt>/resource/pl/spelling.dict</tt>.
    */
-  public abstract String getFileName();
+  // GTODO public abstract String getFileName();
 
   @Override
   public abstract String getId();
 
-  public MorfologikSpellerRule(ResourceBundle messages, Language language) throws IOException {
-    this(messages, language, null);
-  }
-  
-  public MorfologikSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+  public MorfologikSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
+    super(messages, language, userConfig, ignoreWords, prohibitedWords);
+    speller1 = new MorfologikMultiSpeller(dictionaries, userConfig, 1);
+    speller2 = new MorfologikMultiSpeller(dictionaries, userConfig, 2);
+    speller3 = new MorfologikMultiSpeller(dictionaries, userConfig, 3);
+    setConvertsCase(speller1.convertsCase());
+
     this.userConfig = userConfig;
     super.setCategory(Categories.TYPOS.getCategory(messages));
     this.conversionLocale = conversionLocale != null ? conversionLocale : Locale.getDefault();
-    init();
+    // GTODO: init();
     setLocQualityIssueType(ITSIssueType.Misspelling);
-    this.suggestionsOrderer = new SuggestionsOrderer(language, this.getId());
+    //GTODO this.suggestionsOrderer = new SuggestionsOrderer(language, this);
   }
 
+  public void setSuggestionsOrderer(SuggestionsOrderer orderer) {
+      suggestionsOrderer = orderer;
+  }
+
+  public SuggestionsOrderer getSuggestionsOrderer() {
+      return suggestionsOrderer;
+  }
+
+  /**
+   * Enable/disable suggestion ordering.  If enabled, the match results will be passed to the {@link SuggestionsOrderer} which
+   * will try and order the suggestions.
+   *
+   * @param value Enable/disable.
+   */
+   /*
+   GTODO Clean up
+  public void setSuggestionsOrderingEnabled(boolean value) {
+      suggestionOrderingEnabled = value;
+  }
+*/
+  /**
+   * Returns whether suggestion ordering is available.
+   *
+   * @return Whether suggestion ordering is available.
+   */
+   /*
+   GTODO Clean up
+  public boolean isMLSuggestionsOrderingEnabled() {
+      return suggestionOrderingEnabled;
+  }
+*/
   @Override
   public String getDescription() {
     return messages.getString("desc_spelling");
@@ -85,13 +123,14 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = getSentenceWithImmunization(sentence).getTokensWithoutWhitespace();
     //lazy init
+    /*
     if (speller1 == null) {
       String binaryDict = null;
-      if (JLanguageTool.getDataBroker().resourceExists(getFileName())) {
+      if (dataBroker.resourceExists(getFileName())) {
         binaryDict = getFileName();
       }
       if (binaryDict != null) {
@@ -102,6 +141,7 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
         return toRuleMatchArray(ruleMatches);
       }
     }
+    */
     int idx = -1;
     for (AnalyzedTokenReadings token : tokens) {
       idx++;
@@ -131,26 +171,28 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
     return toRuleMatchArray(ruleMatches);
   }
 
+/*
+GTODO: Cleanup
   private void initSpeller(String binaryDict) throws IOException {
     String plainTextDict = null;
     String languageVariantPlainTextDict = null;
-    if (JLanguageTool.getDataBroker().resourceExists(getSpellingFileName())) {
+    if (dataBroker.resourceExists(getSpellingFileName())) {
       plainTextDict = getSpellingFileName();
     }
-    if (getLanguageVariantSpellingFileName() != null && JLanguageTool.getDataBroker().resourceExists(getLanguageVariantSpellingFileName())) {
+    if (getLanguageVariantSpellingFileName() != null && dataBroker.resourceExists(getLanguageVariantSpellingFileName())) {
       languageVariantPlainTextDict = getLanguageVariantSpellingFileName();
     }
     if (plainTextDict != null) {
-      speller1 = new MorfologikMultiSpeller(binaryDict, plainTextDict, languageVariantPlainTextDict, userConfig, 1);
-      speller2 = new MorfologikMultiSpeller(binaryDict, plainTextDict, languageVariantPlainTextDict, userConfig, 2);
-      speller3 = new MorfologikMultiSpeller(binaryDict, plainTextDict, languageVariantPlainTextDict, userConfig, 3);
+      speller1 = new MorfologikMultiSpeller(binaryDict, plainTextDict, languageVariantPlainTextDict, userConfig, 1, dataBroker);
+      speller2 = new MorfologikMultiSpeller(binaryDict, plainTextDict, languageVariantPlainTextDict, userConfig, 2, dataBroker);
+      speller3 = new MorfologikMultiSpeller(binaryDict, plainTextDict, languageVariantPlainTextDict, userConfig, 3, dataBroker);
       setConvertsCase(speller1.convertsCase());
     } else {
       throw new RuntimeException("Could not find ignore spell file in path: " + getSpellingFileName());
     }
   }
-
-  private boolean canBeIgnored(AnalyzedTokenReadings[] tokens, int idx, AnalyzedTokenReadings token) throws IOException {
+*/
+  private boolean canBeIgnored(AnalyzedTokenReadings[] tokens, int idx, AnalyzedTokenReadings token) throws Exception {
     return token.isSentenceStart() ||
            token.isImmunized() ||
            token.isIgnoredBySpeller() ||
@@ -183,7 +225,7 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
     return true;
   }
 
-  protected List<RuleMatch> getRuleMatches(String word, int startPos, AnalyzedSentence sentence, List<RuleMatch> ruleMatchesSoFar) throws IOException {
+  protected List<RuleMatch> getRuleMatches(String word, int startPos, AnalyzedSentence sentence, List<RuleMatch> ruleMatchesSoFar) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     if (isMisspelled(speller1, word) || isProhibited(word)) {
       RuleMatch ruleMatch = new RuleMatch(this, sentence, startPos, startPos
@@ -224,17 +266,20 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
   public Pattern tokenizingPattern() {
     return null;
   }
-
+/*
+GTODO Clean up
   protected List<String> orderSuggestions(List<String> suggestions, String word) {
     return suggestions;
   }
-
-  private List<String> orderSuggestions(List<String> suggestions, String word, AnalyzedSentence sentence, int startPos, int wordLength) {
+*/
+  private List<String> orderSuggestions(List<String> suggestions, String word, AnalyzedSentence sentence, int startPos, int wordLength) throws Exception {
     List<String> orderedSuggestions;
-    if (suggestionsOrderer.isMlAvailable()) {
-      orderedSuggestions = suggestionsOrderer.orderSuggestionsUsingModel(suggestions, word, sentence, startPos, word.length());
+    if (suggestionsOrderer != null) {
+     orderedSuggestions = suggestionsOrderer.orderSuggestions(suggestions, word, sentence, startPos, word.length());
+      //orderedSuggestions = suggestionsOrderer.orderSuggestionsUsingModel(suggestions, word, sentence, startPos, word.length());
     } else {
-      orderedSuggestions = orderSuggestions(suggestions, word);
+        orderedSuggestions = suggestions;
+      //orderedSuggestions = orderSuggestions(suggestions, word);
     }
     return orderedSuggestions;
   }
@@ -275,11 +320,11 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
   }
 
   /**
-   * Ignore surrogate pairs (emojis) 
-   * @since 4.3 
+   * Ignore surrogate pairs (emojis)
+   * @since 4.3
    * @see org.languagetool.rules.spelling.SpellingCheckRule#ignoreWord(java.lang.String)
    */
-  protected boolean ignoreWord(String word) throws IOException {
+  public boolean ignoreWord(String word) throws Exception {
     return super.ignoreWord(word) || isSurrogatePairCombination(word);
   }
 }
