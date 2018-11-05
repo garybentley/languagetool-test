@@ -83,16 +83,16 @@ Each of the currently changed languages introduces a number of new methods that 
 then queries its data broker to retrieve the information required by the rule.
 
 For example English now has method:
-
+'''java
 public AvsAnRule createAvsAnRule(ResourceBundle messages) throws Exception {
     return new AvsAnRule(getUseMessages(messages), getUseDataBroker().getRequiresAWords(), getUseDataBroker().getRequiresANWords());
 }
-
+'''
 which as can be seen queries the data broker for the lists of A and AN words that should be used by the rule.
 
 The getRelevantRules method now calls out to createAvsAnRule to create the rule.
 
-- Languages use Locales
+## Languages use Locales
 
 Languages now use a Locale object to define their language, country and variant.  Short code and related data have been removed.  New
 method isVariant has been added to allow users to determine whether their Language object is a variant.
@@ -106,16 +106,22 @@ method isVariant has been added to allow users to determine whether their Langua
 
 de, en, fa and fr have been modified and tested.
 
-- Future work
+## Future work
 
     * Rule ID and rule config
+    * Decouple the resource brokers from file names, have a json file that defines resources and where to find them
+
 ## TODO:
 
-Check change getDefaultLanguageVariant to return a Locale.
-Check en/CompoundRule - uses AmericanEnglish.
-Check en/CompoundRule - uses IOException
-en/CompoundRule - move anitDismabiguationPatterns to be passed in - they are static
+This is a list of things that need to be changed/looked at:
 
+* Check change getDefaultLanguageVariant to return a Locale.
+* Check en/CompoundRule - uses AmericanEnglish.
+* Check en/CompoundRule - uses IOException
+* en/CompoundRule - move anitDismabiguationPatterns to be passed in - they are static
+
+
+## The information below is from the standard LanguageTool README
 
 LanguageTool is an Open Source proofreading software for English, French, German,
 Polish, Russian, and [more than 20 other languages](https://languagetool.org/languages/).
