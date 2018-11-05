@@ -83,11 +83,11 @@ Each of the currently changed languages introduces a number of new methods that 
 then queries its data broker to retrieve the information required by the rule.
 
 For example English now has method:
-'''java
+```java
 public AvsAnRule createAvsAnRule(ResourceBundle messages) throws Exception {
     return new AvsAnRule(getUseMessages(messages), getUseDataBroker().getRequiresAWords(), getUseDataBroker().getRequiresANWords());
 }
-'''
+```
 which as can be seen queries the data broker for the lists of A and AN words that should be used by the rule.
 
 The getRelevantRules method now calls out to createAvsAnRule to create the rule.
