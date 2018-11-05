@@ -1,3 +1,122 @@
+This branching of LanguageTool (based off of SNAPSHOT 4.3) aims to remove a number of the assumptions that curently underpin LanguageTool.
+
+Some of these assumptions are:
+
+1. All data for configuring/executing rules will be found on the classpath.
+
+2. All languages that will be used for the lifetime of the JVM instance will be available (on the classpath).
+
+3. That rules configure themselves from classpath available information.
+
+4. That rules are designed to be executed as a group via JLanguageTool.
+
+5. We are operating in a fixed environment (such as a server).
+
+What changes does this project make to remove these assumptions?
+
+## Loading languages at runtime (not on classpath)
+
+A [LanguageProvider](language-core/src/main/java/org/languagetool/LanguageProvider.java) and a default classpath implementation
+[DefaultResourceLanguageProvider](languagetool-core/src/main/java/org/languagetool/DefaultResourceLanguageProvider.java).
+
+DefaultResourceLanguageProvider.loadLanguages(URL) can be used to load a language or set of languages from a non-classpath source.
+
+[Languages](languagetool-core/src/main/java/org/languagetool/Languages.java).setLanguageProvider(LanguageProvider) can be used to
+set the language provider to use for loading languages.  Just as with standard LanguageTool classpath detection of languages is still
+present and DefaultResourceLanguageProvider.loadLanguages(URL) will use the same mechanism to find and load languages.
+
+## Loading resources
+
+The resources a rule needs for configuration has been decoupled from the classes used to represent the rule.  
+
+The LanguageTool concept of a ResourceDataBroker has been extended to allow the user to provide a ResourceDataBroker that will be used
+by the language to configure the rules it supports.  If no ResourceDataBroker is provided by the user then the language will create its
+own default broker that can be used.  These default brokers expect information to be available and loaded from the classpath (the
+same as the current LanguageTool).
+
+For example the following code will load resources from the classpath:
+
+BritishEnglish en = new BritishEnglish();
+JLanguageTool lt = new JLanguageTool(en);
+List<Rule> rules = en.getRelevantRules();
+
+In this case a [DefaultEnglishResourceDataBroker](languagetool-language-modules/en/src/main/java/org/languagetool/databroker/DefaultEnglishResourceDataBroker.java) will be created by the English class.  The default English broker implements interface [EnglishResourceDataBroker](languagetool-language-modules/en/src/main/java/org/languagetool/databroker/EnglishResourceDataBroker.java) which
+defines what information is needed by English to construct the rules English (and it's variants) supports.
+
+However it is possible to override this behavior, for example:
+
+BritishEnglish en = new BritishEnglish();
+en.setDataBroker(new MyEnglishDataBroker());
+
+in this case requests for data will be sent to MyEnglishDataBroker.
+
+## Decoupling rules from Languages
+
+Nearly all rules have been decoupled from the Language (and subclasses) object.  This is to:
+
+    1. Allow clearer configuration of the rule, i.e. what data is needed to make it work.
+    2. To make rules more easily reusable.
+    3. To decouple them from the configuration data.
+
+The rules have also been changed to have the data they require passed in to the constructor.
+
+An example is:
+
+    en/CompoundRule.java
+
+in LanguageTool the CompoundRuleData the rule uses is loaded as a static variable, in this project the rule constructor is:
+
+    public CompoundRule(ResourceBundle, CompoundRuleData)
+
+the data the rule uses is passed in and loaded elsewhere.  The EnglishResourceDataBroker specifies a method getCompounds that can
+be used to get the English compound rule data.  DefaultEnglishResourceDataBroker implements this method and will load from the classpath.
+
+## Languages defer to the data broker
+
+Each of the currently changes languages defers to its data broker for resources and relevant helper objects.  It is the responsiblity
+of the data broker implementation to return the correct object.  Where appropriate the current resource data broker interfaces narrow the
+type that the data broker should return.  For example the German data broker interface requires a GermanTagger to be returned.
+
+## Languages now support creating individual rules
+
+Each of the currently changed languages introduces a number of new methods that allow users to create each rule as needed.  The language
+then queries its data broker to retrieve the information required by the rule.
+
+For example English now has method:
+
+public AvsAnRule createAvsAnRule(ResourceBundle messages) throws Exception {
+    return new AvsAnRule(getUseMessages(messages), getUseDataBroker().getRequiresAWords(), getUseDataBroker().getRequiresANWords());
+}
+
+which as can be seen queries the data broker for the lists of A and AN words that should be used by the rule.
+
+The getRelevantRules method now calls out to createAvsAnRule to create the rule.
+
+- Languages use Locales
+
+Languages now use a Locale object to define their language, country and variant.  Short code and related data have been removed.  New
+method isVariant has been added to allow users to determine whether their Language object is a variant.
+
+## DefaultResourceDataBroker
+
+   * Uses a PathProvider
+   * Has a default classpath provider
+
+## Currently completed Languages
+
+de, en, fa and fr have been modified and tested.
+
+- Future work
+
+    * Rule ID and rule config
+## TODO:
+
+Check change getDefaultLanguageVariant to return a Locale.
+Check en/CompoundRule - uses AmericanEnglish.
+Check en/CompoundRule - uses IOException
+en/CompoundRule - move anitDismabiguationPatterns to be passed in - they are static
+
+
 LanguageTool is an Open Source proofreading software for English, French, German,
 Polish, Russian, and [more than 20 other languages](https://languagetool.org/languages/).
 It finds many errors that a simple spell checker cannot detect.
