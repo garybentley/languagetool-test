@@ -35,19 +35,19 @@ own default broker that can be used.  These default brokers expect information t
 same as the current LanguageTool).
 
 For example the following code will load resources from the classpath:
-
+```java
 BritishEnglish en = new BritishEnglish();
 JLanguageTool lt = new JLanguageTool(en);
 List<Rule> rules = en.getRelevantRules();
-
+```
 In this case a [DefaultEnglishResourceDataBroker](languagetool-language-modules/en/src/main/java/org/languagetool/databroker/DefaultEnglishResourceDataBroker.java) will be created by the English class.  The default English broker implements interface [EnglishResourceDataBroker](languagetool-language-modules/en/src/main/java/org/languagetool/databroker/EnglishResourceDataBroker.java) which
 defines what information is needed by English to construct the rules English (and it's variants) supports.
 
 However it is possible to override this behavior, for example:
-
+```java
 BritishEnglish en = new BritishEnglish();
 en.setDataBroker(new MyEnglishDataBroker());
-
+```
 in this case requests for data will be sent to MyEnglishDataBroker.
 
 ## Decoupling rules from Languages
