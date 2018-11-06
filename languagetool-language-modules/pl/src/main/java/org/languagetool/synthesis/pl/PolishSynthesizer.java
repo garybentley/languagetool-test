@@ -18,8 +18,6 @@
  */
 package org.languagetool.synthesis.pl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,11 +31,9 @@ import morfologik.stemming.IStemmer;
 import morfologik.stemming.WordData;
 
 import org.languagetool.AnalyzedToken;
-import org.languagetool.JLanguageTool;
 import org.languagetool.synthesis.BaseSynthesizer;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.synthesis.SynthesizerTools;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Polish word form synthesizer. Based on project Morfologik.
@@ -47,29 +43,33 @@ import org.languagetool.databroker.ResourceDataBroker;
 
 public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
 
-  private static final String RESOURCE_FILENAME = "/pl/polish_synth.dict";
-  private static final String TAGS_FILE_NAME = "/pl/polish_tags.txt";
+  // GTODO private static final String RESOURCE_FILENAME = "/pl/polish_synth.dict";
+  // GTODO private static final String TAGS_FILE_NAME = "/pl/polish_tags.txt";
 
   private static final String POTENTIAL_NEGATION_TAG = ":aff";
   private static final String NEGATION_TAG = ":neg";
   private static final String COMP_TAG = "com";
   private static final String SUP_TAG = "sup";
 
-  private volatile Dictionary dictionary;
-  private List<String> possibleTags;
+  //private volatile Dictionary dictionary;
+  private Set<String> possibleTags;
 
+  private IStemmer stemmer;
 
-  public PolishSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public PolishSynthesizer(IStemmer stemmer, Set<String> tags) {
+    super(stemmer, tags);
+    this.stemmer = stemmer;
+    this.possibleTags = tags;
+    //GTODO RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
   }
 
   @Override
   public final String[] synthesize(final AnalyzedToken token,
-      final String posTag) throws IOException {
+      final String posTag) {
     if (posTag == null) {
       return null;
     }
-    final IStemmer synthesizer = new DictionaryLookup(getDictionary());
+    //GTODO final IStemmer synthesizer = new DictionaryLookup(getDictionary());
     boolean isNegated = false;
     if (token.getPOSTag() != null) {
       isNegated = posTag.indexOf(NEGATION_TAG) > 0
@@ -79,24 +79,27 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
     if (posTag.indexOf('+') > 0) {
       return synthesize(token, posTag, true);
     }
-    final List<String> forms = getWordForms(token, posTag, isNegated, synthesizer);
+    final List<String> forms = getWordForms(token, posTag, isNegated);
     return forms.toArray(new String[forms.size()]);
   }
 
   @Override
   public final String[] synthesize(final AnalyzedToken token, final String pos,
-      final boolean posTagRegExp) throws IOException {
+      final boolean posTagRegExp) {
     if (pos == null) {
       return null;
     }
     String posTag = pos;
     if (posTagRegExp) {
+        /*
+        GTODO Clean up
       if (possibleTags == null) {
         try (InputStream stream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(TAGS_FILE_NAME)) {
           possibleTags = SynthesizerTools.loadWords(stream);
         }
       }
-      final IStemmer synthesizer = new DictionaryLookup(getDictionary());
+      */
+      // GTODO final IStemmer synthesizer = new DictionaryLookup(getDictionary());
       final List<String> results = new ArrayList<>();
 
       boolean isNegated = false;
@@ -115,7 +118,7 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
       for (final String tag : possibleTags) {
         final Matcher m = p.matcher(tag);
         if (m.matches()) {
-          final List<String> wordForms = getWordForms(token, tag, isNegated, synthesizer);
+          final List<String> wordForms = getWordForms(token, tag, isNegated);
           if (wordForms != null) {
             results.addAll(wordForms);
           }
@@ -158,11 +161,11 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
   }
 
   private List<String> getWordForms(final AnalyzedToken token, final String posTag,
-      final boolean isNegated, final IStemmer synthesizer) {
+      final boolean isNegated) {
     final List<String> forms = new ArrayList<>();
     final List<WordData> wordForms;
     if (isNegated) {
-      wordForms = synthesizer.lookup(token.getLemma() + "|"
+      wordForms = stemmer.lookup(token.getLemma() + "|"
           + posTag.replaceFirst(NEGATION_TAG, POTENTIAL_NEGATION_TAG));
       if (wordForms != null) {
         for (WordData wd : wordForms) {
@@ -170,7 +173,7 @@ public class PolishSynthesizer extends BaseSynthesizer implements Synthesizer {
         }
       }
     } else {
-      wordForms = synthesizer.lookup(token.getLemma() + "|" + posTag);
+      wordForms = stemmer.lookup(token.getLemma() + "|" + posTag);
       for (WordData wd : wordForms) {
         if (wd.getStem() != null) {
           forms.add(wd.getStem().toString());

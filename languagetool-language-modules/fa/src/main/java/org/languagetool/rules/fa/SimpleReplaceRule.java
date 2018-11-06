@@ -19,11 +19,9 @@
 package org.languagetool.rules.fa;
 
 import org.languagetool.rules.*;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -32,8 +30,8 @@ import java.util.ResourceBundle;
  */
 public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
-  public SimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords) throws IOException {
-    super(messages, wrongWords);
+  public SimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     super.setCategory(Categories.CONFUSED_WORDS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
     addExamplePair(Example.wrong("وی <marker>حاظر</marker> به همکاری شد."),
@@ -73,11 +71,6 @@ GTODO Clean up
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return Locale.getDefault();
   }
 
 }

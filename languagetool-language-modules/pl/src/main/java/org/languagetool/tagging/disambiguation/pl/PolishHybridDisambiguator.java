@@ -18,15 +18,9 @@
  */
 package org.languagetool.tagging.disambiguation.pl;
 
-import java.io.IOException;
-
 import org.languagetool.AnalyzedSentence;
-import org.languagetool.language.Polish;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.MultiWordChunker;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for Polish.
@@ -34,15 +28,14 @@ import org.languagetool.databroker.ResourceDataBroker;
  * @author Marcin Miłkowski
  */
 
-public class PolishHybridDisambiguator extends AbstractDisambiguator<PolishResourceDataBroker> {
+public class PolishHybridDisambiguator extends AbstractDisambiguator {
 
   private final Disambiguator chunker;
   private final Disambiguator disambiguator;
 
-  public PolishHybridDisambiguator (PolishResourceDataBroker dataBroker) {
-      super(dataBroker);
-      this.chunker = dataBroker.getChunker();
-      this.disambiguate = dataBroker.getDisambiguator();
+  public PolishHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator) {
+      this.chunker = chunker;
+      this.disambiguator = disambiguator;
       /*
       GTODO: Clean up
       this.chunker = new MultiWordChunker("/pl/multiwords.txt", dataBroker);
@@ -56,7 +49,7 @@ public class PolishHybridDisambiguator extends AbstractDisambiguator<PolishResou
    */
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-      throws IOException {
+      throws Exception {
     return chunker.disambiguate(disambiguator.disambiguate(input));
   }
 

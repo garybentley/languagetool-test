@@ -18,10 +18,10 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
@@ -29,26 +29,32 @@ import org.languagetool.UserConfig;
 import org.languagetool.rules.*;
 import org.languagetool.rules.pl.*;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.pl.PolishSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.pl.PolishHybridDisambiguator;
 import org.languagetool.tagging.pl.PolishTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.WordTokenizer;
-import org.languagetool.tokenizers.pl.PolishWordTokenizer;
+import org.languagetool.databroker.*;
 
 public class Polish extends Language<PolishResourceDataBroker> {
 
-  private Tagger tagger;
-  private SentenceTokenizer sentenceTokenizer;
-  private PolishWordTokenizer wordTokenizer;
-  private Disambiguator disambiguator;
-  private Synthesizer synthesizer;
+  public static final String LANGUAGE_ID = "pl";
+  public static final String COUNTRY_ID = "PL";
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
 
-  public PolishResourceDataBroker getDefaultDataBroker() {
-      return new DefaultPolishResourceDataBroker();
+  public PolishResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultPolishResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
   }
 
   @Override
@@ -57,8 +63,8 @@ public class Polish extends Language<PolishResourceDataBroker> {
   }
 
   @Override
-  public String getShortCode() {
-    return "pl";
+  public boolean isVariant() {
+      return false;
   }
 
   @Override
@@ -67,45 +73,29 @@ public class Polish extends Language<PolishResourceDataBroker> {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new PolishTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new PolishWordTokenizer();
-      wordTokenizer.setTagger(getTagger());
-    }
-    return wordTokenizer;
+  public WordTokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new PolishHybridDisambiguator(getUseDataBroker());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new PolishSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
@@ -114,21 +104,68 @@ public class Polish extends Language<PolishResourceDataBroker> {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-        new CommaWhitespaceRule(messages),
-        new UppercaseSentenceStartRule(messages, this),
-        new WordRepeatRule(messages, this),
-        new MultipleWhitespaceRule(messages, this),
-        new SentenceWhitespaceRule(messages),
+        createCommaWhitespaceRule(messages),
+        createUppercaseSentenceStartRule(messages),
+        createWordRepeatRule(messages),
+        createMultipleWhitespaceRule(messages),
+        createSentenceWhitespaceRule(messages),
         // specific to Polish:
-        new PolishUnpairedBracketsRule(messages, this),
-        new MorfologikPolishSpellerRule(messages, this, userConfig),
-        new PolishWordRepeatRule(messages),
-        new CompoundRule(messages),
-        new SimpleReplaceRule(messages, getUseDataBroker()),
-        new DashRule()
+        createUnpairedBracketsRule(messages),
+        createMorfologikSpellerRule(messages, userConfig),
+        createPolishWordRepeatRule(messages),
+        createCompoundRule(messages),
+        createReplaceRule(messages),
+        createDashRule(messages)
         );
+  }
+
+  public MorfologikPolishSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikPolishSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getTagger(), getUseDataBroker().getSpellingIgnoreWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new SentenceWhitespaceRule(getUseMessages(messages));
+  }
+
+  public PolishUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new PolishUnpairedBracketsRule(getUseMessages(messages));
+  }
+
+  public SimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public CompoundRule createCompoundRule(ResourceBundle messages) throws Exception {
+      return new CompoundRule(getUseMessages(messages), getUseDataBroker().getCompounds());
+  }
+
+  public DashRule createDashRule(ResourceBundle messages) throws Exception {
+      // GTODO Shoudl really use a value from messages here.
+      return new DashRule(getUseDataBroker().getCompoundPatternRules("Błędne użycie myślnika zamiast łącznika. Poprawnie: "));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
+  }
+
+  public PolishWordRepeatRule createPolishWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new PolishWordRepeatRule(getUseMessages(messages));
   }
 
   @Override

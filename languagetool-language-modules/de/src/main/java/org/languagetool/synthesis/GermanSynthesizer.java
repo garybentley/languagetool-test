@@ -23,10 +23,9 @@ import morfologik.stemming.IStemmer;
 import org.jetbrains.annotations.NotNull;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tools.StringTools;
 import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -37,14 +36,16 @@ import java.util.*;
 public class GermanSynthesizer extends BaseSynthesizer {
 
   private final Tokenizer splitter;
+  private final CaseConverter caseConverter;
 
-  public GermanSynthesizer(IStemmer stemmer, Set<String> tags, Tokenizer splitter) {
+  public GermanSynthesizer(IStemmer stemmer, Set<String> tags, Tokenizer splitter, CaseConverter caseCon) {
     super(stemmer, tags);
     this.splitter = Objects.requireNonNull(splitter);
+    this.caseConverter = Objects.requireNonNull(caseCon);
   }
 
   @Override
-  public String[] synthesize(AnalyzedToken token, String posTag) throws IOException {
+  public String[] synthesize(AnalyzedToken token, String posTag) {
     String[] result = super.synthesize(token, posTag);
     if (result.length == 0) {
       return getCompoundForms(token, posTag, false);
@@ -53,7 +54,7 @@ public class GermanSynthesizer extends BaseSynthesizer {
   }
 
   @Override
-  public String[] synthesize(AnalyzedToken token, String posTag, boolean posTagRegExp) throws IOException {
+  public String[] synthesize(AnalyzedToken token, String posTag, boolean posTagRegExp) {
     String[] result = super.synthesize(token, posTag, posTagRegExp);
     if (result.length == 0) {
       return getCompoundForms(token, posTag, posTagRegExp);
@@ -62,10 +63,10 @@ public class GermanSynthesizer extends BaseSynthesizer {
   }
 
   @NotNull
-  private String[] getCompoundForms(AnalyzedToken token, String posTag, boolean posTagRegExp) throws IOException {
+  private String[] getCompoundForms(AnalyzedToken token, String posTag, boolean posTagRegExp) {
     List<String> parts = splitter.tokenize(token.getToken());
     String firstPart = String.join("", parts.subList(0, parts.size() - 1));
-    String lastPart = StringTools.uppercaseFirstChar(parts.get(parts.size() - 1));
+    String lastPart = caseConverter.uppercaseFirstChar(parts.get(parts.size() - 1));
     AnalyzedToken lastPartToken = new AnalyzedToken(lastPart, posTag, lastPart);
     String[] lastPartForms;
     if (posTagRegExp) {
@@ -75,7 +76,7 @@ public class GermanSynthesizer extends BaseSynthesizer {
     }
     Set<String> results = new LinkedHashSet<>();  // avoid dupes
     for (String part : lastPartForms) {
-      results.add(firstPart + StringTools.lowercaseFirstChar(part));
+      results.add(firstPart + caseConverter.lowercaseFirstChar(part));
     }
     return results.toArray(new String[results.size()]);
   }

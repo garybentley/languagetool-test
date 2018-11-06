@@ -169,7 +169,7 @@ GTODO Clean up
   }
 
   public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
-      return new MultipleWhitespaceRule(messages, this);
+      return new MultipleWhitespaceRule(getUseMessages(messages));
   }
 
   public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {

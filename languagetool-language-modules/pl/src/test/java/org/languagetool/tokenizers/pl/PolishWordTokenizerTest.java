@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,7 +30,9 @@ import static org.junit.Assert.assertEquals;
 public class PolishWordTokenizerTest {
 
   @Test
-  public void testTokenize() {
+  public void testTokenize() throws Exception {
+      // GTODO Not sure what this is testing...  The word tokenizer from Polish.getWordTokenizer has the tagger already applied, no one
+      // should be using the tokenizer without the tagger (in theory).
     final PolishWordTokenizer wordTokenizer = new PolishWordTokenizer();
     final List<String> tokens = wordTokenizer.tokenize("To jest\u00A0 test");
     assertEquals(tokens.size(), 6);

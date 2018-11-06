@@ -79,7 +79,7 @@ public class BritishEnglish extends English {
   }
 
   public BritishReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
-      return new BritishReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getLocale());
+      return new BritishReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
   }
 
   public MorfologikBritishSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {

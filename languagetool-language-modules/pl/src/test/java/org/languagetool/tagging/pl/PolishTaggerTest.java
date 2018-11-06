@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,26 +24,26 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
 import org.languagetool.tokenizers.WordTokenizer;
 
-import java.io.IOException;
-
 public class PolishTaggerTest {
 
+  private Polish language;
   private PolishTagger tagger;
   private WordTokenizer tokenizer;
 
   @Before
-  public void setUp() {
-    tagger = new PolishTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    language = new Polish();
+    tagger = language.getDefaultDataBroker().getTagger();
+    tokenizer = language.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Polish());
+  public void testDictionary() throws Exception {
+    TestTools.testTaggerDictionary(tagger.getDictionary(), language);
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("To jest duży dom.",
         "To/[ten]adj:sg:acc:n1.n2:pos|To/[ten]adj:sg:nom.voc:n1.n2:pos|To/[to]conj|To/[to]qub|To/[to]subst:sg:acc:n2|To/[to]subst:sg:nom:n2 -- jest/[być]verb:fin:sg:ter:imperf:nonrefl -- duży/[duży]adj:sg:acc:m3:pos|duży/[duży]adj:sg:nom.voc:m1.m2.m3:pos -- dom/[dom]subst:sg:acc:m3|dom/[dom]subst:sg:nom:m3", tokenizer, tagger);
     TestTools.myAssert("Krowa pasie się na pastwisku.",

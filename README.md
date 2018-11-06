@@ -99,6 +99,8 @@ method isVariant has been added to allow users to determine whether their Langua
 
 ## DefaultResourceDataBroker
 
+Note: Section WIP
+
    * Uses a PathProvider
    * Has a default classpath provider
 
@@ -107,6 +109,8 @@ method isVariant has been added to allow users to determine whether their Langua
 de, en, fa and fr have been modified and tested.
 
 ## Future work
+
+Note: Section WIP
 
     * Rule ID and rule config
     * Decouple the resource brokers from file names, have a json file that defines resources and where to find them
@@ -119,6 +123,17 @@ This is a list of things that need to be changed/looked at:
 * Check en/CompoundRule - uses AmericanEnglish.
 * Check en/CompoundRule - uses IOException
 * en/CompoundRule - move anitDismabiguationPatterns to be passed in - they are static
+* classes that extends BaseSynthesizer -> remove throws Exception from synthesize methods
+* rename org.languagetool.rules.pl.DashRule to PolishDashRule to prevent confusion with org.language.rules.DashRule and following other language naming conventions, i.e. EnglishDashRule.
+* org.langaugetool.rules.pl.DashRule should use values from ResourceBundle rather than hard code Polish text.
+* consider renaming language specific CompoundRule classes to <language>CompoundRule for clarity (not a big issue since no core CompoundRule).
+* change English file names to use %1$s for language rather than hard coded en.
+* move resource locations to a json/xml configuration file rather than hard coded in data broker classes.
+* en/CompoundRule pass in the anti pattern rules, remove use of "AmericanEnglish".
+* core/AbstractCompoundRule pass in CompoundRuleData to constructor, remove "getCompoundRuleData" method.
+* Move CaseConverter to .rules instead of .rules.patterns (also move DefaultCaseConverter)
+* core/MultipleWhitespaceRule consider using CaseConverter for isNonBreakingWhitespace call.
+* core/UppercaseSentenceStartRule remove dutch special case, handle with Dutch specific rule.
 
 
 ## The information below is from the standard LanguageTool README

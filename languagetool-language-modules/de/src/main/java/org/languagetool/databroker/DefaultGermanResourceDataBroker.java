@@ -415,7 +415,7 @@ GTODO
     @Override
     public GermanSynthesizer getSynthesizer() throws Exception {
         if (synthesizer == null) {
-            synthesizer = new GermanSynthesizer(getIStemmer(), getSynthesizerWordTags(), getStrictCompoundTokenizer());
+            synthesizer = new GermanSynthesizer(getIStemmer(), getSynthesizerWordTags(), getStrictCompoundTokenizer(), getCaseConverter());
         }
         return synthesizer;
     }

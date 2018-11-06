@@ -212,7 +212,7 @@ public class English extends Language<EnglishResourceDataBroker> implements Auto
   }
 
   public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
-      return new MultipleWhitespaceRule(getUseMessages(messages), this);
+      return new MultipleWhitespaceRule(getUseMessages(messages));
   }
 
   public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
@@ -284,7 +284,7 @@ public class English extends Language<EnglishResourceDataBroker> implements Auto
   }
 
   public ContractionSpellingRule createContractionSpellingRule(ResourceBundle messages) throws Exception {
-      return new ContractionSpellingRule(getUseMessages(messages), getUseDataBroker().getContractionWrongWords(), getLocale());
+      return new ContractionSpellingRule(getUseMessages(messages), getUseDataBroker().getContractionWrongWords(), getUseDataBroker().getCaseConverter());
   }
 
   public EnglishDashRule createDashRule(ResourceBundle messages) throws Exception {

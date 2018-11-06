@@ -18,8 +18,30 @@
  */
 package org.languagetool.databroker;
 
-public interface PolishResourceDataBroker implements ResourceDataBroker {
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-    Disambiguator getChunker();
-    Disambiguator getDisambiguator();
+import morfologik.stemming.Dictionary;
+
+import org.languagetool.UserConfig;
+import org.languagetool.rules.CompoundRuleData;
+import org.languagetool.rules.patterns.PatternRule;
+import org.languagetool.tagging.pl.PolishTagger;
+
+public interface PolishResourceDataBroker extends ResourceDataBroker {
+
+    List<String> getSpellingIgnoreWords() throws Exception;
+
+    Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception;
+
+    Map<String, List<String>> getWrongWords() throws Exception;
+
+    CompoundRuleData getCompounds() throws Exception;
+
+    List<PatternRule> getCompoundPatternRules(String message) throws Exception;
+
+    @Override
+    PolishTagger getTagger() throws Exception;
+
 }

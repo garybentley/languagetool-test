@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,7 +21,6 @@ package org.languagetool.rules;
 
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.tools.StringTools;
 
 import java.util.ArrayList;
@@ -31,12 +30,12 @@ import java.util.ResourceBundle;
 /**
  * Check if there is duplicated whitespace in a sentence.
  * Considers two spaces as incorrect, and proposes a single space instead.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public class MultipleWhitespaceRule extends TextLevelRule {
 
-  public MultipleWhitespaceRule(ResourceBundle messages, Language language) {
+  public MultipleWhitespaceRule(ResourceBundle messages) {
     super(messages);
     super.setCategory(Categories.TYPOGRAPHY.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Whitespace);
@@ -51,17 +50,17 @@ public class MultipleWhitespaceRule extends TextLevelRule {
   public String getDescription() {
     return messages.getString("desc_whitespacerepetition");
   }
-  
+
   // First White space is not a linebreak, function or footnote
   private static boolean isFirstWhite(AnalyzedTokenReadings token) {
-    return (token.isWhitespace() || StringTools.isNonBreakingWhitespace(token.getToken())) 
-        && !token.isLinebreak() && !token.getToken().equals("\u200B"); 
+    return (token.isWhitespace() || StringTools.isNonBreakingWhitespace(token.getToken()))
+        && !token.isLinebreak() && !token.getToken().equals("\u200B");
   }
 
   // Removable white space are not linebreaks, tabs, functions or footnotes
   private static boolean isRemovableWhite(AnalyzedTokenReadings token) {
-    return (token.isWhitespace() || StringTools.isNonBreakingWhitespace(token.getToken())) 
-        && !token.isLinebreak() && !token.getToken().equals("\t") && !token.getToken().equals("\u200B"); 
+    return (token.isWhitespace() || StringTools.isNonBreakingWhitespace(token.getToken()))
+        && !token.isLinebreak() && !token.getToken().equals("\t") && !token.getToken().equals("\u200B");
   }
 
   @Override

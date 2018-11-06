@@ -21,10 +21,9 @@ package org.languagetool.rules.en;
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -37,8 +36,6 @@ import java.util.ResourceBundle;
 public class BritishReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String BRITISH_SIMPLE_REPLACE_RULE = "EN_GB_SIMPLE_REPLACE";
-
-  private Locale locale;
 
   // GTODO: private Map<String, List<String>> wrongWords;
   //private static final Locale EN_GB_LOCALE = new Locale("en-GB");
@@ -56,9 +53,8 @@ GTODO: Clean up
     return wrongWords;
   }
 */
-  public BritishReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, Locale locale) throws IOException {
-    super(messages, wrongWords);
-    this.locale = locale;
+  public BritishReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("We can produce <marker>drapes</marker> of any size or shape from a choice of over 500 different fabrics."),
                    Example.fixed("We can produce <marker>curtains</marker> of any size or shape from a choice of over 500 different fabrics."));
@@ -88,12 +84,6 @@ GTODO: Clean up
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return locale;
-    //GTODO: EN_GB_LOCALE;
   }
 
 }

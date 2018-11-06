@@ -42,7 +42,7 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
   protected MorfologikMultiSpeller speller1;
   protected MorfologikMultiSpeller speller2;
   protected MorfologikMultiSpeller speller3;
-  protected Locale conversionLocale;
+  //protected Locale conversionLocale;
 
   private boolean ignoreTaggedWords = false;
   private boolean checkCompound = false;
@@ -68,7 +68,8 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
 
     this.userConfig = userConfig;
     super.setCategory(Categories.TYPOS.getCategory(messages));
-    this.conversionLocale = conversionLocale != null ? conversionLocale : Locale.getDefault();
+    //this.conversionLocale = language.getLocale();
+    // != null ? conversionLocale : Locale.getDefault();
     // GTODO: init();
     setLocQualityIssueType(ITSIssueType.Misspelling);
     //GTODO this.suggestionsOrderer = new SuggestionsOrderer(language, this);
@@ -110,10 +111,12 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
     return messages.getString("desc_spelling");
   }
 
+/*
+GTODO Clean up
   public void setLocale(Locale locale) {
     conversionLocale = locale;
   }
-
+*/
   /**
    * Skip words that are known in the POS tagging dictionary, assuming they
    * cannot be incorrect.

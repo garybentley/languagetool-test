@@ -23,19 +23,21 @@ import org.languagetool.Languages;
 import org.languagetool.rules.AbstractDashRule;
 import org.languagetool.rules.patterns.PatternRule;
 
-import java.io.IOException;
 import java.util.List;
+
+// GTODO This should really be renamed to PolishDashRule to match other languages and prevent namespace confusion with org.languagetool.rules.DashRule.
 
 /**
  * Check for compounds written with dashes instead of hyphens (for example, Rabka — Zdrój).
  * @since 3.6
  */
 public class DashRule extends AbstractDashRule {
-
+/*
+GTODO Clean up
   private static final List<PatternRule> dashRules = loadCompoundFile("/pl/compounds.txt",
           "Błędne użycie myślnika zamiast łącznika. Poprawnie: ", Languages.getLanguageForShortCode("pl"));
-
-  public DashRule() throws IOException {
+*/
+  public DashRule(List<PatternRule> dashRules) throws Exception {
     super(dashRules);
   }
 

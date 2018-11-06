@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,23 +27,25 @@ import org.languagetool.rules.Example;
 
 /**
  * Checks that compounds (if in the list) are not written as separate words.
- * 
+ *
  * @author Marcin Miłkowski, based on code by Daniel Naber
  */
 public final class CompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/pl/compounds.txt");
+  // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/pl/compounds.txt");
+  private final CompoundRuleData compoundData;
 
-  public CompoundRule(final ResourceBundle messages) throws IOException {
+  public CompoundRule(final ResourceBundle messages, CompoundRuleData data) throws IOException {
     super(messages,
             "Ten wyraz pisze się z łącznikiem.",
             "Ten wyraz pisze się razem (bez spacji ani łącznika).",
             "Ten wyraz pisze się z łącznikiem lub bez niego.",
             "Brak łącznika lub zbędny łącznik");
+    compoundData = data;
     addExamplePair(Example.wrong("Witamy w <marker>Rabce Zdroju</marker>."),
                    Example.fixed("Witamy w <marker>Rabce-Zdroju</marker>."));
   }
-  
+
   @Override
   public String getId() {
     return "PL_COMPOUNDS";

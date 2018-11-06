@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,20 +18,30 @@
  */
 package org.languagetool.rules.pl;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
+import org.languagetool.language.Polish;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.*;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.tagging.Tagger;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Collections;
+import java.util.ResourceBundle;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
 
-  private static final String RESOURCE_FILENAME = "/pl/hunspell/pl_PL.dict";
+  // GTODO private static final String RESOURCE_FILENAME = "/pl/hunspell/pl_PL.dict";
 
   private static final Pattern POLISH_TOKENIZING_CHARS = Pattern.compile("(?:[Qq]uasi|[Nn]iby)-");
 
@@ -86,21 +96,25 @@ public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
     }
 
   private final UserConfig userConfig;
+  private final CaseConverter caseConverter;
+  private final Tagger tagger;
 
-  public MorfologikPolishSpellerRule(ResourceBundle messages,
-                                     Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+  public MorfologikPolishSpellerRule(ResourceBundle messages, Polish language, UserConfig userConfig, Set<Dictionary> dictionaries, Tagger tagger, List<String> ignoreWords, CaseConverter caseCon) throws Exception {
+      super(messages, language, userConfig, dictionaries, ignoreWords, Collections.emptyList());
     setCategory(Categories.TYPOS.getCategory(messages));
     addExamplePair(Example.wrong("To jest zdanie z <marker>bledem</marker>"),
                    Example.fixed("To jest zdanie z <marker>błędem</marker>."));
     this.userConfig = userConfig;
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
+    this.tagger = Objects.requireNonNull(tagger, "Tagger must be provided.");
   }
-
+/*
+GTODO Clean up
   @Override
   public String getFileName() {
     return RESOURCE_FILENAME;
   }
-
+*/
   @Override
   public String getId() {
     return "MORFOLOGIK_RULE_PL_PL";
@@ -113,7 +127,7 @@ public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
 
   @Override
   protected List<RuleMatch> getRuleMatches(final String word, final int startPos, AnalyzedSentence sentence, List<RuleMatch> ruleMatchesSoFar)
-          throws IOException {
+          throws Exception {
     final List<RuleMatch> ruleMatches = new ArrayList<>();
     if (isMisspelled(speller1, word) && isNotCompound(word)) {
       final RuleMatch ruleMatch = new RuleMatch(this, sentence, startPos, startPos
@@ -121,9 +135,9 @@ public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
               messages.getString("desc_spelling_short"));
       //If lower case word is not a misspelled word, return it as the only suggestion
       boolean createSuggestions = userConfig == null || userConfig.getMaxSpellingSuggestions() == 0 || ruleMatchesSoFar.size() <= userConfig.getMaxSpellingSuggestions();
-      if (!isMisspelled(speller1, word.toLowerCase(conversionLocale))) {
+      if (!isMisspelled(speller1, caseConverter.toLowerCase(word))) {
         if (createSuggestions) {
-          List<String> suggestion = Arrays.asList(word.toLowerCase(conversionLocale));
+          List<String> suggestion = Arrays.asList(caseConverter.toLowerCase(word));
           ruleMatch.setSuggestedReplacements(suggestion);
         } else {
           // limited to save CPU
@@ -137,7 +151,8 @@ public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
         suggestions.addAll(0, getAdditionalTopSuggestions(suggestions, word));
         suggestions.addAll(getAdditionalSuggestions(suggestions, word));
         if (!suggestions.isEmpty()) {
-          ruleMatch.setSuggestedReplacements(pruneSuggestions(orderSuggestions(suggestions,word)));
+          ruleMatch.setSuggestedReplacements(pruneSuggestions(suggestions));
+          // GTODO orderSuggestions(suggestions,word)));
         }
       } else {
         // limited to save CPU
@@ -156,14 +171,14 @@ public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
    * @return True if the word is not a compound.
    * @since 2.5
    */
-  private boolean isNotCompound(String word) throws IOException {
+  private boolean isNotCompound(String word) throws Exception {
     List<String> probablyCorrectWords = new ArrayList<>();
     List<String> testedTokens = new ArrayList<>(2);
     for (int i = 2; i < word.length(); i++) {
       // chop from left to right
       final String first = word.substring(0, i);
       final String second = word.substring(i, word.length());
-      if (prefixes.contains(first.toLowerCase(conversionLocale))
+      if (prefixes.contains(caseConverter.toLowerCase(first))
               && !isMisspelled(speller1, second)
               && second.length() > first.length()) { // but not for short words such as "premoc"
         // ignore this match, it's fine
@@ -173,7 +188,7 @@ public final class MorfologikPolishSpellerRule extends MorfologikSpellerRule {
         testedTokens.add(first);
         testedTokens.add(second);
         List<AnalyzedTokenReadings> taggedToks =
-                language.getTagger().tag(testedTokens);
+                tagger.tag(testedTokens);
         if (taggedToks.size() == 2
                 // "białozielony", trzynastobitowy
                 && (taggedToks.get(0).hasPosTag("adja")

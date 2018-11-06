@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Daniel Naber (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,10 +21,8 @@ package org.languagetool.rules.pl;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -32,9 +30,9 @@ import static org.junit.Assert.assertEquals;
 public class PolishUnpairedBracketsRuleTest {
 
   @Test
-  public void testRulePolish() throws IOException {
+  public void testRulePolish() throws Exception {
     Polish language = new Polish();
-    PolishUnpairedBracketsRule rule = new PolishUnpairedBracketsRule(TestTools.getEnglishMessages(), language);
+    PolishUnpairedBracketsRule rule = language.createUnpairedBracketsRule(null);
     JLanguageTool lt = new JLanguageTool(language);
 
     assertEquals(0, getMatches("(To jest zdanie do testowania).", rule, lt));
@@ -45,7 +43,7 @@ public class PolishUnpairedBracketsRuleTest {
     assertEquals(1, getMatches("W tym zdaniu jest niesparowany „cudzysłów.", rule, lt));
   }
 
-  private int getMatches(String input, PolishUnpairedBracketsRule rule, JLanguageTool lt) throws IOException {
+  private int getMatches(String input, PolishUnpairedBracketsRule rule, JLanguageTool lt) throws Exception {
     return rule.match(Collections.singletonList(lt.getAnalyzedSentence(input))).length;
   }
 

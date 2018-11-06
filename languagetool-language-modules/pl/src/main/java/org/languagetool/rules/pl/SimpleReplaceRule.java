@@ -18,14 +18,13 @@
  */
 package org.languagetool.rules.pl;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.*;
 import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
@@ -40,9 +39,11 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String POLISH_SIMPLE_REPLACE_RULE = "PL_SIMPLE_REPLACE";
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale PL_LOCALE = new Locale("pl");
+  // GTODO private Map<String, List<String>> wrongWords;
+  //GTODO private static final Locale PL_LOCALE = new Locale("pl");
 
+/*
+ GTODO Clean up
   @Override
   protected Map<String, List<String>> getWrongWords() {
       if (wrongWords == null) {
@@ -50,9 +51,9 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
       }
     return wrongWords;
   }
-
-  public SimpleReplaceRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
+*/
+  public SimpleReplaceRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) throws Exception {
+    super(messages, wrongWords, caseCon);
     setLocQualityIssueType(ITSIssueType.Misspelling);
     setCategory(new Category(new CategoryId("PRAWDOPODOBNE_LITEROWKI"), "Prawdopodobne literówki"));
     setCheckLemmas(false);
@@ -84,11 +85,6 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return PL_LOCALE;
   }
 
 }

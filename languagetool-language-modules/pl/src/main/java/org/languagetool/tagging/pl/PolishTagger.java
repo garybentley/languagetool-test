@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,10 +18,14 @@
  */
 package org.languagetool.tagging.pl;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.tagging.BaseTagger;
 import org.languagetool.tools.StringTools;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,33 +33,39 @@ import java.util.Locale;
 
 /**
  * Polish POS tagger based on FSA morphological dictionaries.
- * 
+ *
  * @author Marcin Milkowski
  */
 public class PolishTagger extends BaseTagger {
 
-  private final Locale plLocale = new Locale("pl");
+  // GTODO private final Locale plLocale = new Locale("pl");
 
-  public PolishTagger() {
-    super("/pl/polish.dict");
+  private CaseConverter caseConverter;
+
+  public PolishTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+    super(baseDict, tagger, caseCon, true);
+    this.caseConverter = caseCon;
+    //GTODO super("/pl/polish.dict");
   }
 
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/pl/added.txt";
   }
-
+*/
   @Override
   public final List<AnalyzedTokenReadings> tag(final List<String> sentenceTokens) {
     List<AnalyzedToken> taggerTokens;
     List<AnalyzedToken> lowerTaggerTokens;
-    List<AnalyzedToken> upperTaggerTokens;    
+    List<AnalyzedToken> upperTaggerTokens;
     final List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
 
     for (String word : sentenceTokens) {
       final List<AnalyzedToken> l = new ArrayList<>();
-      final String lowerWord = word.toLowerCase(plLocale);
+      final String lowerWord = caseConverter.toLowerCase(word);
       taggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(word));
       lowerTaggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(lowerWord));
       final boolean isLowercase = word.equals(lowerWord);
@@ -72,7 +82,7 @@ public class PolishTagger extends BaseTagger {
       if (lowerTaggerTokens.isEmpty() && taggerTokens.isEmpty()) {
         if (isLowercase) {
           upperTaggerTokens = asAnalyzedTokenListForTaggedWords(word,
-              getWordTagger().tag(StringTools.uppercaseFirstChar(word)));
+              getWordTagger().tag(caseConverter.uppercaseFirstChar(word)));
           if (!upperTaggerTokens.isEmpty()) {
             addTokens(upperTaggerTokens, l);
           } else {

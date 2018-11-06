@@ -19,11 +19,11 @@
 package org.languagetool.rules.en;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.*;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
@@ -35,7 +35,6 @@ import org.languagetool.rules.*;
 public class ContractionSpellingRule extends AbstractSimpleReplaceRule {
 
   public static final String CONTRACTION_SPELLING_RULE = "EN_CONTRACTION_SPELLING";
-  private final Locale locale;
 
   //private Map<String, List<String>> wrongWords;
   //private static final Locale EN_LOCALE = new Locale("en");
@@ -52,9 +51,8 @@ GTODO: Clean up
 
   }
 */
-  public ContractionSpellingRule(ResourceBundle messages, Map<String, List<String>> wrongWords, Locale locale) {
-    super(messages, wrongWords);
-    this.locale = locale;
+  public ContractionSpellingRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     super.setCategory(Categories.TYPOS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
     addExamplePair(Example.wrong("We <marker>havent</marker> earned anything."),
@@ -84,12 +82,6 @@ GTODO: Clean up
   @Override
   public boolean isCaseSensitive() {
     return true;
-  }
-
-  @Override
-  public Locale getLocale() {
-      return locale;
-    //GTODO return EN_LOCALE;
   }
 
 }

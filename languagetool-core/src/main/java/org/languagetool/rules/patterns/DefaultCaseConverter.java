@@ -69,6 +69,10 @@ public class DefaultCaseConverter implements CaseConverter {
         return StringTools.isEmpty(str) ? str : StringTools.uppercaseFirstChar(str, locale);
     }
 
+    public String lowercaseFirstChar(String str) {
+        return StringTools.isEmpty(str) ? str : StringTools.lowercaseFirstChar(str);
+    }
+
     /**
      * Convert the string according to the conversion provided and sample (optional).
      *

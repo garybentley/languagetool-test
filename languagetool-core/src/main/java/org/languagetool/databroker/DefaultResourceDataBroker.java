@@ -787,7 +787,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    * @return The tokenizer.
    */
   @Override
-  public WordTokenizer getWordTokenizer() {
+  public WordTokenizer getWordTokenizer() throws Exception {
       if (wordTokenizer == null) {
           wordTokenizer = new WordTokenizer();
       }

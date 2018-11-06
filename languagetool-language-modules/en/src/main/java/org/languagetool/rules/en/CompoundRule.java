@@ -40,6 +40,7 @@ public class CompoundRule extends AbstractCompoundRule {
 
   // static to make sure this gets loaded only once:
   private CompoundRuleData compoundData;
+  // GTODO Pass in anti patterns.
   private static final Language AMERICAN_ENGLISH = new AmericanEnglish();
   private static List<DisambiguationPatternRule> antiDisambiguationPatterns = null;
   private static final List<List<PatternToken>> ANTI_PATTERNS = Arrays.asList(

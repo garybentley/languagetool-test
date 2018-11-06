@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,17 +25,16 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class PolishWordRepeatRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    final PolishWordRepeatRule rule = new PolishWordRepeatRule(TestTools.getEnglishMessages());
+  public void testRule() throws Exception {
+    Polish language = new Polish();
+    final PolishWordRepeatRule rule = language.createPolishWordRepeatRule(null);
     RuleMatch[] matches;
-    JLanguageTool langTool = new JLanguageTool(new Polish());
+    JLanguageTool langTool = new JLanguageTool(language);
     //correct
     matches = rule.match(langTool.getAnalyzedSentence("To jest zdanie próbne."));
     assertEquals(0, matches.length);

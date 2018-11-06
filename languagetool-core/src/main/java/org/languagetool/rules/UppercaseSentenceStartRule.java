@@ -157,6 +157,7 @@ public class UppercaseSentenceStartRule extends TextLevelRule {
   }
 
   @Nullable
+  // GTODO Handle this...
   private String dutchSpecialCase(String firstToken,
       String secondToken, AnalyzedTokenReadings[] tokens) {
     if (!language.getLocale().getLanguage().equals("nl")) {
@@ -177,6 +178,7 @@ public class UppercaseSentenceStartRule extends TextLevelRule {
     return WordTokenizer.isEMail(token);
   }
 
+  // GTODO Handle this.
   private boolean isDutchSpecialCase(String word) {
     return StringUtils.equalsAny(word, "k", "m", "n", "r", "s", "t");
   }

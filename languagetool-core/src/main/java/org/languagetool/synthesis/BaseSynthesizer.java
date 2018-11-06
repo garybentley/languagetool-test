@@ -18,9 +18,6 @@
  */
 package org.languagetool.synthesis;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -129,7 +126,7 @@ public class BaseSynthesizer implements Synthesizer {
    * @return inflected words, or an empty array if no forms were found
    */
   @Override
-  public String[] synthesize(AnalyzedToken token, String posTag) throws IOException {
+  public String[] synthesize(AnalyzedToken token, String posTag) {
     List<String> wordForms = new ArrayList<>();
     lookup(token.getLemma(), posTag, wordForms);
     return wordForms.toArray(new String[wordForms.size()]);
@@ -137,7 +134,7 @@ public class BaseSynthesizer implements Synthesizer {
 
   @Override
   public String[] synthesize(AnalyzedToken token, String posTag,
-      boolean posTagRegExp) throws IOException {
+      boolean posTagRegExp) {
     if (posTagRegExp) {
       //GTODO initPossibleTags();
       Pattern p = Pattern.compile(posTag);

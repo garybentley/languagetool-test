@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,40 +18,47 @@
  */
 package org.languagetool.tagging.disambiguation;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
 import org.languagetool.tagging.disambiguation.rules.DisambiguationRuleTest;
-import org.languagetool.tagging.pl.PolishTagger;
+import org.languagetool.tagging.Tagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.databroker.*;
 
 public class PolishDisambiguationRuleTest extends DisambiguationRuleTest {
-      
-    private PolishTagger tagger;
+
+    private Tagger tagger;
     private WordTokenizer tokenizer;
     private SentenceTokenizer sentenceTokenizer;
-    private MultiWordChunker disambiguator;
-      
+    private Disambiguator disambiguator;
+
     @Before
-    public void setUp() {
-      tagger = new PolishTagger();
-      tokenizer = new WordTokenizer();
-      sentenceTokenizer = new SRXSentenceTokenizer(new Polish());
-      disambiguator = new MultiWordChunker("/pl/multiwords.txt");
+    public void setUp() throws Exception {
+      Polish language = new Polish();
+      tagger = language.getTagger();
+      tokenizer = language.getWordTokenizer();
+      sentenceTokenizer = language.getSentenceTokenizer();
+      disambiguator = language.getDisambiguator();
+
+      // GTODO Create our own chunker here to make sure that the test below (see comment) works.
+      DefaultPolishResourceDataBroker broker = new DefaultPolishResourceDataBroker(language, language.getClass().getClassLoader());
+      disambiguator = broker.createMultiWordChunkerFromResourcePath(false);
+      //GTODO new MultiWordChunker("/pl/multiwords.txt");
     }
 
     @Test
-    public void testChunker() throws IOException {
+    public void testChunker() throws Exception {
       //TestTools.myAssert("To jest duży dom.", "/[null]SENT_START To/[to]conj|To/[ten]adj:sg:nom.acc.voc:n1.n2  /[null]null jest/[być]verb:fin:sg:ter:imperf  /[null]null duży/[duży]adj:sg:nom:m:pneg  /[null]null dom/[dom]subst:sg:nom.acc:m3 ./[null]SENT_END", tokenizer, sentenceTokenizer, tagger, disambiguator);
       //TestTools.myAssert("Krowa pasie się na pastwisku.", "/[null]SENT_START Krowa/[krowa]subst:sg:nom:f  /[null]null pasie/[pas]subst:sg:loc.voc:m3|pasie/[paść]verb:irreg  /[null]null się/[siebie]qub  /[null]null na/[na]prep:acc.loc  /[null]null pastwisku/[pastwisko]subst:sg:dat:n+subst:sg:loc:n ./[null]SENT_END", tokenizer, sentenceTokenizer, tagger, disambiguator);
       //TestTools.myAssert("blablabla","/[null]SENT_START blablabla/[null]SENT_END", tokenizer, sentenceTokenizer, tagger, disambiguator);
       TestTools.myAssert("To test... dezambiguacji",
           "/[null]SENT_START To/[ten]adj:sg:acc:n1.n2:pos|To/[ten]adj:sg:nom.voc:n1.n2:pos|To/[to]conj|To/[to]qub|To/[to]subst:sg:acc:n2|To/[to]subst:sg:nom:n2  /[null]null test/[test]subst:sg:acc:m3|test/[test]subst:sg:nom:m3 ./[...]<ELLIPSIS> ./[null]null ./[...]</ELLIPSIS>  /[null]null dezambiguacji/[null]null", tokenizer, sentenceTokenizer, tagger, disambiguator);
+      // GTODO The test below fails when the hybrid disambiguator is used.  It assumes a multi word chunker when Polish doesn't use one (it uses the hybrid), this test should be changed to match what would be
+      // expected from a hyrbrid disambiguator.
       TestTools.myAssert("On, to znaczy premier, jest niezbyt mądry",
           "/[null]SENT_START On/[on]adj:sg:acc:m3:pos|On/[on]adj:sg:nom.voc:m1.m2.m3:pos|On/[on]ppron3:sg:nom:m1.m2.m3:ter:akc.nakc:praep.npraep ,/[null]null  /[null]null to/[ten]adj:sg:acc:n1.n2:pos|to/[ten]adj:sg:nom.voc:n1.n2:pos|to/[to znaczy]<TO_ZNACZY>|to/[to]conj|to/[to]qub|to/[to]subst:sg:acc:n2|to/[to]subst:sg:nom:n2  /[null]null znaczy/[to znaczy]</TO_ZNACZY>|znaczy/[znaczyć]verb:fin:sg:ter:imperf:refl.nonrefl  /[null]null premier/[premier]subst:pl:acc:f|premier/[premier]subst:pl:dat:f|premier/[premier]subst:pl:gen:f|premier/[premier]subst:pl:inst:f|premier/[premier]subst:pl:loc:f|premier/[premier]subst:pl:nom:f|premier/[premier]subst:pl:voc:f|premier/[premier]subst:sg:acc:f|premier/[premier]subst:sg:dat:f|premier/[premier]subst:sg:gen:f|premier/[premier]subst:sg:inst:f|premier/[premier]subst:sg:loc:f|premier/[premier]subst:sg:nom:f|premier/[premier]subst:sg:nom:m1|premier/[premier]subst:sg:voc:f|premier/[premiera]subst:pl:gen:f ,/[null]null  /[null]null jest/[być]verb:fin:sg:ter:imperf:nonrefl  /[null]null niezbyt/[niezbyt]adv  /[null]null mądry/[mądry]adj:sg:acc:m3:pos|mądry/[mądry]adj:sg:nom.voc:m1.m2.m3:pos|mądry/[mądry]subst:sg:nom:m1|mądry/[mądry]subst:sg:voc:m1", tokenizer, sentenceTokenizer, tagger, disambiguator);
       TestTools.myAssert("Lubię go z uwagi na krótkie włosy.",

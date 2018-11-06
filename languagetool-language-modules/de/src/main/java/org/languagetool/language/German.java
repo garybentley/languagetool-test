@@ -187,7 +187,7 @@ public class German extends Language<GermanResourceDataBroker> implements AutoCl
   }
 
   public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
-      return new MultipleWhitespaceRule(getUseMessages(messages), this);
+      return new MultipleWhitespaceRule(getUseMessages(messages));
   }
 
   public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {

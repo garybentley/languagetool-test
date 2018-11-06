@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,12 +21,10 @@ package org.languagetool.rules.pl;
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
 import org.languagetool.language.Polish;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -39,13 +37,13 @@ public class DashRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    Language lang = new Polish();
+    Polish lang = new Polish();
     langTool = new JLanguageTool(lang);
-    rule = new DashRule();
+    rule = lang.createDashRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "Nie róbmy nic na łapu-capu.");
     check(0, "Jedzmy kogel-mogel.");
@@ -57,7 +55,7 @@ public class DashRuleTest {
     check(1, "Aix — en — Provence", new String[]{"Aix-en-Provence"});
   }
 
-  private void check(int expectedErrors, String text) throws IOException {
+  private void check(int expectedErrors, String text) throws Exception {
     check(expectedErrors, text, null);
   }
 
@@ -67,7 +65,7 @@ public class DashRuleTest {
    * @param text the text to check
    * @param expSuggestions the expected suggestions
    */
-  private void check(int expectedErrors, String text, String[] expSuggestions) throws IOException {
+  private void check(int expectedErrors, String text, String[] expSuggestions) throws Exception {
     assertNotNull("Please initialize langTool!", langTool);
     assertNotNull("Please initialize 'rule'!", rule);
     RuleMatch[] ruleMatches = rule.match(langTool.getAnalyzedSentence(text));

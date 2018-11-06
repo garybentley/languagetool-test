@@ -84,7 +84,7 @@ public class NewZealandEnglish extends English {
   }
 
   public NewZealandReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
-      return new NewZealandReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getLocale());
+      return new NewZealandReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
   }
 
 }

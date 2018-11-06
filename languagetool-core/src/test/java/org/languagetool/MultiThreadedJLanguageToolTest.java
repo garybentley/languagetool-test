@@ -106,7 +106,7 @@ public class MultiThreadedJLanguageToolTest {
         // less rules than processors (depending on the machine), should at least not crash
         return Arrays.asList(
                 new UppercaseSentenceStartRule(messages, this),
-                new MultipleWhitespaceRule(messages, this)
+                new MultipleWhitespaceRule(messages)
         );
       }
     });

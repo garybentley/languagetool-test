@@ -39,7 +39,7 @@ public class MultipleWhitespaceRuleTest {
   @Before
   public void setUp() throws Exception {
        lt = new JLanguageTool(TestTools.getTestLanguage());
-       rule = new MultipleWhitespaceRule(TestTools.getEnglishMessages(), TestTools.getTestLanguage());
+       rule = new MultipleWhitespaceRule(TestTools.getEnglishMessages());
   }
 
   @Test

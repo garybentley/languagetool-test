@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,9 +20,10 @@
 package org.languagetool.synthesis.pl;
 
 import org.junit.Test;
+import org.languagetool.language.Polish;
 import org.languagetool.AnalyzedToken;
+import org.languagetool.synthesis.Synthesizer;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -30,21 +31,22 @@ import static org.junit.Assert.assertEquals;
 public class PolishSynthesizerTest {
 
   @Test
-  public final void testSynthesizeString() throws IOException {
-    PolishSynthesizer synth = new PolishSynthesizer();
+  public final void testSynthesizeString() throws Exception {
+    Polish language = new Polish();
+    Synthesizer synth = language.getSynthesizer();
     assertEquals(synth.synthesize(dummyToken("blablabla"), "blablabla").length, 0);
 
     assertEquals("[Aarona]", Arrays.toString(synth.synthesize(dummyToken("Aaron"), "subst:sg:gen:m1")));
     assertEquals("[Abchazem]", Arrays.toString(synth.synthesize(dummyToken("Abchaz"), "subst:sg:inst:m1")));
-    // assertEquals("[nieduży]", Arrays.toString(synth.synthesize(dummyToken("nieduży"), "adj:sg:nom:m:pos:neg")));        
+    // assertEquals("[nieduży]", Arrays.toString(synth.synthesize(dummyToken("nieduży"), "adj:sg:nom:m:pos:neg")));
     assertEquals("[miała]", Arrays.toString(synth.synthesize(dummyToken("mieć"), "verb:praet:sg:f:ter:imperf:refl.nonrefl")));
         assertEquals("[brzydziej]", Arrays.toString(synth.synthesize(dummyToken("brzydko"), "adv:com")));
     //with regular expressions
     assertEquals("[tonera]", Arrays.toString(
             getSortedArray(synth.synthesize(dummyToken("toner"), "subst:sg:gen:m.*", true))));
     assertEquals("[niedużego, nieduży]", Arrays.toString(
-            getSortedArray(synth.synthesize(dummyToken("nieduży"), "adj:sg.*(m[0-9]?|m.n):pos", true))));    
-    assertEquals("[miał, miała, miałam, miałaś, miałem, miałeś, miało, miałom, miałoś]", 
+            getSortedArray(synth.synthesize(dummyToken("nieduży"), "adj:sg.*(m[0-9]?|m.n):pos", true))));
+    assertEquals("[miał, miała, miałam, miałaś, miałem, miałeś, miało, miałom, miałoś]",
           Arrays.toString(
                   getSortedArray(synth.synthesize(dummyToken("mieć"), ".*praet:sg.*", true))));
   }
@@ -58,5 +60,5 @@ public class PolishSynthesizerTest {
     Arrays.sort(newAr);
     return newAr;
   }
-  
+
 }

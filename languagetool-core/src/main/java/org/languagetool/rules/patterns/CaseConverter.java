@@ -35,6 +35,8 @@ public interface CaseConverter {
 
     public boolean isMixedCase(String str);
 
+    public String lowercaseFirstChar(String str);
+
     /**
      * Convert the string according to the conversion provided and sample (optional).
      *

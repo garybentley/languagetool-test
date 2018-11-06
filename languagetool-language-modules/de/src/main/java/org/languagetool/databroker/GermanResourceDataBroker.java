@@ -44,19 +44,12 @@ import org.languagetool.rules.spelling.hunspell.*;
 import org.languagetool.rules.de.*;
 
 public interface GermanResourceDataBroker extends ResourceDataBroker {
+
     Set<Pattern[]> getCaseRuleExceptionPatterns() throws Exception;
 
     Hunspell.Dictionary getHunspellDictionary() throws Exception;
 
     Set<Dictionary> getDictionaries(UserConfig config) throws Exception;
-    /*
-    GTODO
-    public Map<String, List<String>> getContractionWrongWords() throws Exception;
-
-    public List<ContextWords> getWrongWordsInContext() throws Exception;
-    public Dictionary getWordTaggerDictionary() throws Exception;
-    public EnglishSynthesizer getSynthesizer() throws Exception;
-*/
 
     Map<String, List<ConfusionSet>> getConfusionSets() throws Exception;
 
@@ -81,11 +74,6 @@ public interface GermanResourceDataBroker extends ResourceDataBroker {
     List<String> getSpellingIgnoreWords() throws Exception;
 
     List<String> getSpellingProhibitedWords() throws Exception;
-
-    //public List<PatternRule> getCompoundPatternRules(String message) throws Exception;
-
-    //@Override
-    //public EnglishWordTokenizer getWordTokenizer() throws Exception;
 
     //@Override
     Chunker getPostDisambiguationChunker() throws Exception;

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,26 +20,32 @@
 package org.languagetool.tokenizers.pl;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class PolishSentenceTokenizerTest {
 
-  private final SentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Polish());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Polish language = new Polish();
+      stokenizer = language.getSentenceTokenizer();
+  }
 
   @Test
   public final void testTokenize() {
-    
+
     testSplit("To się wydarzyło 3.10.2000 i mam na to dowody.");
 
-    testSplit("To było 13.12 - nikt nie zapomni tego przemówienia.");    
+    testSplit("To było 13.12 - nikt nie zapomni tego przemówienia.");
     testSplit("Heute ist der 13.12.2004.");
     testSplit("To jest np. ten debil spod jedynki.");
     testSplit("To jest 1. wydanie.");
-    testSplit("Dziś jest 13. rocznica powstania wąchockiego.");    
- 
+    testSplit("Dziś jest 13. rocznica powstania wąchockiego.");
+
     testSplit("Das in Punkt 3.9.1 genannte Verhalten.");
 
     testSplit("To jest tzw. premier.");
@@ -53,10 +59,10 @@ public class PolishSentenceTokenizerTest {
             "W skład obiegu otwartego wchodzi zbiornik i armatura.");
     testSplit("Zabudowano kolumny o długości 45 m. ",
             "Woda z ujęcia jest dostarczana do zakładu.");
-    
+
     // two-letter initials:
     testSplit("Najlepszym polskim reżyserem był St. Różewicz. ", "Chodzi o brata wielkiego poety.");
-    
+
     // From the abbreviation list:
     testSplit("Ks. Jankowski jest prof. teologii.");
     testSplit("To wydarzyło się w 1939 r.",
@@ -77,7 +83,7 @@ public class PolishSentenceTokenizerTest {
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

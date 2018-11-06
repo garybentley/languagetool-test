@@ -18,10 +18,9 @@
  */
 package org.languagetool.rules;
 
-import java.io.IOException;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
-import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * A rule that matches words which should not be used and suggests
@@ -45,17 +44,19 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
   private boolean checkLemmas = true;
 
   private Map<String, List<String>> wrongWords;
+  private CaseConverter caseConverter;
 /*
 GTODO: Clean up
   protected static Map<String, List<String>> load(String path, ResourceDataBroker dataBroker) {
     return new SimpleReplaceDataLoader().loadWords(path, dataBroker);
   }
 */
-
+/*
+ GTODO Clean up
   public Map<String, List<String>> getWrongWords() {
       return wrongWords;
   }
-
+*/
   /**
    * Indicates if the rule is case-sensitive. Default value is <code>true</code>.
    *
@@ -69,11 +70,12 @@ GTODO: Clean up
    * @return the locale used for case conversion when {@link #isCaseSensitive()}
    *         is set to <code>false</code>.
    */
+   /*
+   GTODO Clean up
   public Locale getLocale() {
-      // GTODO Need to use a CaseConverter here...
     return Locale.getDefault();
   }
-
+*/
   /**
    * Skip words that are known in the POS tagging dictionary, assuming they
    * cannot be incorrect.
@@ -83,10 +85,11 @@ GTODO: Clean up
     ignoreTaggedWords = true;
   }
 
-  public AbstractSimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords) {
+  public AbstractSimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
     super(messages);
     super.setCategory(Categories.MISC.getCategory(messages));
-    this.wrongWords = wrongWords;
+    this.wrongWords = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
   }
 
   @Override
@@ -109,7 +112,7 @@ GTODO: Clean up
   }
 
   private String cleanup(String word) {
-    return isCaseSensitive() ? word : word.toLowerCase(getLocale());
+    return isCaseSensitive() ? word : caseConverter.toLowerCase(word);
   }
 
   @Override
@@ -142,9 +145,9 @@ GTODO: Clean up
     String tokenString = cleanup(originalTokenStr);
 
     // try first with the original word, then with the all lower-case version
-    List<String> possibleReplacements = getWrongWords().get(originalTokenStr);
+    List<String> possibleReplacements = wrongWords.get(originalTokenStr);
     if (possibleReplacements == null) {
-      possibleReplacements = getWrongWords().get(tokenString);
+      possibleReplacements = wrongWords.get(tokenString);
     }
 
     if (possibleReplacements == null && checkLemmas) {
@@ -153,13 +156,13 @@ GTODO: Clean up
       List<String> lemmas = new ArrayList<>();
       for (AnalyzedToken analyzedToken : tokenReadings.getReadings()) {
         String lemma = analyzedToken.getLemma();
-        if (lemma != null && getWrongWords().containsKey(lemma) && ! lemmas.contains(lemma) ) {
+        if (lemma != null && wrongWords.containsKey(lemma) && ! lemmas.contains(lemma) ) {
           lemmas.add(cleanup(lemma));
         }
       }
 
       for (String lemma: lemmas) {
-        List<String> replacements = getWrongWords().get(lemma);
+        List<String> replacements = wrongWords.get(lemma);
         if (replacements != null) {
           possibleReplacements.addAll(replacements);
         }
@@ -196,9 +199,9 @@ GTODO: Clean up
     RuleMatch potentialRuleMatch = new RuleMatch(this, sentence, pos, pos
         + tokenString.length(), getMessage(tokenString, replacements), getShort());
 
-    if (!isCaseSensitive() && StringTools.startsWithUppercase(tokenString)) {
+    if (!isCaseSensitive() && caseConverter.startsWithUpperCase(tokenString)) {
       for (int i = 0; i < replacements.size(); i++) {
-        replacements.set(i, StringTools.uppercaseFirstChar(replacements.get(i)));
+        replacements.set(i, caseConverter.uppercaseFirstChar(replacements.get(i)));
       }
     }
 

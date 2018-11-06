@@ -24,18 +24,16 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikPolishSpellerRuleTest {
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
-    final MorfologikPolishSpellerRule rule =
-        new MorfologikPolishSpellerRule (TestTools.getMessages("pl"), new Polish(), null);
+  public void testMorfologikSpeller() throws Exception {
+    Polish language = new Polish();
+    final MorfologikPolishSpellerRule rule = language.createMorfologikSpellerRule(null, null);
 
-    final JLanguageTool langTool = new JLanguageTool(new Polish());
+    final JLanguageTool langTool = new JLanguageTool(language);
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("To jest test bez jakiegokolwiek błędu.")).length);

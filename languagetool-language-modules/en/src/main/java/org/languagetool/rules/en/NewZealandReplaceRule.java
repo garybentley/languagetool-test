@@ -19,12 +19,11 @@
 package org.languagetool.rules.en;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -40,7 +39,6 @@ public class NewZealandReplaceRule extends AbstractSimpleReplaceRule {
 
   //private Map<String, List<String>> wrongWords;
   //private static final Locale EN_NZ_LOCALE = new Locale("en-NZ");
-  private final Locale locale;
 
 /*
 GTODO: Clean up.
@@ -56,9 +54,8 @@ GTODO: Clean up.
 
   }
 */
-  public NewZealandReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, Locale locale) throws IOException {
-    super(messages, wrongWords);
-    this.locale = locale;
+  public NewZealandReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("A <marker>sidewalk</marker> is a path along the side of a road."),
                    Example.fixed("A <marker>footpath</marker> is a path along the side of a road."));
@@ -88,12 +85,6 @@ GTODO: Clean up.
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-      return locale;
-    // GTODO: return EN_NZ_LOCALE;
   }
 
 }

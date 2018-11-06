@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,14 +22,13 @@ import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.Polish;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class UppercaseSentenceStartRuleTest {
 
   @Test
-  public void testPolishSpecialCases() throws IOException {
+  public void testPolishSpecialCases() throws Exception {
+      // GTODO What is this testing?  How do we know which rule will match?
     final JLanguageTool lt = new JLanguageTool(new Polish());
     assertEquals(0, lt.check("Zdanie.").size());
     assertEquals(0, lt.check("To jest lista punktowana:\n\npunkt pierwszy,\n\npunkt drugi,\n\npunkt trzeci.").size());

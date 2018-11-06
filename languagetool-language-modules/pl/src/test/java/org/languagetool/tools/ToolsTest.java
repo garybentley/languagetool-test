@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 public class ToolsTest {
 
   @Test
-  public void testCheck() throws IOException, ParserConfigurationException, SAXException {
+  public void testCheck() throws Exception {
     final JLanguageTool tool = new JLanguageTool(new Polish());
 
     List<RuleMatch> matches = tool.check("To jest całkowicie prawidłowe zdanie.");
@@ -45,7 +45,7 @@ public class ToolsTest {
   }
 
   @Test
-  public void testCorrect() throws IOException, ParserConfigurationException, SAXException {
+  public void testCorrect() throws Exception {
     JLanguageTool tool = new JLanguageTool(new Polish());
     tool.setCleanOverlappingMatches(false);
 
@@ -60,5 +60,5 @@ public class ToolsTest {
     correct = Tools.correctText("To jest jest problem. Ale to już już nie jest problem. Tak sie nie robi. W tym zdaniu brakuje przecinka bo go zapomniałem.", tool);
     assertEquals("To jest problem. Ale to już nie jest problem. Tak się nie robi. W tym zdaniu brakuje przecinka, bo go zapomniałem.", correct);
   }
-  
+
 }

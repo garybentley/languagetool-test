@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -52,35 +52,35 @@ public class MatchTest {
     //tests with synthesizer
     Match match = getMatch("POS1", "POS2", true);
     final Polish polish = new Polish();
-    MatchState matchState = new MatchState(match, polish.getSynthesizer());
+    MatchState matchState = new MatchState(match, polish.getSynthesizer(), polish);
     matchState.setToken(getAnalyzedTokenReadings("inflectedform11", "POS1", "Lemma1"));
     //getting empty strings, which is what we want
-    assertEquals("[]", Arrays.toString(matchState.toFinalString(polish)));
+    assertEquals("[]", Arrays.toString(matchState.toFinalString()));
 
     // contrast with a speller = false!
     match = getMatch("POS1", "POS2", false);
-    matchState = new MatchState(match, polish.getSynthesizer());
+    matchState = new MatchState(match, polish.getSynthesizer(), polish);
     matchState.setToken(getAnalyzedTokenReadings("inflectedform11", "POS1", "Lemma1"));
-    assertEquals("[(inflectedform11)]", Arrays.toString(matchState.toFinalString(polish)));
+    assertEquals("[(inflectedform11)]", Arrays.toString(matchState.toFinalString()));
 
     //and now a real word - we should get something
     match = getMatch("subst:sg:acc.nom:m3", "subst:sg:gen:m3", true);
-    matchState = new MatchState(match, polish.getSynthesizer());
+    matchState = new MatchState(match, polish.getSynthesizer(), polish);
     matchState.setToken(getAnalyzedTokenReadings("AON", "subst:sg:acc.nom:m3", "AON"));
-    assertEquals("[AON-u]", Arrays.toString(matchState.toFinalString(polish)));
+    assertEquals("[AON-u]", Arrays.toString(matchState.toFinalString()));
 
-    //and now pure text changes        
+    //and now pure text changes
     match = getTextMatch("^(.*)$", "$0-u", true);
     match.setLemmaString("AON");
-    matchState = new MatchState(match, polish.getSynthesizer());
-    assertEquals("[AON-u]", Arrays.toString(matchState.toFinalString(polish)));
+    matchState = new MatchState(match, polish.getSynthesizer(), polish);
+    assertEquals("[AON-u]", Arrays.toString(matchState.toFinalString()));
     match.setLemmaString("batalion");
     //should be empty
-    matchState = new MatchState(match, polish.getSynthesizer());
-    assertEquals("[]", Arrays.toString(matchState.toFinalString(polish)));
+    matchState = new MatchState(match, polish.getSynthesizer(), polish);
+    assertEquals("[]", Arrays.toString(matchState.toFinalString()));
     match.setLemmaString("ASEAN");
     //and this one not
-    matchState = new MatchState(match, polish.getSynthesizer());
-    assertEquals("[ASEAN-u]", Arrays.toString(matchState.toFinalString(polish)));
+    matchState = new MatchState(match, polish.getSynthesizer(), polish);
+    assertEquals("[ASEAN-u]", Arrays.toString(matchState.toFinalString()));
   }
 }

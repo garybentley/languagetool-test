@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,11 +20,9 @@ package org.languagetool.rules.pl;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
 import org.languagetool.rules.MultipleWhitespaceRule;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -32,14 +30,15 @@ import static org.junit.Assert.assertEquals;
 public class MultipleWhitespaceRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    final MultipleWhitespaceRule rule = new MultipleWhitespaceRule(TestTools.getEnglishMessages(), new Polish());
-    final JLanguageTool langTool = new JLanguageTool(new Polish());
+  public void testRule() throws Exception {
+    Polish language = new Polish();
+    final MultipleWhitespaceRule rule = language.createMultipleWhitespaceRule(null);
+    final JLanguageTool langTool = new JLanguageTool(language);
     assertEquals(0, getMatches("To jest test.", rule, langTool));
     assertEquals(1, getMatches("To jest   test.", rule, langTool));
   }
 
-  private int getMatches(String input, MultipleWhitespaceRule rule, JLanguageTool lt) throws IOException {
+  private int getMatches(String input, MultipleWhitespaceRule rule, JLanguageTool lt) throws Exception {
     return rule.match(Collections.singletonList(lt.getAnalyzedSentence(input))).length;
   }
 

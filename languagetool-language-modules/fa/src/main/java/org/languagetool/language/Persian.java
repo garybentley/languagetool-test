@@ -136,7 +136,7 @@ GTODO Clean up
   }
 
   public SimpleReplaceRule createSimpleReplaceRule(ResourceBundle messages) throws Exception {
-      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords());
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
   }
 
   public PersianWordRepeatRule createPersianWordRepeatRule(ResourceBundle messages) throws Exception {
@@ -164,7 +164,7 @@ GTODO Clean up
   }
 
   public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
-      return new MultipleWhitespaceRule(getUseMessages(messages), this);
+      return new MultipleWhitespaceRule(getUseMessages(messages));
   }
 
   public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
