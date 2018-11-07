@@ -65,7 +65,7 @@
                       <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
                       </compilerArgs>
-                  
+
                   </configuration>
               </plugin>
 
@@ -170,7 +170,10 @@
     <module>languagetool-language-modules/fr</module>
     <module>languagetool-language-modules/de</module>
     <module>languagetool-language-modules/pl</module>
+    <!--
+    Removed due to serious issues, missing file references
     <module>languagetool-language-modules/ca</module>
+-->
     <module>languagetool-language-modules/it</module>
     <module>languagetool-language-modules/br</module>
     <module>languagetool-language-modules/nl</module>
