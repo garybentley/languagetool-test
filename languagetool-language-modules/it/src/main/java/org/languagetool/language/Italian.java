@@ -18,11 +18,10 @@
  */
 package org.languagetool.language;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
@@ -33,30 +32,41 @@ import org.languagetool.rules.*;
 import org.languagetool.rules.it.ItalianConfusionProbabilityRule;
 import org.languagetool.rules.it.ItalianWordRepeatRule;
 import org.languagetool.rules.it.MorfologikItalianSpellerRule;
+import org.languagetool.databroker.*;
 
 import org.languagetool.tagging.Tagger;
-import org.languagetool.tagging.it.ItalianTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.it.ItalianRuleDisambiguator;
 
-public class Italian extends Language implements AutoCloseable {
+public class Italian extends Language<ItalianResourceDataBroker> {
 
-  private Tagger tagger;
-  private SentenceTokenizer sentenceTokenizer;
-  private LuceneLanguageModel languageModel;
-  private Disambiguator disambiguator;
+    public static final String LANGUAGE_ID = "it";
+    public static final String COUNTRY_ID = "IT";
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+  public ItalianResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultItalianResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
 
   @Override
   public String getName() {
     return "Italian";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "it";
   }
 
   @Override
@@ -65,19 +75,13 @@ public class Italian extends Language implements AutoCloseable {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new ItalianTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -87,55 +91,76 @@ public class Italian extends Language implements AutoCloseable {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new WhitespaceBeforePunctuationRule(messages),
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "»", "«" /*"‘"*/),
-                    Arrays.asList("]", ")", "}", "«", "»" /*"’"*/)),
-            new MorfologikItalianSpellerRule(messages, this, userConfig),
-            new UppercaseSentenceStartRule(messages, this),
-            new ItalianWordRepeatRule(messages, this),
-            new MultipleWhitespaceRule(messages, this)
+            createWhitespaceBeforePunctuationRule(messages),
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createMorfologikSpellerRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),
+            createWordRepeatRule(messages),
+            createMultipleWhitespaceRule(messages)
     );
   }
 
-  /** @since 3.1 */
-  @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
-    if (languageModel == null) {
-      languageModel = new LuceneLanguageModel(new File(indexDir, getShortCode()));
-    }
-    return languageModel;
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public ItalianWordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new ItalianWordRepeatRule(getUseMessages(messages));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public MorfologikItalianSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikItalianSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig), getUseDataBroker().getSpellingIgnoreWords());
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "»", "«" /*"‘"*/),
+              Arrays.asList("]", ")", "}", "«", "»" /*"’"*/));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public WhitespaceBeforePunctuationRule createWhitespaceBeforePunctuationRule(ResourceBundle messages) throws Exception {
+      return new WhitespaceBeforePunctuationRule(getUseMessages(messages));
   }
 
   /** @since 3.1 */
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
+  public LanguageModel getLanguageModel() throws Exception {
+      return getUseDataBroker().getLanguageModel();
+  }
+
+  /** @since 3.1 */
+  @Override
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.<Rule>asList(
-            new ItalianConfusionProbabilityRule(messages, languageModel, this)
+            createConfusionProbabilityRule(messages, languageModel)
     );
   }
 
-  /**
-   * Closes the language model, if any.
-   * @since 3.1
-   */
-  @Override
-  public void close() throws Exception {
-    if (languageModel != null) {
-      languageModel.close();
-    }
+  public ItalianConfusionProbabilityRule createConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      return new ItalianConfusionProbabilityRule(getUseMessages(messages), languageModel, this, getUseDataBroker().getConfusionSets());
   }
 
   @Override
-  public final Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new ItalianRuleDisambiguator(getUseDataBroker());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override

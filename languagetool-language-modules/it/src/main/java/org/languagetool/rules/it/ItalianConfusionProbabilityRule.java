@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,11 @@
  */
 package org.languagetool.rules.it;
 
-import org.languagetool.Language;
+import java.util.Map;
+import java.util.List;
+
+import org.languagetool.language.Italian;
+import org.languagetool.rules.ConfusionSet;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.ngrams.ConfusionProbabilityRule;
 
@@ -29,8 +33,8 @@ import java.util.ResourceBundle;
  */
 public class ItalianConfusionProbabilityRule extends ConfusionProbabilityRule {
 
-  public ItalianConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language) {
-    super(messages, languageModel, language);
+  public ItalianConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Italian lang, Map<String,List<ConfusionSet>> confusionSets) {
+    super(messages, languageModel, lang, confusionSets);
     // TODO: add example:
     //addExamplePair(Example.wrong("<marker>wrong</marker> word in sentence"),
     //               Example.fixed("<marker>correct</marker> word in sentence"));

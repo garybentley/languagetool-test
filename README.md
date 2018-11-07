@@ -134,7 +134,14 @@ This is a list of things that need to be changed/looked at:
 * Move CaseConverter to .rules instead of .rules.patterns (also move DefaultCaseConverter)
 * core/MultipleWhitespaceRule consider using CaseConverter for isNonBreakingWhitespace call.
 * core/UppercaseSentenceStartRule remove dutch special case, handle with Dutch specific rule.
-
+* pl/test/PolishDisambiguationRuleTest make use of polish hyrbird disambiguator not a multi word chunker.
+* modify grammar.xml to allow specification of default enabled/disabled rules.  At present they are hard coded in the language (see ValencianCatalan)
+* CatalanTagger can't be created since org/languagetool/resource/ca/ca-ES-valencia.dict doesn't exist.
+* CatalanSynthesizer can't be created since org/languagetool/resource/ca/[ca-ES-valencia_synth.dict, ca-ES-valencia_tags.txt] don't exist.  Synthesizer also refers to ValenciaCatalan rather than Catalan, should probably be changed.
+* CatalanWordTokenizer can't be created since org/languagetool/resource/ca/ca-ES-valencia.dict doesn't exist.  Also Tokenizer refers to ValenciaCatalan rather than Catalan (default variant is standard Catalan not Valencia Catalan).
+* Catalan has NOT been ported because of these serious issues.  It is removed from the pom.xml file.
+* it/MorfologikItalianSpellerRule doesn't set the category or add an example pair like other languages.
+* it/ItalianRuleDisambiguator remove class, is only a wrapper around XmlRuleDisambiguator and not needed.
 
 ## The information below is from the standard LanguageTool README
 

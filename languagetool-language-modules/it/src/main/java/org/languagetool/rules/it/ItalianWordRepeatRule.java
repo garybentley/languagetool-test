@@ -21,7 +21,6 @@ package org.languagetool.rules.it;
 import java.util.ResourceBundle;
 
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.rules.WordRepeatRule;
 
 /**
@@ -29,8 +28,8 @@ import org.languagetool.rules.WordRepeatRule;
  */
 public class ItalianWordRepeatRule extends WordRepeatRule {
 
-  public ItalianWordRepeatRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public ItalianWordRepeatRule(ResourceBundle messages) {
+    super(messages);
   }
 
   @Override

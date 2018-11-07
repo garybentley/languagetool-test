@@ -18,7 +18,6 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -55,7 +54,11 @@ import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.ca.CatalanWordTokenizer;
 
-public class Catalan extends Language {
+public class Catalan extends Language<CatalanResourceDataBroker> {
+
+    public static final String LANGUAGE_ID = "ca";
+    public static final String COUNTRY_ID = "ES";
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
 
   private static final Language DEFAULT_CATALAN = new Catalan();
 
@@ -64,6 +67,25 @@ public class Catalan extends Language {
   private Tokenizer wordTokenizer;
   private Synthesizer synthesizer;
   private Disambiguator disambiguator;
+
+  public CatalanResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultCatalanResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
 
   @Override
   public String getName() {
@@ -91,7 +113,7 @@ public class Catalan extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws Exception {
     return Arrays.asList(
             new CommaWhitespaceRule(messages,
             		Example.wrong("A parer seu<marker> ,</marker> no era veritat."),

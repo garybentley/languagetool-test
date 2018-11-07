@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,8 +18,10 @@
  */
 package org.languagetool.tagging.it;
 
-import java.util.Locale;
+import morfologik.stemming.Dictionary;
 
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.languagetool.tagging.BaseTagger;
 
 /**
@@ -28,14 +30,16 @@ import org.languagetool.tagging.BaseTagger;
  * @author Marcin Milkowski
  */
 public class ItalianTagger extends BaseTagger {
-
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/it/added.txt";
   }
-
-  public ItalianTagger() {
-    super("/it/italian.dict", Locale.ITALIAN);
+*/
+  public ItalianTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
+    super(dict, tagger, caseCon, true);
+    //GTODO super("/it/italian.dict", Locale.ITALIAN);
   }
-  
+
 }

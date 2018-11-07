@@ -18,7 +18,6 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +53,19 @@ import org.languagetool.rules.ca.SimpleReplaceVerbsRule;
 
 public class ValencianCatalan extends Catalan {
 
+    public static final String VARIANT_ID = "valencia";
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID, VARIANT_ID);
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
+
+    @Override
+    public boolean isVariant() {
+        return true;
+    }
+
   @Override
   public String getName() {
     return "Catalan (Valencian)";
@@ -70,7 +82,10 @@ public class ValencianCatalan extends Catalan {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Langauge> altLanguages) throws Exception {
+      List<Rule> rules = super.getRelevantRules(messages, userConfig, altLanguages);
+      /*
+      GTODO CLean up, all these rules are in our super call
     return Arrays.asList(
             new CommaWhitespaceRule(messages,
                 Example.wrong("A parer seu<marker> ,</marker> no era veritat."),
@@ -98,11 +113,18 @@ public class ValencianCatalan extends Catalan {
             new ReplaceOperationNamesRule(messages, this),
             // Valencian DNV
             new SimpleReplaceDNVRule(messages, this),
-            new SimpleReplaceDNVColloquialRule(messages, this),
-            new SimpleReplaceDNVSecondaryRule(messages, this),
             new SimpleReplaceDiacriticsIEC(messages, getUseDataBroker()),
-            new SimpleReplaceDiacriticsTraditional(messages, getUseDataBroker())
-    );
+            new SimpleReplaceDiacriticsTraditional(messages, getUseDataBroker()),
+            */
+GTODO - need to sort missing file issues before Catalan can be used
+Also, a number of classes are called "Catalan[X]" but actually use valencia type resources but the default
+variant (in Catalan) is Catalan.
+            // This rule uses CatalanTagger which needs to know whether the language is a variant...
+            new SimpleReplaceVerbsRule(messages, this),
+
+            rules.add(new SimpleReplaceDNVColloquialRule(messages, this));
+            rules.add(new SimpleReplaceDNVSecondaryRule(messages, this));
+    return rules;
   }
 
   @Override

@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,18 +16,25 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.rules.it;
+package org.languagetool.databroker;
 
-import org.junit.Test;
-import org.languagetool.rules.patterns.PatternRuleTest;
-import org.languagetool.language.Italian;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
-public class ItalianPatternRuleTest extends PatternRuleTest {
+import morfologik.stemming.Dictionary;
+import org.languagetool.UserConfig;
+import org.languagetool.rules.ConfusionSet;
 
-  @Test
-  public void testRules() throws Exception {
-      Italian lang = new Italian();
-      runTestForLanguage(lang);
-  }
+public interface ItalianResourceDataBroker extends ResourceDataBroker {
+
+    Map<String, List<ConfusionSet>> getConfusionSets() throws Exception;
+
+    Set<Dictionary> getDictionaries(UserConfig config) throws Exception;
+
+    /**
+     * Get the spelling ignore words.
+     */
+    List<String> getSpellingIgnoreWords() throws Exception;
 
 }

@@ -18,8 +18,6 @@
  */
 package org.languagetool.tagging.disambiguation.rules.it;
 
-import java.io.IOException;
-
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.language.Italian;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
@@ -29,16 +27,19 @@ import org.languagetool.databroker.ResourceDataBroker;
 
 public class ItalianRuleDisambiguator extends AbstractDisambiguator {
 
+// GTODO Remove, no longer needed.
+/*
   private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Italian());
 
   public ItalianRuleDisambiguator (ResourceDataBroker dataBroker) {
       super(dataBroker);
   }
-
+*/
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-    throws IOException {
-      return disambiguator.disambiguate(input);
+    throws Exception {
+        return input;
+      //return disambiguator.disambiguate(input);
   }
 
 }

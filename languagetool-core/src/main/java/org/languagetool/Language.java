@@ -57,7 +57,7 @@ import java.util.stream.*;
  * <p>Sub classes should typically use lazy init for anything that's costly to set up.
  * This improves start up time for the LanguageTool stand-alone version.
  */
-public abstract class Language<E extends ResourceDataBroker> {
+public abstract class Language<E extends ResourceDataBroker> implements AutoCloseable {
 
   //private static final Disambiguator DEMO_DISAMBIGUATOR = new DemoDisambiguator();
   //private static final Tagger DEMO_TAGGER = new DemoTagger();
@@ -660,4 +660,10 @@ GTODO Clean up
     return Objects.hash(l.getLanguage(), l.getCountry(), l.getVariant());
     //GTODO getShortCodeWithCountryAndVariant().hashCode();
   }
+
+  @Override
+  public void close() throws Exception {
+      getUseDataBroker().close();
+  }
+
 }
