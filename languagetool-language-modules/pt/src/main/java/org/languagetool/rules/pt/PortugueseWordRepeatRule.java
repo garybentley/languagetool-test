@@ -41,8 +41,8 @@ public class PortugueseWordRepeatRule extends WordRepeatRule {
 
   private static final Pattern TAUTONYMS_SPECIES = Pattern.compile("aaptos|acanthogyrus|achatina|agagus|agama|alburnus|alces|alle|alosa|amandava|amazilia|ameiva|anableps|anguilla|anguilla|anhinga|anostomus|anser|anthias|apus|arcinella|ariadne|aspredo|astacus|avicularia|axis|badis|bagarius|bagre|balanus|banjos|barbatula|barbus|basiliscus|batasio|belobranchus|belone|belonimorphis|bidyanus|bison|bombina|boops|brama|brosme|bubo|bucayana|bufo|buteo|butis|calamus|calappa|caleta|callichthys|calotes|capoeta|capreolus|caracal|carassius|carassius|cardinalis|carduelis|caretta|casuarius|catla|catostomus|cephea|cerastes|chaca|chalcides|chandramara|chanos|chaos|chinchilla|chiropotes|chitala|chromis|ciconia|cidaris|cinclus|citellus|clelia|coccothraustes|coccothraustes|cochlearius|coeligena|colius|columella|concholepas|concholepas|conger|conta|convoluta|cordylus|coscoroba|cossus|cotinga|coturnix|crangon|cressida|crex|cricetus|crocuta|crossoptilon|curaeus|cyanicterus|cygnus|cymbium|cynoglossus|dama|dario|dentex|devario|diuca|dives|dolabrifera|enhydris|ensifera|ensifera|ensis|erythrinus|extra|falcipennis|feroculus|ficus|fragum|francolinus|furcula|gagata|galbula|gallinago|gallus|gazella|gazella|gemma|genetta|gerbillus|gibberulus|giraffa|glis|glycimeris|glyphis|gobio|goliathus|gonorynchus|gorilla|grapsus|grapsus|grus|gryllotalpa|guira|gulo|hara|harpa|haustellum|hemilepidotus|heterophyes|himantopus|himantopus|hippocampus|hippoglossus|hippopus|histrio|histrionicus|hoolock|hucho|huso|hyaena|hypnale|ichthyaetus|icterus|idea|iguana|indicator|indri|indri|jacana|jaculus|janthina|kachuga|koilofera|lactarius|lagocephalus|lagopus|lagopus|lagurus|lambis|lemmus|lepadogaster|lerwa|leuciscus|lima|limanda|limanda|limosa|liparis|lithognathus|lithophaga|loa|lota|luscinia|lutjanus|lutra|lutraria|lynx|macrophyllum|manacus|margaritifera|marmota|martes|mascarinus|mashuna|megacephala|melanodera|meles|melo|melolontha|melolontha|melongena|menidia|mephitis|mercenaria|meretrix|merluccius|meza|microstoma|milvus|milvus|mitella|mitra|mitu|modiolus|modulus|mola|molossus|molva|monachus|moniliformis|mops|mustelus|myaka|myospalax|myotis|myotis|naja|naja|nangra|nasua|natrix|neita|niviventer|notopterus|nycticorax|nycticorax|oenanthe|ogasawarana|oliva|ophioscincus|oplopomus|oreotragus|oriolus|pagrus|pangasius|papio|pauxi|perdix|periphylla|perna|petaurista|petronia|phocoena|phoenicurus|phoxinus|phycis|pica|pipa|pipile|pipistrellus|pipra|pithecia|planorbis|plica|poliocephalus|pollachius|pollicipes|porites|porphyrio|porphyrolaema|porpita|porzana|pristis|pseudobagarius|pudu|puffinus|pungitius|pyrrhocorax|pyrrhula|quadrula|quelea|rama|ranina|rapa|rasbora|rattus|redunca|regulus|remora|retropinna|rhinobatos|riparia|rita|rupicapra|rupicola|rutilus|saccolaimus|salamandra|sarda|scalpellum|scincus|scolytus|sephanoides|serinus|sodreana|solea|sphyraena|spinachia|spirorbis|spirula|sprattus|squatina|staphylaea|suiriri|sula|suta|synodus|tadorna|tandanus|tchagra|telescopium|temnurus|terebellum|tetradactylus|tetrax|therezopolis|thymallus|tibicen|tinca|todus|torpedo|trachurus|trachycorystes|trachyrinchus|tricornis|troglodytes|tropheops|tubifex|tyrannus|umbraculum|uncia|vanellus|vanellus|velella|velella|velutina|vicugna|villosa|vimba|viviparus|volva|vulpes|vulpes|xanthocephalus|xanthostigma|xenopirostris|ypiranga|zebrus|zera|zingel|zingha|zoma|zonia|zungaro|zygoneura|se");
 
-  public PortugueseWordRepeatRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public PortugueseWordRepeatRule(ResourceBundle messages) {
+    super(messages);
     super.setCategory(Categories.REPETITIONS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Duplication);
     addExamplePair(Example.wrong("Este <marker>é é</marker> apenas uma frase de exemplo."),
@@ -80,11 +80,11 @@ public class PortugueseWordRepeatRule extends WordRepeatRule {
   private boolean wordRepetitionOf(String word, AnalyzedTokenReadings[] tokens, int position) {
     return position > 0 && tokens[position - 1].getToken().equals(word) && tokens[position].getToken().equals(word);
   }
-  
+
   private boolean isGenus(AnalyzedTokenReadings token) {
     return TAUTONYMS_GENUS.matcher(token.getToken()).matches();
   }
-  
+
   private boolean isSpecies(AnalyzedTokenReadings token) {
     return TAUTONYMS_SPECIES.matcher(token.getToken()).matches();
   }

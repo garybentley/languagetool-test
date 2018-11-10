@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2008 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,9 +35,10 @@ public class GenericUnpairedBracketsRuleTest {
   private JLanguageTool langTool;
 
   @Test
-  public void testDutchRule() throws IOException {
-    langTool = new JLanguageTool(new Dutch());
-    rule = org.languagetool.rules.GenericUnpairedBracketsRuleTest.getBracketsRule(langTool);
+  public void testDutchRule() throws Exception {
+      Dutch lang = new Dutch();
+    langTool = new JLanguageTool(lang);
+    rule = lang.createUnpairedBracketsRule(null);
     // correct sentences:
     assertMatches("Het centrale probleem van het werk is de ‘dichterlijke kuischheid’.", 0);
     //this was a bug as there are several pairs that start with the same char:
@@ -48,7 +49,7 @@ public class GenericUnpairedBracketsRuleTest {
     assertMatches(" Eurlings: “De gegevens van de dienst zijn van cruciaal belang voor de veiligheid van de luchtvaart en de scheepvaart.", 1);
   }
 
-  private void assertMatches(String input, int expectedMatches) throws IOException {
+  private void assertMatches(String input, int expectedMatches) throws Exception {
     final RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(input)));
     assertEquals(expectedMatches, matches.length);
   }

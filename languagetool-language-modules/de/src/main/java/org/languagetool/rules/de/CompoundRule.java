@@ -34,16 +34,16 @@ import org.languagetool.rules.Example;
  */
 public class CompoundRule extends AbstractCompoundRule {
 
-  private final CompoundRuleData compoundData;
+  // GTODO private final CompoundRuleData compoundData;
   //GTODO  = new CompoundRuleData("/de/compounds.txt", "/de/compound-cities.txt");
 
   public CompoundRule(ResourceBundle messages, CompoundRuleData compounds) throws IOException {
     super(messages,
+            compounds,
             "Dieses Wort wird mit Bindestrich geschrieben.",
             "Dieses Wort wird zusammengeschrieben.",
             "Diese Wörter werden zusammengeschrieben oder mit Bindestrich getrennt.",
             "Zusammenschreibung von Wörtern");
-    this.compoundData = compounds;
     super.setCategory(Categories.COMPOUNDING.getCategory(messages));
     addExamplePair(Example.wrong("Wenn es schlimmer wird, solltest Du zum <marker>HNO Arzt</marker> gehen."),
                    Example.fixed("Wenn es schlimmer wird, solltest Du zum <marker>HNO-Arzt</marker> gehen."));
@@ -59,8 +59,4 @@ public class CompoundRule extends AbstractCompoundRule {
     return "Zusammenschreibung von Wörtern, z. B. 'CD-ROM' statt 'CD ROM'";
   }
 
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
-  }
 }

@@ -22,18 +22,19 @@
  */
 package org.languagetool.rules.pt;
 
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.WrongWordInContextRule;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.ContextWords;
 
 public class PortugueseWrongWordInContextRule extends WrongWordInContextRule {
 
-  public PortugueseWrongWordInContextRule(ResourceBundle messages, ResourceDataBroker dataBroker) {
-    super(messages, dataBroker);
+  public PortugueseWrongWordInContextRule(ResourceBundle messages, List<ContextWords> wrongWords) {
+    super(messages, wrongWords);
     super.setCategory(Categories.SEMANTICS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Grammar);
     addExamplePair(Example.wrong("O acidente <marker>infringiu</marker> grandes danos."),
@@ -55,11 +56,13 @@ public class PortugueseWrongWordInContextRule extends WrongWordInContextRule {
     return "Confusão de palavra dentro do contexto (Infligir/Infringir, etc.)";
   }
 
+/*
+GTODO
   @Override
   protected String getFilename() {
     return "/pt/wrongWordInContext.txt";
   }
-
+*/
   @Override
   protected String getMessageString() {
     return "Pretende dizer <suggestion>$SUGGESTION</suggestion> em vez de $WRONGWORD?";

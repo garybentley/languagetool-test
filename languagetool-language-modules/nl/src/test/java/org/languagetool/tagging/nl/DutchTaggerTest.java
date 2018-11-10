@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,31 +22,37 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Dutch;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.nl.DutchWordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.Tagger;
 
 public class DutchTaggerTest {
-    
-  private DutchTagger tagger;
-  private WordTokenizer tokenizer;
-      
+
+  private Dutch lang;
+  private Tagger tagger;
+  private Tokenizer tokenizer;
+
   @Before
-  public void setUp() {
-    tagger = new DutchTagger();
-    tokenizer = new DutchWordTokenizer();
+  public void setUp() throws Exception {
+    lang = new Dutch();
+    tagger = lang.getDefaultDataBroker().getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Dutch());
+  public void testDictionary() throws Exception {
+      if (tagger instanceof BaseTagger) {
+          TestTools.testTaggerDictionary(((BaseTagger) tagger).getDictionary(), lang);
+      } else {
+          System.out.println("testDictionary test not run due to Tagger not being an instance of: " + BaseTagger.class.getName());
+      }
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("Dit is een Nederlandse zin om het programma'tje te testen.",
-        "Dit/[null]null -- is/[is]ZNW:EKV:DE_|is/[zijn]WKW:TGW:3EP -- een/[een]GET|een/[een]ZNW:EKV:DE_ -- Nederlandse/[Nederlands]BNW:STL:VRB|Nederlandse/[Nederlandse]ZNW:EKV:DE_ -- zin/[zin]ZNW:EKV:DE_|zin/[zinnen]WKW:TGW:1EP -- om/[null]null -- het/[null]null -- programma'tje/[null]null -- te/[te]VRZ -- testen/[test]ZNW:MRV:DE_|testen/[testen]WKW:TGW:INF", tokenizer, tagger);        
-    TestTools.myAssert("zwijnden", "zwijnden/[zwijnen]WKW:VLT:INF", tokenizer, tagger);        
+        "Dit/[null]null -- is/[is]ZNW:EKV:DE_|is/[zijn]WKW:TGW:3EP -- een/[een]GET|een/[een]ZNW:EKV:DE_ -- Nederlandse/[Nederlands]BNW:STL:VRB|Nederlandse/[Nederlandse]ZNW:EKV:DE_ -- zin/[zin]ZNW:EKV:DE_|zin/[zinnen]WKW:TGW:1EP -- om/[null]null -- het/[null]null -- programma'tje/[null]null -- te/[te]VRZ -- testen/[test]ZNW:MRV:DE_|testen/[testen]WKW:TGW:INF", tokenizer, tagger);
+    TestTools.myAssert("zwijnden", "zwijnden/[zwijnen]WKW:VLT:INF", tokenizer, tagger);
   }
 }

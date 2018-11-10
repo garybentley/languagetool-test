@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,11 +19,14 @@
 package org.languagetool.rules.pt;
 
 import org.languagetool.Language;
+import org.languagetool.language.Portuguese;
+import org.languagetool.rules.ConfusionSet;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.ngrams.ConfusionProbabilityRule;
 
 //import org.languagetool.rules.Categories;
-
+import java.util.Map;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -31,11 +34,11 @@ import java.util.ResourceBundle;
  */
 public class PortugueseConfusionProbabilityRule extends ConfusionProbabilityRule {
 
-  public PortugueseConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language) {
-    super(messages, languageModel, language);
+  public PortugueseConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Portuguese language, Map<String,List<ConfusionSet>> confusionSets) {
+      super(messages, languageModel, language, confusionSets);
     //super.setCategory(Categories.CONFUSED_WORDS.getCategory(messages));
-    setDefaultOff();  
-   /* Leave setDefaultOff() on Portuguese ngram rules. 
+    setDefaultOff();
+   /* Leave setDefaultOff() on Portuguese ngram rules.
     * They have low priority for Portuguese because:
     * - they are not available for all users;
     * - there is no publicly available ngram data via LanguageTool (2016-12)

@@ -18,17 +18,20 @@
  */
 package org.languagetool.tagging.br;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.tagging.BaseTagger;
 import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.tagging.WordTagger;
 
 /** Breton Tagger.
  *
@@ -50,15 +53,19 @@ public class BretonTagger extends BaseTagger {
 
   private static final Pattern patternSuffix = Pattern.compile("(?iu)(..+)-(mañ|se|hont)$");
 
-  private final Locale conversionLocale = Locale.getDefault();
+  private CaseConverter caseConverter;
 
+  //private final Locale conversionLocale = Locale.getDefault();
+/*
+GTODO Clean up
   @Override
   public String getManualAdditionsFileName() {
     return "/br/added.txt";
   }
-
-  public BretonTagger() {
-    super("/br/breton.dict", new Locale("br"));
+*/
+  public BretonTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
+    super(dict, tagger, caseCon, true);
+    this.caseConverter = caseCon;
   }
 
   // This method is almost the same as the 'tag' method in
@@ -66,8 +73,7 @@ public class BretonTagger extends BaseTagger {
   // dictionary fails, it retry without the suffixes
   // -mañ, -se, -hont.
   @Override
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens)
-  throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) {
     List<AnalyzedToken> taggerTokens;
     List<AnalyzedToken> lowerTaggerTokens;
     List<AnalyzedToken> upperTaggerTokens;
@@ -82,7 +88,7 @@ public class BretonTagger extends BaseTagger {
       // which happens rarely when trying to remove suffixes -mañ, -se, etc.
       for (;;) {
         List<AnalyzedToken> l = new ArrayList<>();
-        String lowerWord = probeWord.toLowerCase(conversionLocale);
+        String lowerWord = caseConverter.toLowerCase(probeWord);
         taggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(probeWord));
         lowerTaggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(lowerWord));
         boolean isLowercase = probeWord.equals(lowerWord);
@@ -99,7 +105,7 @@ public class BretonTagger extends BaseTagger {
         if (lowerTaggerTokens.isEmpty() && taggerTokens.isEmpty()) {
           if (isLowercase) {
             upperTaggerTokens = asAnalyzedTokenListForTaggedWords(word,
-                getWordTagger().tag(StringTools.uppercaseFirstChar(probeWord)));
+                getWordTagger().tag(caseConverter.uppercaseFirstChar(probeWord)));
             if (!upperTaggerTokens.isEmpty()) {
               addTokens(upperTaggerTokens, l);
             }

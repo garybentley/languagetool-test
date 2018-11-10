@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005-2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,37 +23,41 @@ import org.languagetool.rules.AbstractSimpleReplaceRule2;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.languagetool.tools.Tools;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 import java.net.URL;
 
 /**
- * A rule that matches common Wikipedia errors. 
+ * A rule that matches common Wikipedia errors.
  * Portuguese implementations. Loads the list of words from
  * <code>/pt/wikipedia.txt</code>.
  *
- * @author Tiago F. Santos 
+ * @author Tiago F. Santos
  * @since 3.6
  */
 public class PortugueseWikipediaRule extends AbstractSimpleReplaceRule2 {
 
   public static final String WIKIPEDIA_COMMON_ERRORS = "PT_WIKIPEDIA_COMMON_ERRORS";
 
-  private static final String FILE_NAME = "/pt/wikipedia.txt";
-  private static final Locale PT_LOCALE = new Locale("pt");// locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/pt/wikipedia.txt";
+  // GTODO private static final Locale PT_LOCALE = new Locale("pt");// locale used on case-conversion
 
+/*
+GTODO
   @Override
   public final String getFileName() {
     return FILE_NAME;
   }
+*/
 
-
-  public PortugueseWikipediaRule(ResourceBundle messages) throws IOException {
-    super(messages, new Portuguese());
+  public PortugueseWikipediaRule(ResourceBundle messages, List<Map<String, String>> wordinessWords, CaseConverter caseCon) {
+    super(messages, wordinessWords, caseCon);
     super.setCategory(Categories.WIKIPEDIA.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Grammar);
     addExamplePair(Example.wrong("<marker>mais também</marker>"),
@@ -74,7 +78,7 @@ public class PortugueseWikipediaRule extends AbstractSimpleReplaceRule2 {
   public String getShort() {
     return "Erro gramatical ou de normativa";
   }
-  
+
   @Override
   public String getSuggestion() {
     return " é um erro. Considere utilizar ";
@@ -89,10 +93,11 @@ public class PortugueseWikipediaRule extends AbstractSimpleReplaceRule2 {
   public URL getUrl() {
     return Tools.getUrl("https://pt.wikipedia.org/wiki/Wikip%C3%A9dia:Lista_de_erros_comuns/M%C3%A1quinas");
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return PT_LOCALE;
   }
-
+*/
 }

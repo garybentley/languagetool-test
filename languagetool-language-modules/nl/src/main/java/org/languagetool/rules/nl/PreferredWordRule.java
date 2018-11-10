@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,11 +18,11 @@
  */
 package org.languagetool.rules.nl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Objects;
 
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.rules.Categories;
@@ -37,15 +37,17 @@ import org.languagetool.rules.RuleMatch;
  */
 public class PreferredWordRule extends Rule {
 
-  private static final String DESC = "Suggereert een gebruikelijker woord.";
+  public static final String DESC = "Suggereert een gebruikelijker woord.";
 
-  private static final PreferredWordData data = new PreferredWordData(DESC);
+  private final List<PreferredWordRuleWithSuggestion> spellingRules;
+  // GTODO private static final PreferredWordData data = new PreferredWordData(DESC);
 
-  public PreferredWordRule(ResourceBundle messages) throws IOException {
+  public PreferredWordRule(ResourceBundle messages, List<PreferredWordRuleWithSuggestion> rules) {
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
     addExamplePair(Example.wrong("Hij vindt <marker>rijwiel</marker> een ouderwets woord."),
                    Example.fixed("En ik vind <marker>fiets</marker> ook beter."));
+    this.spellingRules = Objects.requireNonNull(rules, "Rules must be provided.");
   }
 
   @Override
@@ -59,9 +61,9 @@ public class PreferredWordRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
-    for (PreferredWordRuleWithSuggestion ruleWithSuggestion : data.get()) {
+    for (PreferredWordRuleWithSuggestion ruleWithSuggestion : spellingRules) {
       Rule rule = ruleWithSuggestion.rule;
       RuleMatch[] matches = rule.match(sentence);
       if (matches.length > 0) {
@@ -77,5 +79,5 @@ public class PreferredWordRule extends Rule {
     }
     return toRuleMatchArray(ruleMatches);
   }
-  
+
 }

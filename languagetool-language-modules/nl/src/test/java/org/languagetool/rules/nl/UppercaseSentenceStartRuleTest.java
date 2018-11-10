@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,7 +23,6 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.language.Dutch;
 import org.languagetool.rules.patterns.AbstractPatternRule;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,14 +31,14 @@ import static org.junit.Assert.assertEquals;
 public class UppercaseSentenceStartRuleTest {
 
   @Test
-  public void testDutchSpecialCases() throws IOException {
+  public void testDutchSpecialCases() throws Exception {
     final JLanguageTool lt = new JLanguageTool(new Dutch() {
       @Override
       protected synchronized List<AbstractPatternRule> getPatternRules() {
         return Collections.emptyList();
       }
     });
-    
+
     assertEquals(1, lt.check("A sentence.").size());
     assertEquals(0, lt.check("'s Morgens...").size());
 
@@ -48,5 +47,5 @@ public class UppercaseSentenceStartRuleTest {
     assertEquals(2, lt.check("s sentence.").size());
     assertEquals(1, lt.check("'t").size());
   }
-  
+
 }

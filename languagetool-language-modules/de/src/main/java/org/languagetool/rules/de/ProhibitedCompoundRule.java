@@ -29,8 +29,6 @@ import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.*;
 import org.languagetool.tools.StringTools;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 import static org.languagetool.tools.StringTools.*;
@@ -232,7 +230,7 @@ GTODO Clean up
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     for (AnalyzedTokenReadings readings : sentence.getTokensWithoutWhitespace()) {
       String word = readings.getToken();

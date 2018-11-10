@@ -74,6 +74,9 @@ public class DefaultFrenchResourceDataBroker extends DefaultResourceDataBroker i
     public static String WORD_TAGGER_ADDED_WORDS_FILE_NAME = "/en/added.txt";
     public static String WORD_TAGGER_REMOVED_WORDS_FILE_NAME = "/en/removed.txt";
 
+    public static String PROHIBITED_WORDS_FILE_NAME = "%1$s/hunspell/prohibit.txt";
+    public static String IGNORE_WORDS_FILE_NAME = "%1$s/hunspell/ignore.txt";
+
     private FrenchTagger tagger;
     private FrenchSynthesizer synthesizer;
     private FrenchHybridDisambiguator disambiguator;
@@ -146,12 +149,12 @@ public class DefaultFrenchResourceDataBroker extends DefaultResourceDataBroker i
 
     @Override
     public List<String> getSpellingIgnoreWords() throws Exception {
-        return getSpellingIgnoreWordsFromResourcePath();
+        return loadSpellingIgnoreWordsFromResourcePath(String.format(PLAIN_TEXT_BASE_SPELLING_FILE_NAME, language.getLocale().getLanguage()), String.format(IGNORE_WORDS_FILE_NAME, language.getLocale().getLanguage()));
     }
 
     @Override
     public List<String> getSpellingProhibitedWords() throws Exception {
-        return getSpellingProhibitedWordsFromResourcePath();
+        return loadSpellingProhibitedWordsFromResourcePath(String.format(PROHIBITED_WORDS_FILE_NAME, language.getLocale().getLanguage()));
     }
 
     @Override

@@ -21,7 +21,7 @@ package org.languagetool.rules.nl;
 import org.languagetool.rules.AbstractCompoundRule;
 import org.languagetool.rules.CompoundRuleData;
 
-import java.io.IOException;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -29,10 +29,12 @@ import java.util.ResourceBundle;
  */
 public class CompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/nl/compounds.txt");
+  // GTODO private final CompoundRuleData compoundData;
+  // GTODO = new CompoundRuleData("/nl/compounds.txt");
 
-  public CompoundRule(ResourceBundle messages) throws IOException {
+  public CompoundRule(ResourceBundle messages, CompoundRuleData data) {
     super(messages,
+            data,
             "Dit woord hoort waarschijnlijk aaneengeschreven met een koppelteken.",
             "Dit woord hoort waarschijnlijk aaneengeschreven.",
             "Deze uitdrukking hoort mogelijk aan elkaar, eventueel met een koppelteken.",
@@ -48,11 +50,6 @@ public class CompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Woorden die aaneen geschreven horen, bijvoorbeeld 'zee-egel' i.p.v. 'zee egel'";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
 }

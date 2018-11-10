@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,8 +26,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Dutch;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -39,12 +37,13 @@ public class SimpleReplaceRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new SimpleReplaceRule(TestTools.getMessages("nl"));
-    langTool = new JLanguageTool(new Dutch());
+    Dutch lang = new Dutch();
+    rule = lang.createReplaceRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("all right")).length);
 
@@ -58,7 +57,7 @@ public class SimpleReplaceRuleTest {
    * @param sentence the sentence containing the incorrect/misspelled word.
    * @param word the word that is correct (the suggested replacement).
    */
-  private void checkSimpleReplaceRule(String sentence, String word) throws IOException {
+  private void checkSimpleReplaceRule(String sentence, String word) throws Exception {
     final RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals("Invalid matches.length while checking sentence: "
         + sentence, 1, matches.length);

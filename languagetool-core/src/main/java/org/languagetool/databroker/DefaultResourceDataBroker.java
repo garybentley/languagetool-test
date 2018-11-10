@@ -87,6 +87,7 @@ import org.languagetool.rules.CompoundRuleData;
 import org.languagetool.rules.bitext.BitextRule;
 import org.apache.commons.lang3.StringUtils;
 import org.languagetool.*;
+import org.languagetool.tools.StringTools;
 import org.languagetool.rules.spelling.hunspell.*;
 import org.languagetool.rules.patterns.*;
 import org.languagetool.rules.patterns.bitext.BitextPatternRule;
@@ -163,8 +164,6 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
     public static final String MESSAGE_BUNDLE_FILE_NAME = "/org/languagetool/MessagesBundle%1$s.properties";
     public static final String DEFAULT_MESSAGE_BUNDLE_LANGUAGE_CODE = "en";
 
-    public static String PLAIN_TEXT_BASE_SPELLING_FILE_NAME = "%1$s/hunspell/spelling.txt";
-
     /**
      * The default directory name of the {@code /resource} directory.
      */
@@ -233,9 +232,6 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
     public static String FALSE_FRIEND_RULES_FILE_NAME = "false-friends.xml";
     public static String MULTI_WORDS_FILE_NAME = "%1$s/multiwords.txt";
     public static String NGRAM_INDEX_DIR_NAME = "%1$s/ngram-index";
-
-    public static String PROHIBITED_WORDS_FILE_NAME = "%1$s/hunspell/prohibit.txt";
-    public static String IGNORE_WORDS_FILE_NAME = "%1$s/hunspell/ignore.txt";
 
     public static String WORD_TAGGER_ADDED_WORDS_FILE_NAME = "%1$s/added.txt";
     public static String WORD_TAGGER_REMOVED_WORDS_FILE_NAME = "%1$s/removed.txt";
@@ -879,6 +875,63 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
       return null;
   }
 
+  public static List<Map<String, String>> createWrongWords2(Path path, WordTokenizer wordTokenizer, Charset charset) throws Exception {
+      Objects.requireNonNull(path, "Path must be specified.");
+      path = path.toRealPath();
+      if (Files.notExists(path)) {
+          return null;
+      }
+      charset = charset != null ? charset : DEFAULT_CHARSET;
+      List<Map<String, String>> list = new ArrayList<>();
+      try (Scanner br = new Scanner(path, charset.name())) {
+        String line;
+        while (br.hasNextLine()) {
+            line = br.nextLine().trim();
+          if (line.isEmpty() || line.charAt(0) == '#') { // ignore comments
+            continue;
+          }
+
+          String[] parts = line.split("=");
+          if (parts.length != 2) {
+            throw new IOException("Expected exactly 1 '=' character. Line: " + line);
+          }
+
+          String[] wrongForms = parts[0].split("\\|"); // multiple incorrect forms
+          for (String wrongForm : wrongForms) {
+            int wordCount = 0;
+            List<String> tokens = wordTokenizer.tokenize(wrongForm);
+            for (String token : tokens) {
+              if (!StringTools.isWhitespace(token)) {
+                wordCount++;
+              }
+            }
+            // grow if necessary
+            for (int i = list.size(); i < wordCount; i++) {
+              list.add(new HashMap<>());
+            }
+            list.get(wordCount - 1).put(wrongForm, parts[1]);
+          }
+        }
+      }
+      // seal the result (prevent modification from outside this class)
+      List<Map<String,String>> result = new ArrayList<>();
+      for (Map<String, String> map : list) {
+        result.add(Collections.unmodifiableMap(map));
+      }
+      return Collections.unmodifiableList(result);
+  }
+
+  /**
+   * Loads a set of wrong words from the rules path specified.  This is designed for use with AbstractSimpleReplaceRule2.
+   *
+   */
+  public List<Map<String, String>> createWrongWords2FromRulesPath(String path, WordTokenizer tokenizer) throws Exception {
+      if (rulesDirPathExists(path)) {
+          return createWrongWords2(getRulesDirPath(path), tokenizer, DEFAULT_CHARSET);
+      }
+      return null;
+  }
+
   /**
    *  We have two files:
    *  - /rules/en/grammar.xml
@@ -1423,23 +1476,20 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
        }
    }
 
-   public List<String> getSpellingIgnoreWordsFromResourcePath() throws Exception {
+   public List<String> loadSpellingIgnoreWordsFromResourcePath(String baseSpellingFile, String ignoreFile) throws Exception {
        List<String> words = new ArrayList<>();
-       String file = String.format(PLAIN_TEXT_BASE_SPELLING_FILE_NAME, language.getLocale().getLanguage());
-       if (resourceDirPathExists(file)) {
-           words.addAll((List<String>) getWordListFromResourcePath(file, spellingWordProcessor));
+       if (resourceDirPathExists(baseSpellingFile)) {
+           words.addAll((List<String>) getWordListFromResourcePath(baseSpellingFile, spellingWordProcessor));
        }
        // GTODO Dodgy cast
-       file = String.format(IGNORE_WORDS_FILE_NAME, language.getLocale().getLanguage());
-       if (resourceDirPathExists(file)) {
-           words.addAll((List<String>) getWordListFromResourcePath(file, spellingWordProcessor));
+       if (resourceDirPathExists(ignoreFile)) {
+           words.addAll((List<String>) getWordListFromResourcePath(ignoreFile, spellingWordProcessor));
        }
        return words;
    }
 
-   public List<String> getSpellingProhibitedWordsFromResourcePath() throws Exception {
+   public List<String> loadSpellingProhibitedWordsFromResourcePath(String file) throws Exception {
        List<String> words = new ArrayList<>();
-       String file = String.format(PROHIBITED_WORDS_FILE_NAME, language.getLocale().getLanguage());
        if (resourceDirPathExists(file)) {
            // GTODO Dodgy cast
            words.addAll((List<String>) getWordListFromResourcePath(file, spellingWordProcessor));

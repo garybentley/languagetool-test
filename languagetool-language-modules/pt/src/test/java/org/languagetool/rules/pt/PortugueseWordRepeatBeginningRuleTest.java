@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.Portuguese;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 public class PortugueseWordRepeatBeginningRuleTest {
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     JLanguageTool langTool = new JLanguageTool(new Portuguese());
     // correct sentences:
     assertEquals(0, langTool.check("Este exemplo está correto. Este exemplo também está.").size());

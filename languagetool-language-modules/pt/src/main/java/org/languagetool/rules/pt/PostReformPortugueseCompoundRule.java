@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,10 +35,11 @@ import java.net.URL;
  */
 public class PostReformPortugueseCompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/pt/post-reform-compounds.txt");
+  // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/pt/post-reform-compounds.txt");
 
-  public PostReformPortugueseCompoundRule(ResourceBundle messages) throws IOException {    
+  public PostReformPortugueseCompoundRule(ResourceBundle messages, CompoundRuleData data) {
     super(messages,
+            data,
             "Esta palavra é hifenizada.",
             "Esta palavra é composta por justaposição.",
             "Esta palavra pode ser composta por justaposição ou hifenizada.",
@@ -62,8 +63,11 @@ public class PostReformPortugueseCompoundRule extends AbstractCompoundRule {
     return Tools.getUrl("https://pt.wikipedia.org/wiki/Lista_das_alterações_previstas_pelo_acordo_ortográfico_de_1990");
   }
 
+/*
+GTODO
   @Override
   protected CompoundRuleData getCompoundRuleData() {
     return compoundData;
   }
+  */
 }

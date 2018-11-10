@@ -18,15 +18,17 @@
  */
 package org.languagetool.rules.nl;
 
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.WrongWordInContextRule;
+import org.languagetool.rules.ContextWords;
 import org.languagetool.databroker.ResourceDataBroker;
 
 public class DutchWrongWordInContextRule extends WrongWordInContextRule {
 
-  public DutchWrongWordInContextRule(ResourceBundle messages, ResourceDataBroker dataBroker) {
-    super(messages, dataBroker);
+  public DutchWrongWordInContextRule(ResourceBundle messages, List<ContextWords> wrongWords) {
+    super(messages, wrongWords);
   }
 
   @Override
@@ -43,12 +45,13 @@ public class DutchWrongWordInContextRule extends WrongWordInContextRule {
   public String getDescription() {
     return "Woordverwarring";
   }
-
+/*
+GTODO Clean up
   @Override
   protected String getFilename() {
     return "/nl/wrongWordInContext.txt";
   }
-
+*/
   @Override
   protected String getMessageString() {
     return "Mogelijk verwarring: Bedoelde u <suggestion>$SUGGESTION</suggestion> i.p.v. '$WRONGWORD'?";

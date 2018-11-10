@@ -46,12 +46,8 @@ public class NoDisambiguationEnglishPartialPosTagFilter extends PartialPosTagFil
 
   @Override
   protected List<AnalyzedTokenReadings> tag(String token) {
-    try {
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(token));
       AnalyzedTokenReadings[] atr = tags.toArray(new AnalyzedTokenReadings[tags.size()]);
       return Arrays.asList(atr);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not tag and disambiguate '" + token + "'", e);
-    }
   }
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,35 +23,40 @@ import org.languagetool.rules.AbstractSimpleReplaceRule2;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.languagetool.tools.Tools;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.net.URL;
 
 /**
- * A rule that matches redundant expression. 
+ * A rule that matches redundant expression.
  * Portuguese implementations. Loads the list of words from
  * <code>/pt/redundancies.txt</code>.
  *
- * @author Tiago F. Santos 
+ * @author Tiago F. Santos
  * @since 3.8
  */
 public class PortugueseRedundancyRule extends AbstractSimpleReplaceRule2 {
 
   public static final String PT_REDUNDANCY_REPLACE = "PT_REDUNDANCY_REPLACE";
 
-  private static final String FILE_NAME = "/pt/redundancies.txt";
-  private static final Locale PT_LOCALE = new Locale("pt");  // locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/pt/redundancies.txt";
+  // GTODO private static final Locale PT_LOCALE = new Locale("pt");  // locale used on case-conversion
 
+/*
+GTODO
   @Override
   public final String getFileName() {
     return FILE_NAME;
   }
+  */
 
-  public PortugueseRedundancyRule(ResourceBundle messages) throws IOException {
-    super(messages, new Portuguese());
+  public PortugueseRedundancyRule(ResourceBundle messages, List<Map<String, String>> wordinessWords, CaseConverter caseCon) {
+    super(messages, wordinessWords, caseCon);
     super.setCategory(Categories.REDUNDANCY.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
     addExamplePair(Example.wrong("<marker>duna de areia</marker>"),
@@ -88,9 +93,11 @@ public class PortugueseRedundancyRule extends AbstractSimpleReplaceRule2 {
     return Tools.getUrl("https://pt.wikipedia.org/wiki/Pleonasmo");
   }
 
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return PT_LOCALE;
   }
-
+*/
 }

@@ -19,7 +19,6 @@
 
 package org.languagetool.rules.patterns;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -157,7 +156,7 @@ public abstract class AbstractPatternRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     return null;
   }
 

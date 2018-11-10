@@ -19,15 +19,15 @@
 package org.languagetool.rules.br;
 
 import org.junit.Test;
+import org.languagetool.language.Breton;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class BretonPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Breton language = new Breton();
+    runTestForLanguage(language);
   }
 
 }

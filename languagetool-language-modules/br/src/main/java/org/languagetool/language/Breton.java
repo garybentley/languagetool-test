@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,7 @@
 
 package org.languagetool.language;
 
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -33,36 +33,52 @@ import org.languagetool.rules.br.MorfologikBretonSpellerRule;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.br.BretonTagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.br.BretonWordTokenizer;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.databroker.*;
 
-/** 
+/**
  * @author Dominique Pelle
  */
-public class Breton extends Language {
+public class Breton extends Language<BretonResourceDataBroker> {
 
   private SentenceTokenizer sentenceTokenizer;
   private Tagger tagger;
   private Tokenizer wordTokenizer;
   private Disambiguator disambiguator;
 
-  @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
+  public static final String LANGUAGE_ID = "br";
+  public static final String COUNTRY_ID = "FR";
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+    public BretonResourceDataBroker getDefaultDataBroker() throws Exception {
+        return new DefaultBretonResourceDataBroker(this, getClass().getClassLoader());
     }
-    return sentenceTokenizer;
+
+    @Override
+    public Language getDefaultLanguageVariant() {
+        return null;
+    }
+
+    @Override
+    public boolean isVariant() {
+        return false;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
+
+  @Override
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new BretonWordTokenizer();
-    }
-    return wordTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
@@ -70,30 +86,26 @@ public class Breton extends Language {
     return "Breton";
   }
 
+/*
+ GTODO Clean up
   @Override
   public String getShortCode() {
     return "br";
   }
-
+*/
   @Override
   public String[] getCountries() {
     return new String[] {"FR"};
   }
-  
+
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new BretonTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new XmlRuleDisambiguator(new Breton());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
@@ -104,16 +116,46 @@ public class Breton extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new MorfologikBretonSpellerRule(messages, this, userConfig),
-            new UppercaseSentenceStartRule(messages, this),
-            new MultipleWhitespaceRule(messages, this),
-            new SentenceWhitespaceRule(messages),
-            new TopoReplaceRule(messages)
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createMorfologikSpellerRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createSentenceWhitespaceRule(messages),
+            createTopoReplaceRule(messages)
     );
+  }
+
+  public TopoReplaceRule createTopoReplaceRule(ResourceBundle messages) throws Exception {
+      return new TopoReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongTopographicalWords(), getUseDataBroker().getWordTokenizer(), getUseDataBroker().getCaseConverter());
+
+  }
+
+  public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new SentenceWhitespaceRule(getUseMessages(messages));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public MorfologikBretonSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikBretonSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig), getUseDataBroker().getSpellingIgnoreWords());
   }
 
   @Override

@@ -18,7 +18,7 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -38,8 +38,9 @@ import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.nl.DutchWordTokenizer;
+import org.languagetool.databroker.*;
 
-public class Dutch extends Language {
+public class Dutch extends Language<DutchResourceDataBroker> {
 
   private Tagger tagger;
   private SentenceTokenizer sentenceTokenizer;
@@ -47,14 +48,32 @@ public class Dutch extends Language {
   private Disambiguator disambiguator;
   private Tokenizer wordTokenizer;
 
-  @Override
-  public String getName() {
-    return "Dutch";
+  public static final String LANGUAGE_ID = "nl";
+  public static final String COUNTRY_ID = "NL";
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+  public DutchResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultDutchResourceDataBroker(this, getClass().getClassLoader());
   }
 
   @Override
-  public String getShortCode() {
-    return "nl";
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public String getName() {
+    return "Dutch";
   }
 
   @Override
@@ -63,43 +82,28 @@ public class Dutch extends Language {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new DutchTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new DutchSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new DutchWordTokenizer();
-    }
-    return wordTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new XmlRuleDisambiguator(new Dutch());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
@@ -116,23 +120,80 @@ public class Dutch extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "“", "‹", "“", "„", "\""),
-                    Arrays.asList("]", ")", "}", "”", "›", "”", "”", "\"")),
-            new UppercaseSentenceStartRule(messages, this),
-            new MorfologikDutchSpellerRule(messages, this, userConfig),
-            new MultipleWhitespaceRule(messages, this),
-            new CompoundRule(messages),
-            new DutchWrongWordInContextRule(messages, getUseDataBroker()),
-            new WordCoherencyRule(messages, getUseDataBroker()),
-            new SimpleReplaceRule(messages),
-            new LongSentenceRule(messages, userConfig, -1, true),
-            new PreferredWordRule(messages)
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createUppercaseSentenceStartRule(messages),
+            createMorfologikSpellerRule(messages, userConfig),
+            createMultipleWhitespaceRule(messages),
+            createCompoundRule(messages),
+            createWrongWordInContextRule(messages),
+            createWordCoherencyRule(messages),
+            createReplaceRule(messages),
+            createLongSentenceRule(messages, userConfig),
+            createPreferredWordRule(messages)
     );
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(messages, confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords, true);
+  }
+
+  public CompoundRule createCompoundRule(ResourceBundle messages) throws Exception {
+      return new CompoundRule(getUseMessages(messages), getUseDataBroker().getCompounds());
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public PreferredWordRule createPreferredWordRule(ResourceBundle messages) throws Exception {
+      return new PreferredWordRule(getUseMessages(messages), getUseDataBroker().getPreferredWordRules());
+  }
+
+  public WordCoherencyRule createWordCoherencyRule(ResourceBundle messages) throws Exception {
+      return new WordCoherencyRule(getUseMessages(messages), getUseDataBroker().getCoherencyMappings());
+  }
+
+  public DutchWrongWordInContextRule createWrongWordInContextRule(ResourceBundle messages) throws Exception {
+      return new DutchWrongWordInContextRule(getUseMessages(messages), getUseDataBroker().getWrongWordsInContext());
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public SimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "“", "‹", "“", "„", "\""),
+              Arrays.asList("]", ")", "}", "”", "›", "”", "”", "\""));
+  }
+
+  public MorfologikDutchSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikDutchSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig), getUseDataBroker().getSpellingIgnoreWords(), getUseDataBroker().getSpellingProhibitedWords());
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
   }
 
   @Override

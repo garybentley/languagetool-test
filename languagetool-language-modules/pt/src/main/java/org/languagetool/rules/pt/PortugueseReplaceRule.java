@@ -22,6 +22,7 @@ import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.languagetool.tools.Tools;
 import org.languagetool.databroker.ResourceDataBroker;
 
@@ -43,17 +44,19 @@ public class PortugueseReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String PORTUGUESE_SIMPLE_REPLACE_RULE = "PT_SIMPLE_REPLACE";
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale PT_LOCALE = new Locale("pt");
+  // GTODO private Map<String, List<String>> wrongWords;
+  // GTODO private static final Locale PT_LOCALE = new Locale("pt");
 
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
     return wrongWords;
   }
-
-  public PortugueseReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
-    wrongWords = load("/pt/replace.txt", dataBroker);
+*/
+  public PortugueseReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
+    //GTODO wrongWords = load("/pt/replace.txt", dataBroker);
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("<marker>device</marker>"),
@@ -90,10 +93,11 @@ public class PortugueseReplaceRule extends AbstractSimpleReplaceRule {
   public boolean isCaseSensitive() {
     return false;
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return PT_LOCALE;
   }
-
+*/
 }

@@ -27,26 +27,31 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.io.InputStream;
 import java.util.ResourceBundle;
+import java.util.Scanner;
+import java.util.Collections;
+import java.io.IOException;
 import java.nio.file.*;
 import java.nio.charset.*;
 import java.util.stream.*;
 
 import morfologik.stemming.Dictionary;
 
-import org.languagetool.language.Italian;
+import org.languagetool.language.Breton;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.tagging.WordTagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.tokenizers.br.BretonWordTokenizer;
 import org.languagetool.languagemodel.LuceneLanguageModel;
-import org.languagetool.tagging.it.ItalianTagger;
+import org.languagetool.tagging.br.BretonTagger;
 import org.languagetool.tagging.MorfologikTagger;
+import org.languagetool.tools.StringTools;
 
-public class DefaultItalianResourceDataBroker extends DefaultResourceDataBroker implements ItalianResourceDataBroker {
+public class DefaultBretonResourceDataBroker extends DefaultResourceDataBroker implements BretonResourceDataBroker {
 
     /**
      * The filename to use for the base hunspell binary dictionary info.  The locale language and country values are replaced in the filename.
@@ -62,17 +67,61 @@ public class DefaultItalianResourceDataBroker extends DefaultResourceDataBroker 
 
     public static String PLAIN_TEXT_BASE_SPELLING_FILE_NAME = "%1$s/hunspell/spelling.txt";
 
-    public static String WORD_TAGGER_DICT_FILE_NAME = "%1$s/italian.dict";
-
     public static String IGNORE_WORDS_FILE_NAME = "%1$s/hunspell/ignore.txt";
-    
+
+    public static String WORD_TAGGER_DICT_FILE_NAME = "%1$s/breton.dict";
+
+    public static String TOPOGRPHICAL_WRONG_WORDS_FILE_NAME = "%1$s/topo.txt";
+
+    public static StringProcessor<Map<String, String>> topoWrongWordsProcessor = new StringProcessor<Map<String, String>>() {
+        @Override
+        public boolean shouldSkip(String line) {
+            line = line.trim();
+            return line.isEmpty() || line.charAt(0) == '#';
+        }
+        @Override
+        public Set<String> getErrors(String line) {
+            Set<String> errors = null;
+            line = line.trim();
+            String[] parts = line.split("=");
+            if (parts.length != 2) {
+                errors = new HashSet<>();
+                errors.add("Expected line to have format: <place>=<place>[|<place>...]");
+            }
+            return errors;
+        }
+        @Override
+        public Map<String, String> getProcessed(String line) {
+            line = line.trim();
+            String[] parts = line.split("=");
+            String[] wrongForms = parts[0].split("\\|"); // multiple incorrect forms
+            Map<String, String> data = new HashMap<>();
+            for (String wrongForm : wrongForms) {
+                /*
+                 GTODO Not sure this is doing anything useful
+              int wordCount = 0;
+              List<String> tokens = tokenizer.tokenize(wrongForm);
+              for (String token : tokens) {
+                if (!StringTools.isWhitespace(token)) {
+                  wordCount++;
+                }
+              }
+              */
+              data.put(wrongForm, parts[1]);
+            }
+            return data;
+        }
+    };
+
+
     private WordTagger wordTagger;
     private Dictionary wordTaggerDictionary;
-    private ItalianTagger tagger;
-    private LuceneLanguageModel languageModel;
+    private BretonTagger tagger;
     private Set<Dictionary> dictionaries;
+    private BretonWordTokenizer wordTokenizer;
+    private List<Map<String, String>> wrongTopoWords;
 
-    public DefaultItalianResourceDataBroker(Italian lang, ClassLoader classLoader) throws Exception {
+    public DefaultBretonResourceDataBroker(Breton lang, ClassLoader classLoader) throws Exception {
         super(lang, classLoader);
     }
 
@@ -135,15 +184,70 @@ public class DefaultItalianResourceDataBroker extends DefaultResourceDataBroker 
         return dicts;
     }
 
+    @Override
+    public List<Map<String, String>> getWrongTopographicalWords() throws Exception {
+        if (wrongTopoWords == null) {
+            List<Map<String, String>> list = new ArrayList<>();
+            Path path = getRulesDirPath(String.format(TOPOGRPHICAL_WRONG_WORDS_FILE_NAME, language.getLocale().getLanguage()));
+            try (Scanner br = new Scanner(path, DEFAULT_CHARSET.name())) {
+              String line;
+
+              while (br.hasNextLine()) {
+                line = br.nextLine().trim();
+                if (line.isEmpty() || line.charAt(0) == '#') { // ignore comments
+                  continue;
+                }
+                String[] parts = line.split("=");
+                if (parts.length != 2) {
+                  throw new IOException(String.format("Format error in line: %1$s, path: %2$s", line, path));
+                }
+                String[] wrongForms = parts[0].split("\\|"); // multiple incorrect forms
+                for (String wrongForm : wrongForms) {
+                  int wordCount = 0;
+                  List<String> tokens = getWordTokenizer().tokenize(wrongForm);
+                  for (String token : tokens) {
+                    if (!StringTools.isWhitespace(token)) {
+                      wordCount++;
+                    }
+                  }
+                  // grow if necessary
+                  for (int i = list.size(); i < wordCount; i++) {
+                    list.add(new HashMap<>());
+                  }
+                  list.get(wordCount - 1).put(wrongForm, parts[1]);
+                }
+              }
+            }
+            // seal the result (prevent modification from outside this class)
+            List<Map<String,String>> result = new ArrayList<>();
+            for (Map<String, String> map : list) {
+              result.add(Collections.unmodifiableMap(map));
+            }
+            wrongTopoWords = Collections.unmodifiableList(result);
+
+            // GTODO This call isn't working... not entirely sure why.
+            //wrongTopoWords = loadWordsFromRulesPath(String.format(TOPOGRPHICAL_WRONG_WORDS_FILE_NAME, language.getLocale().getLanguage()), DEFAULT_CHARSET, topoWrongWordsProcessor);
+        }
+        return wrongTopoWords;
+    }
+
+    @Override
+    public BretonWordTokenizer getWordTokenizer() throws Exception {
+        if (wordTokenizer == null) {
+            wordTokenizer = new BretonWordTokenizer();
+        }
+        return wordTokenizer;
+    }
+
     /**
      * Get the tagger.
      *
      * @return The tagger.
      */
     @Override
-    public ItalianTagger getTagger() throws Exception {
+    public BretonTagger getTagger() throws Exception {
         if (tagger == null) {
-              tagger = new ItalianTagger(getWordTaggerDictionary(), getWordTagger(), getCaseConverter());
+              tagger = new BretonTagger(getWordTaggerDictionary(), getWordTagger(), getCaseConverter());
         }
         return tagger;
     }
@@ -156,14 +260,6 @@ public class DefaultItalianResourceDataBroker extends DefaultResourceDataBroker 
     @Override
     public SentenceTokenizer getSentenceTokenizer() throws Exception {
         return getDefaultSentenceTokenizer();
-    }
-
-    @Override
-    public synchronized LuceneLanguageModel getLanguageModel() throws Exception {
-        if (languageModel == null) {
-            languageModel = createLanguageModelFromResourcePath();
-        }
-        return languageModel;
     }
 
     @Override
@@ -184,17 +280,6 @@ public class DefaultItalianResourceDataBroker extends DefaultResourceDataBroker 
             wordTaggerDictionary = getMorfologikBinaryDictionaryFromResourcePath(String.format(WORD_TAGGER_DICT_FILE_NAME, language.getLocale().getLanguage()));
         }
         return wordTaggerDictionary;
-    }
-
-    /**
-     * Close our resources.
-     */
-    @Override
-    public void close() throws Exception {
-        super.close();
-        if (languageModel != null) {
-            languageModel.close();
-        }
     }
 
 }

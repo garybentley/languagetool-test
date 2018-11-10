@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,19 +24,17 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Breton;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikBretonSpellerRuleTest {
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
-    final MorfologikBretonSpellerRule rule =
-            new MorfologikBretonSpellerRule (TestTools.getMessages("br"), new Breton(), null);
+  public void testMorfologikSpeller() throws Exception {
+    Breton language = new Breton();
+    final MorfologikBretonSpellerRule rule = language.createMorfologikSpellerRule(null, null);
 
     RuleMatch[] matches;
-    final JLanguageTool langTool = new JLanguageTool(new Breton());
+    final JLanguageTool langTool = new JLanguageTool(language);
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Penaos emañ kont ganit?")).length);

@@ -34,8 +34,6 @@ import org.languagetool.tools.StringTools;
 import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,12 +51,14 @@ public class GermanTagger extends BaseTagger {
 
   private ManualTagger removalTagger;
   private Tokenizer compoundTokenizer;
+  private CaseConverter caseConverter;
 
   // GTODO Need an interface rather than ManualTagger, i.e. an interface that describes what the tagger is doing.
   public GermanTagger(Dictionary baseDict, WordTagger tagger, ManualTagger removalTagger, Tokenizer tokenizer, CaseConverter caseCon) {
       super(baseDict, tagger, caseCon, true);
       removalTagger = Objects.requireNonNull(removalTagger, "Removal tagger must be provided.");
       compoundTokenizer = Objects.requireNonNull(tokenizer, "Tokenizer must be provided.");
+      caseConverter = Objects.requireNonNull(caseCon, "Case Converter must be provided.");
   }
 /*
 GTODO Clean up
@@ -96,7 +96,7 @@ GTODO Clean up
       //Find only the actual important part of the word
       List<String> compoundedWord = compoundTokenizer.tokenize(lastPart);
       if (compoundedWord.size() > 1) {
-        lastPart = StringTools.uppercaseFirstChar(compoundedWord.get(compoundedWord.size() - 1));
+        lastPart = caseConverter.uppercaseFirstChar(compoundedWord.get(compoundedWord.size() - 1));
       } else {
         lastPart = compoundedWord.get(compoundedWord.size() - 1);
       }
@@ -127,7 +127,7 @@ GTODO Clean up
    * Return only the first reading of the given word or {@code null}.
    */
   @Nullable
-  public AnalyzedTokenReadings lookup(String word) throws IOException {
+  public AnalyzedTokenReadings lookup(String word) {
     List<AnalyzedTokenReadings> result = tag(Collections.singletonList(word), false);
     AnalyzedTokenReadings atr = result.get(0);
     if (atr.getAnalyzedToken(0).getPOSTag() == null) {
@@ -141,16 +141,16 @@ GTODO Clean up
   }
 
   private boolean matchesUppercaseAdjective(String unknownUppercaseToken) {
-    List<TaggedWord> temp = getWordTagger().tag(StringTools.lowercaseFirstChar(unknownUppercaseToken));
+    List<TaggedWord> temp = getWordTagger().tag(caseConverter.lowercaseFirstChar(unknownUppercaseToken));
     return temp.size() > 0 && temp.get(0).getPosTag().matches("ADJ.*");
   }
 
   @Override
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) {
     return tag(sentenceTokens, true);
   }
 
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens, boolean ignoreCase) throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens, boolean ignoreCase) {
     boolean firstWord = true;
     List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
@@ -202,7 +202,7 @@ GTODO Clean up
                 //Tokenize, start word uppercase if it's a result of splitting
                 List<String> compoundedWord = compoundTokenizer.tokenize(word);
                 if (compoundedWord.size() > 1) {
-                  word = StringTools.uppercaseFirstChar(compoundedWord.get(compoundedWord.size() - 1));
+                  word = caseConverter.uppercaseFirstChar(compoundedWord.get(compoundedWord.size() - 1));
                 } else {
                   word = compoundedWord.get(compoundedWord.size() - 1);
                 }
@@ -212,14 +212,14 @@ GTODO Clean up
                 //Some words that are linked with a dash ('-') will be written in uppercase, even adjectives
                 if (wordOrig.contains("-") && linkedTaggerTokens.isEmpty()) {
                   if (matchesUppercaseAdjective(word)) {
-                    word = StringTools.lowercaseFirstChar(word);
+                    word = caseConverter.lowercaseFirstChar(word);
                     linkedTaggerTokens = getWordTagger().tag(word);
                   }
                 }
 
                 word = wordOrig;
 
-                boolean wordStartsUppercase = StringTools.startsWithUppercase(word);
+                boolean wordStartsUppercase = caseConverter.startsWithUpperCase(word);
                 if (linkedTaggerTokens.size() > 0) {
                   if (wordStartsUppercase) { //Choose between uppercase/lowercase Lemma
                     readings.addAll(getAnalyzedTokens(linkedTaggerTokens, word));
@@ -236,8 +236,8 @@ GTODO Clean up
           } else {
             // last part governs a word's POS:
             String lastPart = compoundParts.get(compoundParts.size() - 1);
-            if (StringTools.startsWithUppercase(word)) {
-              lastPart = StringTools.uppercaseFirstChar(lastPart);
+            if (caseConverter.startsWithUpperCase(word)) {
+              lastPart = caseConverter.uppercaseFirstChar(lastPart);
             }
             List<TaggedWord> partTaggerTokens = getWordTagger().tag(lastPart);
             if (partTaggerTokens.size() > 0) {
@@ -354,10 +354,10 @@ GTODO Clean up
       StringBuilder lemma = new StringBuilder();
       int i = 0;
       for (String s : allButLastPart) {
-        lemma.append(i == 0 ? s : StringTools.lowercaseFirstChar(s));
+        lemma.append(i == 0 ? s : caseConverter.lowercaseFirstChar(s));
         i++;
       }
-      lemma.append(StringTools.lowercaseFirstChar(taggedWord.getLemma()));
+      lemma.append(caseConverter.lowercaseFirstChar(taggedWord.getLemma()));
       result.add(new AnalyzedToken(word, taggedWord.getPosTag(), lemma.toString()));
     }
     return result;

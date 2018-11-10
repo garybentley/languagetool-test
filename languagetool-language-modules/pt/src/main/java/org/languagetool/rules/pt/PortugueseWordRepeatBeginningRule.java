@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,12 +32,12 @@ import org.languagetool.rules.WordRepeatBeginningRule;
 
 /**
  * Adds a list Portuguese adverbs to {@link WordRepeatBeginningRule}.
- * 
+ *
  * @since 3.6
  * localized by @author Tiago F. Santos from the german version
  */
 public class PortugueseWordRepeatBeginningRule extends WordRepeatBeginningRule {
-  
+
   private static final Set<String> ADVERBS = new HashSet<>(Arrays.asList(
           "Abaixo", "Acaso", "Acima", "Acolá",
           "Ademais", "Adentro", "Adiante", "Adicionalmente",
@@ -71,19 +71,19 @@ public class PortugueseWordRepeatBeginningRule extends WordRepeatBeginningRule {
           "Tarde", "Ultimamente", "Unicamente"
   ));
 
-  public PortugueseWordRepeatBeginningRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public PortugueseWordRepeatBeginningRule(ResourceBundle messages) {
+    super(messages);
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
     addExamplePair(Example.wrong("Além disso, a rua é quase completamente residêncial. <marker>Além</marker> disso, foi chamada em nome de um poeta."),
                    Example.fixed("Além disso, a rua é quase completamente residêncial. <marker>Foi</marker> chamada em nome de um poeta."));
   }
-  
+
   @Override
   public String getId() {
     return "PORTUGUESE_WORD_REPEAT_BEGINNING_RULE";
   }
-  
+
   @Override
   protected boolean isAdverb(AnalyzedTokenReadings token) {
     return ADVERBS.contains(token.getToken());

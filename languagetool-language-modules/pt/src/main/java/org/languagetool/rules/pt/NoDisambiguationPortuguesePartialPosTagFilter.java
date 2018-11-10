@@ -23,10 +23,10 @@ import org.languagetool.language.Portuguese;
 import org.languagetool.rules.PartialPosTagFilter;
 import org.languagetool.tagging.Tagger;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A {@link PartialPosTagFilter} for Portuguese that does not run the disambiguator.
@@ -34,16 +34,16 @@ import java.util.List;
  */
 public class NoDisambiguationPortuguesePartialPosTagFilter extends PartialPosTagFilter {
 
-  private final Tagger tagger = new Portuguese().getTagger();
+  private final Tagger tagger;
+
+  public NoDisambiguationPortuguesePartialPosTagFilter(Tagger tagger) {
+      this.tagger = Objects.requireNonNull(tagger, "Tagger must be provided.");
+  }
 
   @Override
-  protected List<AnalyzedTokenReadings> tag(String token) {
-    try {
+  protected List<AnalyzedTokenReadings> tag(String token) throws Exception {
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(token));
       AnalyzedTokenReadings[] atr = tags.toArray(new AnalyzedTokenReadings[tags.size()]);
       return Arrays.asList(atr);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not tag and disambiguate '" + token + "'", e);
-    }
   }
 }

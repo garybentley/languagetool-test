@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,7 @@
  */
 package org.languagetool.tagging.pt;
 
-import java.io.IOException;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import morfologik.stemming.DictionaryLookup;
+import morfologik.stemming.Dictionary;
 import morfologik.stemming.IStemmer;
 
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,9 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.chunking.ChunkTag;
 import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
 import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /** Portuguese Part-of-speech tagger.
  * Based on English tagger.
@@ -41,7 +44,7 @@ import org.languagetool.tools.StringTools;
  * @author Marcin Milkowski
  * Base PT file created by Jaume Ortolà
  * Extended by Tiago F. Santos
- * 
+ *
  */
 public class PortugueseTagger extends BaseTagger {
 
@@ -50,28 +53,35 @@ public class PortugueseTagger extends BaseTagger {
 
   private static final Pattern PREFIXES_FOR_VERBS = Pattern.compile("(auto|re)(...+)",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
+  private CaseConverter caseConverter;
+
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/pt/added.txt";
   }
-  
+
   @Override
   public String getManualRemovalsFileName() {
     return "/pt/removed.txt";
   }
+*/
+  public PortugueseTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
+    super(dict, tagger, caseCon, true);
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case Converter must be provided.");
 
-  public PortugueseTagger() {
-    super("/pt/portuguese.dict", new Locale("pt"));
+    // GTODO super("/pt/portuguese.dict", new Locale("pt"));
   }
-
+/*
+GTODO
   @Override
   public boolean overwriteWithManualTagger(){
     return false;
   }
-
+*/
   @Override
-  public List<AnalyzedTokenReadings> tag(final List<String> sentenceTokens)
-      throws IOException {
+  public List<AnalyzedTokenReadings> tag(final List<String> sentenceTokens) {
 
     final List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
@@ -88,11 +98,11 @@ public class PortugueseTagger extends BaseTagger {
         word = word.replace("’", "'");
       }
       final List<AnalyzedToken> l = new ArrayList<>();
-      final String lowerWord = word.toLowerCase(conversionLocale);
+      final String lowerWord = caseConverter.toLowerCase(word);
       final boolean isLowercase = word.equals(lowerWord);
       final boolean isMixedCase = StringTools.isMixedCase(word);
       List<AnalyzedToken> taggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(word));
-      
+
       // normal case:
       addTokens(taggerTokens, l);
       // tag non-lowercase (alluppercase or startuppercase), but not mixedcase
@@ -126,12 +136,14 @@ public class PortugueseTagger extends BaseTagger {
   }
 
   @Nullable
+  // GTODO This is its own class call (not overriding a parent method), why is it duplicating the creation of an IStemmer?
+  // GTODO Remove the duplication of creating a new DicitonaryLookup.
   protected List<AnalyzedToken> additionalTags(String word, IStemmer stemmer) {
     final IStemmer dictLookup = new DictionaryLookup(getDictionary());
     List<AnalyzedToken> additionalTaggedTokens = new ArrayList<>();
     //Any well-formed adverb with suffix -mente is tagged as an adverb of manner (RM)
     if (word.endsWith("mente")){
-      final String lowerWord = word.toLowerCase(conversionLocale);
+      final String lowerWord = caseConverter.toLowerCase(word);
       final String possibleAdj = lowerWord.replaceAll("^(.+)mente$", "$1");
       List<AnalyzedToken> taggerTokens;
       taggerTokens = asAnalyzedTokenList(lowerWord, dictLookup.lookup(possibleAdj));
@@ -157,6 +169,7 @@ public class PortugueseTagger extends BaseTagger {
         if (posTag != null) {
           final Matcher m = VERB.matcher(posTag);
           if (m.matches()) {
+            // GTODO Should this toLowerCase call use the CaseConverter?
             String lemma = matcher.group(1).toLowerCase().concat(taggerToken.getLemma());
             additionalTaggedTokens.add(new AnalyzedToken(word, posTag, lemma));
           }

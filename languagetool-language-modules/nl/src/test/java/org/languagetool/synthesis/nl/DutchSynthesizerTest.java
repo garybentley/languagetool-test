@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,8 +21,9 @@ package org.languagetool.synthesis.nl;
 
 import org.junit.Test;
 import org.languagetool.AnalyzedToken;
+import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.language.Dutch;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -30,16 +31,17 @@ import static org.junit.Assert.assertEquals;
 public class DutchSynthesizerTest {
 
   @Test
-  public final void testSynthesizeStringString() throws IOException {
-    DutchSynthesizer synth = new DutchSynthesizer();
-    assertEquals(synth.synthesize(dummyToken("blablabla"), 
+  public final void testSynthesizeStringString() throws Exception {
+    Dutch lang = new Dutch();
+    Synthesizer synth = lang.getSynthesizer();
+    assertEquals(synth.synthesize(dummyToken("blablabla"),
         "blablabla").length, 0);
-    
+
     assertEquals("[zwommen]", Arrays.toString(synth.synthesize(dummyToken("zwemmen"), "WKW:VLT:INF")));
     //assertEquals("[Afro-Surinamers]", Arrays.toString(synth.synthesize(dummyToken("Afro-Surinamer"), "ZNW:MRV:DE_")));
     assertEquals("[hebt, heeft]", Arrays.toString(synth.synthesize(dummyToken("hebben"), "WKW:TGW:3EP", true)));
     //with regular expressions
-    assertEquals("[doorgeseind]", Arrays.toString(synth.synthesize(dummyToken("doorseinen"), "WKW:VTD:ONV", true)));    
+    assertEquals("[doorgeseind]", Arrays.toString(synth.synthesize(dummyToken("doorseinen"), "WKW:VTD:ONV", true)));
     //assertEquals("[doorseine, doorseinenden, doorseinend, doorseinende, doorsein, doorseint, doorseinen, doorseinde, doorseinden, doorgeseind, doorgeseinde]", Arrays.toString(synth.synthesize(dummyToken("doorseinen"), "WKW.*", true)));
   }
 

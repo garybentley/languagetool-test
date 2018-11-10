@@ -1245,11 +1245,7 @@ public class CaseRule extends Rule {
 
   private AnalyzedTokenReadings lookup(String word) {
     AnalyzedTokenReadings lookupResult = null;
-    try {
       lookupResult = tagger.lookup(word);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not lookup '"+word+"'.", e);
-    }
     return lookupResult;
   }
 

@@ -127,28 +127,8 @@ public class DefaultGermanResourceDataBroker extends DefaultResourceDataBroker i
 
     public static String WRONG_WORDS_IN_CONTEXT_FILE_NAME = "%1$s/wrongWordInContext.txt";
 
-     /**
-      * The location of wrong words (words to be replaced) in the rules dir.  %1$s is replaced with the language code from the locale,
-      * %2$s is the country.  This file is used in {@link getWrongWords()}.
-      */
-     /*
-     GTODO Clean up
-    public static String CONTRACTIONS_FILE_NAME = "/en/contractions.txt";
-
-    public static String GENERAL_PATTERN_RULES_FILE_NAME = "/en/grammar.xml";
-    public static String LOCALE_VARIANT_PATTERN_RULES_FILE_NAME = "/en/en_%1$s/grammar.xml";
-
-    public static String REQUIRES_A_WORD_LIST_FILE_NAME = "/en/det_a.txt";
-    public static String REQUIRES_AN_WORD_LIST_FILE_NAME = "/en/det_an.txt";
-
-    public static String WORD_2_VEC_MODEL_DICT_FILE_NAME = "/en/dictionary.txt";
-    public static String WORD_2_VEC_MATRIX_FILE_NAME = "/en/final_embeddings.txt";
-    public static String NEURAL_NETWORK_CONFUSION_SETS_FILE_NAME = "/en/neuralnetwork/confusion_sets.txt";
-    public static String NEURAL_NETWORK_CLASSIFIER_W_FC1_FILE_NAME = "/en/W_fc1.txt";
-    public static String NEURAL_NETWORK_CLASSIFIER_B_FC1_FILE_NAME = "/en/b_fc1.txt";
-    public static String NEURAL_NETWORK_CLASSIFIER_W_FC2_FILE_NAME = "/en/W_fc2.txt";
-    public static String NEURAL_NETWORK_CLASSIFIER_B_FC2_FILE_NAME = "/en/b_fc2.txt";
-*/
+    public static String PROHIBITED_WORDS_FILE_NAME = "%1$s/hunspell/prohibit.txt";
+    public static String IGNORE_WORDS_FILE_NAME = "%1$s/hunspell/ignore.txt";
 
     private static RuleFilterCreator ruleFilterCreator;
 
@@ -544,7 +524,7 @@ MorfologikDictionaryProvider
 
     @Override
     public List<String> getSpellingIgnoreWords() throws Exception {
-        List<String> words = super.getSpellingIgnoreWordsFromResourcePath();
+        List<String> words = loadSpellingIgnoreWordsFromResourcePath(String.format(PLAIN_TEXT_BASE_SPELLING_FILE_NAME, language.getLocale().getLanguage()), String.format(IGNORE_WORDS_FILE_NAME, language.getLocale().getLanguage()));
 
         String localeVariantFile = String.format(LOCALE_VARIANT_PLAIN_TEXT_SPELLING_FILE_NAME, language.getLocale().getLanguage(), language.getLocale().getCountry());
         if (resourceDirPathExists(localeVariantFile)) {
@@ -555,7 +535,7 @@ MorfologikDictionaryProvider
 
     @Override
     public List<String> getSpellingProhibitedWords() throws Exception {
-        return getSpellingProhibitedWordsFromResourcePath();
+        return loadSpellingProhibitedWordsFromResourcePath(String.format(PROHIBITED_WORDS_FILE_NAME, language.getLocale().getLanguage()));
     }
 
     @Override

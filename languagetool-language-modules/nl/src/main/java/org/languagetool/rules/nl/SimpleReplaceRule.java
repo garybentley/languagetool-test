@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,41 +18,38 @@
  */
 package org.languagetool.rules.nl;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.List;
+import java.util.Map;
 
-import org.languagetool.language.Dutch;
 import org.languagetool.rules.*;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
  * correct ones instead.
  *
- * Dutch implementations. Loads the list of words from
- * <code>rules/nl/replace.txt</code>.
- * 
  * @since 2.7
  */
 public class SimpleReplaceRule extends AbstractSimpleReplaceRule2 {
 
   public static final String DUTCH_SIMPLE_REPLACE_RULE = "NL_SIMPLE_REPLACE";
-  
-  private static final Locale NL_LOCALE = new Locale("nl");
 
-  public SimpleReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages, new Dutch());
+  public SimpleReplaceRule(ResourceBundle messages, List<Map<String, String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     setLocQualityIssueType(ITSIssueType.Misspelling);
     setCategory(new Category(new CategoryId("VERGISSINGEN"), "Vergissingen"));
     addExamplePair(Example.wrong("<marker>ofzo</marker>."),
                    Example.fixed("<marker>of zo</marker>."));
   }
-
+/*
+ GTODO Clean up
   @Override
   public String getFileName() {
     return "/nl/replace.txt";
   }
-
+*/
   @Override
   public final String getId() {
     return DUTCH_SIMPLE_REPLACE_RULE;
@@ -81,11 +78,6 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule2 {
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return NL_LOCALE;
   }
 
 }

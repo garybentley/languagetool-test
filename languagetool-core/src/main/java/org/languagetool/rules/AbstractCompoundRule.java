@@ -18,13 +18,13 @@
  */
 package org.languagetool.rules;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.ResourceBundle;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +49,7 @@ public abstract class AbstractCompoundRule extends Rule {
   private final String shortDesc;
   // if true, the first word will be uncapitalized before compared to the entries in CompoundRuleData
   protected boolean sentenceStartsWithUpperCase = false;
+  private final CompoundRuleData compoundData;
 
   @Override
   public abstract String getId();
@@ -57,23 +58,24 @@ public abstract class AbstractCompoundRule extends Rule {
   public abstract String getDescription();
 
   /** @since 3.0 */
-  protected abstract CompoundRuleData getCompoundRuleData();
+  // GTODO protected abstract CompoundRuleData getCompoundRuleData();
 
   /**
    * @since 3.0
    */
   // GTODO Change to pass in compound data?
-  public AbstractCompoundRule(ResourceBundle messages,
-                              String withHyphenMessage, String withoutHyphenMessage, String withOrWithoutHyphenMessage) throws IOException {
-    this(messages, withHyphenMessage, withoutHyphenMessage, withOrWithoutHyphenMessage, null);
+  public AbstractCompoundRule(ResourceBundle messages, CompoundRuleData data,
+                              String withHyphenMessage, String withoutHyphenMessage, String withOrWithoutHyphenMessage) {
+    this(messages, data, withHyphenMessage, withoutHyphenMessage, withOrWithoutHyphenMessage, null);
   }
 
   /**
    * @since 3.0
    */
-  public AbstractCompoundRule(ResourceBundle messages,
+  public AbstractCompoundRule(ResourceBundle messages, CompoundRuleData data,
                               String withHyphenMessage, String withoutHyphenMessage, String withOrWithoutHyphenMessage,
-                              String shortMessage) throws IOException {
+                              String shortMessage) {
+    this.compoundData = Objects.requireNonNull(data, "Compound rule data must be provided.");
     super.setCategory(Categories.MISC.getCategory(messages));
     this.withHyphenMessage = withHyphenMessage;
     this.withoutHyphenMessage = withoutHyphenMessage;
@@ -125,16 +127,16 @@ public abstract class AbstractCompoundRule extends Rule {
       for (int k = stringsToCheck.size()-1; k >= 0; k--) {
         String stringToCheck = stringsToCheck.get(k);
         String origStringToCheck = origStringsToCheck.get(k);
-        if (getCompoundRuleData().getIncorrectCompounds().contains(stringToCheck)) {
+        if (compoundData.getIncorrectCompounds().contains(stringToCheck)) {
           AnalyzedTokenReadings atr = stringToToken.get(stringToCheck);
           String msg = null;
           List<String> replacement = new ArrayList<>();
-          if (!getCompoundRuleData().getNoDashSuggestion().contains(stringToCheck)) {
+          if (!compoundData.getNoDashSuggestion().contains(stringToCheck)) {
             replacement.add(origStringToCheck.replace(' ', '-'));
             msg = withHyphenMessage;
           }
-          if (isNotAllUppercase(origStringToCheck) && !getCompoundRuleData().getOnlyDashSuggestion().contains(stringToCheck)) {
-            replacement.add(mergeCompound(origStringToCheck, getCompoundRuleData().getNoDashLowerCaseSuggestion().stream().anyMatch(s -> origStringsToCheck.contains(s))));
+          if (isNotAllUppercase(origStringToCheck) && !compoundData.getOnlyDashSuggestion().contains(stringToCheck)) {
+            replacement.add(mergeCompound(origStringToCheck, compoundData.getNoDashLowerCaseSuggestion().stream().anyMatch(s -> origStringsToCheck.contains(s))));
             msg = withoutHyphenMessage;
           }
           String[] parts = stringToCheck.split(" ");

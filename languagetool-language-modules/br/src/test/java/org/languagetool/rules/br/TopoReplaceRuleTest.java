@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,8 +23,6 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.Breton;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,9 +31,10 @@ import static org.junit.Assert.assertEquals;
 public class TopoReplaceRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    TopoReplaceRule rule = new TopoReplaceRule(TestTools.getEnglishMessages());
-    JLanguageTool langTool = new JLanguageTool(new Breton());
+  public void testRule() throws Exception {
+    Breton language = new Breton();
+    TopoReplaceRule rule = language.createTopoReplaceRule(null);
+    JLanguageTool langTool = new JLanguageTool(language);
 
     // Wrong sentences.
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("France a zo ur vro.")).length);

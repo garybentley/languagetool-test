@@ -20,8 +20,7 @@ package org.languagetool.rules.pt;
 
 import org.junit.Test;
 import org.languagetool.*;
-
-import java.io.IOException;
+import org.languagetool.language.Portuguese;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -29,16 +28,16 @@ import static org.junit.Assert.assertTrue;
 public class PortugueseWordRepeatRuleTest {
 
   @Test
-  public void testIgnore() throws IOException {
-    Language lang = Languages.getLanguageForShortCode("pt");
+  public void testIgnore() throws Exception {
+      Portuguese lang = new Portuguese();
     JLanguageTool lt = new JLanguageTool(lang);
-    PortugueseWordRepeatRule rule = new PortugueseWordRepeatRule(TestTools.getEnglishMessages(), lang);
+    PortugueseWordRepeatRule rule = lang.createWordRepeatRule(null);
     assertFalse(ignore("no repetition", lt, rule));
     assertTrue(ignore("blá blá", lt, rule));
     assertTrue(ignore("Aaptos aaptos", lt, rule));
   }
 
-  private boolean ignore(String input, JLanguageTool lt, PortugueseWordRepeatRule rule) throws IOException {
+  private boolean ignore(String input, JLanguageTool lt, PortugueseWordRepeatRule rule) throws Exception {
     AnalyzedSentence sentence = lt.getAnalyzedSentence(input);
     AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
     return rule.ignore(tokens, 2);

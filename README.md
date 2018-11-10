@@ -106,7 +106,9 @@ Note: Section WIP
 
 ## Currently completed Languages
 
-de, en, fa and fr have been modified and tested.
+de, en, fa and fr, it have been modified and tested.
+
+Note: ca has been removed (via pom.xml) due to a number of missing files that prevent construction of Catalan and its rules.
 
 ## Future work
 
@@ -142,6 +144,17 @@ This is a list of things that need to be changed/looked at:
 * Catalan has NOT been ported because of these serious issues.  It is removed from the pom.xml file.
 * it/MorfologikItalianSpellerRule doesn't set the category or add an example pair like other languages.
 * it/ItalianRuleDisambiguator remove class, is only a wrapper around XmlRuleDisambiguator and not needed.
+* it needs more tests.
+* consider creating a HybridDisambiguator, polish and portuguese both use a hybrid with the same semantics, i.e. a multiwordchunker+xmlruledisambiguator.  Could have a HyrbridDisambiguator(Disambiguator...) that then chains the disambiguate method.
+* pt consider passing an IStemmer to the PortugueseTagger, it's creating one for every tag call.
+* Maybe change ResourceDataBroker.getWordTokenizer to return a Tokenizer rather than WordTokenizer.
+* pt/PortugueseTagger is creating duplicate DictionaryLookups within it's own call stack.  Remove the duplication.
+* inconsistent rules created in getRelevantRules, for instance some languages return a EmptyLineRule some don't, why?
+* pt/PortugueseUnitConversionRule uses a Locale.GERMAN for the number format.
+* Rules like AbstractCompoundRule could be created from a config file, see pl/CompoundRule, de/CompoundRule for examples.
+* PortugalPortuguese/BrazilianPortuguese getRelevantRules contains duplicate rule PostReformPortugueseCompoundRule addition.
+* en/EnglishDashRule doesn't set a category.
+* extensions of AbstractDashRule apply conflicting categories, de it is COMPOUNDING, pt it is TYPOGRAPHICAL, en doesn't set it, pl doesn't set it, ru doesn't set it.
 
 ## The information below is from the standard LanguageTool README
 

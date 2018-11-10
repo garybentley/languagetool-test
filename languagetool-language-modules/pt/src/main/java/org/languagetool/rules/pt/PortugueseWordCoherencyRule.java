@@ -23,9 +23,7 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
-import org.languagetool.databroker.ResourceDataBroker;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -39,13 +37,14 @@ public class PortugueseWordCoherencyRule extends AbstractWordCoherencyRule {
 
   private Map<String, String> wordMap;
 
-  public PortugueseWordCoherencyRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+  public PortugueseWordCoherencyRule(ResourceBundle messages, Map<String, String> wordMap) {
     super(messages);
-    wordMap = new WordCoherencyDataLoader().loadWords("/pt/coherency.txt", dataBroker);
+    //GTODO wordMap = new WordCoherencyDataLoader().loadWords("/pt/coherency.txt", dataBroker);
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Inconsistency);
     addExamplePair(Example.wrong("Foi um período duradouro. Tão marcante e <marker>duradoiro</marker> dificilmente será esquecido."),
                    Example.fixed("Foi um período duradouro. Tão marcante e <marker>duradouro</marker> dificilmente será esquecido."));
+    this.wordMap = wordMap;
   }
 
   @Override

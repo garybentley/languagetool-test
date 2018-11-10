@@ -55,7 +55,7 @@ import java.util.Locale;
  * Support for German - use the sub classes {@link GermanyGerman}, {@link SwissGerman}, or {@link AustrianGerman}
  * if you need spell checking.
  */
-public class German extends Language<GermanResourceDataBroker> implements AutoCloseable {
+public class German extends Language<GermanResourceDataBroker> {
 
     public static final String LANGUAGE_ID = "de";
     public static final Locale LOCALE = new Locale(LANGUAGE_ID);
@@ -394,15 +394,6 @@ GTODO Clean up
   @Override
   public List<NeuralNetworkRule> getRelevantWord2VecModelRules(ResourceBundle messages, Word2VecModel word2vecModel) throws Exception {
       return getUseDataBroker().createNeuralNetworkRules(messages, word2vecModel);
-  }
-
-  /**
-   * Closes the language model, if any.
-   * @since 3.1
-   */
-  @Override
-  public void close() throws Exception {
-      getUseDataBroker().close();
   }
 
   @Override

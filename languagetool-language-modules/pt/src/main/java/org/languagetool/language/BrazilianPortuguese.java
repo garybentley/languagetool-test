@@ -18,12 +18,13 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.UserConfig;
+import org.languagetool.Language;
 import org.languagetool.rules.*;
 import org.languagetool.rules.pt.BrazilianPortugueseReplaceRule;
 import org.languagetool.rules.pt.PostReformPortugueseCompoundRule;
@@ -31,19 +32,40 @@ import org.languagetool.rules.pt.PostReformPortugueseDashRule;
 
 public class BrazilianPortuguese extends Portuguese {
 
+    public static final String COUNTRY_ID = "BR";
+    public static final Locale LOCALE = new Locale(Portuguese.LANGUAGE_ID, COUNTRY_ID);
+
+    @Override
+    public boolean isVariant() {
+        return true;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
+
   @Override
   public String getName() {
     return "Portuguese (Brazil)";
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     List<Rule> rules = new ArrayList<>();
-    rules.addAll(super.getRelevantRules(messages, userConfig));
-    rules.add(new PostReformPortugueseCompoundRule(messages));
-    rules.add(new BrazilianPortugueseReplaceRule(messages, getUseDataBroker()));
-    rules.add(new PostReformPortugueseDashRule());
+    rules.addAll(super.getRelevantRules(messages, userConfig, altLanguages));
+    // GTODO Already added rules.add(new PostReformPortugueseCompoundRule(messages));
+    rules.add(createBrazilReplaceRule(messages));
+    rules.add(createPostReformDashRule(messages));
     return rules;
+  }
+
+  public BrazilianPortugueseReplaceRule createBrazilReplaceRule(ResourceBundle messages) throws Exception {
+      return new BrazilianPortugueseReplaceRule(getUseMessages(messages), getUseDataBroker().getBrazilWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PostReformPortugueseDashRule createPostReformDashRule(ResourceBundle messages) throws Exception {
+      return new PostReformPortugueseDashRule(getUseDataBroker().getPostReformCompoundPatternRules(PostReformPortugueseDashRule.MESSAGE));
   }
 
   @Override

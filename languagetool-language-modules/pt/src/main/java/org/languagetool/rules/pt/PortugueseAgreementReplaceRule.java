@@ -23,11 +23,9 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.tools.Tools;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.net.URL;
@@ -42,17 +40,19 @@ public class PortugueseAgreementReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String PORTUGUESE_AGREEMENT_REPLACE_RULE = "PT_AGREEMENT_REPLACE";
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale PT_LOCALE = new Locale("pt");
+  // GTODO private Map<String, List<String>> wrongWords;
+  // GTODO private static final Locale PT_LOCALE = new Locale("pt");
 
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
     return wrongWords;
   }
-
-  public PortugueseAgreementReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
-    wrongWords = load("/pt/AOreplace.txt", dataBroker);
+*/
+  public PortugueseAgreementReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
+    // GTODO wrongWords = load("/pt/AOreplace.txt", dataBroker);
     super.setCategory(Categories.TYPOS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
     // setDefaultOff();
@@ -90,10 +90,11 @@ public class PortugueseAgreementReplaceRule extends AbstractSimpleReplaceRule {
   public boolean isCaseSensitive() {
     return false;
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return PT_LOCALE;
   }
-
+*/
 }

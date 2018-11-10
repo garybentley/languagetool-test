@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,32 +16,22 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.rules.nl;
+package org.languagetool.databroker;
 
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.languagetool.JLanguageTool;
-import org.languagetool.language.Dutch;
-import org.languagetool.rules.AbstractCompoundRuleTest;
+import morfologik.stemming.Dictionary;
+import org.languagetool.UserConfig;
+import org.languagetool.rules.ConfusionSet;
 
-public class CompoundRuleTest extends AbstractCompoundRuleTest {
+public interface BretonResourceDataBroker extends ResourceDataBroker {
 
-  @Before
-  public void setUp() throws Exception {
-    Dutch lang = new Dutch();
-    lt = new JLanguageTool(lang);
-    rule = lang.createCompoundRule(null);
-  }
+    List<Map<String, String>> getWrongTopographicalWords() throws Exception;
 
-  @Test
-  public void testRule() throws Exception {
-    // correct sentences:
-    check(0, "Dit is een zee-egel.");
-    check(0, "Zee-egel is een woord.");
-    // incorrect sentences:
-    check(1, "Dit is een zee egel.");
-    check(1, "Zee egel is een woord.");
-  }
+    Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception;
+
+    List<String> getSpellingIgnoreWords() throws Exception;
 
 }

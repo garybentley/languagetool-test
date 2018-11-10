@@ -19,15 +19,15 @@
 package org.languagetool.rules.pt;
 
 import org.junit.Test;
+import org.languagetool.language.Portuguese;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class PortuguesePatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+      Portuguese lang = new Portuguese();
+      runTestForLanguage(lang);
   }
 
 }

@@ -24,49 +24,50 @@ import org.languagetool.UserConfig;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.*;
-import org.languagetool.rules.neuralnetwork.NeuralNetworkRuleCreator;
 import org.languagetool.rules.neuralnetwork.Word2VecModel;
 import org.languagetool.rules.pt.*;
 import org.languagetool.rules.spelling.hunspell.HunspellRule;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.pt.PortugueseSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.pt.PortugueseHybridDisambiguator;
-import org.languagetool.tagging.pt.PortugueseTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.pt.PortugueseWordTokenizer;
+import org.languagetool.databroker.*;
+import org.languagetool.rules.neuralnetwork.NeuralNetworkRule;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
 import java.util.ResourceBundle;
 
 /**
  * Post-spelling-reform Portuguese.
  */
-public class Portuguese extends Language implements AutoCloseable {
+public class Portuguese extends Language<PortugueseResourceDataBroker> {
 
   private static final Language PORTUGAL_PORTUGUESE = new PortugalPortuguese();
 
-  private Tagger tagger;
-  private Disambiguator disambiguator;
-  private Tokenizer wordTokenizer;
-  private Synthesizer synthesizer;
-  private SentenceTokenizer sentenceTokenizer;
-  private LuceneLanguageModel languageModel;
+  public static final String LANGUAGE_ID = "pt";
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID);
+
+    public PortugueseResourceDataBroker getDefaultDataBroker() throws Exception {
+        return new DefaultPortugueseResourceDataBroker(this, getClass().getClassLoader());
+    }
+
+    @Override
+    public boolean isVariant() {
+        return false;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
 
   @Override
   public String getName() {
     return "Portuguese";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "pt";
   }
 
   @Override
@@ -76,6 +77,7 @@ public class Portuguese extends Language implements AutoCloseable {
 
   @Override
   public Language getDefaultLanguageVariant() {
+      // GTODO Why is Portugal the default rather than Brazil?  What is this based on?
     return PORTUGAL_PORTUGUESE;
   }
 
@@ -89,90 +91,205 @@ public class Portuguese extends Language implements AutoCloseable {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new PortugueseTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   /**
    * @since 3.6
    */
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new PortugueseHybridDisambiguator(getUseDataBroker());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   /**
    * @since 3.6
    */
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new PortugueseWordTokenizer();
-    }
-    return wordTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new PortugueseSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages,
-                Example.wrong("Tomamos café<marker> ,</marker> queijo, bolachas e uvas."),
-                Example.fixed("Tomamos café<marker>,</marker> queijo, bolachas e uvas.")),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "\"", "“" /*, "«", "'", "‘" */),
-                    Arrays.asList("]", ")", "}", "\"", "”" /*, "»", "'", "’" */)),
-            new HunspellRule(messages, this, userConfig),
-            new LongSentenceRule(messages, userConfig, -1, true),
-            new LongParagraphRule(messages, this, userConfig),
-            new UppercaseSentenceStartRule(messages, this,
-                Example.wrong("Esta casa é velha. <marker>foi</marker> construida em 1950."),
-                Example.fixed("Esta casa é velha. <marker>Foi</marker> construida em 1950.")),
-            new MultipleWhitespaceRule(messages, this),
-            new SentenceWhitespaceRule(messages),
-            new WhiteSpaceBeforeParagraphEnd(messages, this),
-            new WhiteSpaceAtBeginOfParagraph(messages),
-            new EmptyLineRule(messages, this),
-            new ParagraphRepeatBeginningRule(messages, this),
-            new PunctuationMarkAtParagraphEnd(messages, this),
+            createCommaWhitespaceRule(messages),
+            createUnpairedBracketsRule(messages),
+            createSpellerRule(messages, userConfig),
+            createLongSentenceRule(messages, userConfig),
+            createLongParagraphRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createSentenceWhitespaceRule(messages),
+            createWhiteSpaceBeforeParagraphEndRule(messages),
+            createWhiteSpaceAtBeginOfParagraphRule(messages),
+            createEmptyLineRule(messages),
+            createParagraphRepeatBeginningRule(messages),
+            createPunctuationMarkAtParagraphEndRule(messages),
             //Specific to Portuguese:
-            new PostReformPortugueseCompoundRule(messages),
-            new PortugueseReplaceRule(messages, getUseDataBroker()),
-            new PortugueseBarbarismsRule(messages),
-            new PortugueseClicheRule(messages),
-            new PortugueseFillerWordsRule(messages, this, userConfig),
-            new PortugueseRedundancyRule(messages),
-            new PortugueseWordinessRule(messages),
-            new PortugueseWeaselWordsRule(messages),
-            new PortugueseWikipediaRule(messages),
-            new PortugueseWordRepeatRule(messages, this),
-            new PortugueseWordRepeatBeginningRule(messages, this),
-            new PortugueseAccentuationCheckRule(messages),
-            new PortugueseWrongWordInContextRule(messages, getUseDataBroker()),
-            new PortugueseWordCoherencyRule(messages, getUseDataBroker()),
-            new PortugueseUnitConversionRule(messages)
+            createPostReformCompoundRule(messages),
+            createReplaceRule(messages),
+            createBarbarismsRule(messages),
+            createClicheRule(messages),
+            createFillerWordsRule(messages, userConfig),
+            createRedundancyRule(messages),
+            createWordinessRule(messages),
+            createWeaselWordsRule(messages),
+            createWikipediaRule(messages),
+            createWordRepeatRule(messages),
+            createWordRepeatBeginningRule(messages),
+            createAccentuationCheckRule(messages),
+            createWrongWordInContextRule(messages),
+            createWordCoherencyRule(messages),
+            createUnitConversionRule(messages)
     );
+  }
+
+  public HunspellRule createSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new HunspellRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getHunspellDictionary(), getUseDataBroker().getSpellingIgnoreWords(), Collections.emptyList(), null);
+  }
+
+  public PostReformPortugueseCompoundRule createPostReformCompoundRule(ResourceBundle messages) throws Exception {
+      return new PostReformPortugueseCompoundRule(getUseMessages(messages), getUseDataBroker().getPostReformCompoundRuleData());
+  }
+
+  public PortugueseUnitConversionRule createUnitConversionRule(ResourceBundle messages) throws Exception {
+      return new PortugueseUnitConversionRule(getUseMessages(messages));
+  }
+
+  public PortugueseWordCoherencyRule createWordCoherencyRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWordCoherencyRule(getUseMessages(messages), getUseDataBroker().getCoherencyMappings());
+  }
+
+  public PortugueseWrongWordInContextRule createWrongWordInContextRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWrongWordInContextRule(getUseMessages(messages), getUseDataBroker().getWrongWordsInContext());
+  }
+
+  public PortugueseAccentuationCheckRule createAccentuationCheckRule(ResourceBundle messages) throws Exception {
+      return new PortugueseAccentuationCheckRule(getUseMessages(messages), getUseDataBroker().getVerbToNounAccentWords(), getUseDataBroker().getVerbToAdjectiveAccentWords());
+  }
+
+  public PortugueseBarbarismsRule createBarbarismsRule(ResourceBundle messages) throws Exception {
+      return new PortugueseBarbarismsRule(getUseMessages(messages), getUseDataBroker().getBarbarismsWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PortugueseFillerWordsRule createFillerWordsRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new PortugueseFillerWordsRule(getUseMessages(messages), this, userConfig);
+  }
+
+  public PortugueseWikipediaRule createWikipediaRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWikipediaRule(getUseMessages(messages), getUseDataBroker().getWikipediaWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PortugueseClicheRule createClicheRule(ResourceBundle messages) throws Exception {
+      return new PortugueseClicheRule(getUseMessages(messages), getUseDataBroker().getClicheWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PortugueseRedundancyRule createRedundancyRule(ResourceBundle messages) throws Exception {
+      return new PortugueseRedundancyRule(getUseMessages(messages), getUseDataBroker().getRedundancyWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PortugueseWeaselWordsRule createWeaselWordsRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWeaselWordsRule(getUseMessages(messages), getUseDataBroker().getWeaselWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PortugueseWordinessRule createWordinessRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWordinessRule(getUseMessages(messages), getUseDataBroker().getWordinessWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public PortugueseReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new PortugueseReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages),
+          Example.wrong("Tomamos café<marker> ,</marker> queijo, bolachas e uvas."),
+          Example.fixed("Tomamos café<marker>,</marker> queijo, bolachas e uvas."));
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+                Arrays.asList("[", "(", "{", "\"", "“" /*, "«", "'", "‘" */),
+                Arrays.asList("]", ")", "}", "\"", "”" /*, "»", "'", "’" */));
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(messages, confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords, true);
+  }
+
+  public LongParagraphRule createLongParagraphRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongParagraphRule(getUseMessages(messages), this, maxWords);
+  }
+
+  public LongParagraphRule createLongParagraphRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+         confWords = userConfig.getConfigValueByID(LongParagraphRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongParagraphRule(messages, confWords);
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+          Example.wrong("Esta casa é velha. <marker>foi</marker> construida em 1950."),
+          Example.fixed("Esta casa é velha. <marker>Foi</marker> construida em 1950."));
+
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new SentenceWhitespaceRule(getUseMessages(messages));
+  }
+
+  public WhiteSpaceBeforeParagraphEnd createWhiteSpaceBeforeParagraphEndRule(ResourceBundle messages) throws Exception {
+      return new WhiteSpaceBeforeParagraphEnd(getUseMessages(messages), this);
+  }
+
+  public WhiteSpaceAtBeginOfParagraph createWhiteSpaceAtBeginOfParagraphRule(ResourceBundle messages) throws Exception {
+      return new WhiteSpaceAtBeginOfParagraph(getUseMessages(messages));
+  }
+
+  public PunctuationMarkAtParagraphEnd createPunctuationMarkAtParagraphEndRule(ResourceBundle messages) throws Exception {
+      return new PunctuationMarkAtParagraphEnd(getUseMessages(messages), this);
+  }
+
+  public ParagraphRepeatBeginningRule createParagraphRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new ParagraphRepeatBeginningRule(getUseMessages(messages), this);
+  }
+
+  public EmptyLineRule createEmptyLineRule(ResourceBundle messages) throws Exception {
+      return new EmptyLineRule(getUseMessages(messages), this);
+  }
+
+  public PortugueseWordRepeatBeginningRule createWordRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWordRepeatBeginningRule(getUseMessages(messages));
+  }
+
+  public PortugueseWordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new PortugueseWordRepeatRule(getUseMessages(messages));
   }
 
   @Override
@@ -182,39 +299,34 @@ public class Portuguese extends Language implements AutoCloseable {
 
   /** @since 3.6 */
   @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
-    if (languageModel == null) {
-      languageModel = new LuceneLanguageModel(new File(indexDir, getShortCode()));
-    }
-    return languageModel;
+  public synchronized LanguageModel getLanguageModel() throws Exception {
+      return getUseDataBroker().getLanguageModel();
   }
 
   /** @since 3.6 */
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.<Rule>asList(
-            new PortugueseConfusionProbabilityRule(messages, languageModel, this)
+            createConfusionProbabilityRule(messages, languageModel)
     );
   }
 
-  /** @since 4.0 */
-  @Override
-  public synchronized Word2VecModel getWord2VecModel(File indexDir) throws IOException {
-    return new Word2VecModel(indexDir + File.separator + getShortCode());
+  public PortugueseConfusionProbabilityRule createConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      return new PortugueseConfusionProbabilityRule(getUseMessages(messages), languageModel, this, getUseDataBroker().getConfusionSets());
   }
 
   /** @since 4.0 */
   @Override
-  public List<Rule> getRelevantWord2VecModelRules(ResourceBundle messages, Word2VecModel word2vecModel) throws IOException {
-    return NeuralNetworkRuleCreator.createRules(messages, this, word2vecModel);
+  public synchronized Word2VecModel getWord2VecModel() throws Exception {
+      return getUseDataBroker().getWord2VecModel();
   }
 
-  /** @since 3.6 */
+  /** @since 4.0 */
   @Override
-  public void close() throws Exception {
-    if (languageModel != null) {
-      languageModel.close();
-    }
+  public List<NeuralNetworkRule> getRelevantWord2VecModelRules(ResourceBundle messages, Word2VecModel word2vecModel) throws Exception {
+      return getUseDataBroker().createNeuralNetworkRules(messages, word2vecModel);
+    // GTODO return NeuralNetworkRuleCreator.createRules(messages, this, word2vecModel);
   }
 
   @Override

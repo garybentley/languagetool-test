@@ -23,12 +23,10 @@ package org.languagetool.rules.pt;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
+import org.languagetool.language.Portuguese;
 import org.languagetool.Languages;
 import org.languagetool.rules.AbstractUnitConversionRule;
 import org.languagetool.rules.UnitConversionRuleTestHelper;
-
-import java.io.IOException;
 
 public class PortugueseUnitConversionRuleTest {
 
@@ -49,10 +47,10 @@ public class PortugueseUnitConversionRuleTest {
   private final UnitConversionRuleTestHelper unitConversionRuleTestHelper = new UnitConversionRuleTestHelper();
 
   @Test
-  public void match() throws IOException {
-    Language lang = Languages.getLanguageForShortCode("pt");
+  public void match() throws Exception {
+      Portuguese lang = new Portuguese();
     JLanguageTool lt = new JLanguageTool(lang);
-    PortugueseUnitConversionRule rule = new PortugueseUnitConversionRule(JLanguageTool.getMessageBundle(lang));
+    PortugueseUnitConversionRule rule = lang.createUnitConversionRule(null);
     assertMatches("Eu tenho 6 pés de altura.", 1, "1,83 metros", rule, lt);
     assertMatches("Eu tenho 6 pés (2,02 m) de altura.", 1, "1,83 metros", rule, lt);
     assertMatches("Eu tenho 6 pés (1,82 m) de altura.", 0, null, rule, lt);
@@ -67,7 +65,7 @@ public class PortugueseUnitConversionRuleTest {
     assertMatches("Sendo a latitude 8º32'00\" e a longitude 39º22'49\".", 0, null, rule, lt);
   }
 
-  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws IOException {
+  private void assertMatches(String input, int expectedMatches, String converted, AbstractUnitConversionRule rule, JLanguageTool lt) throws Exception {
     unitConversionRuleTestHelper.assertMatches(input, expectedMatches, converted, rule, lt);
   }
 }

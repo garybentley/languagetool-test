@@ -38,8 +38,6 @@ import org.languagetool.databroker.EnglishResourceDataBroker;
  */
 public class CompoundRule extends AbstractCompoundRule {
 
-  // static to make sure this gets loaded only once:
-  private CompoundRuleData compoundData;
   // GTODO Pass in anti patterns.
   private static final Language AMERICAN_ENGLISH = new AmericanEnglish();
   private static List<DisambiguationPatternRule> antiDisambiguationPatterns = null;
@@ -50,13 +48,13 @@ public class CompoundRule extends AbstractCompoundRule {
         )
       );
 
-  public CompoundRule(ResourceBundle messages, CompoundRuleData data) throws IOException {
+  public CompoundRule(ResourceBundle messages, CompoundRuleData data) {
     super(messages,
+            data,
             "This word is normally spelled with hyphen.",
             "This word is normally spelled as one.",
             "This expression is normally spelled as one or with hyphen.",
             "Hyphenation problem");
-    compoundData = data;
     // GTODO: Clean up
     //compoundData = new CompoundRuleData(dataBroker, "/en/compounds.txt");
     addExamplePair(Example.wrong("I now have a <marker>part time</marker> job."),
@@ -71,11 +69,6 @@ public class CompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Hyphenated words, e.g., 'case-sensitive' instead of 'case sensitive'";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
   @Override

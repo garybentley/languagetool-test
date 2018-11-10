@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,10 +32,11 @@ import java.util.ResourceBundle;
  */
 public class PreReformPortugueseCompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/pt/pre-reform-compounds.txt");
+  // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/pt/pre-reform-compounds.txt");
 
-  public PreReformPortugueseCompoundRule(ResourceBundle messages) throws IOException {    
+  public PreReformPortugueseCompoundRule(ResourceBundle messages, CompoundRuleData data) {
     super(messages,
+            data,
             "Esta palavra é hifenizada.",
             "Esta palavra é composta por justaposição.",
             "Esta palavra pode ser composta por justaposição ou hifenizada.",
@@ -52,11 +53,6 @@ public class PreReformPortugueseCompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Palavras compostas";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
 }

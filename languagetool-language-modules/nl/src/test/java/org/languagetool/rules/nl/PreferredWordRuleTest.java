@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,22 +21,19 @@ package org.languagetool.rules.nl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
-import org.languagetool.Languages;
+import org.languagetool.language.Dutch;
 
 public class PreferredWordRuleTest {
-  
+
   @Test
-  public void test() throws IOException {
-    Language dutch = Languages.getLanguageForShortCode("nl");
-    PreferredWordRule rule = new PreferredWordRule(JLanguageTool.getMessageBundle());
-    JLanguageTool lt = new JLanguageTool(dutch);
+  public void test() throws Exception {
+    Dutch lang = new Dutch();
+    PreferredWordRule rule = lang.createPreferredWordRule(null);
+    JLanguageTool lt = new JLanguageTool(lang);
 
     AnalyzedSentence sentence1 = lt.getAnalyzedSentence("rijwiel");
     assertThat(rule.match(sentence1).length, is(1));

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà i Font
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,10 +18,11 @@
  */
 package org.languagetool.rules.pt;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +37,7 @@ import org.languagetool.tools.StringTools;
  * This rule checks if a word without graphical accent and with a verb POS tag
  * should be a noun or an adjective with graphical accent. It uses two lists of
  * word pairs: verb-noun and verb-adjective.
- * 
+ *
  * @author Jaume Ortolà i Font
  * l18n by Tiago F. Santos
  * TODO Verify all exceptions that apply to Portuguese
@@ -80,13 +81,26 @@ public class PortugueseAccentuationCheckRule extends Rule {
 /*  private static final Pattern LOCOCOES = Pattern.compile(".*LOC.*");*/
   private static final Pattern PRONOME_PESSOAL = Pattern.compile("P0.{6}|PP3CN000|PP3NN000|PP3CP000|PP3CSD00"); // TODO Confirmar a exclusão de: PP3..A00 (coincidee COM articles determinats) se aplica ao português
 
-  private static final Map<String, AnalyzedTokenReadings> relevantWords = 
-          new PortugueseAccentuationDataLoader().loadWords("/pt/verbos_sem_acento_nomes_com_acento.txt");
-  private static final Map<String, AnalyzedTokenReadings> relevantWords2 =
-          new PortugueseAccentuationDataLoader().loadWords("/pt/verbos_sem_acento_adj_com_acento.txt");
+  private final Map<String, AnalyzedTokenReadings> relevantWords = new HashMap<>();
+         //GTODO new PortugueseAccentuationDataLoader().loadWords("/pt/verbos_sem_acento_nomes_com_acento.txt");
+  private final Map<String, AnalyzedTokenReadings> relevantWords2 = new HashMap<>();
+        //GTODO new PortugueseAccentuationDataLoader().loadWords("/pt/verbos_sem_acento_adj_com_acento.txt");
 
-  public PortugueseAccentuationCheckRule(ResourceBundle messages) throws IOException {
+  public PortugueseAccentuationCheckRule(ResourceBundle messages, Map<String, AnalyzedToken> verbToNounAccentWords, Map<String, AnalyzedToken> verbToAdjectiveAccentWords) {
     super.setCategory(Categories.CONFUSED_WORDS.getCategory(messages));
+
+    Objects.requireNonNull(verbToNounAccentWords, "Verb to noun accented words must be provided.");
+    for (String k : verbToNounAccentWords.keySet()) {
+        AnalyzedToken t = verbToNounAccentWords.get(k);
+        this.relevantWords.put(k, new AnalyzedTokenReadings(t, 0));
+    }
+
+    Objects.requireNonNull(verbToAdjectiveAccentWords, "Verb to adjective accented words must be provided.");
+    for (String k : verbToAdjectiveAccentWords.keySet()) {
+        AnalyzedToken t = verbToAdjectiveAccentWords.get(k);
+        this.relevantWords2.put(k, new AnalyzedTokenReadings(t, 0));
+    }
+
     setDefaultOff(); // FIXME This rule is a basic adaptation that has no exceptions added. Users may test the rule and give the required feedback so that the rule can be on by default
     setLocQualityIssueType(ITSIssueType.Misspelling);
   }
@@ -105,7 +119,7 @@ public class PortugueseAccentuationCheckRule extends Rule {
   public RuleMatch[] match(final AnalyzedSentence sentence) {
     final List<RuleMatch> ruleMatches = new ArrayList<>();
     final AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
-    for (int i = 1; i < tokens.length; i++) { 
+    for (int i = 1; i < tokens.length; i++) {
       // ignoring token 0, i.e. SENT_START
       final String token;
       if (i == 1) {
@@ -147,8 +161,8 @@ public class PortugueseAccentuationCheckRule extends Rule {
           && !prevToken.startsWith("-")) {
         continue;
       }
-      
-      
+
+
       String replacement = null;
       final Matcher mPreposicaoDE = PREPOSICAO_DE.matcher(nextToken);
       final Matcher mExcepcoesDE = EXCEPCOES_ANTES_DE.matcher(nextNextToken);
@@ -167,11 +181,11 @@ public class PortugueseAccentuationCheckRule extends Rule {
         }
         // aquestes renuncies
         else if (((matchPostagRegexp(tokens[i - 1], DETERMINANTE_MS) && matchPostagRegexp(relevantWords.get(token), NOME_MS) /*
-              && !token.equals("cantar")*/) 
+              && !token.equals("cantar")*/)
             || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_MP) && matchPostagRegexp(relevantWords.get(token), NOME_MP))
             || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_FS) && matchPostagRegexp(relevantWords.get(token), NOME_FS) /*
-                && !token.equals("venia") && !token.equals("tenia") && !token.equals("continua") && !token.equals("genera") 
-                && !token.equals("faria")*/) 
+                && !token.equals("venia") && !token.equals("tenia") && !token.equals("continua") && !token.equals("genera")
+                && !token.equals("faria")*/)
             || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_FP) && matchPostagRegexp(relevantWords.get(token), NOME_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -180,7 +194,7 @@ public class PortugueseAccentuationCheckRule extends Rule {
             && matchPostagRegexp(tokens[i - 2], VERBO_CONJUGADO)
             && ((matchPostagRegexp(tokens[i - 1], DETERMINANTE_MS) && matchPostagRegexp(relevantWords.get(token), NOME_MS))
                 || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_MP) && matchPostagRegexp(relevantWords.get(token), NOME_MP))
-                || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_FS) && matchPostagRegexp(relevantWords.get(token), NOME_FS)) 
+                || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_FS) && matchPostagRegexp(relevantWords.get(token), NOME_FS))
                 || (matchPostagRegexp(tokens[i - 1], DETERMINANTE_FP) && matchPostagRegexp(relevantWords.get(token), NOME_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -189,7 +203,7 @@ public class PortugueseAccentuationCheckRule extends Rule {
             && matchPostagRegexp(tokens[i - 2], VERBO_CONJUGADO)
             && ((mArtigoOMS.matches() && matchPostagRegexp(relevantWords.get(token), NOME_MS))
                 || (mArtigoOMP.matches() && matchPostagRegexp(relevantWords.get(token), NOME_MP))
-                || (mArtigoOFS.matches() && matchPostagRegexp(relevantWords.get(token), NOME_FS)) 
+                || (mArtigoOFS.matches() && matchPostagRegexp(relevantWords.get(token), NOME_FS))
                 || (mArtigoOFP.matches() && matchPostagRegexp(relevantWords.get(token),NOME_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -206,7 +220,7 @@ public class PortugueseAccentuationCheckRule extends Rule {
             /* && !matchPostagRegexp(tokens[i + 1], LOCUCOES) */
             && (i < tokens.length - 2)
             && !matchPostagRegexp(tokens[i + 2], INFINITIVO)
-            && !mExcepcoesDE.matches() 
+            && !mExcepcoesDE.matches()
             && !tokens[i - 1].hasPosTag("RG")) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -217,13 +231,13 @@ public class PortugueseAccentuationCheckRule extends Rule {
             && !token.equals("faries") && !token.equals("continua")
             && !token.equals("continues") && !token.equals("cantar")
             && !token.equals("diferencia") && !token.equals("diferencies")
-            && !token.equals("distancia")  && !token.equals("distancies") 
+            && !token.equals("distancia")  && !token.equals("distancies")
             && */ ((mArtigoOMS.matches() && matchPostagRegexp(
                 relevantWords.get(token), NOME_MS))
                 || (mArtigoOFS.matches() && matchPostagRegexp(
                     relevantWords.get(token), NOME_FS))
                 || (mArtigoOMP.matches() && matchPostagRegexp(
-                    relevantWords.get(token), NOME_MP)) 
+                    relevantWords.get(token), NOME_MP))
                 || (mArtigoOFP.matches() && matchPostagRegexp(
                     relevantWords.get(token), NOME_FP)))
 
@@ -231,24 +245,24 @@ public class PortugueseAccentuationCheckRule extends Rule {
           replacement = relevantWords.get(token).getToken();
         }
         // circunstancias extraordináries
-        else if (/*!token.equals("pronuncia") 
+        else if (/*!token.equals("pronuncia")
             && !token.equals("espero") && !token.equals("pronuncies")
-            && !token.equals("venia")  && !token.equals("venies") 
-            && !token.equals("tenia")  && !token.equals("tenies") 
+            && !token.equals("venia")  && !token.equals("venies")
+            && !token.equals("tenia")  && !token.equals("tenies")
             && !token.equals("continua") && !token.equals("continues")
-            && !token.equals("faria") && !token.equals("faries") 
+            && !token.equals("faria") && !token.equals("faries")
             && !token.equals("genera") && !token.equals("figuri")
             && */ (i < tokens.length - 1)
             && ((matchPostagRegexp(relevantWords.get(token), NOME_MS) && matchPostagRegexp(tokens[i + 1], ADJETIVO_MS))
                 || (matchPostagRegexp(relevantWords.get(token), NOME_FS) && matchPostagRegexp(tokens[i + 1], ADJETIVO_FS))
-                || (matchPostagRegexp(relevantWords.get(token), NOME_MP) && matchPostagRegexp(tokens[i + 1], ADJETIVO_MP)) 
+                || (matchPostagRegexp(relevantWords.get(token), NOME_MP) && matchPostagRegexp(tokens[i + 1], ADJETIVO_MP))
                 || (matchPostagRegexp(relevantWords.get(token), NOME_FP) && matchPostagRegexp(tokens[i + 1], ADJETIVO_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
         // les seves contraries
         else if ((matchPostagRegexp(relevantWords.get(token), NOME_MS) && matchPostagRegexp(tokens[i - 1], ADJETIVO_MS)
               && !matchPostagRegexp(tokens[i], VERBO_3S) && !matchPostagRegexp(tokens[i], GRUPO_VERBAL))
-            || (matchPostagRegexp(relevantWords.get(token), NOME_FS) && matchPostagRegexp(tokens[i - 1], ADJETIVO_FS) 
+            || (matchPostagRegexp(relevantWords.get(token), NOME_FS) && matchPostagRegexp(tokens[i - 1], ADJETIVO_FS)
               && !matchPostagRegexp(tokens[i], VERBO_3S))
             || (matchPostagRegexp(relevantWords.get(token), NOME_MP) && matchPostagRegexp(tokens[i - 1], ADJETIVO_MP))
             || (matchPostagRegexp(relevantWords.get(token), NOME_FP) && matchPostagRegexp(tokens[i - 1], ADJETIVO_FP))) {
@@ -270,7 +284,7 @@ public class PortugueseAccentuationCheckRule extends Rule {
         else if (nextToken.equals("que")
             && ((mArtigoOMS.matches() && matchPostagRegexp(relevantWords.get(token), NOME_MS))
                 || (mArtigoOFS.matches() && matchPostagRegexp(relevantWords.get(token), NOME_FS))
-                || (mArtigoOMP.matches() && matchPostagRegexp(relevantWords.get(token), NOME_MP)) 
+                || (mArtigoOMP.matches() && matchPostagRegexp(relevantWords.get(token), NOME_MP))
                 || (mArtigoOFP.matches() && matchPostagRegexp(relevantWords.get(token), NOME_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -279,12 +293,12 @@ public class PortugueseAccentuationCheckRule extends Rule {
                 && !token.equals("venia") && !token.equals("venies") && !token.equals("tenia")
                 && !token.equals("tenies") && !token.equals("continua") && !token.equals("continues")
                 && !token.equals("faria") && !token.equals("faries") && !token.equals("genera")
-                && !token.equals("figuri") 
-            && */ i>2 
-            && tokens[i - 2].hasPosTag("SPS00") && !tokens[i - 2].hasPosTag("RG")           
+                && !token.equals("figuri")
+            && */ i>2
+            && tokens[i - 2].hasPosTag("SPS00") && !tokens[i - 2].hasPosTag("RG")
             && ((matchPostagRegexp(relevantWords.get(token), NOME_MS) && matchPostagRegexp(tokens[i - 1], ADJETIVO_MS))
                 || (matchPostagRegexp(relevantWords.get(token), NOME_FS) && matchPostagRegexp(tokens[i - 1], ADJETIVO_FS))
-                || (matchPostagRegexp(relevantWords.get(token), NOME_MP) && matchPostagRegexp(tokens[i - 1], ADJETIVO_MP)) 
+                || (matchPostagRegexp(relevantWords.get(token), NOME_MP) && matchPostagRegexp(tokens[i - 1], ADJETIVO_MP))
                 || (matchPostagRegexp(relevantWords.get(token), NOME_FP) && matchPostagRegexp(tokens[i - 1], ADJETIVO_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -294,9 +308,9 @@ public class PortugueseAccentuationCheckRule extends Rule {
       if (isRelevantWord2 && !matchPostagRegexp(tokens[i], GN)/* && !matchPostagRegexp(tokens[i], LOCUCOES) */ ) {
         // de maneira obvia, circumstancias extraordinarias.
         if ((matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MS) && matchPostagRegexp(tokens[i - 1], NOME_MS)
-              && !tokens[i - 1].hasPosTag("_GN_FS") && matchPostagRegexp(tokens[i], VERBO_CONJUGADO) 
+              && !tokens[i - 1].hasPosTag("_GN_FS") && matchPostagRegexp(tokens[i], VERBO_CONJUGADO)
               && !matchPostagRegexp(tokens[i], VERBO_3S))
-            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FS) && prevPrevToken.equalsIgnoreCase("de") 
+            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FS) && prevPrevToken.equalsIgnoreCase("de")
                 && (prevToken.equals("maneira") || prevToken.equals("forma")))
             || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MP) && matchPostagRegexp(tokens[i - 1], NOME_MP))
             || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FP) && matchPostagRegexp(tokens[i - 1], NOME_FP))) {
@@ -306,13 +320,13 @@ public class PortugueseAccentuationCheckRule extends Rule {
         else if ((i < tokens.length - 1)
             && !prevToken.equals("que")
             && !matchPostagRegexp(tokens[i - 1], NOT_IN_PREV_TOKEN)
-            && ((matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MS) && matchPostagRegexp(tokens[i + 1], NOME_MS) 
+            && ((matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MS) && matchPostagRegexp(tokens[i + 1], NOME_MS)
                 && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_MS))
-            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FS) && matchPostagRegexp(tokens[i + 1], NOME_FS) 
+            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FS) && matchPostagRegexp(tokens[i + 1], NOME_FS)
                 && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_FS))
-            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MP) && matchPostagRegexp(tokens[i + 1], NOME_MP) 
-                && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_MP)) 
-            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FP) && matchPostagRegexp(tokens[i + 1], NOME_FP) 
+            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MP) && matchPostagRegexp(tokens[i + 1], NOME_MP)
+                && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_MP))
+            || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FP) && matchPostagRegexp(tokens[i + 1], NOME_FP)
                 && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_FP)))) {
           replacement = relevantWords2.get(token).getToken();
         }
@@ -323,7 +337,7 @@ public class PortugueseAccentuationCheckRule extends Rule {
             || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FS)
                 && matchPostagRegexp(tokens[i + 1], NOME_FS) && mArtigoOFS.matches())
             || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_MP)
-                && matchPostagRegexp(tokens[i + 1], NOME_MP) && mArtigoOMP.matches()) 
+                && matchPostagRegexp(tokens[i + 1], NOME_MP) && mArtigoOMP.matches())
             || (matchPostagRegexp(relevantWords2.get(token), ADJETIVO_FP)
                 && matchPostagRegexp(tokens[i + 1], NOME_FP) && mArtigoOFP.matches()))) {
           replacement = relevantWords2.get(token).getToken();

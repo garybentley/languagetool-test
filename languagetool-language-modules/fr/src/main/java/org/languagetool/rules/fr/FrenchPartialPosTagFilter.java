@@ -50,13 +50,9 @@ public class FrenchPartialPosTagFilter extends PartialPosTagFilter {
 
   @Override
   protected List<AnalyzedTokenReadings> tag(String token) throws Exception {
-    try {
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(token));
       AnalyzedTokenReadings[] atr = tags.toArray(new AnalyzedTokenReadings[tags.size()]);
       AnalyzedSentence disambiguated = disambiguator.disambiguate(new AnalyzedSentence(atr));
       return Arrays.asList(disambiguated.getTokens());
-    } catch (IOException e) {
-      throw new RuntimeException("Could not tag and disambiguate '" + token + "'", e);
-    }
   }
 }

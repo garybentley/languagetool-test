@@ -18,6 +18,10 @@
  */
 package org.languagetool.synthesis.pt;
 
+import java.util.Set;
+
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
 import org.languagetool.databroker.ResourceDataBroker;
 
@@ -27,11 +31,10 @@ import org.languagetool.databroker.ResourceDataBroker;
  */
 public class PortugueseSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = "/pt/portuguese_synth.dict";
-  private static final String TAGS_FILE_NAME = "/pt/portuguese_tags.txt";
+  //GTODO private static final String RESOURCE_FILENAME = "/pt/portuguese_synth.dict";
+  //GTODO private static final String TAGS_FILE_NAME = "/pt/portuguese_tags.txt";
 
-  public PortugueseSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public PortugueseSynthesizer(IStemmer stemmer, Set<String> tags) {
+    super(stemmer, tags);
   }
-
 }

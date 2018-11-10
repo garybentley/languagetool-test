@@ -19,9 +19,10 @@
 package org.languagetool.tokenizers.nl;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Dutch;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
 
 /**
  * @author Daniel Naber
@@ -30,7 +31,13 @@ import org.languagetool.tokenizers.SRXSentenceTokenizer;
  */
 public class DutchSRXSentenceTokenizerTest {
 
-  private final SRXSentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Dutch());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Dutch lang = new Dutch();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public void testTokenize() {
@@ -117,7 +124,7 @@ public class DutchSRXSentenceTokenizerTest {
   }
 
   private void testSplit(String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

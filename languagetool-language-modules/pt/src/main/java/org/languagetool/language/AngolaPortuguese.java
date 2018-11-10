@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,12 +18,13 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.UserConfig;
+import org.languagetool.Language;
 import org.languagetool.rules.*;
 import org.languagetool.rules.pt.PreReformPortugueseCompoundRule;
 import org.languagetool.rules.pt.PreReformPortugueseDashRule;
@@ -32,7 +33,20 @@ import org.languagetool.rules.pt.PreReformPortugueseDashRule;
  * @since 3.6
  */
 public class AngolaPortuguese extends Portuguese {
-  
+
+    public static final String COUNTRY_ID = "AO";
+    public static final Locale LOCALE = new Locale(Portuguese.LANGUAGE_ID, COUNTRY_ID);
+
+    @Override
+    public boolean isVariant() {
+        return true;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
+
   @Override
   public String[] getCountries() {
     return new String[]{"AO"};
@@ -44,12 +58,20 @@ public class AngolaPortuguese extends Portuguese {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     List<Rule> rules = new ArrayList<>();
-    rules.addAll(super.getRelevantRules(messages, userConfig));
-    rules.add(new PreReformPortugueseCompoundRule(messages));
-    rules.add(new PreReformPortugueseDashRule());
+    rules.addAll(super.getRelevantRules(messages, userConfig, altLanguages));
+    rules.add(createPreReformCompoundRule(messages));
+    rules.add(createPreReformDashRule(messages));
     return rules;
+  }
+
+  public PreReformPortugueseDashRule createPreReformDashRule(ResourceBundle messages) throws Exception {
+      return new PreReformPortugueseDashRule(getUseDataBroker().getPreReformCompoundPatternRules(PreReformPortugueseDashRule.MESSAGE));
+  }
+
+  public PreReformPortugueseCompoundRule createPreReformCompoundRule(ResourceBundle messages) throws Exception {
+      return new PreReformPortugueseCompoundRule(getUseMessages(messages), getUseDataBroker().getPreReformCompoundRuleData());
   }
 
 }

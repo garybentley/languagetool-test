@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,10 +39,12 @@ import org.languagetool.rules.patterns.PatternTokenBuilder;
  * @since 4.1
  */
 class PreferredWordData {
-
+// GTODO Can remove this class, no longer used.
   private final List<PreferredWordRuleWithSuggestion> spellingRules = new ArrayList<>();
-  
+
   PreferredWordData(String ruleDesc) {
+      /*
+       GTODO Clean up
     String filePath = "/nl/preferredwords.csv";
     try (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(filePath);
          Scanner scanner = new Scanner(inputStream, "utf-8")) {
@@ -67,10 +69,11 @@ class PreferredWordData {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    */
   }
 
   @NotNull
-  private List<PatternToken> getTokens(String oldWord, Language lang) {
+  private List<PatternToken> getTokens(String oldWord, Language lang) throws Exception {
     PatternTokenBuilder builder = new PatternTokenBuilder();
     String[] newWordTokens = oldWord.split(" ");
     List<PatternToken> patternTokens = new ArrayList<>();
@@ -86,7 +89,7 @@ class PreferredWordData {
     return patternTokens;
   }
 
-  private boolean isBaseform(String term, Language lang) {
+  private boolean isBaseform(String term, Language lang) throws Exception {
     try {
       AnalyzedTokenReadings lookup = lang.getTagger().tag(Collections.singletonList(term)).get(0);
       if (lookup != null) {

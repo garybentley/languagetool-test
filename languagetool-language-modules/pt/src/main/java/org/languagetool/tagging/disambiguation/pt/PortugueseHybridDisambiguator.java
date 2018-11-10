@@ -19,15 +19,9 @@
 
 package org.languagetool.tagging.disambiguation.pt;
 
-import java.io.IOException;
-
 import org.languagetool.AnalyzedSentence;
-import org.languagetool.language.Portuguese;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.MultiWordChunker;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for Portuguese
@@ -38,11 +32,13 @@ import org.languagetool.databroker.ResourceDataBroker;
 public class PortugueseHybridDisambiguator extends AbstractDisambiguator {
 
     private final Disambiguator chunker;
-    private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Portuguese());
+    private final Disambiguator disambiguator;
+    // GTODO  = new XmlRuleDisambiguator(new Portuguese());
 
-    public PortugueseHybridDisambiguator (ResourceDataBroker dataBroker) {
-        super(dataBroker);
-        chunker = new MultiWordChunker("/pt/multiwords.txt", dataBroker);
+    public PortugueseHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator) {
+        this.chunker = chunker;
+        this.disambiguator = disambiguator;
+        // GTODO chunker = new MultiWordChunker("/pt/multiwords.txt", dataBroker);
     }
 
     /**
@@ -50,8 +46,7 @@ public class PortugueseHybridDisambiguator extends AbstractDisambiguator {
      * disambiguator.
      */
     @Override
-    public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-            throws IOException {
+    public final AnalyzedSentence disambiguate(AnalyzedSentence input) throws Exception {
         return disambiguator.disambiguate(chunker.disambiguate(input));
     }
 

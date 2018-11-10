@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,8 +23,8 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.Breton;
 import org.languagetool.rules.*;
-import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.tokenizers.WordTokenizer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,25 +46,31 @@ public class TopoReplaceRule extends Rule {
 
   public static final String BRETON_TOPO = "BR_TOPO";
 
-  private static final String FILE_NAME = "/br/topo.txt";
-  private static final String FILE_ENCODING = "utf-8";
+  //GTODO private static final String FILE_NAME = "/br/topo.txt";
+  // GTODO private static final String FILE_ENCODING = "utf-8";
   // locale used on case-conversion
-  private static final Locale BR_LOCALE = new Locale("br");
+  // GTODO private static final Locale BR_LOCALE = new Locale("br");
 
   // list of maps containing error-corrections pairs.
-  // the n-th map contains key strings of (n+1) words 
-  private final List<Map<String, String>> wrongWords;
-  
-  private final Tokenizer wordTokenizer = new Breton().getWordTokenizer();
+  // the n-th map contains key strings of (n+1) words
+  private List<Map<String, String>> wrongWords;
 
+  private WordTokenizer wordTokenizer;
+
+  private CaseConverter caseConverter;
+/*
+GTODO Clean up
   public final String getFileName() {
     return FILE_NAME;
   }
-
-  public TopoReplaceRule(ResourceBundle messages) throws IOException {
+*/
+  public TopoReplaceRule(ResourceBundle messages, List<Map<String, String>> wrongWords, WordTokenizer wordTokenizer, CaseConverter caseCon) throws IOException {
     super(messages);
     super.setCategory(Categories.MISC.getCategory(messages));
-    wrongWords = loadWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream(getFileName()));
+    this.wrongWords = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
+    this.wordTokenizer = Objects.requireNonNull(wordTokenizer, "Word tokenizer must be provided.");
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case Converter must be provided.");
+    // GTODO wrongWords = loadWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream(getFileName()));
   }
 
   @Override
@@ -86,7 +92,7 @@ public class TopoReplaceRule extends Rule {
   }
 
   /**
-   * @return the word used to separate multiple suggestions; used only before last suggestion, the rest are comma-separated.  
+   * @return the word used to separate multiple suggestions; used only before last suggestion, the rest are comma-separated.
    */
   public String getSuggestionsSeparator() {
     return " pe ";
@@ -99,18 +105,22 @@ public class TopoReplaceRule extends Rule {
   /**
    * locale used on case-conversion
    */
+   /*
+   GTODO
   public Locale getLocale() {
     return BR_LOCALE;
   }
-
+*/
+/*
+GTODO
   public String getEncoding() {
     return FILE_ENCODING;
   }
-
+*/
   /**
    * @return the word tokenizer used for tokenization on loading words.
    */
-  protected Tokenizer getWordTokenizer() {
+  protected WordTokenizer getWordTokenizer() {
     return wordTokenizer;
   }
 
@@ -122,11 +132,13 @@ public class TopoReplaceRule extends Rule {
   }
 
   /**
-   * Load the list of words. Same as {@link AbstractSimpleReplaceRule#load} but allows multiple words.   
+   * Load the list of words. Same as {@link AbstractSimpleReplaceRule#load} but allows multiple words.
    * @param stream the stream to load.
    * @return the list of maps containing the error-corrections pairs. The n-th map contains key strings of (n+1) words.
    * @see #getWordTokenizer
    */
+   /*
+   GTODO Clean up
   private List<Map<String, String>> loadWords(InputStream stream)
           throws IOException {
     List<Map<String, String>> list = new ArrayList<>();
@@ -171,7 +183,7 @@ public class TopoReplaceRule extends Rule {
     }
     return Collections.unmodifiableList(result);
   }
-
+*/
   private void addToQueue(AnalyzedTokenReadings token,
                           Queue<AnalyzedTokenReadings> prevTokens) {
     boolean inserted = prevTokens.offer(token);
@@ -188,7 +200,7 @@ public class TopoReplaceRule extends Rule {
             .getTokensWithoutWhitespace();
 
     Queue<AnalyzedTokenReadings> prevTokens = new ArrayBlockingQueue<>(wrongWords.size());
-
+System.out.println ("----> " + wrongWords);
     for (int i = 1; i < tokens.length; i++) {
       addToQueue(tokens[i], prevTokens);
       StringBuilder sb = new StringBuilder();
@@ -208,10 +220,11 @@ public class TopoReplaceRule extends Rule {
           continue;
         }
         String crt = variants.get(j);
-        String crtMatch = isCaseSensitive() 
+        String crtMatch = isCaseSensitive()
                               ? wrongWords.get(crtWordCount - 1).get(crt)
-                              : wrongWords.get(crtWordCount- 1).get(crt.toLowerCase(getLocale()));
+                              : wrongWords.get(crtWordCount- 1).get(caseConverter.toLowerCase(crt));
         if (crtMatch != null) {
+            // GTODO This could be improved by having the wrong words pre-split, i.e. wrongWords = Map<String, Set<String>>
           List<String> replacements = Arrays.asList(crtMatch.split("\\|"));
           String msg = crt + getSuggestion();
           for (int k = 0; k < replacements.size(); k++) {
@@ -225,9 +238,9 @@ public class TopoReplaceRule extends Rule {
           int endPos = prevTokensList.get(len - 1).getEndPos();
           RuleMatch potentialRuleMatch = new RuleMatch(this, sentence, startPos, endPos, msg, getShort());
 
-          if (!isCaseSensitive() && StringTools.startsWithUppercase(crt)) {
+          if (!isCaseSensitive() && caseConverter.startsWithUpperCase(crt)) {
             for (int k = 0; k < replacements.size(); k++) {
-              replacements.set(k, StringTools.uppercaseFirstChar(replacements.get(k)));
+              replacements.set(k, caseConverter.uppercaseFirstChar(replacements.get(k)));
             }
           }
           potentialRuleMatch.setSuggestedReplacements(replacements);

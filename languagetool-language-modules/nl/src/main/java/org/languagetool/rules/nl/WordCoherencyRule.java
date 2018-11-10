@@ -23,8 +23,8 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
 import org.languagetool.databroker.ResourceDataBroker;
 
-import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -34,9 +34,10 @@ public class WordCoherencyRule extends AbstractWordCoherencyRule {
 
   private Map<String, String> wordMap;
 
-  public WordCoherencyRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+  public WordCoherencyRule(ResourceBundle messages, Map<String, String> wordMap) throws Exception {
     super(messages);
-    wordMap = new WordCoherencyDataLoader().loadWords("/nl/coherency.txt", dataBroker);
+    this.wordMap = Objects.requireNonNull(wordMap, "Word map must be provided.");
+    //GTODO new WordCoherencyDataLoader().loadWords("/nl/coherency.txt", word);
     addExamplePair(Example.wrong("We raden af om in één tekst zowel <marker>hivtest</marker> als <marker>hiv-test</marker> te schrijven."),
                    Example.fixed("We raden af om in één tekst zowel <marker>hivtest</marker> als <marker>hivtest</marker> te schrijven."));
   }

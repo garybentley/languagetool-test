@@ -33,15 +33,15 @@ import org.languagetool.rules.Example;
 public final class CompoundRule extends AbstractCompoundRule {
 
   // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/pl/compounds.txt");
-  private final CompoundRuleData compoundData;
+  // GTODO private final CompoundRuleData compoundData;
 
   public CompoundRule(final ResourceBundle messages, CompoundRuleData data) throws IOException {
     super(messages,
+            data,
             "Ten wyraz pisze się z łącznikiem.",
             "Ten wyraz pisze się razem (bez spacji ani łącznika).",
             "Ten wyraz pisze się z łącznikiem lub bez niego.",
             "Brak łącznika lub zbędny łącznik");
-    compoundData = data;
     addExamplePair(Example.wrong("Witamy w <marker>Rabce Zdroju</marker>."),
                    Example.fixed("Witamy w <marker>Rabce-Zdroju</marker>."));
   }
@@ -54,11 +54,6 @@ public final class CompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Sprawdza wyrazy z łącznikiem, np. „łapu capu” zamiast „łapu-capu”";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
 }

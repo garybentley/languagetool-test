@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,18 +28,18 @@ import static org.junit.Assert.assertEquals;
 public class JLanguageToolTest {
 
   @Test
-  public void testDutch() throws IOException {
+  public void testDutch() throws Exception {
     final JLanguageTool tool = new JLanguageTool(new Dutch());
     assertEquals(0, tool.check("Een test, die geen fouten mag geven.").size());
     assertEquals(1, tool.check("Dit is fout.!").size());
     //test uppercasing rule:
-    /*  
+    /*
     matches = tool.check("De Afdeling Beheer kan het");
-    assertEquals(1, matches.size());   
+    assertEquals(1, matches.size());
     assertEquals("Als Afdeling geen deel uitmaakt van de naam, dan is juist:<suggestion>afdeling</suggestion>", matches.get(0).getMessage());
      */
     // Dutch rule has no effect with English error but they are spelling mistakes:
     assertEquals(3, tool.check("I can give you more a detailed description.").size());
   }
-  
+
 }

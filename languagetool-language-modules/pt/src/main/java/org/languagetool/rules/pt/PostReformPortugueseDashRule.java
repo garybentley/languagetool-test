@@ -25,7 +25,6 @@ import org.languagetool.rules.patterns.PatternRule;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -35,10 +34,14 @@ import java.util.ResourceBundle;
  */
 public class PostReformPortugueseDashRule extends AbstractDashRule {
 
+    public static final String MESSAGE = "Um travessão foi utilizado em vez de um hífen. Pretende dizer: ";
+
+/*
+GTODO
   private static final List<PatternRule> dashRules = loadCompoundFile("/pt/post-reform-compounds.txt",
                     "Um travessão foi utilizado em vez de um hífen. Pretende dizer: ", Languages.getLanguageForShortCode("pt-PT"));
-  
-  public PostReformPortugueseDashRule() throws IOException {
+*/
+  public PostReformPortugueseDashRule(List<PatternRule> dashRules) {
     super(dashRules);
     // super.setCategory(Categories.TYPOGRAPHY.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Typographical);

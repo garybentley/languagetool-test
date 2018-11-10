@@ -18,6 +18,9 @@
  */
 package org.languagetool.synthesis.nl;
 
+import java.util.Set;
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
 import org.languagetool.databroker.ResourceDataBroker;
 
@@ -25,13 +28,14 @@ import org.languagetool.databroker.ResourceDataBroker;
  * Dutch word form synthesizer.
  * @author Marcin Miłkowski
  */
+ // GTODO Can probably get rid of this class, it's just a wrapper.
 public class DutchSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = "/nl/dutch_synth.dict";
-  private static final String TAGS_FILE_NAME = "/nl/dutch_tags.txt";
+  //GTODO private static final String RESOURCE_FILENAME = "/nl/dutch_synth.dict";
+  //GTODO private static final String TAGS_FILE_NAME = "/nl/dutch_tags.txt";
 
-  public DutchSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public DutchSynthesizer(IStemmer stemmer, Set<String> possibleTags) {
+    super(stemmer, possibleTags);
   }
 
 }

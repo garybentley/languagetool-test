@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Collections;
 
 import java.util.stream.Collectors;
 
@@ -33,54 +35,137 @@ import morfologik.stemming.Dictionary;
 import morfologik.stemming.DictionaryLookup;
 
 import org.languagetool.UserConfig;
-import org.languagetool.language.Polish;
-import org.languagetool.synthesis.pl.PolishSynthesizer;
-import org.languagetool.tagging.disambiguation.pl.PolishHybridDisambiguator;
-import org.languagetool.tagging.pl.PolishTagger;
+import org.languagetool.language.Dutch;
+import org.languagetool.synthesis.nl.DutchSynthesizer;
+import org.languagetool.tagging.nl.DutchTagger;
 import org.languagetool.tagging.MorfologikTagger;
 import org.languagetool.tagging.WordTagger;
-import org.languagetool.tokenizers.pl.PolishWordTokenizer;
+import org.languagetool.tokenizers.nl.DutchWordTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.rules.patterns.PatternRule;
 import org.languagetool.rules.CompoundRuleData;
+import org.languagetool.rules.ContextWords;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.rules.patterns.PatternRule;
+import org.languagetool.rules.patterns.PatternToken;
+import org.languagetool.rules.patterns.PatternTokenBuilder;
+import org.languagetool.rules.nl.PreferredWordRuleWithSuggestion;
+import org.languagetool.rules.nl.PreferredWordRule;
+import org.languagetool.AnalyzedTokenReadings;
 
-public class DefaultPolishResourceDataBroker extends DefaultResourceDataBroker implements PolishResourceDataBroker {
+public class DefaultDutchResourceDataBroker extends DefaultResourceDataBroker implements DutchResourceDataBroker {
 
-    public static String WORD_TAGGER_DICT_FILE_NAME = "%1$s/polish.dict";
-    public static String STEMMER_DICT_FILE_NAME = "%1$s/polish_synth.dict";
-    public static String SYNTHESIZER_WORD_TAGS_FILE_NAME = "%1$s/polish_tags.txt";
+    public static String WORD_TAGGER_DICT_FILE_NAME = "%1$s/dutch.dict";
+    public static String STEMMER_DICT_FILE_NAME = "%1$s/dutch_synth.dict";
+    public static String SYNTHESIZER_WORD_TAGS_FILE_NAME = "%1$s/dutch_tags.txt";
     public static String COMPOUNDS_FILE_NAME = "%1$s/compounds.txt";
     public static String REPLACE_FILE_NAME = "%1$s/replace.txt";
 
     /**
      * The filename to use for the base hunspell binary dictionary info.  The locale language and country values are replaced in the filename.
-     * For en_GB this would become: /en/hunspell/en_GB.info
+     * For nl_NL this would become: /nl/spelling/nl_NL.info
      */
-    public static String PLAIN_TEXT_SPELLING_INFO_FILE_NAME = "%1$s/hunspell/%1$s_%2$s.info";
+    public static String PLAIN_TEXT_SPELLING_INFO_FILE_NAME = "%1$s/spelling/%1$s_%2$s.info";
 
-    public static String PLAIN_TEXT_BASE_SPELLING_FILE_NAME = "%1$s/hunspell/spelling.txt";
+    public static String PLAIN_TEXT_BASE_SPELLING_FILE_NAME = "%1$s/spelling/spelling.txt";
 
     /**
      * The filename to use for the base hunspell binary dictionary.  The locale language and country values are replaced in the filename.
-     * For en_GB this would become: /en/hunspell/en_GB.dict
+     * For nl_NL this would become: /nl/spelling/nl_NL.dict
      */
-    public static String BINARY_DICT_FILE_NAME = "%1$s/hunspell/%1$s_%2$s.dict";
+    public static String BINARY_DICT_FILE_NAME = "%1$s/spelling/%1$s_%2$s.dict";
 
-    public static String IGNORE_WORDS_FILE_NAME = "%1$s/hunspell/ignore.txt";
+    public static String WRONG_WORDS_IN_CONTEXT_FILE_NAME = "%1$s/wrongWordInContext.txt";
 
-    private PolishTagger tagger;
-    private PolishWordTokenizer wordTokenizer;
-    private PolishHybridDisambiguator disambiguator;
-    private PolishSynthesizer synthesizer;
+    public static String COHERENCY_WORD_LIST_FILE_NAME = "%1$s/coherency.txt";
+
+    public static String PREFERRED_WORDS_FILE_NAME = "%1$s/preferredwords.csv";
+
+    public static String PROHIBITED_WORDS_FILE_NAME = "%1$s/spelling/prohibit.txt";
+    public static String IGNORE_WORDS_FILE_NAME = "%1$s/spelling/ignore.txt";
+
+    private DutchTagger tagger;
+    private DutchWordTokenizer wordTokenizer;
+    private DutchSynthesizer synthesizer;
     private Dictionary wordTaggerDictionary;
     private WordTagger wordTagger;
     private IStemmer istemmer;
     private CompoundRuleData compounds;
-    private Map<String, List<String>> wrongWords;
+    private List<Map<String, String>> wrongWords;
     private Set<Dictionary> dictionaries;
+    private List<ContextWords> wrongWordsInContext;
+    private Map<String, String> coherencyMappings;
 
-    public DefaultPolishResourceDataBroker(Polish lang, ClassLoader classLoader) throws Exception {
+    public DefaultDutchResourceDataBroker(Dutch lang, ClassLoader classLoader) throws Exception {
         super(lang, classLoader);
+    }
+
+    @Override
+    public List<PreferredWordRuleWithSuggestion> getPreferredWordRules() throws Exception {
+        String message = "Voor dit woord is een gebruikelijker alternatief.";
+        String shortMessage = "Gebruikelijker woord";
+        StringProcessor<PreferredWordRuleWithSuggestion> proc = new StringProcessor<PreferredWordRuleWithSuggestion>() {
+            @Override
+            public boolean shouldSkip(String line) {
+                line = line.trim();
+                return line.startsWith("#");
+            }
+            @Override
+            public Set<String> getErrors(String line) {
+                Set<String> errors = null;
+                line = line.trim();
+                String[] parts = line.split(";");
+                if (parts.length != 2) {
+                    errors = new HashSet<>();
+                    errors.add ("Expected format: <oldword>;<newword>");
+                }
+                return errors;
+            }
+            @Override
+            public PreferredWordRuleWithSuggestion getProcessed(String line) throws Exception {
+                line = line.trim();
+                String[] parts = line.split(";");
+                String oldWord = parts[0];
+                String newWord = parts[1];
+                List<PatternToken> patternTokens = getTokens(oldWord);
+                PatternRule rule = new PatternRule("NL_PREFERRED_WORD_RULE_INTERNAL", language, patternTokens, PreferredWordRule.DESC, message, shortMessage);
+                return new PreferredWordRuleWithSuggestion(rule, oldWord, newWord);
+            }
+        };
+        return loadWordsFromResourcePath(String.format(PREFERRED_WORDS_FILE_NAME, language.getLocale().getLanguage()), DEFAULT_CHARSET, proc);
+    }
+
+    private List<PatternToken> getTokens(String oldWord) throws Exception {
+      PatternTokenBuilder builder = new PatternTokenBuilder();
+      String[] newWordTokens = oldWord.split(" ");
+      List<PatternToken> patternTokens = new ArrayList<>();
+      for (String part : newWordTokens) {
+        PatternToken token;
+        if (isBaseform(oldWord)) {
+          token = builder.csToken(part).matchInflectedForms().build();
+        } else {
+          token = builder.csToken(part).build();
+        }
+        patternTokens.add(token);
+      }
+      return patternTokens;
+    }
+
+    private boolean isBaseform(String term) throws Exception {
+        AnalyzedTokenReadings lookup = getTagger().tag(Collections.singletonList(term)).get(0);
+        if (lookup != null) {
+          return lookup.hasLemma(term);
+        }
+        return false;
+    }
+
+    @Override
+    public Map<String, String> getCoherencyMappings() throws Exception {
+        if (coherencyMappings == null) {
+            String fileName = String.format(COHERENCY_WORD_LIST_FILE_NAME, language.getLocale().getLanguage());
+            coherencyMappings = createCoherencyMappingsFromRulesPath(fileName);
+        }
+        return coherencyMappings;
     }
 
     /**
@@ -146,18 +231,44 @@ public class DefaultPolishResourceDataBroker extends DefaultResourceDataBroker i
         return loadSpellingIgnoreWordsFromResourcePath(String.format(PLAIN_TEXT_BASE_SPELLING_FILE_NAME, language.getLocale().getLanguage()), String.format(IGNORE_WORDS_FILE_NAME, language.getLocale().getLanguage()));
     }
 
+    @Override
+    public List<String> getSpellingProhibitedWords() throws Exception {
+        return loadSpellingProhibitedWordsFromResourcePath(String.format(PROHIBITED_WORDS_FILE_NAME, language.getLocale().getLanguage()));
+    }
+
     /**
-     * Get the wrong words for Polish.
+     * Get the case converter for Dutch.
+     *
+     * Note: this is just a pass through to our super since DefaultCaseConverter handles the Dutch special case but
+     * if more complex Dutch case handling is required, this call should return a Dutch specific CaseConverter subclass.
+     *
+     * @return The case converter.
+     */
+    @Override
+    public CaseConverter getCaseConverter() {
+        return super.getCaseConverter();
+    }
+
+    /**
+     * Get the wrong words for Dutch.
      *
      * @return A map of the words.
      */
     @Override
-    public Map<String, List<String>> getWrongWords() throws Exception {
+    public List<Map<String, String>> getWrongWords() throws Exception {
         if (wrongWords == null) {
             String replaceFile = String.format(REPLACE_FILE_NAME, language.getLocale().getLanguage());
-            wrongWords = createWrongWordsFromRulesPath(replaceFile);
+            wrongWords = createWrongWords2FromRulesPath(replaceFile, getWordTokenizer());
         }
         return wrongWords;
+    }
+
+    @Override
+    public List<ContextWords> getWrongWordsInContext() throws Exception {
+        if (wrongWordsInContext == null) {
+            wrongWordsInContext = loadContextWords(getRulesDirPath(String.format(WRONG_WORDS_IN_CONTEXT_FILE_NAME, language.getLocale().getLanguage())));
+        }
+        return wrongWordsInContext;
     }
 
     @Override
@@ -169,11 +280,6 @@ public class DefaultPolishResourceDataBroker extends DefaultResourceDataBroker i
             }
         }
         return compounds;
-    }
-
-    @Override
-    public List<PatternRule> getCompoundPatternRules(String message) throws Exception {
-        return loadCompoundPatternRulesFromResourcePath(String.format(COMPOUNDS_FILE_NAME, language.getLocale().getLanguage()), DEFAULT_CHARSET, message);
     }
 
     public IStemmer getIStemmer() throws Exception {
@@ -194,9 +300,9 @@ public class DefaultPolishResourceDataBroker extends DefaultResourceDataBroker i
     }
 
     @Override
-    public PolishSynthesizer getSynthesizer() throws Exception {
+    public DutchSynthesizer getSynthesizer() throws Exception {
         if (synthesizer == null) {
-            synthesizer = new PolishSynthesizer(getIStemmer(), getSynthesizerWordTags());
+            synthesizer = new DutchSynthesizer(getIStemmer(), getSynthesizerWordTags());
         }
         return synthesizer;
     }
@@ -217,32 +323,17 @@ public class DefaultPolishResourceDataBroker extends DefaultResourceDataBroker i
     }
 
     @Override
-    public PolishTagger getTagger() throws Exception {
+    public DutchTagger getTagger() throws Exception {
       if (tagger == null) {
-        tagger = new PolishTagger(getWordTaggerDictionary(), getWordTagger(), getCaseConverter());
+        tagger = new DutchTagger(getWordTaggerDictionary(), getWordTagger(), getCaseConverter());
       }
       return tagger;
     }
 
-    /**
-     * Get the disambiguator.  We override to return a specialization, however we still use {@link super.getDisambiguator()} to get the
-     * xml rule based disambiguator.
-     *
-     * @return The disambiguator.
-     */
     @Override
-    public PolishHybridDisambiguator getDisambiguator() throws Exception {
-        if (disambiguator == null) {
-          disambiguator = new PolishHybridDisambiguator(createMultiWordChunkerFromResourcePath(false), super.getDisambiguator());
-        }
-        return disambiguator;
-    }
-
-    @Override
-    public PolishWordTokenizer getWordTokenizer() throws Exception {
+    public DutchWordTokenizer getWordTokenizer() throws Exception {
       if (wordTokenizer == null) {
-        wordTokenizer = new PolishWordTokenizer();
-        wordTokenizer.setTagger(getTagger());
+        wordTokenizer = new DutchWordTokenizer();
       }
       return wordTokenizer;
     }
@@ -251,13 +342,4 @@ public class DefaultPolishResourceDataBroker extends DefaultResourceDataBroker i
     public SentenceTokenizer getSentenceTokenizer() throws Exception {
         return getDefaultSentenceTokenizer();
     }
-/*
-GTODO
-    public Disambiguator getChunker() {
-        if (chunker == null) {
-            chunker = new MultiWordChunker("/pl/multiwords.txt", this);
-        }
-        return chunker;
-    }
-*/
 }

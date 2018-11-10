@@ -27,6 +27,7 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import org.languagetool.language.PortugalPortuguese;
 
 import static tech.units.indriya.unit.Units.*;
 
@@ -40,7 +41,16 @@ public class PortugueseUnitConversionRule extends AbstractUnitConversionRule {
 
   public PortugueseUnitConversionRule(ResourceBundle messages) {
     super(messages);
-    format = NumberFormat.getNumberInstance(Locale.GERMANY);
+    // GTODO Is this correct?
+    //GTODO format = NumberFormat.getNumberInstance(Locale.GERMANY);
+    // https://www.oracle.com/technetwork/java/javase/documentation/java9locales-3559485.html#util-text
+    // Locale pt_PT (Portugal Portuguese) is fully supported so let's use that.
+    // There are differences between handling of numbers in Portual/Brazil Portuguese though, see:
+    // https://www.languagesandnumbers.com/how-to-count-in-portuguese-portugal/en/por-prt/
+    // https://www.languagesandnumbers.com/how-to-count-in-portuguese-brazil/en/por-bra/
+    // however that shouldn't make a real difference since we are talking about number formatting not
+    // language representation.
+    format = NumberFormat.getNumberInstance(PortugalPortuguese.LOCALE);
     format.setMaximumFractionDigits(2);
     format.setRoundingMode(RoundingMode.HALF_UP);
 
@@ -58,7 +68,8 @@ public class PortugueseUnitConversionRule extends AbstractUnitConversionRule {
     addUnit("milhas por hora", MILE.divide(HOUR), "milhas por hora", 1, false);
 
     addUnit("metros?", METRE, "metros", 1, true);
-    addUnit("kilómetros?|Quilómetros?", METRE, "quilómetros", 1e3, true);
+    addUnit("Quilómetros?", METRE, "quilómetros", 1e3, true);
+    addUnit("kilómetros?", METRE, "quilómetros", 1e3, true);
     addUnit("decímetros?", METRE, "decímetros", 1e-1, false); // metric, but should not be suggested
     addUnit("centímetros?", METRE, "centímetros", 1e-2, true);
     addUnit("milímetros?", METRE, "milímetros", 1e-3, true);

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,22 +23,20 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.Dutch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikDutchSpellerRuleTest {
-  
+
   @Test
-  public void testSpeller() throws IOException {
+  public void testSpeller() throws Exception {
     Dutch language = new Dutch();
-    MorfologikDutchSpellerRule rule = new MorfologikDutchSpellerRule(TestTools.getEnglishMessages(), language, null);
+    MorfologikDutchSpellerRule rule = language.createMorfologikSpellerRule(null, null);
     JLanguageTool langTool = new JLanguageTool(language);
 
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Amsterdam")).length);
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("ipv")).length);  // in ignore.txt
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("voorzover")).length);  // in ignore.txt
-    
+
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("FoobarWrongxx")).length);  // camel case is not ignored
     assertEquals(1, rule.match(langTool.getAnalyzedSentence("foobarwrong")).length);
   }

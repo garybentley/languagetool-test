@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Marcin Miłkowski (www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,6 @@
 
 package org.languagetool.rules.bitext;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,10 +31,10 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 
 /**
- * Abstract bitext rule class. A BitextRule describes a language error and 
- * can test whether a given pre-analyzed pair of source and target text 
+ * Abstract bitext rule class. A BitextRule describes a language error and
+ * can test whether a given pre-analyzed pair of source and target text
  * contains that error using the {@link Rule#match} method.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public abstract class BitextRule extends Rule {
@@ -51,7 +50,7 @@ public abstract class BitextRule extends Rule {
   public abstract String getMessage();
 
   public abstract RuleMatch[] match(AnalyzedSentence sourceText,
-      AnalyzedSentence targetText) throws IOException;
+      AnalyzedSentence targetText) throws Exception;
 
   private List<StringPair> correctExamples;
   private List<IncorrectBitextExample> incorrectExamples;
@@ -62,7 +61,7 @@ public abstract class BitextRule extends Rule {
    */
   @Nullable
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     return null;
   }
 

@@ -20,14 +20,8 @@ package org.languagetool.rules;
 
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.JLanguageTool;
-import org.languagetool.Language;
-import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -44,9 +38,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public abstract class AbstractSimpleReplaceRule2 extends Rule {
 
-  private final Language language;
-
-  public abstract String getFileName();
   @Override
   public abstract String getId();
   @Override
@@ -57,20 +48,17 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
    * @return the word used to separate multiple suggestions; used only before last suggestion, the rest are comma-separated.
    */
   public abstract String getSuggestionsSeparator();
-  /**
-   * locale used on case-conversion
-   */
-  public abstract Locale getLocale();
 
   // list of maps containing error-corrections pairs.
   // the n-th map contains key strings of (n+1) words
   private final List<Map<String, String>> wrongWords;
+  private CaseConverter caseConverter;
 
-  public AbstractSimpleReplaceRule2(ResourceBundle messages, Language language, List<Map<String, String>> wrongWords) throws IOException {
+  public AbstractSimpleReplaceRule2(ResourceBundle messages, List<Map<String, String>> wrongWords, CaseConverter caseCon) {
     super(messages);
-    this.language = Objects.requireNonNull(language);
     super.setCategory(Categories.MISC.getCategory(messages));
-    this.wrongWords = wrongWords;
+    this.wrongWords = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
     /*
     try {
         wrongWords = loadWords(dataBroker.getFromRulesDirAsStream(getFileName()));
@@ -179,7 +167,7 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
       for (int j = 0; j < len; j++) { // longest words first
         String crt = variants.get(j);
         int crtWordCount = len - j;
-        String crtMatch = isCaseSensitive() ? wrongWords.get(crtWordCount - 1).get(crt) : wrongWords.get(crtWordCount- 1).get(crt.toLowerCase(getLocale()));
+        String crtMatch = isCaseSensitive() ? wrongWords.get(crtWordCount - 1).get(crt) : wrongWords.get(crtWordCount- 1).get(caseConverter.toLowerCase(crt));
         if (crtMatch != null) {
           List<String> replacements = Arrays.asList(crtMatch.split("\\|"));
           String msg = crt + getSuggestion();
@@ -193,9 +181,9 @@ public abstract class AbstractSimpleReplaceRule2 extends Rule {
           int endPos = prevTokensList.get(len - 1).getEndPos();
           RuleMatch potentialRuleMatch = new RuleMatch(this, sentence, startPos, endPos, msg, getShort());
 
-          if (!isCaseSensitive() && StringTools.startsWithUppercase(crt)) {
+          if (!isCaseSensitive() && caseConverter.startsWithUpperCase(crt)) {
             for (int k = 0; k < replacements.size(); k++) {
-              replacements.set(k, StringTools.uppercaseFirstChar(replacements.get(k)));
+              replacements.set(k, caseConverter.uppercaseFirstChar(replacements.get(k)));
             }
           }
           potentialRuleMatch.setSuggestedReplacements(replacements);

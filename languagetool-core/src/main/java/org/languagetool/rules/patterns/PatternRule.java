@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules.patterns;
 
-import java.io.IOException;
 import java.util.*;
 
 import org.languagetool.AnalyzedSentence;
@@ -155,8 +154,8 @@ public class PatternRule extends AbstractPatternRule {
   }
 */
   @Override
-  public final RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
-    try {
+  public final RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
+    //GTODO try {
       RuleMatcher matcher;
       if (patternTokens != null) {
         matcher = new PatternRuleMatcher(this, useList);
@@ -166,11 +165,13 @@ public class PatternRule extends AbstractPatternRule {
         throw new IllegalStateException("Neither pattern tokens nor regex set for rule " + getId());
       }
       return matcher.match(getSentenceWithImmunization(sentence));
+      /* GTODO
     } catch (IOException e) {
       throw new IOException("Error analyzing sentence: '" + sentence + "'", e);
     } catch (Exception e) {
       throw new RuntimeException("Error analyzing sentence: '" + sentence + "'", e);
     }
+    */
   }
 
   /**

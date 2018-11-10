@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,33 +25,35 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.Dutch;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class WordCoherencyRuleTest {
 
-  private final JLanguageTool lt = new JLanguageTool(new Dutch());
+  private Dutch language;
+  private JLanguageTool lt;
 
   @Before
-  public void before() throws IOException {
+  public void before() throws Exception {
+    language = new Dutch();
+    lt = new JLanguageTool(language);
     TestTools.disableAllRulesExcept(lt, "NL_WORD_COHERENCY");
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     assertError("hivhealing, hiv-healing");
   }
 
-  private void assertError(String s) throws IOException {
-    WordCoherencyRule rule = new WordCoherencyRule(TestTools.getEnglishMessages());
+  private void assertError(String s) throws Exception {
+    WordCoherencyRule rule = language.createWordCoherencyRule(null);
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     assertEquals(1, rule.match(analyzedSentences).length);
   }
 
-  private void assertGood(String s) throws IOException {
-    WordCoherencyRule rule = new WordCoherencyRule(TestTools.getEnglishMessages());
+  private void assertGood(String s) throws Exception {
+    WordCoherencyRule rule = language.createWordCoherencyRule(null);
     List<AnalyzedSentence> analyzedSentences = lt.analyzeText(s);
     assertEquals(0, rule.match(analyzedSentences).length);
   }

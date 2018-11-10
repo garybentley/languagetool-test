@@ -22,9 +22,8 @@ import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,17 +42,19 @@ public class PortugalPortugueseReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String PORTUGAL_PORTUGUESE_SIMPLE_REPLACE_RULE = "PT_PT_SIMPLE_REPLACE";
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale PT_PT_LOCALE = new Locale("pt-PT");
+  //GTODO private Map<String, List<String>> wrongWords;
+  // GTODO private static final Locale PT_PT_LOCALE = new Locale("pt-PT");
 
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
     return wrongWords;
   }
-
-  public PortugalPortugueseReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
-    wrongWords = load("/pt/pt-PT/replace.txt", dataBroker);
+*/
+  public PortugalPortugueseReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
+    // GTODO wrongWords = load("/pt/pt-PT/replace.txt", dataBroker);
     super.setCategory(Categories.REGIONALISMS.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("Onde está o <marker>banheiro</marker>?"),
@@ -85,10 +86,11 @@ public class PortugalPortugueseReplaceRule extends AbstractSimpleReplaceRule {
   public boolean isCaseSensitive() {
     return false;
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return PT_PT_LOCALE;
   }
-
+*/
 }

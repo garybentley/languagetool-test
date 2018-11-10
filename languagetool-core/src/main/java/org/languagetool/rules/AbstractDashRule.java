@@ -25,10 +25,6 @@ import org.languagetool.Language;
 import org.languagetool.rules.patterns.PatternRule;
 import org.languagetool.rules.patterns.PatternToken;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +39,8 @@ public abstract class AbstractDashRule extends Rule {
 
   private final List<PatternRule> dashRules;
 
-  public AbstractDashRule(List<PatternRule> dashRules) throws IOException {
-    this.dashRules = Objects.requireNonNull(dashRules);
+  public AbstractDashRule(List<PatternRule> dashRules) {
+    this.dashRules = Objects.requireNonNull(dashRules, "Dash rules must be provided.");
   }
 
   @Override
@@ -56,7 +52,7 @@ public abstract class AbstractDashRule extends Rule {
   public abstract String getDescription();
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> matches = new ArrayList<>();
     for (PatternRule dashRule : dashRules) {
       for (RuleMatch match : dashRule.match(sentence)) {

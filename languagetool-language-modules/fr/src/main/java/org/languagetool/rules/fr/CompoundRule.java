@@ -30,16 +30,16 @@ import org.languagetool.rules.Example;
  */
 public class CompoundRule extends AbstractCompoundRule {
 
-  private CompoundRuleData compoundData;
+  // GTODO private CompoundRuleData compoundData;
   //GTODO  = new CompoundRuleData("/fr/compounds.txt");
 
   public CompoundRule(ResourceBundle messages, CompoundRuleData data) throws IOException {
     super(messages,
+            data,
             "Écrivez avec un trait d’union.",
             "Écrivez avec un mot seul sans espace ni trait d’union.",
             "Écrivez avec un mot seul ou avec trait d’union.",
             "Erreur de trait d’union");
-    compoundData = data;
     addExamplePair(Example.wrong("Le <marker>Haut Rhin</marker>."),
                    Example.fixed("Le <marker>Haut-Rhin</marker>."));
   }
@@ -52,11 +52,6 @@ public class CompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Mots avec trait d’union";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
 }

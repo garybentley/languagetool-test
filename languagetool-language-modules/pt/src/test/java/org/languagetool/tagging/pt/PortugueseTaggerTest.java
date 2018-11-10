@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,28 +22,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Portuguese;
-import org.languagetool.tokenizers.WordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.databroker.DefaultPortugueseResourceDataBroker;
 
 public class PortugueseTaggerTest {
 
+  private Portuguese lang;
   private PortugueseTagger tagger;
-  private WordTokenizer tokenizer;
+  private Tokenizer tokenizer;
 
   @Before
-  public void setUp() {
-    tagger = new PortugueseTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    lang = new Portuguese();
+      DefaultPortugueseResourceDataBroker broker = new DefaultPortugueseResourceDataBroker(lang, lang.getClass().getClassLoader());
+    tagger = broker.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Portuguese());
+  public void testDictionary() throws Exception {
+    TestTools.testTaggerDictionary(tagger.getDictionary(), lang);
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("Estes são os meus amigos.",
         "Estes/[este]DD0MP0|Estes/[este]PD0MP000 -- "
             + "são/[ser]VMIP3P0|são/[são]AQ0MS0|são/[são]NCMS000 -- "
