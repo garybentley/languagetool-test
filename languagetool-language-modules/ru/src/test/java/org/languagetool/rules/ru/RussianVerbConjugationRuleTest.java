@@ -25,7 +25,6 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.Russian;
 
-import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -43,9 +42,10 @@ public class RussianVerbConjugationRuleTest {
             "Я пойдёт", "Она пойдут", "Оно пойдёте", "Мы пойдёшь", "Ты пойду");
 
     @Test
-    public void testRussianVerbConjugationRule() throws IOException {
-        RussianVerbConjugationRule rule = new RussianVerbConjugationRule(TestTools.getEnglishMessages());
-        JLanguageTool lt = new JLanguageTool(new Russian());
+    public void testRussianVerbConjugationRule() throws Exception {
+        Russian lang = new Russian();
+        RussianVerbConjugationRule rule = lang.createVerbConjugationRule(null);
+        JLanguageTool lt = new JLanguageTool(lang);
 
         for (String sentence : wrongSentences) {
             AnalyzedSentence analyzedSentence = lt.getAnalyzedSentence(sentence);

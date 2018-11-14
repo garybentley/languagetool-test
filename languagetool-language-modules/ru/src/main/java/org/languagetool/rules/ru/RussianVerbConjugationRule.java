@@ -26,7 +26,6 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,11 +54,11 @@ public class RussianVerbConjugationRule extends Rule {
     }
 
     @Override
-    public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+    public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
         List<RuleMatch> ruleMatches = new ArrayList<>();
         AnalyzedTokenReadings[] tokenReadings = sentence.getTokensWithoutWhitespace();
         for (int i = 1; i < tokenReadings.length - 1; i++) {
-	    AnalyzedTokenReadings previousReading = tokenReadings[i-1];	
+	    AnalyzedTokenReadings previousReading = tokenReadings[i-1];
             AnalyzedTokenReadings currentReading = tokenReadings[i];
             AnalyzedTokenReadings nextReading = tokenReadings[i + 1];
 	    AnalyzedToken previousLemmaTok = previousReading.getReadings().get(0);
@@ -121,4 +120,3 @@ public class RussianVerbConjugationRule extends Rule {
         return "Неверное спряжение глагола";
     }
 }
-

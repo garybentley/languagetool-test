@@ -80,13 +80,4 @@ public interface PortugueseResourceDataBroker extends ResourceDataBroker {
 
     List<NeuralNetworkRule> createNeuralNetworkRules(ResourceBundle messages, Word2VecModel model) throws Exception;
 
-    //Map<String, List<ConfusionSet>> getConfusionSets() throws Exception;
-
-    //Set<Dictionary> getDictionaries(UserConfig config) throws Exception;
-
-    /**
-     * Get the spelling ignore words.
-     */
-    //List<String> getSpellingIgnoreWords() throws Exception;
-
 }

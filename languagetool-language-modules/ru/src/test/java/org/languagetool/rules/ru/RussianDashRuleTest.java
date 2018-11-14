@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,7 +26,6 @@ import org.languagetool.language.Russian;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -39,13 +38,13 @@ public class RussianDashRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    Language lang = new Russian();
+    Russian lang = new Russian();
     langTool = new JLanguageTool(lang);
-    rule = new RussianDashRule();
+    rule = lang.createDashRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "Он вышел из-за забора.");
     check(0, "Ростов-на-Дону.");
@@ -54,7 +53,7 @@ public class RussianDashRuleTest {
     check(1, "Ростов — на — Дону", new String[]{"Ростов-на-Дону"});
   }
 
-  private void check(int expectedErrors, String text) throws IOException {
+  private void check(int expectedErrors, String text) throws Exception {
     check(expectedErrors, text, null);
   }
 
@@ -64,7 +63,7 @@ public class RussianDashRuleTest {
    * @param text the text to check
    * @param expSuggestions the expected suggestions
    */
-  private void check(int expectedErrors, String text, String[] expSuggestions) throws IOException {
+  private void check(int expectedErrors, String text, String[] expSuggestions) throws Exception {
     assertNotNull("Please initialize langTool!", langTool);
     assertNotNull("Please initialize 'rule'!", rule);
     RuleMatch[] ruleMatches = rule.match(langTool.getAnalyzedSentence(text));

@@ -23,7 +23,6 @@ import org.languagetool.Languages;
 import org.languagetool.rules.AbstractDashRule;
 import org.languagetool.rules.patterns.PatternRule;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -32,10 +31,12 @@ import java.util.List;
  */
 public class RussianDashRule extends AbstractDashRule {
 
+  public static final String MESSAGE = "Использовано тире вместо дефиса. Предполагалось: ";
+/* GTODO
   private static final List<PatternRule> dashRules = loadCompoundFile("/ru/compounds.txt",
           "Использовано тире вместо дефиса. Предполагалось: ", Languages.getLanguageForShortCode("ru"));
-
-  public RussianDashRule() throws IOException {
+*/
+  public RussianDashRule(List<PatternRule> dashRules) throws Exception {
     super(dashRules);
      setDefaultOff(); // Slows down start up. See GitHub issue #1016.
   }

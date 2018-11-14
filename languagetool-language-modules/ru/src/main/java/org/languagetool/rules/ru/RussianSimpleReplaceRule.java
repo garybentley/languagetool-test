@@ -20,7 +20,7 @@ package org.languagetool.rules.ru;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Example;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,21 +39,20 @@ import java.util.ResourceBundle;
  */
 public class RussianSimpleReplaceRule extends AbstractSimpleReplaceRule {
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale RU_LOCALE = new Locale("ru");
+  // GTODO private Map<String, List<String>> wrongWords;
+  // GTODO private static final Locale RU_LOCALE = new Locale("ru");
 
-
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
     return wrongWords;
   }
-
-  public RussianSimpleReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
-    wrongWords = load("/ru/replace.txt", dataBroker);
-  addExamplePair(Example.wrong("<marker>Экспрессо</marker> – крепкий кофе, приготовленный из хорошо обжаренных и тонко помолотых кофейных зёрен."),
-                 Example.fixed("<marker>Эспрессо</marker> – крепкий кофе, приготовленный из хорошо обжаренных и тонко помолотых кофейных зёрен."));
-
+*/
+  public RussianSimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) throws Exception {
+    super(messages, wrongWords, caseCon);
+    addExamplePair(Example.wrong("<marker>Экспрессо</marker> – крепкий кофе, приготовленный из хорошо обжаренных и тонко помолотых кофейных зёрен."),
+                   Example.fixed("<marker>Эспрессо</marker> – крепкий кофе, приготовленный из хорошо обжаренных и тонко помолотых кофейных зёрен."));
   }
 
   @Override
@@ -81,9 +80,11 @@ public class RussianSimpleReplaceRule extends AbstractSimpleReplaceRule {
   public boolean isCaseSensitive() {
     return false;
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return RU_LOCALE;
   }
+  */
 }

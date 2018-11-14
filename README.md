@@ -155,6 +155,12 @@ This is a list of things that need to be changed/looked at:
 * PortugalPortuguese/BrazilianPortuguese getRelevantRules contains duplicate rule PostReformPortugueseCompoundRule addition.
 * en/EnglishDashRule doesn't set a category.
 * extensions of AbstractDashRule apply conflicting categories, de it is COMPOUNDING, pt it is TYPOGRAPHICAL, en doesn't set it, pl doesn't set it, ru doesn't set it.
+* en/DefaultEnglishResourceDataBroker cache spelling ignore/prohibit words.
+* core/UppercaseSentenceStartRule remove dutch special case.  Remove Language.
+* rt/Russian RussianDashRule has been removed from the getRelevantRules call since it causes an exhaustion of heap space error and no amount of heap allocation seems to sate it.  There are 26k compound pattern rules however.  This is probably something I'm doing wrong, if anyone can tell me what it is please let me know.  An alternative approach would be to create PatternRules on a demand basis, i.e. iterate through the file and create the rules one at a time rather than creating them all at once.
+* ast/rules dir is a subdir of language, doesn't match other languages.
+* ast/ast.profile file is never referenced?
+* ast/test there are two rules dirs, org/languagetool/rules, org/languagetool/languages/rules
 
 ## The information below is from the standard LanguageTool README
 

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,13 +18,16 @@
  */
 package org.languagetool.tagging.ru;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.List;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 import org.languagetool.tagging.BaseTagger;
 
@@ -33,7 +36,8 @@ import org.languagetool.tagging.BaseTagger;
  * See readme.txt for details, the POS tagset is described in tagset.txt
  */
 public class RussianTagger extends BaseTagger {
-
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/ru/added.txt";
@@ -43,13 +47,18 @@ public class RussianTagger extends BaseTagger {
   public String getManualRemovalsFileName() {
     return "/ru/removed.txt";
   }
-
+*/
+  public RussianTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
+    super(dict, tagger, caseCon, true);
+  }
+/*
+GTODO
   public RussianTagger() {
     super("/ru/russian.dict", new Locale("ru"));
   }
-
+*/
   @Override
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) {
     List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
     for (String word : sentenceTokens) {

@@ -19,15 +19,15 @@
 package org.languagetool.rules.ast;
 
 import org.junit.Test;
+import org.languagetool.language.Asturian;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class AsturianPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Asturian lang = new Asturian();
+    runTestForLanguage(lang);
   }
 
 }

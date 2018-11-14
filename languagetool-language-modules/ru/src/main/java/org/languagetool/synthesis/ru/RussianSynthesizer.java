@@ -18,8 +18,11 @@
  */
 package org.languagetool.synthesis.ru;
 
+import java.util.Set;
+
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Russian word form synthesizer.
@@ -27,11 +30,11 @@ import org.languagetool.databroker.ResourceDataBroker;
  */
 public class RussianSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = "/ru/russian_synth.dict";
-  private static final String TAGS_FILE_NAME = "/ru/tags_russian.txt";
+  //GTODO private static final String RESOURCE_FILENAME = "/ru/russian_synth.dict";
+  //GTODO private static final String TAGS_FILE_NAME = "/ru/tags_russian.txt";
 
-  public RussianSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public RussianSynthesizer(IStemmer stemmer, Set<String> tags) {
+    super(stemmer, tags);
   }
 
 }

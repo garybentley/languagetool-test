@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,6 +20,7 @@
 package org.languagetool.tokenizers.ru;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Russian;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
@@ -27,7 +28,13 @@ import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class RussianSRXSentenceTokenizerTest {
 
-  private final SentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Russian());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Russian lang = new Russian();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public final void testTokenize() {
@@ -45,7 +52,7 @@ public class RussianSRXSentenceTokenizerTest {
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

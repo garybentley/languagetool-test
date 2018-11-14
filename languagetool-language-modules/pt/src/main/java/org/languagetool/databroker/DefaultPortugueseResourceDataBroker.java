@@ -453,66 +453,6 @@ public class DefaultPortugueseResourceDataBroker extends DefaultResourceDataBrok
         return synthesizer;
     }
 
-    /**
-    * GTODO Tidy up doco
-     * Return the dictionaries we use for spelling, files we use are:
-     *   - /resource/<locale.language>/hunspell/<locale.language>_<locale.countrycode>.dict, this creates a binary hunspell dictionary.
-     *   - /resource/<locale.language>/hunspell/spelling.txt, a text based dictionary.
-     *   - /resource/<locale.language>/hunspell/spelling_<locale.language>-<locale.countrycode>.txt, a locale variant dictionary (optional)
-     *   - /resource/<locale.language>/hunspell/<locale.language>_<locale.countrycode>.info, the info for text dictionary.
-     *
-     * The plain text and variant dictionary are merged to form a single extra dictionary.
-     *
-     * @return The dictionaries to use for the language locale.
-     */
-     /*
-    @Override
-    // GTODO Push this down into DefaultResourceDataBroker, pass the relevant filenames, en and de have slightly different naming for the variant files...
-    public Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception {
-        Set<Dictionary> dicts = new LinkedHashSet<>();
-        String country = language.getLocale().getCountry();
-        String lang = language.getLocale().getLanguage();
-        String plainTextInfoFile = String.format(PLAIN_TEXT_SPELLING_INFO_FILE_NAME, lang, country);
-        if (resourceDirPathExists(plainTextInfoFile) && userConfig != null) {
-            // Create our user dictionary.
-            List<String> userWords = userConfig.getAcceptedWords();
-            if (userWords != null && userWords.size() > 0) {
-                List<byte[]> lines = userWords.stream()
-                                              .map(w -> w.getBytes(StandardCharsets.UTF_8))
-                                              .collect(Collectors.toList());
-                dicts.add (DefaultMorfologikDictionaryLoader.loadFromLines(lines, getResourceDirPathStream(plainTextInfoFile)));
-            }
-        }
-
-        if (dictionaries == null) {
-            // Try out binary file.
-            Set<Dictionary> _dicts = new LinkedHashSet<>();
-            String binDictFile = String.format(BINARY_DICT_FILE_NAME, lang, country);
-            Dictionary binDict = getMorfologikBinaryDictionaryFromResourcePath(binDictFile);
-            if (binDict != null) {
-                _dicts.add(binDict);
-            }
-
-            List<String> availableFiles = new ArrayList<>();
-            String spellingFile = String.format(PLAIN_TEXT_BASE_SPELLING_FILE_NAME, lang);
-            if (resourceDirPathExists(spellingFile)) {
-                availableFiles.add(spellingFile);
-            }
-
-            if (availableFiles.size() > 0) {
-                Dictionary textDict = getMorfologikTextDictionaryFromResourcePaths(availableFiles, plainTextInfoFile, DEFAULT_CHARSET);
-                if (textDict != null) {
-                    _dicts.add(textDict);
-                }
-            }
-
-            dictionaries = _dicts;
-            dicts.addAll(_dicts);
-        }
-        dicts.addAll(dictionaries);
-        return dicts;
-    }
-*/
     @Override
     public PortugueseTagger getTagger() throws Exception {
       if (tagger == null) {

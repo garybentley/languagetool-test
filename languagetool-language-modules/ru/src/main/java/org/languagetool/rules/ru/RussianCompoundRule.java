@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,17 +30,18 @@ import org.languagetool.rules.Example;
  * Checks that compounds (if in the list) are not written as separate words.
  * Russian compounds rule.
  * @author Yakov Reztsov
- * 
+ *
  * Based on German compounds rule.
  * @author Daniel Naber
  *
  */
 public class RussianCompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/ru/compounds.txt");
+  // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/ru/compounds.txt");
 
-  public RussianCompoundRule(ResourceBundle messages) throws IOException {
+  public RussianCompoundRule(ResourceBundle messages, CompoundRuleData data) throws IOException {
     super(messages,
+            data,
             "Эти слова должны быть написаны через дефис.",
             "Эти слова должны быть написаны слитно.",
             "Эти слова могут быть написаны через дефис или слитно.");
@@ -49,7 +50,7 @@ public class RussianCompoundRule extends AbstractCompoundRule {
    super.sentenceStartsWithUpperCase = true;
   }
 
-  
+
   @Override
   public String getId() {
     return "RU_COMPOUNDS";
@@ -59,10 +60,11 @@ public class RussianCompoundRule extends AbstractCompoundRule {
   public String getDescription() {
     return "Правописание через дефис";
   }
-
+/*
+GTODO
   @Override
   protected CompoundRuleData getCompoundRuleData() {
     return compoundData;
   }
-
+*/
 }

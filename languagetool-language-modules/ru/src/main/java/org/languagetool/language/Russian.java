@@ -18,8 +18,7 @@
  */
 package org.languagetool.language;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -40,14 +39,39 @@ import org.languagetool.tagging.disambiguation.ru.RussianHybridDisambiguator;
 import org.languagetool.tagging.ru.RussianTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.databroker.*;
 
-public class Russian extends Language implements AutoCloseable {
+public class Russian extends Language<RussianResourceDataBroker> {
 
-  private Tagger tagger;
-  private Disambiguator disambiguator;
-  private Synthesizer synthesizer;
-  private SentenceTokenizer sentenceTokenizer;
-  private LuceneLanguageModel languageModel;
+    public static final String LANGUAGE_ID = "ru";
+    public static final String COUNTRY_ID = "RU";
+
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+    @Override
+    public RussianResourceDataBroker getUseDataBroker() throws Exception {
+        return super.getUseDataBroker();
+    }
+
+    @Override
+    public RussianResourceDataBroker getDefaultDataBroker() throws Exception {
+        return new DefaultRussianResourceDataBroker(this, getClass().getClassLoader());
+    }
+
+    @Override
+    public boolean isVariant() {
+        return false;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
+
+    @Override
+    public Language getDefaultLanguageVariant() {
+        return null;
+    }
 
   @Override
   public Pattern getIgnoredCharactersRegex() {
@@ -58,47 +82,36 @@ public class Russian extends Language implements AutoCloseable {
   public String getName() {
     return "Russian";
   }
-
+/*
+ GTODO
   @Override
   public String getShortCode() {
     return "ru";
   }
-
+*/
   @Override
   public String[] getCountries() {
     return new String[] {"RU"};
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new RussianTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new RussianHybridDisambiguator(getUseDataBroker());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new RussianSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -109,55 +122,99 @@ public class Russian extends Language implements AutoCloseable {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages,
-                    Example.wrong("Не род<marker> ,</marker> а ум поставлю в воеводы."),
-                    Example.fixed("Не род<marker>,</marker> а ум поставлю в воеводы.")),
-            new DoublePunctuationRule(messages),
-            new UppercaseSentenceStartRule(messages, this,
-                    Example.wrong("Закончилось лето. <marker>дети</marker> снова сели за школьные парты."),
-                    Example.fixed("Закончилось лето. <marker>Дети</marker> снова сели за школьные парты.")),
-            new MorfologikRussianSpellerRule(messages, this, userConfig),
-            new WordRepeatRule(messages, this),
-            new MultipleWhitespaceRule(messages, this),
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUppercaseSentenceStartRule(messages),
+            createMorfologikSpellerRule(messages, userConfig),
+            createWordRepeatRule(messages),
+            createMultipleWhitespaceRule(messages),
             // specific to Russian :
-            new RussianUnpairedBracketsRule(messages, this),
-            new RussianCompoundRule(messages),
-            new RussianSimpleReplaceRule(messages, getUseDataBroker()),
-            new RussianWordCoherencyRule(messages, getUseDataBroker()),
-            new RussianWordRepeatRule(messages),
-            new RussianVerbConjugationRule(messages),
-            new RussianDashRule()
+            createUnpairedBracketsRule(messages),
+            createCompoundRule(messages),
+            createReplaceRule(messages),
+            createWordCoherencyRule(messages),
+            createRussianWordRepeatRule(messages),
+            createVerbConjugationRule(messages)
+            // GTODO Removed since it causes an out of heap space error -> createDashRule(messages)
     );
   }
 
-  /** @since 3.1 */
-  @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
-    if (languageModel == null) {
-      languageModel = new LuceneLanguageModel(new File(indexDir, getShortCode()));
-    }
-    return languageModel;
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages),
+              Example.wrong("Не род<marker> ,</marker> а ум поставлю в воеводы."),
+              Example.fixed("Не род<marker>,</marker> а ум поставлю в воеводы."));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+              Example.wrong("Закончилось лето. <marker>дети</marker> снова сели за школьные парты."),
+              Example.fixed("Закончилось лето. <marker>Дети</marker> снова сели за школьные парты."));
+  }
+
+  public RussianUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new RussianUnpairedBracketsRule(getUseMessages(messages));
+  }
+
+  public RussianVerbConjugationRule createVerbConjugationRule(ResourceBundle messages) throws Exception {
+      return new RussianVerbConjugationRule(getUseMessages(messages));
+  }
+
+  public MorfologikRussianSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikRussianSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getSpellingIgnoreWords(), getUseDataBroker().getSpellingProhibitedWords());
+  }
+
+  public RussianDashRule createDashRule(ResourceBundle messages) throws Exception {
+      return new RussianDashRule(getUseDataBroker().getCompoundPatternRules(RussianDashRule.MESSAGE));
+  }
+
+  public RussianWordCoherencyRule createWordCoherencyRule(ResourceBundle messages) throws Exception {
+      return new RussianWordCoherencyRule(getUseMessages(messages), getUseDataBroker().getCoherencyMappings());
+  }
+
+  public RussianCompoundRule createCompoundRule(ResourceBundle messages) throws Exception {
+      return new RussianCompoundRule(getUseMessages(messages), getUseDataBroker().getCompounds());
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public RussianWordRepeatRule createRussianWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new RussianWordRepeatRule(getUseMessages(messages));
+  }
+
+  public RussianSimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new RussianSimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
   }
 
   /** @since 3.1 */
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
+  public LanguageModel getLanguageModel() throws Exception {
+      return getUseDataBroker().getLanguageModel();
+  }
+
+  /** @since 3.1 */
+  @Override
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
     return Arrays.<Rule>asList(
-            new RussianConfusionProbabilityRule(messages, languageModel, this)
+            createConfusionProbabilityRule(messages, languageModel)
     );
   }
 
-  /**
-   * Closes the language model, if any.
-   * @since 3.1
-   */
-  @Override
-  public void close() throws Exception {
-    if (languageModel != null) {
-      languageModel.close();
-    }
+  public RussianConfusionProbabilityRule createConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      return new RussianConfusionProbabilityRule(getUseMessages(messages), languageModel, this, getUseDataBroker().getConfusionSets());
   }
 
   /** @since 3.3 */

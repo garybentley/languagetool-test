@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Daniel Naber (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,7 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Russian;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -33,9 +32,9 @@ import static org.junit.Assert.assertEquals;
 public class RussianUnpairedBracketsRuleTest {
 
   @Test
-  public void testRuleRussian() throws IOException {
-    RussianUnpairedBracketsRule rule = new RussianUnpairedBracketsRule(TestTools
-        .getEnglishMessages(), new Russian());
+  public void testRuleRussian() throws Exception {
+    Russian lang = new Russian();
+    RussianUnpairedBracketsRule rule = lang.createUnpairedBracketsRule(null);
     RuleMatch[] matches;
     JLanguageTool langTool = new JLanguageTool(new Russian());
     // correct sentences:
@@ -56,5 +55,5 @@ public class RussianUnpairedBracketsRuleTest {
         .getAnalyzedSentence("В таком ключе был начат в мае 1823 в Кишинёве роман в стихах 'Евгений Онегин.")));
     assertEquals(1, matches.length);
   }
-  
+
 }

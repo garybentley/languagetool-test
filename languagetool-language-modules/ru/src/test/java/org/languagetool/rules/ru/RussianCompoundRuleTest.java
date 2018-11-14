@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,11 +25,9 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Russian;
 import org.languagetool.rules.AbstractCompoundRuleTest;
 
-import java.io.IOException;
-
 /**
  * Russian Compound rule test
- * @author Yakov Reztsov 
+ * @author Yakov Reztsov
  * Based on German Compound rule test
  * @author Daniel Naber
  */
@@ -37,12 +35,13 @@ public class RussianCompoundRuleTest extends AbstractCompoundRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    lt = new JLanguageTool(new Russian());
-    rule = new RussianCompoundRule(TestTools.getEnglishMessages());
+    Russian lang = new Russian();
+    lt = new JLanguageTool(lang);
+    rule = lang.createCompoundRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "Он вышел из-за дома.");
     check(0, "Разработка ПО за идею.");
@@ -72,6 +71,6 @@ public class RussianCompoundRuleTest extends AbstractCompoundRuleTest {
     check(1, "Мы, во первых, были довольно высоко над уровнем моря.");
     // incorrect sentences:
   }
-  
-  
+
+
 }

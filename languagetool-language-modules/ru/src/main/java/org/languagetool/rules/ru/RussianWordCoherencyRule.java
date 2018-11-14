@@ -23,7 +23,6 @@ import org.languagetool.rules.Example;
 import org.languagetool.rules.WordCoherencyDataLoader;
 import org.languagetool.databroker.ResourceDataBroker;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -37,11 +36,12 @@ public class RussianWordCoherencyRule extends AbstractWordCoherencyRule {
 
   private Map<String, String> wordMap;
 
-  public RussianWordCoherencyRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
+  public RussianWordCoherencyRule(ResourceBundle messages, Map<String, String> wordMap) {
     super(messages);
-    wordMap = new WordCoherencyDataLoader().loadWords("/ru/coherency.txt", dataBroker);
+    // GTODO wordMap = new WordCoherencyDataLoader().loadWords("/ru/coherency.txt", dataBroker);
     addExamplePair(Example.wrong("Понятие «оффлайн» тоже имеет английские корни и связано со словом «offline», что означает «вне сети». Принтер перешёл в состояние <marker>офлайн</marker>."),
                    Example.fixed("Понятие «оффлайн» тоже имеет английские корни и связано со словом «offline», что означает «вне сети». Принтер перешёл в состояние <marker>оффлайн</marker>."));
+    this.wordMap = wordMap;
   }
 
   @Override

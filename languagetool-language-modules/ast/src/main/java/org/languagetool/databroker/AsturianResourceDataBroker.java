@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,33 +16,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.tagging.ast;
+package org.languagetool.databroker;
 
-import java.util.Locale;
+import java.util.List;
+import java.util.Set;
 
 import morfologik.stemming.Dictionary;
+import org.languagetool.UserConfig;
 
-import org.languagetool.tagging.BaseTagger;
-import org.languagetool.tagging.WordTagger;
-import org.languagetool.rules.patterns.CaseConverter;
+public interface AsturianResourceDataBroker extends ResourceDataBroker {
 
-/** Asturian part-of-speech tagger.
- * @author Xesús González Rato
- */
-public class AsturianTagger extends BaseTagger {
+    Set<Dictionary> getDictionaries(UserConfig config) throws Exception;
 
-    public AsturianTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
-      super(dict, tagger, caseCon, true);
-    }
-/*
-GTODO
-  @Override
-  public String getManualAdditionsFileName() {
-    return "/ast/added.txt";
-  }
+    List<String> getSpellingIgnoreWords() throws Exception;
 
-  public AsturianTagger() {
-    super("/ast/asturian.dict", new Locale("ast"));
-  }
-  */
 }

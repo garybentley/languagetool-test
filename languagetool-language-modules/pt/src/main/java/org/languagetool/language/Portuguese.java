@@ -299,7 +299,7 @@ public class Portuguese extends Language<PortugueseResourceDataBroker> {
 
   /** @since 3.6 */
   @Override
-  public synchronized LanguageModel getLanguageModel() throws Exception {
+  public LanguageModel getLanguageModel() throws Exception {
       return getUseDataBroker().getLanguageModel();
   }
 

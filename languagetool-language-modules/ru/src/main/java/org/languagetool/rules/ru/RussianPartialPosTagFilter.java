@@ -25,7 +25,7 @@ import org.languagetool.rules.PartialPosTagFilter;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 
-import java.io.IOException;
+import java.util.Objects;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -39,18 +39,19 @@ import java.util.List;
  */
 public class RussianPartialPosTagFilter extends PartialPosTagFilter {
 
-  private final Tagger tagger = new Russian().getTagger();
-  private final Disambiguator disambiguator = new Russian().getDisambiguator();
+  private final Tagger tagger;
+  private final Disambiguator disambiguator;
+
+  public RussianPartialPosTagFilter(Tagger tagger, Disambiguator disambiguator) {
+      this.tagger = Objects.requireNonNull(tagger, "Tagger must be provided.");
+      this.disambiguator = Objects.requireNonNull(disambiguator, "Disambiguator must be provided.");
+  }
 
   @Override
-  protected List<AnalyzedTokenReadings> tag(String token) {
-    try {
+  protected List<AnalyzedTokenReadings> tag(String token) throws Exception {
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(token));
       AnalyzedTokenReadings[] atr = tags.toArray(new AnalyzedTokenReadings[tags.size()]);
       AnalyzedSentence disambiguated = disambiguator.disambiguate(new AnalyzedSentence(atr));
       return Arrays.asList(disambiguated.getTokens());
-    } catch (IOException e) {
-      throw new RuntimeException("Could not tag and disambiguate '" + token + "'", e);
-    }
   }
 }

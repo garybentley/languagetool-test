@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,14 +19,16 @@
 
 package org.languagetool.rules.ru;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
+import org.languagetool.language.Russian;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
@@ -35,39 +37,40 @@ public final class MorfologikRussianSpellerRule extends MorfologikSpellerRule {
 
   public static final String RULE_ID = "MORFOLOGIK_RULE_RU_RU";
 
-  private static final String RESOURCE_FILENAME = "/ru/hunspell/ru_RU.dict";
+  // GTODO private static final String RESOURCE_FILENAME = "/ru/hunspell/ru_RU.dict";
   private static final Pattern RUSSIAN_LETTERS = Pattern.compile(".*[а-яёА-ЯЁ].*");
 
-  public MorfologikRussianSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+  public MorfologikRussianSpellerRule(ResourceBundle messages, Russian language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords);
     addExamplePair(Example.wrong("Все счастливые семьи похожи друг на друга, <marker>каждя</marker> несчастливая семья несчастлива по-своему."),
                    Example.fixed("Все счастливые семьи похожи друг на друга, <marker>каждая</marker> несчастливая семья несчастлива по-своему."));
   }
-
+/*
+GTODO
   @Override
   public String getFileName() {
     return RESOURCE_FILENAME;
   }
-
+*/
   @Override
   public String getId() {
     return RULE_ID;
   }
 
   @Override
-  protected boolean ignoreToken(AnalyzedTokenReadings[] tokens, int idx) throws IOException {
-    String word = tokens[idx].getToken();  
+  protected boolean ignoreToken(AnalyzedTokenReadings[] tokens, int idx) throws Exception {
+    String word = tokens[idx].getToken();
     // don't check words that don't have  letters
     if (!RUSSIAN_LETTERS.matcher(word).matches()) {
       return true;
     }
-      
+
     List<String> words = new ArrayList<>();
     for (AnalyzedTokenReadings token : tokens) {
       words.add(token.getToken());
     }
-    
+
     return ignoreWord(words, idx);
   }
-  
+
 }

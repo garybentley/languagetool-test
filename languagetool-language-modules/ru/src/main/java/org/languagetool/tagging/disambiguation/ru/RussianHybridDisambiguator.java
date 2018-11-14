@@ -19,15 +19,12 @@
 
 package org.languagetool.tagging.disambiguation.ru;
 
-import java.io.IOException;
-
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.language.Russian;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.MultiWordChunker;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Hybrid chunker-disambiguator for Russian.
@@ -38,11 +35,13 @@ import org.languagetool.databroker.ResourceDataBroker;
 public class RussianHybridDisambiguator extends AbstractDisambiguator {
 
   private final Disambiguator chunker;
-  private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Russian());
+  private final Disambiguator disambiguator;
+  //GTODO = new XmlRuleDisambiguator(new Russian());
 
-  public RussianHybridDisambiguator (ResourceDataBroker dataBroker) {
-      super(dataBroker);
-     chunker = new MultiWordChunker("/ru/multiwords.txt", dataBroker);
+  public RussianHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator) {
+      this.chunker = chunker;
+      this.disambiguator = disambiguator;
+     //GTODO chunker = new MultiWordChunker("/ru/multiwords.txt", dataBroker);
   }
 
   /**
@@ -51,7 +50,7 @@ public class RussianHybridDisambiguator extends AbstractDisambiguator {
    */
   @Override
   public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-      throws IOException {
+      throws Exception {
     return disambiguator.disambiguate(chunker.disambiguate(input));
   }
 

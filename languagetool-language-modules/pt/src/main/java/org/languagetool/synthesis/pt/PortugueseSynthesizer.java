@@ -23,7 +23,6 @@ import java.util.Set;
 import morfologik.stemming.IStemmer;
 
 import org.languagetool.synthesis.BaseSynthesizer;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Portuguese word form synthesizer
