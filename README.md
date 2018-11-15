@@ -161,6 +161,7 @@ This is a list of things that need to be changed/looked at:
 * ast/rules dir is a subdir of language, doesn't match other languages.
 * ast/ast.profile file is never referenced?
 * ast/test there are two rules dirs, org/languagetool/rules, org/languagetool/languages/rules
+* be has no speller test.
 
 ## The information below is from the standard LanguageTool README
 
