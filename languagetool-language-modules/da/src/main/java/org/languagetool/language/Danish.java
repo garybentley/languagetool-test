@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,9 +18,11 @@
  */
 package org.languagetool.language;
 
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Collections;
 
 import org.languagetool.Language;
 import org.languagetool.UserConfig;
@@ -28,20 +30,40 @@ import org.languagetool.rules.*;
 import org.languagetool.rules.spelling.hunspell.HunspellNoSuggestionRule;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-import org.languagetool.tagging.da.DanishTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.databroker.*;
+import org.languagetool.rules.spelling.hunspell.*;
 
 /**
  * @deprecated this language is unmaintained in LT and might be removed in a future release if we cannot find contributors for it (deprecated since 3.6)
  */
 @Deprecated
-public class Danish extends Language {
+public class Danish extends Language<DanishResourceDataBroker> {
 
-  private Tagger tagger;
-  private SentenceTokenizer sentenceTokenizer;
-  private Disambiguator disambiguator;
+  public static final String LANGUAGE_ID = "da";
+  public static final String COUNTRY_ID = "DK";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+  @Override
+  public DanishResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultDanishResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
 
   @Override
   public String getName() {
@@ -49,37 +71,23 @@ public class Danish extends Language {
   }
 
   @Override
-  public String getShortCode() {
-    return "da";
-  }
-
-  @Override
   public String[] getCountries() {
     return new String[]{"DK"};
   }
-  
+
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new DanishTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
-  
+
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new XmlRuleDisambiguator(new Danish());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
@@ -88,18 +96,45 @@ public class Danish extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "\"", "”"),
-                    Arrays.asList("]", ")", "}", "\"", "”")),
-            new HunspellNoSuggestionRule(messages, this, null),
-            new UppercaseSentenceStartRule(messages, this),  // abbreviation exceptions, done in DanishSentenceTokenizer
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createSpellerRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),  // abbreviation exceptions, done in DanishSentenceTokenizer
             // "WORD_REPEAT_RULE" implemented in grammar.xml
-            new MultipleWhitespaceRule(messages, this)
+            createMultipleWhitespaceRule(messages)
     );
+  }
+
+  public HunspellNoSuggestionRule createSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      Hunspell.Dictionary hdic = getUseDataBroker().getHunspellDictionary();
+      List ignoreWords = getUseDataBroker().getSpellingIgnoreWords();
+      return new HunspellNoSuggestionRule(getUseMessages(messages), this, userConfig, hdic, ignoreWords, Collections.emptyList());
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+                    Arrays.asList("[", "(", "{", "\"", "”"),
+                    Arrays.asList("]", ")", "}", "\"", "”"));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
   }
 
 }

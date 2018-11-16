@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,13 +22,14 @@ package org.languagetool.tagging.zh;
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
+import org.languagetool.language.Chinese;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.zh.ChineseWordTokenizer;
-
-import java.io.IOException;
 
 /**
  * The test of ChineseTagger.
- * 
+ *
  * @author Minshan Chen
  * @author Xiaohui Wu
  * @author Jiamin Zheng
@@ -36,17 +37,18 @@ import java.io.IOException;
  */
 public class ChineseTaggerTest {
 
-  private ChineseTagger tagger;
-  private ChineseWordTokenizer tokenizer;
+  private Tagger tagger;
+  private Tokenizer tokenizer;
 
   @Before
-  public void setUp() {
-    tagger = new ChineseTagger();
-    tokenizer = new ChineseWordTokenizer();
+  public void setUp() throws Exception {
+    Chinese lang = new Chinese();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
 
     TestTools.myAssert(
             "主任强调指出错误的地方。",

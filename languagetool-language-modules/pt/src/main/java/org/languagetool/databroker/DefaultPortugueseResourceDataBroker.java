@@ -74,6 +74,8 @@ public class DefaultPortugueseResourceDataBroker extends DefaultResourceDataBrok
      */
     public static String PLAIN_TEXT_SPELLING_INFO_FILE_NAME = "%1$s/hunspell/%1$s_%2$s.info";
 
+    public static String HUNSPELL_BASE_FILE_NAME_PREFIX = "%1$s_%2$s";
+
     /**
      * The filename to use for the base hunspell binary dictionary.  The locale language and country values are replaced in the filename.
      * For it_IT this would become: it/hunspell/it_IT.dict
@@ -196,7 +198,8 @@ public class DefaultPortugueseResourceDataBroker extends DefaultResourceDataBrok
     @Override
     public Hunspell.Dictionary getHunspellDictionary() throws Exception {
         if (hunspellDict == null) {
-            hunspellDict = createHunspellDictionaryFromResourcePath();
+            String fileName = String.format(HUNSPELL_BASE_FILE_NAME_PREFIX, language.getLocale().getLanguage(), language.getLocale().getCountry());
+            hunspellDict = createHunspellDictionaryFromResourcePath(fileName);
         }
         return hunspellDict;
     }

@@ -19,15 +19,15 @@
 package org.languagetool.rules.da;
 
 import org.junit.Test;
+import org.languagetool.language.Danish;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class DanishPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Danish lang = new Danish();
+    runTestForLanguage(lang);
   }
 
 }

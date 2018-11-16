@@ -18,23 +18,19 @@
  */
 package org.languagetool.tagging.eo;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Objects;
 
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.JLanguageTool;
-import org.languagetool.tagging.ManualTagger;
 import org.languagetool.tagging.TaggedWord;
 import org.languagetool.tagging.Tagger;
+import org.languagetool.tagging.WordTagger;
 
 /**
  * A part-of-speech tagger for Esperanto.
@@ -44,7 +40,7 @@ import org.languagetool.tagging.Tagger;
 public class EsperantoTagger implements Tagger {
   // manual tagger is used to tag the list of closed Esperanto words
   // (small limited number of words which do not have regular ending).
-  private ManualTagger manualTagger = null;
+  private WordTagger manualTagger = null;
 
   // Set of transitive verbs and intransitive verbs.
   private Set<String> setTransitiveVerbs = null;
@@ -105,9 +101,18 @@ public class EsperantoTagger implements Tagger {
     return result;
   }
 
+  public EsperantoTagger(Set<String> transitiveVerbs, Set<String> intransitiveVerbs, Set<String> nonParticiples, WordTagger wordTagger) {
+      setTransitiveVerbs = Objects.requireNonNull(transitiveVerbs, "Transitive verbs must be provided.");
+      setIntransitiveVerbs = Objects.requireNonNull(intransitiveVerbs, "Intransitive verbs must be provided.");
+      setNonParticiple = Objects.requireNonNull(nonParticiples, "Non participles must be provided.");
+      manualTagger = Objects.requireNonNull(wordTagger, "Word tagger must be provided.");
+  }
+
   /**
    * Load list of words from UTF-8 file (one word per line).
    */
+   /*
+   GTODO Clean up
   private Set<String> loadWords(InputStream stream) throws IOException {
     Set<String> words = new HashSet<>();
     try (
@@ -125,7 +130,9 @@ public class EsperantoTagger implements Tagger {
     }
     return words;
   }
-
+*/
+/*
+GTODO Clean up
   private void lazyInit() throws IOException {
     if (manualTagger != null) {
       return;
@@ -147,7 +154,7 @@ public class EsperantoTagger implements Tagger {
     setIntransitiveVerbs = loadWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream("/eo/verb-ntr.txt"));
     setNonParticiple     = loadWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream("/eo/root-ant-at.txt"));
   }
-
+*/
   // For a given verb (.*i) find whether it is transitive and/or non transitive.
   // Returns:
   // "tr" for a verb which is transitive
@@ -199,9 +206,8 @@ public class EsperantoTagger implements Tagger {
   }
 
   @Override
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) {
 
-    lazyInit();
     Matcher matcher;
 
     List<AnalyzedTokenReadings> tokenReadings =

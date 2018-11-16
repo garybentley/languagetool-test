@@ -133,7 +133,7 @@ GTODO, clean up the file extension has no bearing on the format within the file.
         }
 
         @Override
-        public WordTokenizer getWordTokenizer() throws Exception {
+        public Tokenizer getWordTokenizer() throws Exception {
             return getUseDataBroker().getWordTokenizer();
         }
 

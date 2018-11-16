@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,28 +16,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.tagging.da;
+package org.languagetool.databroker;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
 import morfologik.stemming.Dictionary;
+import org.languagetool.UserConfig;
+import org.languagetool.rules.ConfusionSet;
 
-import org.languagetool.tagging.WordTagger;
-import org.languagetool.rules.patterns.CaseConverter;
-import org.languagetool.tagging.BaseTagger;
+public interface ChineseResourceDataBroker extends ResourceDataBroker {
 
-/**
- * Danish Part-of-speech tagger.
- *
- * @author Esben Aaberg
- */
-public class DanishTagger extends BaseTagger {
-/*
-GTODO
-  @Override
-  public String getManualAdditionsFileName() {
-    return "/da/added.txt";
-  }
-*/
-  public DanishTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
-    super(baseDict, tagger, caseCon, true);
-  }
+    Set<Dictionary> getDictionaries(UserConfig config) throws Exception;
+
+    Map<String, List<ConfusionSet>> getConfusionSets() throws Exception;
+
 }

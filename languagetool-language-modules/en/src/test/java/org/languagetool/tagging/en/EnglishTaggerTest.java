@@ -23,10 +23,9 @@ import org.junit.Test;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.TestTools;
 import org.languagetool.language.English;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tagging.Tagger;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ import static org.junit.Assert.assertEquals;
 public class EnglishTaggerTest {
 
   private Tagger tagger;
-  private WordTokenizer tokenizer;
+  private Tokenizer tokenizer;
   private English lang;
 
   @Before
@@ -47,7 +46,7 @@ public class EnglishTaggerTest {
 
   @Test
   public void testDictionary() throws Exception {
-    TestTools.testTaggerDictionary(lang.getUseDataBroker().getWordTaggerDictionary(), new English());
+     TestTools.testTaggerDictionary(lang.getUseDataBroker().getWordTaggerDictionary(), new English());
   }
 
   @Test

@@ -28,7 +28,7 @@ import org.languagetool.rules.fa.*;
 import org.languagetool.tokenizers.PersianWordTokenizer;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 
 import org.languagetool.databroker.PersianResourceDataBroker;
 import org.languagetool.databroker.DefaultPersianResourceDataBroker;
@@ -96,7 +96,7 @@ GTODO Clean up
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() throws Exception {
+  public Tokenizer getWordTokenizer() throws Exception {
       return getUseDataBroker().getWordTokenizer();
   }
 

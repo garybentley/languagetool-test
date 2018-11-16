@@ -21,23 +21,24 @@ package org.languagetool.tagging.eo;
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
-import org.languagetool.tokenizers.WordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.language.Esperanto;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.tokenizers.Tokenizer;
 
 public class EsperantoTaggerTest {
 
-  private EsperantoTagger tagger;
-  private WordTokenizer tokenizer;
+  private Tagger tagger;
+  private Tokenizer tokenizer;
 
   @Before
-  public void setUp() {
-    tagger = new EsperantoTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    Esperanto lang = new Esperanto();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("Tio estas simpla testo",
         "Tio/[null]T nak np t o -- estas/[esti]V nt as -- simpla/[simpla]A nak np -- testo/[testo]O nak np", tokenizer, tagger);
     TestTools.myAssert("Mi malsategas",

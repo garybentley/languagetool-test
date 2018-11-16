@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,7 +20,9 @@
 package org.languagetool.tokenizers.zh;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
+import org.languagetool.language.Chinese;
 import org.languagetool.tokenizers.SentenceTokenizer;
 
 /**
@@ -33,7 +35,13 @@ import org.languagetool.tokenizers.SentenceTokenizer;
  */
 public class ChineseSentenceTokenizerTest {
 
-  private final SentenceTokenizer stokenizer = new ChineseSentenceTokenizer();
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Chinese lang = new Chinese();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public void testTokenize() {
@@ -79,7 +87,7 @@ public class ChineseSentenceTokenizerTest {
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

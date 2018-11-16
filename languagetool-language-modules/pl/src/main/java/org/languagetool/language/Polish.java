@@ -34,7 +34,7 @@ import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.pl.PolishTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.databroker.*;
 
 public class Polish extends Language<PolishResourceDataBroker> {
@@ -83,7 +83,7 @@ public class Polish extends Language<PolishResourceDataBroker> {
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() throws Exception {
+  public Tokenizer getWordTokenizer() throws Exception {
       return getUseDataBroker().getWordTokenizer();
   }
 

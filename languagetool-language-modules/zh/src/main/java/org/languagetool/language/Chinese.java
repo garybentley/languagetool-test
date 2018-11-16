@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,8 +18,7 @@
  */
 package org.languagetool.language;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -38,17 +37,38 @@ import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.zh.ChineseSentenceTokenizer;
 import org.languagetool.tokenizers.zh.ChineseWordTokenizer;
+import org.languagetool.databroker.*;
 
-public class Chinese extends Language implements AutoCloseable {
+public class Chinese extends Language<ChineseResourceDataBroker> {
 
-  private Tagger tagger;
-  private Tokenizer wordTokenizer;
-  private SentenceTokenizer sentenceTokenizer;
-  private LuceneLanguageModel languageModel;
+  public static final String LANGUAGE_ID = "zh";
+  public static final String COUNTRY_ID = "CN";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
 
   @Override
-  public String getShortCode() {
-    return "zh";
+  public ChineseResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
+  }
+
+  @Override
+  public ChineseResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultChineseResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
   }
 
   @Override
@@ -67,63 +87,53 @@ public class Chinese extends Language implements AutoCloseable {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new DoublePunctuationRule(messages),
-            new MultipleWhitespaceRule(messages, this)
+            createDoublePunctuationRule(messages),
+            createMultipleWhitespaceRule(messages)
     );
   }
 
-  @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new ChineseTagger();
-    }
-    return tagger;
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new ChineseWordTokenizer();
-    }
-    return wordTokenizer;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new ChineseSentenceTokenizer();
-    }
-    return sentenceTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
-  /** @since 3.1 */
   @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
-    if (languageModel == null) {
-      languageModel = new LuceneLanguageModel(new File(indexDir, getShortCode()));
-    }
-    return languageModel;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   /** @since 3.1 */
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
+  public LanguageModel getLanguageModel() throws Exception {
+      return getUseDataBroker().getLanguageModel();
+  }
+
+  /** @since 3.1 */
+  @Override
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
     return Arrays.<Rule>asList(
-            new ChineseConfusionProbabilityRule(messages, languageModel, this)
+            createConfusionProbabilityRule(messages, languageModel)
     );
   }
 
-  /**
-   * Closes the language model, if any. 
-   * @since 3.1
-   */
-  @Override
-  public void close() throws Exception {
-    if (languageModel != null) {
-      languageModel.close();
-    }
+  public ChineseConfusionProbabilityRule createConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      return new ChineseConfusionProbabilityRule(getUseMessages(messages), languageModel, this, getUseDataBroker().getConfusionSets());
   }
 
 }

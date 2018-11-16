@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,8 +18,7 @@
  */
 package org.languagetool.tokenizers.zh;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,8 +34,14 @@ import cn.com.cjf.ChineseJF;
 public class ChineseWordTokenizer implements Tokenizer {
 
   private SegTag seg;
-  private ChineseJF chinesdJF;
+  private ChineseJF chineseJF;
 
+  public ChineseWordTokenizer(ChineseJF chineseJF, SegTag segTag) {
+      this.seg = Objects.requireNonNull(segTag, "Seg tag must be provided.");
+      this.chineseJF = Objects.requireNonNull(chineseJF, "Chinese JF must be provided.");
+  }
+/*
+GTODO Clean up
   private void init() {
     if (chinesdJF == null) {
       chinesdJF = CJFBeanFactory.getChineseJF();
@@ -60,13 +65,12 @@ public class ChineseWordTokenizer implements Tokenizer {
       }
     }
   }
-
+*/
   @Override
   public List<String> tokenize(String text) {
-    init();
     String result;
     try {
-      result = seg.split(chinesdJF.chineseFan2Jan(text)).getFinalResult();
+      result = seg.split(chineseJF.chineseFan2Jan(text)).getFinalResult();
       // a hacky workaround for http://sourceforge.net/p/languagetool/bugs/186/ and
       // http://code.google.com/p/ictclas4j/issues/detail?id=14 which otherwise causes a StringIndexOutOfBoundsException
       // TODO: fix the original cause

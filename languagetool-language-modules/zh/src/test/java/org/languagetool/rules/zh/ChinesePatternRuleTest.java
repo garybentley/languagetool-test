@@ -19,15 +19,15 @@
 package org.languagetool.rules.zh;
 
 import org.junit.Test;
+import org.languagetool.language.Chinese;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class ChinesePatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Chinese lang = new Chinese();
+    runTestForLanguage(lang);
   }
 
 }

@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,28 +16,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.tagging.da;
+package org.languagetool.databroker;
 
-import morfologik.stemming.Dictionary;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
-import org.languagetool.tagging.WordTagger;
-import org.languagetool.rules.patterns.CaseConverter;
-import org.languagetool.tagging.BaseTagger;
+import org.languagetool.rules.spelling.hunspell.*;
 
-/**
- * Danish Part-of-speech tagger.
- *
- * @author Esben Aaberg
- */
-public class DanishTagger extends BaseTagger {
-/*
-GTODO
-  @Override
-  public String getManualAdditionsFileName() {
-    return "/da/added.txt";
-  }
-*/
-  public DanishTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
-    super(baseDict, tagger, caseCon, true);
-  }
+public interface DanishResourceDataBroker extends ResourceDataBroker {
+
+    Hunspell.Dictionary getHunspellDictionary() throws Exception;
+
+    List<String> getSpellingIgnoreWords() throws Exception;
+
 }

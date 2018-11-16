@@ -30,14 +30,11 @@ import org.languagetool.rules.en.*;
 import org.languagetool.rules.neuralnetwork.Word2VecModel;
 import org.languagetool.rules.neuralnetwork.NeuralNetworkRule;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.en.EnglishSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.en.EnglishTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
-import org.languagetool.tokenizers.WordTokenizer;
-import org.languagetool.tokenizers.en.EnglishWordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.databroker.EnglishResourceDataBroker;
 import org.languagetool.databroker.DefaultEnglishResourceDataBroker;
 
@@ -138,7 +135,7 @@ public class English extends Language<EnglishResourceDataBroker> implements Auto
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() throws Exception {
+  public Tokenizer getWordTokenizer() throws Exception {
       return getUseDataBroker().getWordTokenizer();
   }
 

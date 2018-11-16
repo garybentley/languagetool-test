@@ -55,6 +55,7 @@ public class BrazilianPortuguese extends Portuguese {
     List<Rule> rules = new ArrayList<>();
     rules.addAll(super.getRelevantRules(messages, userConfig, altLanguages));
     // GTODO Already added rules.add(new PostReformPortugueseCompoundRule(messages));
+    rules.add(createSpellerRule(messages, userConfig));
     rules.add(createBrazilReplaceRule(messages));
     rules.add(createPostReformDashRule(messages));
     return rules;

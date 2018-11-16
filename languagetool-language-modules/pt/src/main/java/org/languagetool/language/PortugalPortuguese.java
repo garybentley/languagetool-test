@@ -61,6 +61,7 @@ public class PortugalPortuguese extends Portuguese {
     List<Rule> rules = new ArrayList<>();
     rules.addAll(super.getRelevantRules(messages, userConfig, altLanguages));
     // GTODO This is already added in the super call.  rules.add(new PostReformPortugueseCompoundRule(messages));
+    rules.add(createSpellerRule(messages, userConfig));
     rules.add(createPostReformDashRule(messages));
     rules.add(createPortugalReplaceRule(messages));
     rules.add(createAgreementReplaceRule(messages));

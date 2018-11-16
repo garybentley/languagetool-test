@@ -19,16 +19,23 @@
 package org.languagetool.tokenizers.da;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Danish;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
 
 /**
  * @author Esben Aaberg
  */
 public class DanishSRXSentenceTokenizerTest {
 
-  private final SRXSentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Danish());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Danish lang = new Danish();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public void testTokenize() {
@@ -73,7 +80,7 @@ public class DanishSRXSentenceTokenizerTest {
   }
 
   private void testSplit(String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

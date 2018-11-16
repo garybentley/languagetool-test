@@ -34,6 +34,7 @@ import org.languagetool.rules.patterns.RuleFilterCreator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.rules.patterns.bitext.BitextPatternRule;
 import org.languagetool.rules.neuralnetwork.Word2VecModel;
 import org.languagetool.tagging.WordTagger;
@@ -156,7 +157,7 @@ public interface ResourceDataBroker extends AutoCloseable {
     /**
      * Get the word tokenizer.
      */
-    WordTokenizer getWordTokenizer() throws Exception;
+    Tokenizer getWordTokenizer() throws Exception;
 
     /**
      * Get the case converter.

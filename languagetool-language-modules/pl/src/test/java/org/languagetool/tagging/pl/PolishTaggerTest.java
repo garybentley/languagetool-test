@@ -22,13 +22,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Polish;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 
 public class PolishTaggerTest {
 
   private Polish language;
   private PolishTagger tagger;
-  private WordTokenizer tokenizer;
+  private Tokenizer tokenizer;
 
   @Before
   public void setUp() throws Exception {

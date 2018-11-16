@@ -26,7 +26,6 @@ import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.*;
 import org.languagetool.rules.neuralnetwork.Word2VecModel;
 import org.languagetool.rules.pt.*;
-import org.languagetool.rules.spelling.hunspell.HunspellRule;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
@@ -34,6 +33,7 @@ import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.databroker.*;
 import org.languagetool.rules.neuralnetwork.NeuralNetworkRule;
+import org.languagetool.rules.spelling.hunspell.HunspellRule;
 
 import java.util.Locale;
 import java.util.Arrays;
@@ -127,7 +127,6 @@ public class Portuguese extends Language<PortugueseResourceDataBroker> {
     return Arrays.asList(
             createCommaWhitespaceRule(messages),
             createUnpairedBracketsRule(messages),
-            createSpellerRule(messages, userConfig),
             createLongSentenceRule(messages, userConfig),
             createLongParagraphRule(messages, userConfig),
             createUppercaseSentenceStartRule(messages),
@@ -157,7 +156,7 @@ public class Portuguese extends Language<PortugueseResourceDataBroker> {
     );
   }
 
-  public HunspellRule createSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+  protected HunspellRule createSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
       return new HunspellRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getHunspellDictionary(), getUseDataBroker().getSpellingIgnoreWords(), Collections.emptyList(), null);
   }
 

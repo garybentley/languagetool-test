@@ -59,6 +59,8 @@ public class DefaultFrenchResourceDataBroker extends DefaultResourceDataBroker i
 
     public static String PLAIN_TEXT_BASE_SPELLING_FILE_NAME = "%1$s/hunspell/spelling.txt";
 
+    public static String HUNSPELL_BASE_FILE_NAME_PREFIX = "%1$s_%2$s";
+
     /**
      * The filename to use for the base hunspell binary dictionary.  The locale language and country values are replaced in the filename.
      * For fr_FR this would become: fr/hunspell/fr_FR.dict
@@ -142,7 +144,8 @@ public class DefaultFrenchResourceDataBroker extends DefaultResourceDataBroker i
     @Override
     public Hunspell.Dictionary getHunspellDictionary() throws Exception {
         if (hunspellDict == null) {
-            hunspellDict = createHunspellDictionaryFromResourcePath();
+            String fileName = String.format(HUNSPELL_BASE_FILE_NAME_PREFIX, language.getLocale().getLanguage(), language.getLocale().getCountry());
+            hunspellDict = createHunspellDictionaryFromResourcePath(fileName);
         }
         return hunspellDict;
     }

@@ -61,6 +61,7 @@ public class AngolaPortuguese extends Portuguese {
   public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     List<Rule> rules = new ArrayList<>();
     rules.addAll(super.getRelevantRules(messages, userConfig, altLanguages));
+    rules.add(createSpellerRule(messages, userConfig));
     rules.add(createPreReformCompoundRule(messages));
     rules.add(createPreReformDashRule(messages));
     return rules;

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,9 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+import org.languagetool.language.Chinese;
+import org.languagetool.tokenizers.Tokenizer;
+
 /**
  * The test of ChineseWordTokenizer.
  *
@@ -36,9 +39,10 @@ import static org.junit.Assert.assertEquals;
 public class ChineseWordTokenizerTest {
 
   @Test
-  public void testTokenize() {
+  public void testTokenize() throws Exception {
+    Chinese lang = new Chinese();
 
-    ChineseWordTokenizer wordTokenizer = new ChineseWordTokenizer();
+    Tokenizer wordTokenizer = lang.getWordTokenizer();
 
     List<String> tokens = wordTokenizer.tokenize("主任强调指出错误的地方。");
     assertEquals(tokens.size(), 7);

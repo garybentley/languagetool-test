@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,9 +31,9 @@ import org.languagetool.tools.StringTools;
  * A tagger that reads the POS information from a plain (UTF-8) text file. This
  * makes it possible for the user to edit the text file to let the system know
  * about new words or missing readings in the *.dict file.
- * 
+ *
  * <p>File Format: <tt>fullform baseform postags</tt> (tab separated)
- * 
+ *
  * @author Daniel Naber
  * @see ManualSynthesizer
  */
@@ -45,6 +45,7 @@ public class ManualTagger implements WordTagger {
     mapping = loadMapping(inputStream, "utf8");
   }
 
+  // GTODO Change to remove this and pass a Map<String, List<TaggerWord>> to the constructor instead.
   private Map<String, List<TaggedWord>> loadMapping(InputStream inputStream, String encoding) throws IOException {
     Map<String, List<TaggedWord>> map = new HashMap<>();
     try (

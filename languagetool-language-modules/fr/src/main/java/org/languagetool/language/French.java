@@ -40,7 +40,7 @@ import org.languagetool.tagging.disambiguation.fr.FrenchHybridDisambiguator;
 import org.languagetool.tagging.fr.FrenchTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.databroker.*;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.spelling.morfologik.MorfologikMultiSpeller;
@@ -116,7 +116,7 @@ GTODO Clean up
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() throws Exception {
+  public Tokenizer getWordTokenizer() throws Exception {
       return getUseDataBroker().getWordTokenizer();
   }
 

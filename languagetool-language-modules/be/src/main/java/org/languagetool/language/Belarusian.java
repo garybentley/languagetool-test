@@ -40,9 +40,6 @@ import org.languagetool.databroker.*;
 @Deprecated
 public class Belarusian extends Language<BelarusianResourceDataBroker> {
 
-  private Tagger tagger;
-  private SentenceTokenizer sentenceTokenizer;
-
   public static final String LANGUAGE_ID = "be";
   public static final String COUNTRY_ID = "BY";
 

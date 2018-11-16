@@ -162,6 +162,8 @@ This is a list of things that need to be changed/looked at:
 * ast/ast.profile file is never referenced?
 * ast/test there are two rules dirs, org/languagetool/rules, org/languagetool/languages/rules
 * be has no speller test.
+* da has very few tests.
+* pl why doesn't polish have a double punctuation rule?
 
 ## The information below is from the standard LanguageTool README
 

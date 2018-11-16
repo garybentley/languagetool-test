@@ -26,13 +26,13 @@ import org.languagetool.tagging.disambiguation.rules.DisambiguationRuleTest;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.databroker.*;
 
 public class PolishDisambiguationRuleTest extends DisambiguationRuleTest {
 
     private Tagger tagger;
-    private WordTokenizer tokenizer;
+    private Tokenizer tokenizer;
     private SentenceTokenizer sentenceTokenizer;
     private Disambiguator disambiguator;
 

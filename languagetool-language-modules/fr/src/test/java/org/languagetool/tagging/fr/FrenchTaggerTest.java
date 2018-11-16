@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.French;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tagging.Tagger;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ import java.io.IOException;
 public class FrenchTaggerTest {
 
   private Tagger tagger;
-  private WordTokenizer tokenizer;
+  private Tokenizer tokenizer;
   private French lang;
 
   @Before

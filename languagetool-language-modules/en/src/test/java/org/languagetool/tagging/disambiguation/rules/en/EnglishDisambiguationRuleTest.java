@@ -30,13 +30,13 @@ import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.AnalyzedSentence;
 
 public class EnglishDisambiguationRuleTest extends DisambiguationRuleTest {
 
   private Tagger tagger;
-  private WordTokenizer tokenizer;
+  private Tokenizer tokenizer;
   private SentenceTokenizer sentenceTokenizer;
   private Disambiguator disambiguator;
   private Disambiguator disamb2;

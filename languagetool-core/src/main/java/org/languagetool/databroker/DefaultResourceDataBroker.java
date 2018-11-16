@@ -179,7 +179,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
 
     public static String HUNSPELL_DIC_FILE_NAME_EXT = ".dic";
     public static String HUNSPELL_AFF_FILE_NAME_EXT = ".aff";
-    public static String HUNSPELL_BASE_FILE_NAME = "%1$s/hunspell/%1$s_%2$s%3$s";
+    public static String HUNSPELL_BASE_DIR = "%1$s/hunspell/";
 
     public static String NEURAL_NETWORK_CLASSIFIER_W_FC1_FILE_NAME = "%1$s/W_fc1.txt";
     public static String NEURAL_NETWORK_CLASSIFIER_B_FC1_FILE_NAME = "%1$s/b_fc1.txt";
@@ -783,7 +783,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    * @return The tokenizer.
    */
   @Override
-  public WordTokenizer getWordTokenizer() throws Exception {
+  public Tokenizer getWordTokenizer() throws Exception {
       if (wordTokenizer == null) {
           wordTokenizer = new WordTokenizer();
       }
@@ -1568,24 +1568,20 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    }
 
    // GTODO Implement a cache for these...
-   public Hunspell.Dictionary createHunspellDictionaryFromResourcePath() throws Exception {
-       return createHunspellDictionary(getResourceDirPath(""), language.getLocale());
+   public Hunspell.Dictionary createHunspellDictionaryFromResourcePath(String fileNamePrefix) throws Exception {
+       return createHunspellDictionary(getResourceDirPath(String.format(HUNSPELL_BASE_DIR, language.getLocale().getLanguage())), fileNamePrefix);
    }
 
-   // GTODO Note: Hunspell files are .dic/.aff
-   // GTODO Morofologik dictionary uses /hunspell/ files .dict/.info
    /**
     * Load a Hunspell dictionary from files:
-    *    <basePath>/<locale.language>/hunspell/<locale.language>_<locale.country>.dic (dictionary file)
-    *    <basePath>/<locale.language>/hunspell/<locale.language>_<locale.country>.aff (affixes file)
+    *    <basePath>/<fileNamePrefix>.dic (dictionary file)
+    *    <basePath>/<fileNamePrefix>.aff (affixes file)
     */
-   public static Hunspell.Dictionary createHunspellDictionary(Path basePath, Locale locale) throws Exception {
+   public static Hunspell.Dictionary createHunspellDictionary(Path basePath, String fileNamePrefix) throws Exception {
        Objects.requireNonNull(basePath, "Base path must be provided.");
-       Objects.requireNonNull(locale, "Locale must be provided.");
+       Objects.requireNonNull(fileNamePrefix, "File name prefix must be provided.");
        basePath = basePath.toRealPath();
-       String lang = locale.getLanguage();
-       String country = locale.getCountry();
-       String dicFileName = String.format(HUNSPELL_BASE_FILE_NAME, lang, country, HUNSPELL_DIC_FILE_NAME_EXT);
+       String dicFileName = fileNamePrefix + HUNSPELL_DIC_FILE_NAME_EXT;
        Path dicFilePath = basePath.resolve(dicFileName);
        try {
            dicFilePath = dicFilePath.toRealPath();
@@ -1594,7 +1590,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
            return null;
        }
 
-       String affFileName = String.format(HUNSPELL_BASE_FILE_NAME, lang, country, HUNSPELL_AFF_FILE_NAME_EXT);
+       String affFileName = fileNamePrefix + HUNSPELL_AFF_FILE_NAME_EXT;
        Path affFilePath = basePath.resolve(affFileName);
        try {
            affFilePath = affFilePath.toRealPath();
@@ -1608,7 +1604,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
        if (StringUtils.equalsAny(dictFileURL.getProtocol(), "jar", "vfs", "bundle", "bundleresource")) {
            // GTODO Move this to use paths.
            // Copy the .dic and .aff files to temporary files outside of the resource bundle, then use those files instead.
-           File tempDicFile = File.createTempFile(String.format("hunspell-%1$s-%2$s", lang, country), HUNSPELL_DIC_FILE_NAME_EXT);
+           File tempDicFile = File.createTempFile("hunspell-" + fileNamePrefix, HUNSPELL_DIC_FILE_NAME_EXT);
            tempDicFile.deleteOnExit();
            JLanguageTool.addTemporaryFile(tempDicFile);
            String tempDicFileName = tempDicFile.getName();

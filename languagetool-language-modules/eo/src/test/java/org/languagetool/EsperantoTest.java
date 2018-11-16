@@ -29,9 +29,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class EsperantoTest {
-  
+
   @Test
-  public void test() throws IOException {
+  public void test() throws Exception {
     Esperanto language = new Esperanto();
     assertThat(language.getCountries().length, is(0));
     JLanguageTool languageTool = new JLanguageTool(language);

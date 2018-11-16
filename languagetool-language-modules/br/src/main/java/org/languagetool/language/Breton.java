@@ -130,7 +130,7 @@ public class Breton extends Language<BretonResourceDataBroker> {
   }
 
   public TopoReplaceRule createTopoReplaceRule(ResourceBundle messages) throws Exception {
-      return new TopoReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongTopographicalWords(), getUseDataBroker().getWordTokenizer(), getUseDataBroker().getCaseConverter());
+      return new TopoReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongTopographicalWords(), getUseDataBroker().getCaseConverter());
 
   }
 

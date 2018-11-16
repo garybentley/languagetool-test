@@ -145,7 +145,7 @@ public class TestLanguage extends Language<DefaultTestResourceDataBroker> {
   }
 
   @Override
-  public WordTokenizer getWordTokenizer() throws Exception {
+  public Tokenizer getWordTokenizer() throws Exception {
       return getUseDataBroker().getWordTokenizer();
   }
 

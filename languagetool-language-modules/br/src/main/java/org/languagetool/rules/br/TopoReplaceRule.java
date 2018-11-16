@@ -55,8 +55,6 @@ public class TopoReplaceRule extends Rule {
   // the n-th map contains key strings of (n+1) words
   private List<Map<String, String>> wrongWords;
 
-  private WordTokenizer wordTokenizer;
-
   private CaseConverter caseConverter;
 /*
 GTODO Clean up
@@ -64,11 +62,10 @@ GTODO Clean up
     return FILE_NAME;
   }
 */
-  public TopoReplaceRule(ResourceBundle messages, List<Map<String, String>> wrongWords, WordTokenizer wordTokenizer, CaseConverter caseCon) throws IOException {
+  public TopoReplaceRule(ResourceBundle messages, List<Map<String, String>> wrongWords, CaseConverter caseCon) throws IOException {
     super(messages);
     super.setCategory(Categories.MISC.getCategory(messages));
     this.wrongWords = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
-    this.wordTokenizer = Objects.requireNonNull(wordTokenizer, "Word tokenizer must be provided.");
     this.caseConverter = Objects.requireNonNull(caseCon, "Case Converter must be provided.");
     // GTODO wrongWords = loadWords(JLanguageTool.getDataBroker().getFromRulesDirAsStream(getFileName()));
   }
@@ -120,10 +117,12 @@ GTODO
   /**
    * @return the word tokenizer used for tokenization on loading words.
    */
+   /*
+   GTODO
   protected WordTokenizer getWordTokenizer() {
     return wordTokenizer;
   }
-
+*/
   /**
    * @return the list of wrong words for which this rule can suggest correction. The list cannot be modified.
    */
@@ -200,7 +199,6 @@ GTODO
             .getTokensWithoutWhitespace();
 
     Queue<AnalyzedTokenReadings> prevTokens = new ArrayBlockingQueue<>(wrongWords.size());
-System.out.println ("----> " + wrongWords);
     for (int i = 1; i < tokens.length; i++) {
       addToQueue(tokens[i], prevTokens);
       StringBuilder sb = new StringBuilder();
