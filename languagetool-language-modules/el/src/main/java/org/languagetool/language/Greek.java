@@ -18,9 +18,9 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.languagetool.Language;
@@ -30,32 +30,41 @@ import org.languagetool.rules.*;
 import org.languagetool.rules.el.MorfologikGreekSpellerRule;
 import org.languagetool.rules.el.NumeralStressRule;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.el.GreekSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-import org.languagetool.tagging.el.GreekTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.el.GreekWordTokenizer;
+import org.languagetool.databroker.*;
 
 /**
  *
  * @author Panagiotis Minos (pminos@gmail.com)
  */
-public class Greek extends Language {
+public class Greek extends Language<GreekResourceDataBroker> {
 
-    public static final Locale LOCALE = new Locale("el", "GR");
+  public static final String LANGUAGE_ID = "el";
+  public static final String COUNTRY_ID = "GR";
 
-  private Disambiguator disambiguator;
-  private SentenceTokenizer sentenceTokenizer;
-  private Synthesizer synthesizer;
-  private Tagger tagger;
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
 
   @Override
-  public String getShortCode() {
-    return "el";
+  public GreekResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultGreekResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
   }
 
   @Override
@@ -76,62 +85,102 @@ public class Greek extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages,
-                    Example.wrong("Το κόμμα χωρίζει προτάσεις<marker> ,</marker> όρους προτάσεων και φράσεις."),
-                    Example.fixed("Το κόμμα χωρίζει προτάσεις<marker>,</marker> όρους προτάσεων και φράσεις.")),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule("EL_UNPAIRED_BRACKETS", messages,
-                    Arrays.asList("[", "(", "{", "“", "\"", "«"),
-                    Arrays.asList("]", ")", "}", "”", "\"", "»")),
-            new LongSentenceRule(messages, userConfig),
-            new MorfologikGreekSpellerRule(messages, this, null),
-            new UppercaseSentenceStartRule(messages, this,
-                    Example.wrong("Η τελεία είναι σημείο στίξης. <marker>δείχνει</marker> το τέλος μίας πρότασης."),
-                    Example.fixed("Η τελεία είναι σημείο στίξης. <marker>Δείχνει</marker> το τέλος μίας πρότασης.")),
-            new MultipleWhitespaceRule(messages, this),
-            new WordRepeatBeginningRule(messages, this),
-            new WordRepeatRule(messages, this),
-            new NumeralStressRule(messages)
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createLongSentenceRule(messages, userConfig),
+            createMorfologikSpellerRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createWordRepeatBeginningRule(messages),
+            createWordRepeatRule(messages),
+            createNumeralStressRule(messages)
     );
   }
 
-  @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new GreekTagger();
-    }
-    return tagger;
+  public MorfologikGreekSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikGreekSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getSpellingIgnoreWords());
+  }
+
+  public NumeralStressRule createNumeralStressRule(ResourceBundle messages) throws Exception {
+      return new NumeralStressRule(getUseMessages(messages));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule("EL_UNPAIRED_BRACKETS", getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "“", "\"", "«"),
+              Arrays.asList("]", ")", "}", "”", "\"", "»"));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      // GTODO Shouldn't this be using items from the messages?
+      return new CommaWhitespaceRule(getUseMessages(messages),
+          Example.wrong("Το κόμμα χωρίζει προτάσεις<marker> ,</marker> όρους προτάσεων και φράσεις."),
+          Example.fixed("Το κόμμα χωρίζει προτάσεις<marker>,</marker> όρους προτάσεων και φράσεις."));
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(getUseMessages(messages), confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords);
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      // GTODO Shouldn't this be using items from the messages?
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+          Example.wrong("Η τελεία είναι σημείο στίξης. <marker>δείχνει</marker> το τέλος μίας πρότασης."),
+          Example.fixed("Η τελεία είναι σημείο στίξης. <marker>Δείχνει</marker> το τέλος μίας πρότασης."));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public WordRepeatBeginningRule createWordRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatBeginningRule(getUseMessages(messages));
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    return new GreekWordTokenizer();
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new GreekSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new XmlRuleDisambiguator(new Greek());
-    }
-    return disambiguator;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
+  }
+
+  @Override
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override

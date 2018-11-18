@@ -18,14 +18,13 @@
  */
 package org.languagetool.rules.gl;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
@@ -42,17 +41,8 @@ public class CastWordsRule extends AbstractSimpleReplaceRule {
 
   public static final String GL_CAST_WORDS_RULE = "GL_CAST_WORDS";
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale GL_LOCALE = new Locale("gl");
-
-  @Override
-  protected Map<String, List<String>> getWrongWords() {
-    return wrongWords;
-  }
-
-  public CastWordsRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
-    wrongWords = load("/gl/spanish.txt", dataBroker);
+  public CastWordsRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+      super(messages, wrongWords, caseCon);
   }
 
   @Override
@@ -79,11 +69,6 @@ public class CastWordsRule extends AbstractSimpleReplaceRule {
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return GL_LOCALE;
   }
 
 }

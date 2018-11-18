@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,34 +24,31 @@ import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.tools.Tools;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 /**
- * A rule that matches redundant expression. 
+ * A rule that matches redundant expression.
  * Galician implementations. Loads the list of words from
  * <code>/gl/redundancies.txt</code>.
  *
- * @author Tiago F. Santos 
+ * @author Tiago F. Santos
  * @since 4.0
  */
 public class GalicianRedundancyRule extends AbstractSimpleReplaceRule2 {
 
   public static final String GL_REDUNDANCY_REPLACE = "GL_REDUNDANCY_REPLACE";
 
-  private static final String FILE_NAME = "/gl/redundancies.txt";
-  private static final Locale GL_LOCALE = new Locale("gl");  // locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/gl/redundancies.txt";
+  // GTODO private static final Locale GL_LOCALE = new Locale("gl");  // locale used on case-conversion
 
-  @Override
-  public final String getFileName() {
-    return FILE_NAME;
-  }
-
-  public GalicianRedundancyRule(ResourceBundle messages) throws IOException {
-    super(messages, new Galician());
+  public GalicianRedundancyRule(ResourceBundle messages, List<Map<String, String>> wordinessWords, CaseConverter caseCon) {
+    super(messages, wordinessWords, caseCon);
     super.setCategory(Categories.REDUNDANCY.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
     addExamplePair(Example.wrong("<marker>duna de area</marker>"),
@@ -87,10 +84,11 @@ public class GalicianRedundancyRule extends AbstractSimpleReplaceRule2 {
   public URL getUrl() {
     return Tools.getUrl("https://gl.wikipedia.org/wiki/Pleonasmo");
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return GL_LOCALE;
   }
-
+*/
 }

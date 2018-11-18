@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,25 +16,30 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.synthesis.gl;
+package org.languagetool.databroker;
 
+import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
-import morfologik.stemming.IStemmer;
+import org.languagetool.rules.spelling.hunspell.*;
 
-import org.languagetool.synthesis.BaseSynthesizer;
+public interface GalicianResourceDataBroker extends ResourceDataBroker {
 
-/**
- * Galician word form synthesizer.
- * Based on Dutch word form synthesizer.
- * @author Susana Sotelo
- */
-public class GalicianSynthesizer extends BaseSynthesizer {
-// GTODO Remove this class, not needed.
-  // GTODO private static final String RESOURCE_FILENAME = "/gl/galician_synth.dict";
-  // GTODO private static final String TAGS_FILE_NAME = "/gl/galician_tags.txt";
+    List<String> getSpellingIgnoreWords() throws Exception;
 
-  public GalicianSynthesizer(IStemmer stemmer, Set<String> tags) {
-    super(stemmer, tags);
-  }
+    Hunspell.Dictionary getHunspellDictionary() throws Exception;
+
+    Map<String, List<String>> getWrongWords() throws Exception;
+
+    Map<String, List<String>> getCastWords() throws Exception;
+
+    List<Map<String, String>> getRedundancyWords() throws Exception;
+
+    List<Map<String, String>> getWikipediaWords() throws Exception;
+
+    List<Map<String, String>> getWordinessWords() throws Exception;
+
+    List<Map<String, String>> getBarbarismsWords() throws Exception;
+
 }

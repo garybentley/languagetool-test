@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,9 +21,9 @@ package org.languagetool.tagging.gl;
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
-import org.languagetool.tokenizers.WordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.language.Galician;
+import org.languagetool.tagging.Tagger;
 
 /**
  * @author Susana Sotelo Docio
@@ -31,17 +31,18 @@ import java.io.IOException;
  */
 public class GalicianTaggerTest {
 
-  private GalicianTagger tagger;
-  private WordTokenizer tokenizer;
-  
+  private Tagger tagger;
+  private Tokenizer tokenizer;
+
   @Before
-  public void setUp() {
-    tagger = new GalicianTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    Galician lang = new Galician();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("Todo vai mudar",
         "Todo/[todo]DI0MS0|Todo/[todo]PI0MS000 -- vai/[ir]VMIP3S0|vai/[ir]VMM02S0 -- mudar/[mudar]VMN0000|mudar/[mudar]VMN01S0|mudar/[mudar]VMN03S0|mudar/[mudar]VMSF1S0|mudar/[mudar]VMSF3S0", tokenizer, tagger);
     TestTools.myAssert("Se aínda somos galegos é por obra e graza do idioma",

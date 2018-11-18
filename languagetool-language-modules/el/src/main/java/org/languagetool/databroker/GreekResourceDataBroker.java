@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,18 +16,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.rules.ja;
+package org.languagetool.databroker;
 
-import org.junit.Test;
-import org.languagetool.language.Japanese;
-import org.languagetool.rules.patterns.PatternRuleTest;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 
-public class JapanesePatternRuleTest extends PatternRuleTest {
+import morfologik.stemming.Dictionary;
 
-  @Test
-  public void testRules() throws Exception {
-    Japanese lang = new Japanese();
-    runTestForLanguage(lang);
-  }
+import org.languagetool.UserConfig;
+
+public interface GreekResourceDataBroker extends ResourceDataBroker {
+
+    List<String> getSpellingIgnoreWords() throws Exception;
+
+    Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception;
 
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,17 +21,15 @@ package org.languagetool;
 import org.junit.Test;
 import org.languagetool.language.Japanese;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class JLanguageToolTest {
 
   @Test
-  public void testJapanese() throws IOException {
+  public void testJapanese() throws Exception {
     final JLanguageTool tool = new JLanguageTool(new Japanese());
     assertEquals(0, tool.check("エラーを含まないテスト文です。").size());
     assertEquals(1, tool.check("エラーお含むテスト文です。").size());
   }
-  
+
 }

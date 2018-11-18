@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,13 +20,20 @@
 package org.languagetool.tokenizers.ja;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Japanese;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class JapaneseSRXSentenceTokenizerTest {
 
-  private final SRXSentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Japanese());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Japanese lang = new Japanese();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public void testTokenize() {
@@ -36,7 +43,7 @@ public class JapaneseSRXSentenceTokenizerTest {
     testSplit("テスト用の文です！", "追加のテスト用の文です。");
     testSplit("テスト用の文です... ", "追加のテスト用の文です。");
     testSplit("アドレスはhttp://www.test.deです。");
-    
+
     testSplit("これは(!)の文です。");
     testSplit("これは(!!)の文です。");
     testSplit("これは(?)の文です。");
@@ -45,7 +52,7 @@ public class JapaneseSRXSentenceTokenizerTest {
   }
 
   private void testSplit(String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

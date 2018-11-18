@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,15 +24,16 @@ import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.tools.Tools;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import java.net.URL;
 
 /**
- * A rule that matches words which should not be used and suggests correct ones instead. 
+ * A rule that matches words which should not be used and suggests correct ones instead.
  * Romanian implementations. Loads the list of words from
  * <code>/ro/replace.txt</code>.
  *
@@ -43,16 +44,11 @@ public class GalicianBarbarismsRule extends AbstractSimpleReplaceRule2 {
 
   public static final String GALICIAN_BARBARISM_RULE = "GL_BARBARISM_REPLACE";
 
-  private static final String FILE_NAME = "/gl/barbarisms.txt";
-  private static final Locale GL_LOCALE = new Locale("gl");  // locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/gl/barbarisms.txt";
+  // GTODO private static final Locale GL_LOCALE = new Locale("gl");  // locale used on case-conversion
 
-  @Override
-  public final String getFileName() {
-    return FILE_NAME;
-  }
-
-  public GalicianBarbarismsRule(ResourceBundle messages) throws IOException {
-    super(messages, new Galician());
+  public GalicianBarbarismsRule(ResourceBundle messages, List<Map<String, String>> barbarisms, CaseConverter caseCon) {
+    super(messages, barbarisms, caseCon);
     super.setCategory(Categories.STYLE.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.LocaleViolation);
     addExamplePair(Example.wrong("<marker>curriculum vitae</marker>"),
@@ -87,11 +83,6 @@ public class GalicianBarbarismsRule extends AbstractSimpleReplaceRule2 {
   @Override
   public URL getUrl() {
     return Tools.getUrl("https://gl.wikipedia.org/wiki/Xenismo");
-  }
-
-  @Override
-  public Locale getLocale() {
-    return GL_LOCALE;
   }
 
 }

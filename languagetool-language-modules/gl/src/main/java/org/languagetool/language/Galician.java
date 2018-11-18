@@ -24,36 +24,57 @@ import org.languagetool.UserConfig;
 import org.languagetool.rules.*;
 import org.languagetool.rules.gl.*;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.gl.GalicianSynthesizer;
 import org.languagetool.rules.spelling.hunspell.HunspellRule;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.gl.GalicianHybridDisambiguator;
 import org.languagetool.tagging.gl.GalicianTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.gl.GalicianWordTokenizer;
+import org.languagetool.databroker.*;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Collections;
+import java.util.Locale;
 
-public class Galician extends Language {
-
+public class Galician extends Language<GalicianResourceDataBroker> {
+/*
   private Tagger tagger;
   private Tokenizer wordTokenizer;
   private SentenceTokenizer sentenceTokenizer;
   private Synthesizer synthesizer;
   private Disambiguator disambiguator;
+*/
+  public static final String LANGUAGE_ID = "gl";
+  public static final String COUNTRY_ID = "ES";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public GalicianResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultGalicianResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
+
+  @Override
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -62,45 +83,28 @@ public class Galician extends Language {
   }
 
   @Override
-  public String getShortCode() {
-    return "gl";
-  }
-
-  @Override
   public String[] getCountries() {
     return new String[]{"ES"};
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new GalicianTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new GalicianWordTokenizer();
-    }
-    return wordTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new GalicianSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new GalicianHybridDisambiguator(getUseDataBroker());
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
@@ -117,36 +121,133 @@ public class Galician extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages,
-                Example.wrong("Tomamos café<marker> ,</marker> queixo, bolachas e uvas."),
-                Example.fixed("Tomamos café<marker>,</marker> queixo, bolachas e uvas.")),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "“", "«", "»", "‘", "\"", "'"),
-                    Arrays.asList("]", ")", "}", "”", "»", "«", "’", "\"", "'")),
-            new HunspellRule(messages, this, userConfig),
-            new UppercaseSentenceStartRule(messages, this,
-                Example.wrong("Esta casa é vella. <marker>foi</marker> construida en 1950."),
-                Example.fixed("Esta casa é vella. <marker>Foi</marker> construida en 1950.")),
-            new MultipleWhitespaceRule(messages, this),
-            new LongSentenceRule(messages, userConfig, -1, true),
-            new LongParagraphRule(messages, this, userConfig),
-            new SentenceWhitespaceRule(messages),
-            new WhiteSpaceBeforeParagraphEnd(messages, this),
-            new WhiteSpaceAtBeginOfParagraph(messages),
-            new EmptyLineRule(messages, this),
-            new ParagraphRepeatBeginningRule(messages, this),
-            new PunctuationMarkAtParagraphEnd(messages, this),
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createSpellerRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createLongSentenceRule(messages, userConfig),
+            createLongParagraphRule(messages, userConfig),
+            createSentenceWhitespaceRule(messages),
+            createWhiteSpaceBeforeParagraphEndRule(messages),
+            createWhiteSpaceAtBeginOfParagraphRule(messages),
+            createEmptyLineRule(messages),
+            createParagraphRepeatBeginningRule(messages),
+            createPunctuationMarkAtParagraphEndRule(messages),
             // Specific to Galician:
-            new SimpleReplaceRule(messages, getUseDataBroker()),
-            new CastWordsRule(messages, getUseDataBroker()),
-            new GalicianRedundancyRule(messages),
-            new GalicianWordinessRule(messages),
-            new GalicianBarbarismsRule(messages),
-            new GalicianWikipediaRule(messages)
+            createReplaceRule(messages),
+            createCastWordsRule(messages),
+            createRedundancyRule(messages),
+            createWordinessRule(messages),
+            createBarbarismsRule(messages),
+            createWikipediaRule(messages)
     );
+  }
+
+  public HunspellRule createSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new HunspellRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getHunspellDictionary(), getUseDataBroker().getSpellingIgnoreWords(), Collections.emptyList(), null);
+  }
+
+  public CastWordsRule createCastWordsRule(ResourceBundle messages) throws Exception {
+      return new CastWordsRule(getUseMessages(messages), getUseDataBroker().getCastWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages),
+          Example.wrong("Tomamos café<marker> ,</marker> queixo, bolachas e uvas."),
+          Example.fixed("Tomamos café<marker>,</marker> queixo, bolachas e uvas."));
+  }
+
+  public PunctuationMarkAtParagraphEnd createPunctuationMarkAtParagraphEndRule(ResourceBundle messages) throws Exception {
+      return new PunctuationMarkAtParagraphEnd(getUseMessages(messages), this);
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "“", "«", "»", "‘", "\"", "'"),
+              Arrays.asList("]", ")", "}", "”", "»", "«", "’", "\"", "'"));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+                Example.wrong("Esta casa é vella. <marker>foi</marker> construida en 1950."),
+                Example.fixed("Esta casa é vella. <marker>Foi</marker> construida en 1950."));
+  }
+
+  public GalicianRedundancyRule createRedundancyRule(ResourceBundle messages) throws Exception {
+      return new GalicianRedundancyRule(getUseMessages(messages), getUseDataBroker().getRedundancyWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public WhiteSpaceBeforeParagraphEnd createWhiteSpaceBeforeParagraphEndRule(ResourceBundle messages) throws Exception {
+      return new WhiteSpaceBeforeParagraphEnd(getUseMessages(messages), this);
+  }
+
+  public WhiteSpaceAtBeginOfParagraph createWhiteSpaceAtBeginOfParagraphRule(ResourceBundle messages) throws Exception {
+      return new WhiteSpaceAtBeginOfParagraph(getUseMessages(messages));
+  }
+
+  public EmptyLineRule createEmptyLineRule(ResourceBundle messages) throws Exception {
+      return new EmptyLineRule(getUseMessages(messages), this);
+  }
+
+  public ParagraphRepeatBeginningRule createParagraphRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new ParagraphRepeatBeginningRule(getUseMessages(messages), this);
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(messages, confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords, true);
+  }
+
+  public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new SentenceWhitespaceRule(getUseMessages(messages));
+  }
+
+  public LongParagraphRule createLongParagraphRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongParagraphRule(getUseMessages(messages), this, maxWords);
+  }
+
+  public LongParagraphRule createLongParagraphRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+         confWords = userConfig.getConfigValueByID(LongParagraphRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongParagraphRule(messages, confWords);
+  }
+
+  public GalicianWikipediaRule createWikipediaRule(ResourceBundle messages) throws Exception {
+      return new GalicianWikipediaRule(getUseMessages(messages), getUseDataBroker().getWikipediaWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public GalicianBarbarismsRule createBarbarismsRule(ResourceBundle messages) throws Exception {
+      return new GalicianBarbarismsRule(getUseMessages(messages), getUseDataBroker().getBarbarismsWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public GalicianWordinessRule createWordinessRule(ResourceBundle messages) throws Exception {
+      return new GalicianWordinessRule(getUseMessages(messages), getUseDataBroker().getWordinessWords(), getUseDataBroker().getCaseConverter());
   }
 
   @Override

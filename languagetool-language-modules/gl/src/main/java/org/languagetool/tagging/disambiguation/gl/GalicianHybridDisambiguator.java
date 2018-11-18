@@ -40,10 +40,11 @@ public class GalicianHybridDisambiguator extends AbstractDisambiguator {
     private final Disambiguator chunker;
     private final Disambiguator disambiguator;
 
-    public GalicianHybridDisambiguator(ResourceDataBroker dataBroker) {
-        super(dataBroker);
-        chunker = new MultiWordChunker("/gl/multiwords.txt", dataBroker);
-        disambiguator = new XmlRuleDisambiguator(new Galician());
+    public GalicianHybridDisambiguator(Disambiguator chunker, Disambiguator disambiguator) {
+        this.chunker = chunker;
+        this.disambiguator = disambiguator;
+        // GTODO chunker = new MultiWordChunker("/gl/multiwords.txt", dataBroker);
+        // GTODO disambiguator = new XmlRuleDisambiguator(new Galician());
     }
 
     /**
@@ -52,7 +53,7 @@ public class GalicianHybridDisambiguator extends AbstractDisambiguator {
      */
     @Override
     public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-            throws IOException {
+            throws Exception {
         return disambiguator.disambiguate(chunker.disambiguate(input));
     }
 

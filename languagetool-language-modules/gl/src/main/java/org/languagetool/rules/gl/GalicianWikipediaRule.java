@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005-2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,36 +24,31 @@ import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.tools.Tools;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import java.net.URL;
 
 /**
- * A rule that matches common Wikipedia errors. 
+ * A rule that matches common Wikipedia errors.
  * Galician implementations. Loads the list of words from
  * <code>/gl/wikipedia.txt</code>.
  *
- * @author Tiago F. Santos 
+ * @author Tiago F. Santos
  * @since 4.0
  */
 public class GalicianWikipediaRule extends AbstractSimpleReplaceRule2 {
 
   public static final String WIKIPEDIA_COMMON_ERRORS = "GL_WIKIPEDIA_COMMON_ERRORS";
 
-  private static final String FILE_NAME = "/gl/wikipedia.txt";
-  private static final Locale GL_LOCALE = new Locale("gl");// locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/gl/wikipedia.txt";
+  // GTODO private static final Locale GL_LOCALE = new Locale("gl");// locale used on case-conversion
 
-  @Override
-  public final String getFileName() {
-    return FILE_NAME;
-  }
-
-
-  public GalicianWikipediaRule(ResourceBundle messages) throws IOException {
-    super(messages, new Galician());
+  public GalicianWikipediaRule(ResourceBundle messages, List<Map<String, String>> wikipediaWords, CaseConverter caseCon) {
+    super(messages, wikipediaWords, caseCon);
     super.setCategory(Categories.WIKIPEDIA.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Grammar);
     addExamplePair(Example.wrong("<marker>a efectos de</marker>"),
@@ -74,7 +69,7 @@ public class GalicianWikipediaRule extends AbstractSimpleReplaceRule2 {
   public String getShort() {
     return "Erro gramatical ou de normativa";
   }
-  
+
   @Override
   public String getSuggestion() {
     return " é un erro. Considere utilizar ";
@@ -88,11 +83,6 @@ public class GalicianWikipediaRule extends AbstractSimpleReplaceRule2 {
   @Override
   public URL getUrl() {
     return Tools.getUrl("https://gl.wikipedia.org/wiki/Wikipedia:Erros_de_ortograf%C3%ADa_e_desviaci%C3%B3ns");
-  }
-
-  @Override
-  public Locale getLocale() {
-    return GL_LOCALE;
   }
 
 }

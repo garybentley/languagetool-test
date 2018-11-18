@@ -427,7 +427,6 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
     };
 
     private Word2VecModel word2VecModel;
-    private Set<Dictionary> dictionaries;
     private ResourceBundle messageBundle;
     private List<AbstractPatternRule> patternRules;
     private Disambiguator disambiguator;
@@ -875,7 +874,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
       return null;
   }
 
-  public static List<Map<String, String>> createWrongWords2(Path path, WordTokenizer wordTokenizer, Charset charset) throws Exception {
+  public static List<Map<String, String>> createWrongWords2(Path path, Tokenizer wordTokenizer, Charset charset) throws Exception {
       Objects.requireNonNull(path, "Path must be specified.");
       path = path.toRealPath();
       if (Files.notExists(path)) {
@@ -925,7 +924,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    * Loads a set of wrong words from the rules path specified.  This is designed for use with AbstractSimpleReplaceRule2.
    *
    */
-  public List<Map<String, String>> createWrongWords2FromRulesPath(String path, WordTokenizer tokenizer) throws Exception {
+  public List<Map<String, String>> createWrongWords2FromRulesPath(String path, Tokenizer tokenizer) throws Exception {
       if (rulesDirPathExists(path)) {
           return createWrongWords2(getRulesDirPath(path), tokenizer, DEFAULT_CHARSET);
       }

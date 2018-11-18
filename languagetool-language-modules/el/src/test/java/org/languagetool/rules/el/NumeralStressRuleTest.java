@@ -31,7 +31,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * NumeralStressRule TestCase.
- * 
+ *
  * @author Panagiotis Minos
  * @since 3.3
  */
@@ -41,13 +41,14 @@ public class NumeralStressRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new NumeralStressRule(TestTools.getMessages("el"));
-    langTool = new JLanguageTool(new Greek());
+  public void setUp() throws Exception {
+    Greek lang = new Greek();
+    rule = lang.createNumeralStressRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     assertCorrect("1ος");
     assertCorrect("2η");
@@ -67,15 +68,15 @@ public class NumeralStressRuleTest {
     assertIncorrect("2000ων", "2000ών");
     assertIncorrect("2010ές", "2010ες");
     assertIncorrect("2020α", "2020ά");
-    
+
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence, String correction) throws IOException {
+  private void assertIncorrect(String sentence, String correction) throws Exception {
     final RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals(1, matches.length);
     assertEquals(1, matches[0].getSuggestedReplacements().size());

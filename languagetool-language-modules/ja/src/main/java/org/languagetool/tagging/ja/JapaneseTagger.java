@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.tagging.ja;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,7 @@ import org.languagetool.tagging.Tagger;
 public class JapaneseTagger implements Tagger {
 
   @Override
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) {
     List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>(sentenceTokens.size());
     int pos = 0;
 

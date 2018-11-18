@@ -164,6 +164,11 @@ This is a list of things that need to be changed/looked at:
 * be has no speller test.
 * da has very few tests.
 * pl why doesn't polish have a double punctuation rule?
+* Create a hybrid disambiguator that removes needs for per language hybrid disambiguator.
+* gl/GalicianSynthesizer remove file, not needed.
+* gl/GalicianTagger (also pt/PortugueseTagger and maybe others) consider passing in IStemmer instead of creating one for each tag call.
+* el/Greek doesn't pass userConfig to morfo speller rule.
+* el virtually no tests, no speller check.
 
 ## The information below is from the standard LanguageTool README
 

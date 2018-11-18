@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,14 +18,14 @@
  */
 package org.languagetool.tagging.gl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import morfologik.stemming.DictionaryLookup;
+import morfologik.stemming.Dictionary;
 import morfologik.stemming.IStemmer;
 
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,9 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.chunking.ChunkTag;
 import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
 import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /** Galician Part-of-speech tagger.
  *
@@ -49,6 +51,14 @@ public class GalicianTagger extends BaseTagger {
 
   private static final Pattern PREFIXES_FOR_VERBS = Pattern.compile("(auto|re)(...+)",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
+  private CaseConverter caseConverter;
+
+  public GalicianTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
+    super(dict, tagger, caseCon, true);
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case Converter must be provided.");
+  }
+/*
+GTODO Clean up
   @Override
   public String getManualAdditionsFileName() {
     return "/gl/added.txt";
@@ -67,10 +77,9 @@ public class GalicianTagger extends BaseTagger {
   public boolean overwriteWithManualTagger(){
     return false;
   }
-
+*/
   @Override
-  public List<AnalyzedTokenReadings> tag(final List<String> sentenceTokens)
-      throws IOException {
+  public List<AnalyzedTokenReadings> tag(final List<String> sentenceTokens) {
 
     final List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
@@ -87,11 +96,11 @@ public class GalicianTagger extends BaseTagger {
         word = word.replace("’", "'");
       }
       final List<AnalyzedToken> l = new ArrayList<>();
-      final String lowerWord = word.toLowerCase(conversionLocale);
+      final String lowerWord = caseConverter.toLowerCase(word);
       final boolean isLowercase = word.equals(lowerWord);
       final boolean isMixedCase = StringTools.isMixedCase(word);
       List<AnalyzedToken> taggerTokens = asAnalyzedTokenListForTaggedWords(word, getWordTagger().tag(word));
-      
+
       // normal case:
       addTokens(taggerTokens, l);
       // tag non-lowercase (alluppercase or startuppercase), but not mixedcase
@@ -130,7 +139,7 @@ public class GalicianTagger extends BaseTagger {
     List<AnalyzedToken> additionalTaggedTokens = new ArrayList<>();
     //Any well-formed adverb with suffix -mente is tagged as an adverb of manner (RM)
     if (word.endsWith("mente")){
-      final String lowerWord = word.toLowerCase(conversionLocale);
+      final String lowerWord = caseConverter.toLowerCase(word);
       final String possibleAdj = lowerWord.replaceAll("^(.+)mente$", "$1");
       List<AnalyzedToken> taggerTokens;
       taggerTokens = asAnalyzedTokenList(lowerWord, dictLookup.lookup(possibleAdj));

@@ -192,7 +192,7 @@ public class English extends Language<EnglishResourceDataBroker> implements Auto
 
   public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
       // GTODO Shouldn't this be using items from the messages?
-      return new CommaWhitespaceRule(messages,
+      return new CommaWhitespaceRule(getUseMessages(messages),
               Example.wrong("We had coffee<marker> ,</marker> cheese and crackers and grapes."),
               Example.fixed("We had coffee<marker>,</marker> cheese and crackers and grapes."));
   }
@@ -233,7 +233,7 @@ public class English extends Language<EnglishResourceDataBroker> implements Auto
       if (userConfig != null) {
         confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
       }
-      return createLongSentenceRule(messages, confWords);
+      return createLongSentenceRule(getUseMessages(messages), confWords);
   }
 
   public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
@@ -249,7 +249,7 @@ public class English extends Language<EnglishResourceDataBroker> implements Auto
       if (userConfig != null) {
          confWords = userConfig.getConfigValueByID(LongParagraphRule.getRuleConfiguration().getRuleId());
       }
-      return createLongParagraphRule(messages, confWords);
+      return createLongParagraphRule(getUseMessages(messages), confWords);
   }
 
   public ParagraphRepeatBeginningRule createParagraphRepeatBeginningRule(ResourceBundle messages) throws Exception {

@@ -18,21 +18,18 @@
  */
 package org.languagetool.rules.gl;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * A rule that matches words or phrases which should not be used and suggests
  * correct ones instead.
- *
- * Galician implementation. Loads the list of words from
- * <code>rules/gl/words.txt</code>.
  *
  * @author Susana Sotelo
  *
@@ -42,19 +39,25 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
   public static final String GL_SIMPLE_REPLACE_RULE = "GL_SIMPLE_REPLACE";
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale GL_LOCALE = new Locale("gl");
-
+  //private Map<String, List<String>> wrongWords;
+  //private static final Locale GL_LOCALE = new Locale("gl");
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
     return wrongWords;
   }
-
+*/
+  public SimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+      super(messages, wrongWords, caseCon);
+  }
+/*
+GTODO
   public SimpleReplaceRule(ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
     super(messages, dataBroker);
     wrongWords = load("/gl/words.txt", dataBroker);
   }
-
+*/
   @Override
   public final String getId() {
     return GL_SIMPLE_REPLACE_RULE;
@@ -80,10 +83,11 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
   public boolean isCaseSensitive() {
     return false;
   }
-
+/*
+GTODO
   @Override
   public Locale getLocale() {
     return GL_LOCALE;
   }
-
+*/
 }

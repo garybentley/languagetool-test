@@ -18,14 +18,16 @@
  */
 package org.languagetool.tagging.el;
 
+import morfologik.stemming.Dictionary;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.ioperm.morphology.el.GreekAnalyzer;
 import org.ioperm.morphology.el.Lemma;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.tagging.BaseTagger;
 import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  *
@@ -34,14 +36,14 @@ import org.languagetool.tagging.WordTagger;
 public class GreekTagger extends BaseTagger {
 
   private final GreekAnalyzer tagger;
-
+/*
   @Override
   public String getManualAdditionsFileName() {
     return "/el/added.txt";
   }
-
-  public GreekTagger() {
-    super("/el/greek.dict",  new Locale("el"));
+*/
+  public GreekTagger(Dictionary dict, WordTagger wtagger, CaseConverter caseCon) {
+    super(dict, wtagger, caseCon, true);
     tagger = new GreekAnalyzer();
   }
 

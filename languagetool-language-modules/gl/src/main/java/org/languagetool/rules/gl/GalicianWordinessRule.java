@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,33 +23,29 @@ import org.languagetool.rules.AbstractSimpleReplaceRule2;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * A rule that matches wordy expressions. 
+ * A rule that matches wordy expressions.
  * Galician implementation. Loads the list of words from
  * <code>/gl/wordiness.txt</code>.
  *
- * @author Tiago F. Santos 
+ * @author Tiago F. Santos
  * @since 4.0
  */
 public class GalicianWordinessRule extends AbstractSimpleReplaceRule2 {
 
   public static final String GL_WORDINESS_REPLACE = "GL_WORDINESS_REPLACE";
 
-  private static final String FILE_NAME = "/gl/wordiness.txt";
-  private static final Locale GL_LOCALE = new Locale("gl");  // locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/gl/wordiness.txt";
+  // GTODO private static final Locale GL_LOCALE = new Locale("gl");  // locale used on case-conversion
 
-  @Override
-  public final String getFileName() {
-    return FILE_NAME;
-  }
-
-  public GalicianWordinessRule(ResourceBundle messages) throws IOException {
-    super(messages, new Galician());
+  public GalicianWordinessRule(ResourceBundle messages, List<Map<String, String>> wordinessWords, CaseConverter caseCon) {
+    super(messages, wordinessWords, caseCon);
     super.setCategory(Categories.REDUNDANCY.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
     addExamplePair(Example.wrong("<marker>Raramente é o caso en que acontece</marker> isto."),
@@ -89,10 +85,5 @@ public class GalicianWordinessRule extends AbstractSimpleReplaceRule2 {
    *    throw new RuntimeException(e);
    *  }
     }*/
-
-  @Override
-  public Locale getLocale() {
-    return GL_LOCALE;
-  }
 
 }

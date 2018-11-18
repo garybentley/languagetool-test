@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,7 @@ package org.languagetool.language;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 import org.languagetool.Language;
 import org.languagetool.UserConfig;
@@ -28,20 +29,38 @@ import org.languagetool.rules.DoublePunctuationRule;
 import org.languagetool.rules.MultipleWhitespaceRule;
 import org.languagetool.rules.Rule;
 import org.languagetool.tagging.Tagger;
-import org.languagetool.tagging.ja.JapaneseTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.ja.JapaneseWordTokenizer;
+import org.languagetool.databroker.*;
 
-public class Japanese extends Language {
+public class Japanese extends Language<JapaneseResourceDataBroker> {
 
   private Tagger tagger;
   private SentenceTokenizer sentenceTokenizer;
 
+  public static final String LANGUAGE_ID = "ja";
+  public static final String COUNTRY_ID = "JP";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
   @Override
-  public String getShortCode() {
-    return "ja";
+  public JapaneseResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultJapaneseResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
   }
 
   @Override
@@ -60,32 +79,35 @@ public class Japanese extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new DoublePunctuationRule(messages),
-            new MultipleWhitespaceRule(messages, this)
+            createDoublePunctuationRule(messages),
+            createMultipleWhitespaceRule(messages)
     );
   }
 
-  @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new JapaneseTagger();
-    }
-    return tagger;
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    return new JapaneseWordTokenizer();
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+    return getUseDataBroker().getWordTokenizer();
+  }
+
+  @Override
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
 }

@@ -18,8 +18,11 @@
  */
 package org.languagetool.synthesis.el;
 
+import java.util.Set;
+
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  *
@@ -27,10 +30,13 @@ import org.languagetool.databroker.ResourceDataBroker;
  */
 public class GreekSynthesizer extends BaseSynthesizer {
 
+/* GTODO Remove this class, not needed.
+*/
   private static final String RESOURCE_FILENAME = "/el/greek_synth.dict";
   private static final String TAGS_FILE_NAME = "/el/greek_tags.txt";
 
-  public GreekSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public GreekSynthesizer(IStemmer stemmer, Set<String> tags) {
+    super(stemmer, tags);
   }
+
 }

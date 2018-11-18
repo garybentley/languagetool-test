@@ -20,14 +20,14 @@ package org.languagetool.rules.is;
 
 import org.junit.Test;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
+import org.languagetool.language.Icelandic;
 
 public class IcelandicPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Icelandic lang = new Icelandic();
+    runTestForLanguage(lang);
   }
 
 }
