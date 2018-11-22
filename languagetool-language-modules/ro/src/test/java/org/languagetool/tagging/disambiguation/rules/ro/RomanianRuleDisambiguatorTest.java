@@ -24,8 +24,11 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Romanian;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
 import org.languagetool.tagging.disambiguation.xx.DemoDisambiguator;
+import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.ro.RomanianTagger;
+import org.languagetool.tagging.Tagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.ro.RomanianWordTokenizer;
 
@@ -33,24 +36,24 @@ import java.io.IOException;
 
 public class RomanianRuleDisambiguatorTest {
 
-  private RomanianTagger tagger;
-  private RomanianWordTokenizer tokenizer;
+  private Tagger tagger;
+  private Tokenizer tokenizer;
   private SentenceTokenizer sentenceTokenizer;
-  private XmlRuleDisambiguator disambiguator;
+  private Disambiguator disambiguator;
   private DemoDisambiguator disamb2;
 
   @Before
-  public void setUp() {
-    tagger = new RomanianTagger();
-    tokenizer = new RomanianWordTokenizer();
-    Romanian language = new Romanian();
-    sentenceTokenizer = new SRXSentenceTokenizer(language);
-    disambiguator = new XmlRuleDisambiguator(language);
+  public void setUp() throws Exception {
+    Romanian lang = new Romanian();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
+    sentenceTokenizer = lang.getSentenceTokenizer();
+    disambiguator = lang.getDisambiguator();
     disamb2 = new DemoDisambiguator();
   }
 
   @Test
-  public void testCare1() throws IOException {
+  public void testCare1() throws Exception {
     TestTools
             .myAssert(
                     "Persoana care face treabă.",
@@ -65,7 +68,7 @@ public class RomanianRuleDisambiguatorTest {
   }
 
   @Test
-  public void testEsteO() throws IOException {
+  public void testEsteO() throws Exception {
     TestTools
             .myAssert(
                     "este o masă.",
@@ -85,7 +88,7 @@ public class RomanianRuleDisambiguatorTest {
   }
 
   @Test
-  public void testDezambiguizareVerb() throws IOException {
+  public void testDezambiguizareVerb() throws Exception {
     TestTools
             .myAssert(
                     "vom participa la",

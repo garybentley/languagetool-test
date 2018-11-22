@@ -18,6 +18,7 @@
  */
 package org.languagetool.language;
 
+import org.languagetool.language.SerbianSerbian;
 import org.languagetool.Language;
 
 /**
@@ -29,7 +30,7 @@ public class SerbianConcurrencyTest extends AbstractLanguageConcurrencyTest {
 
   @Override
   protected Language createLanguage() {
-    return new Serbian();
+    return new SerbianSerbian();
   }
 
   @Override

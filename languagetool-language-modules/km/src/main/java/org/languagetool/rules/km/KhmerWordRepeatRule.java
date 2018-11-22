@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,12 +31,12 @@ import org.languagetool.rules.RuleMatch;
 
 /**
  * Check if a word is repeated in Khmer, e.g. the equivalent of "the the".
- *   
+ *
  * @author Daniel Naber and Lee Nakamura
  */
 public class KhmerWordRepeatRule extends Rule {
 
-  public KhmerWordRepeatRule(ResourceBundle messages, Language language) {
+  public KhmerWordRepeatRule(ResourceBundle messages) {
     super(messages);
     super.setCategory(Categories.MISC.getCategory(messages));
   }
@@ -58,7 +58,7 @@ public class KhmerWordRepeatRule extends Rule {
     AnalyzedTokenReadings[] tokensWithWS = sentence.getTokens();
 
     String prevToken = "";
-    // we start from token 1, token 0 is SENT_START 
+    // we start from token 1, token 0 is SENT_START
     for (int i = 1; i < tokens.length; i++) {
       String token = tokens[i].getToken();
       if (isWord(token) && prevToken.equalsIgnoreCase(token) && !ignore(sentence, tokensWithWS, i)) {
@@ -68,8 +68,8 @@ public class KhmerWordRepeatRule extends Rule {
                 messages.getString("repetition"),
                 messages.getString("desc_repetition_short"));
         List<String> replacements = new ArrayList<>();
-        replacements.add(prevToken + " " + token); // case 1: replace zero-width space w/ real space 
-        replacements.add(prevToken);               // case 2: remove repeated word - same as original suggestion 
+        replacements.add(prevToken + " " + token); // case 1: replace zero-width space w/ real space
+        replacements.add(prevToken);               // case 2: remove repeated word - same as original suggestion
         replacements.add(prevToken + "ៗ");        // case 3: same as case 2, just add "repetition character"
         ruleMatch.setSuggestedReplacements(replacements);
         ruleMatches.add(ruleMatch);

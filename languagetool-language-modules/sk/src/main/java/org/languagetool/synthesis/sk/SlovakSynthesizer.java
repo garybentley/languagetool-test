@@ -18,6 +18,11 @@
  */
 package org.languagetool.synthesis.sk;
 
+import java.util.Set;
+import java.util.ResourceBundle;
+
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
 import org.languagetool.databroker.ResourceDataBroker;
 
@@ -27,10 +32,10 @@ import org.languagetool.databroker.ResourceDataBroker;
  */
 public class SlovakSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = "/sk/slovak_synth.dict";
-  private static final String TAGS_FILE_NAME = "/sk/slovak_tags.txt";
+  // GTODO private static final String RESOURCE_FILENAME = "/sk/slovak_synth.dict";
+  // GTODO private static final String TAGS_FILE_NAME = "/sk/slovak_tags.txt";
 
-  public SlovakSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public SlovakSynthesizer(ResourceBundle messages, IStemmer stemmer, Set<String> tags) {
+      super(stemmer, tags);
   }
 }

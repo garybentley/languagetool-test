@@ -19,15 +19,15 @@
 package org.languagetool.rules.sk;
 
 import org.junit.Test;
+import org.languagetool.language.Slovak;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class SlovakPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Slovak lang = new Slovak();
+    runTestForLanguage(lang);
   }
 
 }

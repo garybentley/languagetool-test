@@ -19,15 +19,15 @@
 package org.languagetool.rules.ro;
 
 import org.junit.Test;
+import org.languagetool.language.Romanian;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class RomanianPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Romanian lang = new Romanian();
+    runTestForLanguage(lang);
   }
 
 }

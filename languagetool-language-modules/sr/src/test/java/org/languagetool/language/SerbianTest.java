@@ -29,7 +29,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class SerbianTest {
-
+/*
+GTODO Remove, no longer tests anything
   private final Serbian serbian = new Serbian();
   private final List<String> ruleFiles = new ArrayList<>();
   private static final List<String> RULE_FILE_NAMES = Arrays.asList(
@@ -53,5 +54,5 @@ public class SerbianTest {
   public void getRuleFileNames() throws Exception {
     assertEquals( ruleFiles, serbian.getRuleFileNames() );
   }
-
+*/
 }

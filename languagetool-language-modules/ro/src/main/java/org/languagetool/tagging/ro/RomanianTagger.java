@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,9 +18,12 @@
  */
 package org.languagetool.tagging.ro;
 
-import org.languagetool.tagging.BaseTagger;
+import morfologik.stemming.Dictionary;
 
-import java.util.Locale;
+import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * Romanian Part-of-speech tagger
@@ -29,6 +32,11 @@ import java.util.Locale;
  */
 public class RomanianTagger extends BaseTagger {
 
+    public RomanianTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+        super(baseDict, tagger, caseCon, true);
+    }
+/*
+GTODO
   public RomanianTagger() {
     super("/ro/romanian.dict", new Locale("ro"));
   }
@@ -41,5 +49,5 @@ public class RomanianTagger extends BaseTagger {
   public String getManualAdditionsFileName() {
     return "/ro/added.txt";
   }
-
+*/
 }

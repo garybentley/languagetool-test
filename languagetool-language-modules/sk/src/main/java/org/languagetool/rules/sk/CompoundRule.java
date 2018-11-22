@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,15 +26,16 @@ import org.languagetool.rules.CompoundRuleData;
 
 /**
  * Checks that compounds (if in the list) are not written as separate words.
- * 
+ *
  * @author Zdenko Podobný based on code by Marcin Miłkowski, Daniel Naber
  */
-public final class CompoundRule extends AbstractCompoundRule {
+public class CompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/sk/compounds.txt");
+  // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/sk/compounds.txt");
 
-  public CompoundRule(ResourceBundle messages) throws IOException {
+  public CompoundRule(ResourceBundle messages, CompoundRuleData data) {
     super(messages,
+            data,
             "Toto slovo sa zvyčajne píše so spojovníkom.",
             "Toto slovo sa obvykle píše bez spojovníka.",
             "Tento výraz sa bežne píše s alebo bez spojovníka.",
@@ -49,11 +50,6 @@ public final class CompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Slová so spojovníkom napr. použite „česko-slovenský” namiesto „česko slovenský”";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
 }

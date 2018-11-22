@@ -22,10 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
-import org.languagetool.language.JekavianSerbian;
+import org.languagetool.language.BosnianSerbian;
 import org.languagetool.rules.Rule;
-
-import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -36,12 +34,13 @@ public class MorfologikJekavianSpellerRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new MorfologikJekavianSpellerRule(TestTools.getMessages("sr"), new JekavianSerbian(), null);
-    languageTool = new JLanguageTool(new JekavianSerbian());
+    BosnianSerbian lang = new BosnianSerbian();
+    rule = lang.createMorfologikSpellerRule(null, null);
+    languageTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     // correct sentences
     assertEquals(0, rule.match(languageTool.getAnalyzedSentence("Тамо је лијеп цвијет.")).length);
     assertEquals(0, rule.match(languageTool.getAnalyzedSentence("Дјечак и дјевојчица играју се заједно.")).length);
@@ -50,9 +49,9 @@ public class MorfologikJekavianSpellerRuleTest {
     // Roman numerals
     assertEquals(0, rule.match(languageTool.getAnalyzedSentence("III")).length);
   }
-  
+
   @Test
-  public void testSpellingCheck() throws IOException {
+  public void testSpellingCheck() throws Exception {
     assertEquals(1, rule.match(languageTool.getAnalyzedSentence("Misspelled.")).length);
   }
 }

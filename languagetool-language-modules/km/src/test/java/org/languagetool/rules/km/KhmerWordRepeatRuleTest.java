@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,8 +23,6 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
 import org.languagetool.language.Khmer;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,9 +31,9 @@ import static org.junit.Assert.assertEquals;
 public class KhmerWordRepeatRuleTest {
 
   @Test
-  public void testWordRepeatRule() throws IOException {
+  public void testWordRepeatRule() throws Exception {
     final Khmer language = new Khmer();
-    KhmerWordRepeatRule rule = new KhmerWordRepeatRule(TestTools.getEnglishMessages(), language);
+    KhmerWordRepeatRule rule = language.createWordRepeatRule(null);
     JLanguageTool langTool = new JLanguageTool(language);
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("នេះ​ហើយៗ​នោះ។")).length);

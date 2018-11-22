@@ -1264,30 +1264,48 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
        return Class.forName(className, true, classLoader);
    }
 
-   public WordTagger createWordTaggerFromResourcePath(MorfologikTagger morfoTagger, boolean overwriteWithAddedTagger) throws Exception {
-       String manualRemovalFileName = String.format(WORD_TAGGER_REMOVED_WORDS_FILE_NAME, language.getLocale().getLanguage());
+   public static WordTagger createWordTagger(MorfologikTagger morfoTagger, Path addedWords, Path removedWords, boolean overwriteWithAddedTagger) throws Exception {
+       if (Files.exists(addedWords)) {
+           addedWords = addedWords.toRealPath();
+       }
+       if (Files.exists(removedWords)) {
+           removedWords = removedWords.toRealPath();
+       }
        ManualTagger removalTagger = null;
-       if (resourceDirPathExists(manualRemovalFileName)) {
-           Path path = getResourceDirPath(manualRemovalFileName);
-           try (InputStream stream = Files.newInputStream(path)) {
+       if (Files.exists(removedWords)) {
+           try (InputStream stream = Files.newInputStream(removedWords)) {
              removalTagger = new ManualTagger(stream);
          } catch(Exception e) {
-             throw new IOException(String.format("Unable to load removed words file: %1$s", path), e);
+             throw new IOException(String.format("Unable to load removed words from path: %1$s", removedWords), e);
          }
        }
 
-       String manualAdditionFileName = String.format(WORD_TAGGER_ADDED_WORDS_FILE_NAME, language.getLocale().getLanguage());
-       if (resourceDirPathExists(manualAdditionFileName)) {
-          Path path = getResourceDirPath(manualAdditionFileName);
-          try (InputStream stream = Files.newInputStream(path)) {
+       if (Files.exists(addedWords)) {
+          try (InputStream stream = Files.newInputStream(addedWords)) {
              ManualTagger manualTagger = new ManualTagger(stream);
              return new CombiningTagger(morfoTagger, manualTagger, removalTagger, overwriteWithAddedTagger);
           } catch(Exception e) {
-             throw new IOException(String.format("Unable to load added words file: %1$s", path), e);
+             throw new IOException(String.format("Unable to load added words from path: %1$s", addedWords), e);
           }
        } else {
            return morfoTagger;
        }
+
+   }
+
+   public WordTagger createWordTaggerFromResourcePath(MorfologikTagger morfoTagger, boolean overwriteWithAddedTagger) throws Exception {
+       String manualRemovalFileName = String.format(WORD_TAGGER_REMOVED_WORDS_FILE_NAME, language.getLocale().getLanguage());
+       String manualAdditionFileName = String.format(WORD_TAGGER_ADDED_WORDS_FILE_NAME, language.getLocale().getLanguage());
+       Path manualRemovalPath = null;
+       Path manualAdditionPath = null;
+       if (resourceDirPathExists(manualRemovalFileName)) {
+           manualRemovalPath = getResourceDirPath(manualRemovalFileName);
+       }
+
+       if (resourceDirPathExists(manualAdditionFileName)) {
+          manualAdditionPath = getResourceDirPath(manualAdditionFileName);
+      }
+      return createWordTagger(morfoTagger, manualAdditionPath, manualRemovalPath, overwriteWithAddedTagger);
    }
 
    public Dictionary getMorfologikBinaryDictionaryFromResourcePath(String path) throws Exception {

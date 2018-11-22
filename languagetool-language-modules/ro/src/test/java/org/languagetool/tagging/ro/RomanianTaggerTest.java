@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -51,7 +51,7 @@ public class RomanianTaggerTest extends AbstractRomanianTaggerTest {
     // now that lemma is correct, also check POS
     assertHasLemmaAndPos("merseserăm", "merge", "V0p1000im0");
     TestTools.myAssert("merseserăm", "merseserăm/[merge]V0p1000im0",
-            getTokenizer(), getTagger());
+            tokenizer, tagger);
   }
 
   /**
@@ -68,18 +68,18 @@ public class RomanianTaggerTest extends AbstractRomanianTaggerTest {
   @Test
   public void testTaggerUserDict() throws Exception {
     assertHasLemmaAndPos("configurați", "configura", "V0p2000cz0"); // de adăugat formele pentru infinitiv și participiu
-    // to be updated when the words from added.txt are moved to romanian.dict  
+    // to be updated when the words from added.txt are moved to romanian.dict
   }
 
   /**
    * the big picture: test is tagger performs well with a sentence
    */
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert(
                     "Cartea este frumoasă.",
                     "Cartea/[carte]Sfs3aac000 -- este/[fi]V0s3000izb -- frumoasă/[frumos]Afs3an0000",
-                    getTokenizer(), getTagger());
+                    tokenizer, tagger);
   }
 
 }

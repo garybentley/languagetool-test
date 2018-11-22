@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,9 +24,10 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.TestTools;
 import org.languagetool.language.Romanian;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.tagging.BaseTagger;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,29 +36,29 @@ import static org.junit.Assert.assertTrue;
 /**
  * Root class for RomanianTagger tests.
  * Provides convenient methods to find specific lemma/pos
- * 
+ *
  * @author Ionuț Păduraru
  */
 public abstract class AbstractRomanianTaggerTest {
 
-  private RomanianTagger tagger;
-  private WordTokenizer tokenizer;
+  protected Romanian lang;
+  protected Tagger tagger;
+  protected Tokenizer tokenizer;
 
   @Before
-  public void setUp() {
-    tagger = createTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    lang = new Romanian();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Romanian());
-  }
-
-  protected RomanianTagger createTagger() {
-    // override this if you need need another dictionary (a dictionary
-    // based on another file)
-    return new RomanianTagger();
+  public void testDictionary() throws Exception {
+    if (tagger instanceof BaseTagger) {
+        TestTools.testTaggerDictionary(((BaseTagger) tagger).getDictionary(), lang);
+    } else {
+        System.out.println("Unable to test tagger dictionary, tagger is instanceof: " + tagger.getClass().getName());
+    }
   }
 
   /**
@@ -68,7 +69,7 @@ public abstract class AbstractRomanianTaggerTest {
    * @param posTag expected tag for lemma
    */
   protected void assertHasLemmaAndPos(String inflected, String lemma,
-                                      String posTag) throws IOException {
+                                      String posTag) throws Exception {
     final List<AnalyzedTokenReadings> tags = tagger.tag(Arrays.asList(inflected));
     final StringBuilder allTags = new StringBuilder();
     boolean found = false;
@@ -90,14 +91,6 @@ public abstract class AbstractRomanianTaggerTest {
     assertTrue(String.format("Lemma and POS not found for word [%s]! "
             + "Expected [%s/%s]. Actual: %s", inflected, lemma, posTag,
             allTags.toString()), found);
-  }
-
-  public RomanianTagger getTagger() {
-    return tagger;
-  }
-
-  public WordTokenizer getTokenizer() {
-    return tokenizer;
   }
 
 }

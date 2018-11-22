@@ -18,40 +18,50 @@
  */
 package org.languagetool.rules.sr.jekavian;
 
-import org.languagetool.Language;
+import org.languagetool.language.JekavianSerbian;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
 
-import java.io.IOException;
-import java.util.ResourceBundle;
+import morfologik.stemming.Dictionary;
 
+import java.util.Set;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /** @since 4.0 */
 public final class MorfologikJekavianSpellerRule extends MorfologikSpellerRule {
 
   public static final String RULE_ID = "MORFOLOGIK_RULE_SR_JEKAVIAN";
-  
-  private static final String BASE_DICTIONARY_PATH = "/sr/dictionary/jekavian/";
 
+  // GTODO private static final String BASE_DICTIONARY_PATH = "/sr/dictionary/jekavian/";
+
+  public MorfologikJekavianSpellerRule(ResourceBundle messages, JekavianSerbian language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords);
+  }
+/*
+GTODO
   public MorfologikJekavianSpellerRule(
           ResourceBundle messages,
           Language language, UserConfig userConfig) throws IOException {
 
     super(messages, language, userConfig);
+    */
     /*addExamplePair(
             Example.wrong("Двије сам <marker>зивдјезе</marker> видјела."),
             Example.fixed("Двије сам <marker>звијезде</marker> видјела.")
     );*/
-  }
-
-  @Override
-  public String getFileName() {
-    return BASE_DICTIONARY_PATH + "serbian.dict";
-  }
+  //}
 
   @Override
   public String getId() {
     return RULE_ID;
+  }
+
+/*
+GTODO
+  @Override
+  public String getFileName() {
+    return BASE_DICTIONARY_PATH + "serbian.dict";
   }
 
   @Override
@@ -69,4 +79,5 @@ public final class MorfologikJekavianSpellerRule extends MorfologikSpellerRule {
   public String getProhibitFileName() {
     return BASE_DICTIONARY_PATH + "prohibit.txt";
   }
+*/
 }

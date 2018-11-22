@@ -18,17 +18,26 @@
  */
 package org.languagetool.synthesis.sr;
 
+import java.util.Set;
+import java.util.ResourceBundle;
+
+import morfologik.stemming.IStemmer;
+
+import org.languagetool.synthesis.BaseSynthesizer;
+
 /**
  * Serbian ekavian word form synthesizer
  *
  * @author Zoltan Csala
  * @since 4.0
  */
-public class EkavianSynthesizer extends SerbianSynthesizer {
+public class EkavianSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = DICTIONARY_PATH + "ekavian/serbian_synth.dict";
+// GTODO Remove class, no longer needed.
 
-  public EkavianSynthesizer() {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME);
+  // GTODO private static final String RESOURCE_FILENAME = DICTIONARY_PATH + "ekavian/serbian_synth.dict";
+
+  public EkavianSynthesizer(ResourceBundle messages, IStemmer stemmer, Set<String> tags) {
+      super(stemmer, tags);
   }
 }

@@ -18,6 +18,11 @@
  */
 package org.languagetool.synthesis.sr;
 
+import java.util.Set;
+import java.util.ResourceBundle;
+
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
 
 /**
@@ -28,14 +33,22 @@ import org.languagetool.synthesis.BaseSynthesizer;
  */
 public class SerbianSynthesizer extends BaseSynthesizer {
 
-  protected static final String DICTIONARY_PATH = "/sr/dictionary/";
-  protected static final String TAGS_FILE_NAME = DICTIONARY_PATH + "serbian_synth_tags.txt";
+// GTODO Reemove this class, no longer needed.
+
+  // GTODO protected static final String DICTIONARY_PATH = "/sr/dictionary/";
+  // GTODO protected static final String TAGS_FILE_NAME = DICTIONARY_PATH + "serbian_synth_tags.txt";
 
   /**
    * @param resourceFileName The dictionary file name.
    * @param tagFileName      The name of a file containing all possible tags.
    */
+   /*
   public SerbianSynthesizer(String resourceFileName, String tagFileName) {
     super(resourceFileName, tagFileName);
   }
+*/
+  public SerbianSynthesizer(ResourceBundle messages, IStemmer stemmer, Set<String> tags) {
+      super(stemmer, tags);
+  }
+
 }

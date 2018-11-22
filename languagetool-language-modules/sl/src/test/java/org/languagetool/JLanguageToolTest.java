@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,16 +21,14 @@ package org.languagetool;
 import org.junit.Test;
 import org.languagetool.language.Slovenian;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class JLanguageToolTest {
 
   @Test
-  public void testSlovenian() throws IOException {
+  public void testSlovenian() throws Exception {
     final JLanguageTool tool = new JLanguageTool(new Slovenian());
     assertEquals(1, tool.check("Kupil je npr. jajca, moko in mleko.").size());
   }
-  
+
 }

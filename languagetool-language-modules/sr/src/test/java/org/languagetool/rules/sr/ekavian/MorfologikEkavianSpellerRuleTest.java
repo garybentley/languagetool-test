@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.SerbianSerbian;
 import org.languagetool.rules.Rule;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikEkavianSpellerRuleTest {
@@ -36,12 +34,13 @@ public class MorfologikEkavianSpellerRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new MorfologikEkavianSpellerRule(TestTools.getMessages("sr"), new SerbianSerbian(), null);
-    languageTool = new JLanguageTool(new SerbianSerbian());
+    SerbianSerbian lang = new SerbianSerbian();
+    rule = lang.createMorfologikSpellerRule(null, null);
+    languageTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     // correct sentences
     assertEquals(0, rule.match(languageTool.getAnalyzedSentence("Тамо је леп цвет")).length);
     assertEquals(0, rule.match(languageTool.getAnalyzedSentence("Дечак и девојчица играју се заједно.")).length);

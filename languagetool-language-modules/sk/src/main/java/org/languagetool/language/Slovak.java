@@ -18,7 +18,7 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -28,33 +28,47 @@ import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.databroker.ResourceDataBroker;
 import org.languagetool.rules.*;
-import org.languagetool.rules.sk.CompoundRule;
-import org.languagetool.rules.sk.MorfologikSlovakSpellerRule;
+import org.languagetool.rules.sk.*;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.sk.SlovakSynthesizer;
 import org.languagetool.tagging.Tagger;
-import org.languagetool.tagging.sk.SlovakTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.databroker.*;
 
-public class Slovak extends Language {
+public class Slovak extends Language<SlovakResourceDataBroker> {
 
-  private static final List<String> RULE_FILES = Arrays.asList(
-    "grammar-typography.xml"
-  );
+    public static final String LANGUAGE_ID = "sk";
+    public static final String COUNTRY_ID = "SK";
 
-  private Tagger tagger;
-  private SentenceTokenizer sentenceTokenizer;
-  private Synthesizer synthesizer;
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+    @Override
+    public SlovakResourceDataBroker getUseDataBroker() throws Exception {
+        return super.getUseDataBroker();
+    }
+
+    @Override
+    public SlovakResourceDataBroker getDefaultDataBroker() throws Exception {
+        return new DefaultSlovakResourceDataBroker(this, getClass().getClassLoader());
+    }
+
+    @Override
+    public boolean isVariant() {
+        return false;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
+
+    @Override
+    public Language getDefaultLanguageVariant() {
+        return null;
+    }
 
   @Override
   public String getName() {
     return "Slovak";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "sk";
   }
 
   @Override
@@ -63,27 +77,18 @@ public class Slovak extends Language {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new SlovakTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new SlovakSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -94,23 +99,58 @@ public class Slovak extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "„", "»", "«", "\""),
-                    Arrays.asList("]", ")", "}", "“", "«", "»", "\"")),
-            new UppercaseSentenceStartRule(messages, this),
-            new WordRepeatRule(messages, this),
-            new MultipleWhitespaceRule(messages, this),
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createUppercaseSentenceStartRule(messages),
+            createWordRepeatRule(messages),
+            createMultipleWhitespaceRule(messages),
             // specific to Slovak:
-            new CompoundRule(messages),
-            new MorfologikSlovakSpellerRule(messages, this, userConfig)
+            createCompoundRule(messages),
+            createMorfologikSpellerRule(messages, userConfig)
             //new SlovakVesRule(messages)
     );
   }
 
+  public CompoundRule createCompoundRule(ResourceBundle messages) throws Exception {
+      return new CompoundRule(getUseMessages(messages), getUseDataBroker().getCompounds());
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "„", "»", "«", "\""),
+              Arrays.asList("]", ")", "}", "“", "«", "»", "\""));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public MorfologikSlovakSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikSlovakSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getSpellingIgnoreWords());
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+/*
+GTODO No longer applies
   @Override
   public List<String> getRuleFileNames() {
     List<String> ruleFileNames = super.getRuleFileNames();
@@ -120,5 +160,5 @@ public class Slovak extends Language {
     }
     return ruleFileNames;
   }
-
+*/
 }

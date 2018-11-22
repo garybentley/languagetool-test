@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,31 +22,34 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Slovak;
-import org.languagetool.tokenizers.WordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.tagging.BaseTagger;
 
 public class SlovakTaggerTest {
-    
-  private SlovakTagger tagger;
-  private WordTokenizer tokenizer;
-      
+
+  private Tagger tagger;
+  private Tokenizer tokenizer;
+
   @Before
-  public void setUp() {
-    tagger = new SlovakTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    Slovak lang = new Slovak();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Slovak());
+  public void testDictionary() throws Exception {
+      if (tagger instanceof BaseTagger) {
+          TestTools.testTaggerDictionary(((BaseTagger) tagger).getDictionary(), new Slovak());
+      }
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("Tu nájdete vybrané čísla a obsahy časopisu Kultúra slova.",
-        "Tu/[tu]J|Tu/[tu]PD|Tu/[tu]T -- nájdete/[nájsť]VKdpb+ -- vybrané/[vybraný]Gtfp1x|vybrané/[vybraný]Gtfp4x|vybrané/[vybraný]Gtfp5x|vybrané/[vybraný]Gtip1x|vybrané/[vybraný]Gtip4x|vybrané/[vybraný]Gtip5x|vybrané/[vybraný]Gtnp1x|vybrané/[vybraný]Gtnp4x|vybrané/[vybraný]Gtnp5x|vybrané/[vybraný]Gtns1x|vybrané/[vybraný]Gtns4x|vybrané/[vybraný]Gtns5x -- čísla/[číslo]SSnp1|čísla/[číslo]SSnp4|čísla/[číslo]SSnp5|čísla/[číslo]SSns2 -- a/[a]J|a/[a]O|a/[a]Q|a/[a]SUnp1|a/[a]SUnp2|a/[a]SUnp3|a/[a]SUnp4|a/[a]SUnp5|a/[a]SUnp6|a/[a]SUnp7|a/[a]SUns1|a/[a]SUns2|a/[a]SUns3|a/[a]SUns4|a/[a]SUns5|a/[a]SUns6|a/[a]SUns7|a/[a]T|a/[a]W|a/[as]W -- obsahy/[obsah]SSip1|obsahy/[obsah]SSip4|obsahy/[obsah]SSip5 -- časopisu/[časopis]SSis2|časopisu/[časopis]SSis3 -- Kultúra/[kultúra]SSfs1|Kultúra/[kultúra]SSfs5 -- slova/[slovo]SSns2", tokenizer, tagger);        
-    TestTools.myAssert("blabla","blabla/[null]null", tokenizer, tagger);        
+        "Tu/[tu]J|Tu/[tu]PD|Tu/[tu]T -- nájdete/[nájsť]VKdpb+ -- vybrané/[vybraný]Gtfp1x|vybrané/[vybraný]Gtfp4x|vybrané/[vybraný]Gtfp5x|vybrané/[vybraný]Gtip1x|vybrané/[vybraný]Gtip4x|vybrané/[vybraný]Gtip5x|vybrané/[vybraný]Gtnp1x|vybrané/[vybraný]Gtnp4x|vybrané/[vybraný]Gtnp5x|vybrané/[vybraný]Gtns1x|vybrané/[vybraný]Gtns4x|vybrané/[vybraný]Gtns5x -- čísla/[číslo]SSnp1|čísla/[číslo]SSnp4|čísla/[číslo]SSnp5|čísla/[číslo]SSns2 -- a/[a]J|a/[a]O|a/[a]Q|a/[a]SUnp1|a/[a]SUnp2|a/[a]SUnp3|a/[a]SUnp4|a/[a]SUnp5|a/[a]SUnp6|a/[a]SUnp7|a/[a]SUns1|a/[a]SUns2|a/[a]SUns3|a/[a]SUns4|a/[a]SUns5|a/[a]SUns6|a/[a]SUns7|a/[a]T|a/[a]W|a/[as]W -- obsahy/[obsah]SSip1|obsahy/[obsah]SSip4|obsahy/[obsah]SSip5 -- časopisu/[časopis]SSis2|časopisu/[časopis]SSis3 -- Kultúra/[kultúra]SSfs1|Kultúra/[kultúra]SSfs5 -- slova/[slovo]SSns2", tokenizer, tagger);
+    TestTools.myAssert("blabla","blabla/[null]null", tokenizer, tagger);
   }
 
 }

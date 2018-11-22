@@ -35,12 +35,13 @@ import org.languagetool.tagging.disambiguation.sr.SerbianHybridDisambiguator;
 import org.languagetool.tagging.sr.EkavianTagger;
 import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
+import org.languagetool.databroker.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 /**
  * Support for Serbian language
@@ -51,38 +52,28 @@ import java.util.ResourceBundle;
  *
  * @since 4.0
  */
-public class Serbian extends Language {
+public abstract class Serbian extends Language<SerbianResourceDataBroker> {
 
   private static final Language SERBIA_SERBIAN = new SerbianSerbian();
-
+/*
   private SentenceTokenizer sentenceTokenizer;
   private Tagger tagger;
   private Synthesizer synthesizer;
   private Disambiguator disambiguator;
-
-  // Grammar rules distributed over multiple .XML files
-  // We want to keep our rules small and tidy.
-  // TODO: Make names based on rules that will reside in these files
-  private static final List<String> RULE_FILES = Arrays.asList(
-          // grammar.xml will be added "by default" by method "getRuleFileNames"
-          "grammar-barbarism.xml",
-          "grammar-logical.xml",
-          "grammar-punctuation.xml",
-          "grammar-spelling.xml",
-          "grammar-style.xml"
-  );
-
+*/
   public Serbian() {
+  }
+
+  public static final String LANGUAGE_ID = "sr";
+
+  @Override
+  public SerbianResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
   }
 
   @Override
   public String getName() {
     return "Serbian";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "sr";
   }
 
   @Override
@@ -103,35 +94,23 @@ public class Serbian extends Language {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new EkavianTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new EkavianSynthesizer();
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new SerbianHybridDisambiguator();
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -139,37 +118,58 @@ public class Serbian extends Language {
     return LanguageMaintainedState.ActivelyMaintained;
   }
 
-
   // Rules common for all pronunciations of Serbian language
-  protected List<Rule> getBasicRules(ResourceBundle messages) {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-      new CommaWhitespaceRule(messages,
-        Example.wrong("Није шија<marker> ,</marker> него врат."),
-        Example.fixed("Није шија<marker>,</marker> него врат.")),
-      new DoublePunctuationRule(messages),
-      new GenericUnpairedBracketsRule(messages,
-        Arrays.asList("[", "(", "{", "„", "„", "\""),
-        Arrays.asList("]", ")", "}", "”", "“", "\"")),
-      new UppercaseSentenceStartRule(messages, this,
-        Example.wrong("Почела је школа. <marker>ђаци</marker> су поново сели у клупе."),
-        Example.fixed("Почела је школа. <marker>Ђаци</marker> су поново сели у клупе.")),
-      new MultipleWhitespaceRule(messages, this),
-      new SentenceWhitespaceRule(messages),
-      new WordRepeatRule(messages, this)
+      createCommaWhitespaceRule(messages),
+      createDoublePunctuationRule(messages),
+      createUnpairedBracketsRule(messages),
+      createUppercaseSentenceStartRule(messages),
+      createMultipleWhitespaceRule(messages),
+      createSentenceWhitespaceRule(messages),
+      createWordRepeatRule(messages)
     );
   }
 
-  @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig)
-          throws IOException {
-    List<Rule> rules = new ArrayList<>(getBasicRules(messages));
-    rules.add(new MorfologikEkavianSpellerRule(messages, this, null));
-    rules.add(new SimpleGrammarEkavianReplaceRule(messages));
-    rules.add(new SimpleStyleEkavianReplaceRule(messages));
-    return rules;
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      // GTODO Shouldn't this be using items from the messages?
+      return new CommaWhitespaceRule(getUseMessages(messages),
+      Example.wrong("Није шија<marker> ,</marker> него врат."),
+      Example.fixed("Није шија<marker>,</marker> него врат."));
   }
 
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
 
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "„", "„", "\""),
+              Arrays.asList("]", ")", "}", "”", "“", "\""));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      // GTODO Shouldn't this be using items from the messages?
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+          Example.wrong("Почела је школа. <marker>ђаци</marker> су поново сели у клупе."),
+          Example.fixed("Почела је школа. <marker>Ђаци</marker> су поново сели у клупе."));
+  }
+
+  public SentenceWhitespaceRule createSentenceWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new SentenceWhitespaceRule(getUseMessages(messages));
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+/*
+GTODO
   @Override
   public List<String> getRuleFileNames() {
     List<String> ruleFileNames = super.getRuleFileNames();
@@ -186,5 +186,5 @@ public class Serbian extends Language {
     }
     return ruleFileNames;
   }
-
+*/
 }

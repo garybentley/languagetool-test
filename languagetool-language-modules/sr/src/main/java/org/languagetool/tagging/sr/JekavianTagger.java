@@ -18,17 +18,24 @@
  */
 package org.languagetool.tagging.sr;
 
-import java.util.Locale;
+import morfologik.stemming.Dictionary;
+
+import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /** @since 4.0 */
-public class JekavianTagger extends SerbianTagger {
+public class JekavianTagger extends BaseTagger {
 
-  private static final String DICTIONARY_PATH = BASE_DICTIONARY_PATH + "/jekavian/";
+// GTODO Remove class, no longer used.
 
-  public JekavianTagger() {
-    super(DICTIONARY_PATH + "serbian.dict", new Locale("sr"));
+  // GTODO private static final String DICTIONARY_PATH = BASE_DICTIONARY_PATH + "/jekavian/";
+
+  public JekavianTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+      super(baseDict, tagger, caseCon, true);
   }
-
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return DICTIONARY_PATH + "added.txt";
@@ -38,4 +45,5 @@ public class JekavianTagger extends SerbianTagger {
   public String getManualRemovalsFileName() {
     return DICTIONARY_PATH + "removed.txt";
   }
+  */
 }

@@ -18,14 +18,14 @@
  */
 package org.languagetool.tagging.disambiguation.sr;
 
+import java.util.Objects;
+
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.language.Serbian;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
 import org.languagetool.tagging.disambiguation.MultiWordChunker;
 import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-
-import java.io.IOException;
 
 /**
  * Hybrid chunker-disambiguator for Serbian language.
@@ -37,16 +37,23 @@ import java.io.IOException;
 
 public class SerbianHybridDisambiguator extends AbstractDisambiguator {
 
-  private final Disambiguator chunker = new MultiWordChunker("/sr/multiwords.txt");
-  private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Serbian());
+  private final Disambiguator chunker;
+  // GTODO = new MultiWordChunker("/sr/multiwords.txt");
+  private final Disambiguator disambiguator;
+  // GTODO  = new XmlRuleDisambiguator(new Serbian());
+
+  public SerbianHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator) {
+      this.chunker = Objects.requireNonNull(chunker, "Chunker must be provided.");
+      this.disambiguator = Objects.requireNonNull(disambiguator, "Disambiguator must be provided.");
+  }
 
   /**
    * Calls two disambiguator classes: (1) a chunker; (2) a rule-based
    * disambiguator.
    */
   @Override
-  public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-          throws IOException {
+  public final AnalyzedSentence disambiguate(AnalyzedSentence input) throws Exception {
     return disambiguator.disambiguate(chunker.disambiguate(input));
   }
+
 }

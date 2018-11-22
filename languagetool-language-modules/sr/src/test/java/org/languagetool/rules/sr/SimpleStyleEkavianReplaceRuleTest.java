@@ -21,10 +21,9 @@ package org.languagetool.rules.sr;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
 import org.languagetool.TestTools;
-import org.languagetool.language.Serbian;
+import org.languagetool.language.SerbianSerbian;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.sr.ekavian.SimpleStyleEkavianReplaceRule;
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -32,10 +31,11 @@ import static org.junit.Assert.*;
 public class SimpleStyleEkavianReplaceRuleTest {
 
   @Test
-  public void testRule() throws IOException {
-    SimpleStyleEkavianReplaceRule rule = new SimpleStyleEkavianReplaceRule(TestTools.getEnglishMessages());
+  public void testRule() throws Exception {
+    SerbianSerbian lang = new SerbianSerbian();
+    SimpleStyleEkavianReplaceRule rule = lang.createStyleReplaceRule(null);
     RuleMatch[] matches;
-    JLanguageTool langTool = new JLanguageTool(new Serbian());
+    JLanguageTool langTool = new JLanguageTool(lang);
 
     // correct sentences:
     matches = rule.match(langTool.getAnalyzedSentence("Он је добар."));

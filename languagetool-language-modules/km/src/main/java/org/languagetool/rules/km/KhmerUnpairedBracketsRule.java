@@ -26,11 +26,11 @@ import org.languagetool.Language;
 import org.languagetool.rules.GenericUnpairedBracketsRule;
 
 public class KhmerUnpairedBracketsRule extends GenericUnpairedBracketsRule {
-  
+
   private static final List<String> KM_START_SYMBOLS = Arrays.asList("[", "(", "{", "“", "\"", "'", "«");
   private static final List<String> KM_END_SYMBOLS   = Arrays.asList("]", ")", "}", "”", "\"", "'", "»");
-  
-  public KhmerUnpairedBracketsRule(ResourceBundle messages, Language language) {
+
+  public KhmerUnpairedBracketsRule(ResourceBundle messages) {
     super(messages, KM_START_SYMBOLS, KM_END_SYMBOLS);
   }
 

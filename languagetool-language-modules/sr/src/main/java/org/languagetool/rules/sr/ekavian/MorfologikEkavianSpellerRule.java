@@ -18,13 +18,15 @@
  */
 package org.languagetool.rules.sr.ekavian;
 
-import org.languagetool.Language;
-import org.languagetool.UserConfig;
 import org.languagetool.language.SerbianSerbian;
+import org.languagetool.UserConfig;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
 
-import java.io.IOException;
+import morfologik.stemming.Dictionary;
+
+import java.util.List;
+import java.util.Set;
 import java.util.ResourceBundle;
 
 
@@ -32,29 +34,29 @@ import java.util.ResourceBundle;
 public class MorfologikEkavianSpellerRule extends MorfologikSpellerRule {
 
   public static final String RULE_ID = "MORFOLOGIK_RULE_SR_EKAVIAN";
-  
-  private static final String BASE_DICTIONARY_PATH = "/sr/dictionary/ekavian/";
 
-  public MorfologikEkavianSpellerRule(
-          ResourceBundle messages,
-          Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
-    addExamplePair(
+  // GTODO private static final String BASE_DICTIONARY_PATH = "/sr/dictionary/ekavian/";
+
+  public MorfologikEkavianSpellerRule(ResourceBundle messages, SerbianSerbian language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, List<String> prohibitedWords) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, prohibitedWords);
+      addExamplePair(
             Example.wrong("Изгубила све сам <marker>бткие</marker>, ал' још водим рат."),
             Example.fixed("Изгубила све сам <marker>битке</marker>, ал' још водим рат.")
     );
   }
-
+/*
+GTODO
   @Override
   public String getFileName() {
     return BASE_DICTIONARY_PATH + "serbian.dict";
   }
-
+*/
   @Override
   public String getId() {
     return RULE_ID;
   }
-
+/*
+GTODO
   @Override
   public String getSpellingFileName() {
     return BASE_DICTIONARY_PATH + "spelling.txt";
@@ -70,4 +72,5 @@ public class MorfologikEkavianSpellerRule extends MorfologikSpellerRule {
   public String getProhibitFileName() {
     return BASE_DICTIONARY_PATH + "prohibit.txt";
   }
+  */
 }

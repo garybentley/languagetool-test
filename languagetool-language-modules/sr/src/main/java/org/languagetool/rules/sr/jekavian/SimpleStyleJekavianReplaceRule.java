@@ -19,8 +19,8 @@
 package org.languagetool.rules.sr.jekavian;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,16 +36,10 @@ import java.util.ResourceBundle;
  */
 public class SimpleStyleJekavianReplaceRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/sr/jekavian/replace-style.txt");
-  private static final Locale SR_LOCALE = new Locale("sr");  // locale used on case-conversion
+  // GTODO private static final Map<String, List<String>> wrongWords = load("/sr/jekavian/replace-style.txt");
 
-  public SimpleStyleJekavianReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
-  }
-
-  @Override
-  protected Map<String, List<String>> getWrongWords() {
-    return wrongWords;
+  public SimpleStyleJekavianReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+      super(messages, wrongWords, caseCon);
   }
 
   @Override
@@ -61,11 +55,6 @@ public class SimpleStyleJekavianReplaceRule extends AbstractSimpleReplaceRule {
   @Override
   public String getShort() {
     return "Стилски лоша ријеч тј. израз";
-  }
-
-  @Override
-  public Locale getLocale() {
-    return SR_LOCALE;
   }
 
   @Override

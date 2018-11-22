@@ -19,15 +19,15 @@
 package org.languagetool.rules.lt;
 
 import org.junit.Test;
+import org.languagetool.language.Lithuanian;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class LithuanianPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Lithuanian lang = new Lithuanian();
+    runTestForLanguage(lang);
   }
 
 }

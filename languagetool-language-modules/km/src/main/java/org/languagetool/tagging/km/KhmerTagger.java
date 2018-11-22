@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,24 +18,33 @@
  */
 package org.languagetool.tagging.km;
 
-import java.util.Locale;
+import morfologik.stemming.Dictionary;
 
+import org.languagetool.tagging.WordTagger;
 import org.languagetool.tagging.BaseTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /** Khmer Part-of-speech tagger.
  * Based on part-of-speech lists in Public Domain.
  * See readme.txt for details, the POS tagset is described in tagset.txt
- * 
+ *
  * @author Marcin Milkowski
  */
 public class KhmerTagger extends BaseTagger {
-
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/km/added.txt";
   }
-
+*/
+  public KhmerTagger(Dictionary dict, WordTagger tagger, CaseConverter caseCon) {
+    super(dict, tagger, caseCon, true);
+  }
+/*
+ GTODO
   public KhmerTagger() {
     super("/km/khmer.dict",  new Locale("km"));
   }
+  */
 }

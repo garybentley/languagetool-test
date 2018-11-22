@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,15 +31,19 @@ import org.languagetool.tokenizers.SentenceTokenizer;
  */
 public class RomanianSentenceTokenizerTest {
 
-  Language lang = new Romanian();
-  // accept \n as paragraph:
-  private final SentenceTokenizer stokenizer = new SRXSentenceTokenizer(lang);
+ // accept \n as paragraph:
+  private SentenceTokenizer stokenizer;
   // accept only \n\n as paragraph:
-  private final SentenceTokenizer stokenizer2 = new SRXSentenceTokenizer(lang);
+  private SentenceTokenizer stokenizer2;
 
   @Before
-  public final void setUp() {
+  public final void setUp() throws Exception {
+    Romanian lang1 = new Romanian();
+    stokenizer = lang1.getSentenceTokenizer();
     stokenizer.setSingleLineBreaksMarksParagraph(true);
+
+    Romanian lang2 = new Romanian();
+    stokenizer2 = lang2.getSentenceTokenizer();
     stokenizer2.setSingleLineBreaksMarksParagraph(false);
   }
 
@@ -108,10 +112,10 @@ public class RomanianSentenceTokenizerTest {
     testSplit("A venit domnu' acela. ");
 
     // one/two returns = paragraph = new sentence:
-    TestTools.testSplit(new String[] { "A venit domnul\n\n", "Vasile." }, stokenizer2);
-    TestTools.testSplit(new String[] { "A venit domnul\n", "Vasile." }, stokenizer);
-    TestTools.testSplit(new String[] { "A venit domnu'\n\n", "Vasile." }, stokenizer2);
-    TestTools.testSplit(new String[] { "A venit domnu'\n", "Vasile." }, stokenizer);
+    TestTools.testSplit(stokenizer2, "A venit domnul\n\n", "Vasile.");
+    TestTools.testSplit(stokenizer, "A venit domnul\n", "Vasile.");
+    TestTools.testSplit(stokenizer2, "A venit domnu'\n\n", "Vasile.");
+    TestTools.testSplit(stokenizer, "A venit domnu'\n", "Vasile.");
     // Missing space after sentence end:
     testSplit("El este din România!",
             "Acum e plecat cu afaceri.");
@@ -169,7 +173,7 @@ public class RomanianSentenceTokenizerTest {
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer2);
+    TestTools.testSplit(stokenizer2, sentences);
   }
 
 }

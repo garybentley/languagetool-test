@@ -18,9 +18,9 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.languagetool.Language;
@@ -31,37 +31,52 @@ import org.languagetool.rules.ro.MorfologikRomanianSpellerRule;
 import org.languagetool.rules.ro.RomanianWordRepeatBeginningRule;
 import org.languagetool.rules.ro.SimpleReplaceRule;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.ro.RomanianSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
-import org.languagetool.tagging.ro.RomanianTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.ro.RomanianWordTokenizer;
+import org.languagetool.databroker.*;
 
 /**
  *
  * @author Ionuț Păduraru
  * @since 24.02.2009 22:18:21
  */
-public class Romanian extends Language {
+public class Romanian extends Language<RomanianResourceDataBroker> {
 
-  private Tagger tagger;
-  private Synthesizer synthesizer;
-  private Disambiguator disambiguator;
-  private Tokenizer wordTokenizer;
-  private SentenceTokenizer sentenceTokenizer;
+  public static final String LANGUAGE_ID = "ro";
+  public static final String COUNTRY_ID = "RO";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+  @Override
+  public RomanianResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
+  }
+
+  @Override
+  public RomanianResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultRomanianResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+      return null;
+  }
 
   @Override
   public String getName() {
     return "Romanian";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "ro";
   }
 
   @Override
@@ -70,11 +85,8 @@ public class Romanian extends Language {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new RomanianTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
@@ -85,53 +97,83 @@ public class Romanian extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new UppercaseSentenceStartRule(messages, this),
-            new MultipleWhitespaceRule(messages, this),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "„", "«", "»"),
-                    Arrays.asList("]", ")", "}", "”", "»", "«")),
-            new WordRepeatRule(messages, this),
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createUnpairedBracketsRule(messages),
+            createWordRepeatRule(messages),
             // specific to Romanian:
-            new MorfologikRomanianSpellerRule(messages, this, userConfig),
-            new RomanianWordRepeatBeginningRule(messages, this),
-            new SimpleReplaceRule(messages),
-            new CompoundRule(messages)
+            createMorfologikSpellerRule(messages, userConfig),
+            createWordRepeatBeginningRule(messages),
+            createReplaceRule(messages),
+            createCompoundRule(messages)
     );
   }
 
-  @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new RomanianSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public SimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public RomanianWordRepeatBeginningRule createWordRepeatBeginningRule(ResourceBundle messages) throws Exception {
+      return new RomanianWordRepeatBeginningRule(getUseMessages(messages));
+  }
+
+  public MorfologikRomanianSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikRomanianSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getSpellingIgnoreWords());
+  }
+
+  public CompoundRule createCompoundRule(ResourceBundle messages) throws Exception {
+      return new CompoundRule(getUseMessages(messages), getUseDataBroker().getCompounds());
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+                  Arrays.asList("[", "(", "{", "„", "«", "»"),
+                  Arrays.asList("]", ")", "}", "”", "»", "«"));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new XmlRuleDisambiguator(new Romanian());
-    }
-    return disambiguator;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new RomanianWordTokenizer();
-    }
-    return wordTokenizer;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
+  }
+
+  @Override
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 }

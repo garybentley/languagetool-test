@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,17 +31,18 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    lt = new JLanguageTool(new Slovak());
-    rule = new CompoundRule(TestTools.getEnglishMessages());
+    Slovak lang = new Slovak();
+    lt = new JLanguageTool(lang);
+    rule = lang.createCompoundRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct:
     check(0, "česko-slovenský");
     check(0, "rakúsko-uhorský");
     // incorrect:
     check(1, "bim bam", new String[]{"bim-bam"});
   }
-  
+
 }

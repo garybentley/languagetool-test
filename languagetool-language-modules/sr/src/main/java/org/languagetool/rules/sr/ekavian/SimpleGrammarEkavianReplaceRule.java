@@ -20,11 +20,11 @@ package org.languagetool.rules.sr.ekavian;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * A rule that matches words which should not be used and suggests correct ones instead.
@@ -37,16 +37,10 @@ import java.util.ResourceBundle;
  */
 public class SimpleGrammarEkavianReplaceRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/sr/ekavian/replace-grammar.txt");
-  private static final Locale SR_LOCALE = new Locale("sr");  // locale used on case-conversion
+  // GTODO private static final Map<String, List<String>> wrongWords = load("/sr/ekavian/replace-grammar.txt");
 
-  public SimpleGrammarEkavianReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
-  }
-
-  @Override
-  protected Map<String, List<String>> getWrongWords() {
-    return wrongWords;
+  public SimpleGrammarEkavianReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+      super(messages, wrongWords, caseCon);
   }
 
   @Override
@@ -62,11 +56,6 @@ public class SimpleGrammarEkavianReplaceRule extends AbstractSimpleReplaceRule {
   @Override
   public String getShort() {
     return "Граматички погрешна реч тј. израз";
-  }
-
-  @Override
-  public Locale getLocale() {
-    return SR_LOCALE;
   }
 
   @Override

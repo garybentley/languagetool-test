@@ -22,8 +22,8 @@ import org.junit.Before;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tagging.Tagger;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,27 +38,6 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractSerbianTaggerTest {
 
-  private SerbianTagger tagger;
-  private WordTokenizer tokenizer;
-
-  @Before
-  public void setUp() {
-    tagger = createTagger();
-    tokenizer = new WordTokenizer();
-  }
-
-  public SerbianTagger getTagger() {
-    return tagger;
-  }
-
-  public WordTokenizer getTokenizer() {
-    return tokenizer;
-  }
-
-  protected SerbianTagger createTagger() {
-    return new SerbianTagger();
-  }
-
   /**
    * Verify if <code>inflected</code> contains the specified lemma and pos
    *
@@ -69,7 +48,8 @@ public abstract class AbstractSerbianTaggerTest {
   protected void assertHasLemmaAndPos(
           final String inflected,
           final String lemma,
-          final String posTag) throws IOException {
+          final String posTag,
+          final Tagger tagger) throws Exception {
 
     final List<AnalyzedTokenReadings> tags = tagger.tag(Arrays.asList(inflected));
     final StringBuilder allTags = new StringBuilder();

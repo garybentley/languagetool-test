@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,8 +18,6 @@
  */
 package org.languagetool.rules.ro;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
@@ -34,12 +32,13 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    lt = new JLanguageTool(new Romanian());
-    rule = new CompoundRule(TestTools.getMessages("ro"));
+    Romanian lang = new Romanian();
+    lt = new JLanguageTool(lang);
+    rule = lang.createCompoundRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     check(0, "Au plecat câteșitrei.");
     // incorrect sentences:

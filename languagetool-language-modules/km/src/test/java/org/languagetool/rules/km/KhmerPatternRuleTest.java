@@ -19,15 +19,15 @@
 package org.languagetool.rules.km;
 
 import org.junit.Test;
+import org.languagetool.language.Khmer;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class KhmerPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Khmer lang = new Khmer();
+    runTestForLanguage(lang);
   }
 
 }

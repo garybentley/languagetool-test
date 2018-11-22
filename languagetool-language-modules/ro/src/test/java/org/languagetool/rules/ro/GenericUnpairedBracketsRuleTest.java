@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2008 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,7 +24,6 @@ import org.languagetool.language.Romanian;
 import org.languagetool.rules.GenericUnpairedBracketsRule;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -35,9 +34,10 @@ public class GenericUnpairedBracketsRuleTest {
   private JLanguageTool langTool;
 
   @Test
-  public void testRomanianRule() throws IOException {
-    langTool = new JLanguageTool(new Romanian());
-    rule = org.languagetool.rules.GenericUnpairedBracketsRuleTest.getBracketsRule(langTool);
+  public void testRomanianRule() throws Exception {
+    Romanian lang = new Romanian();
+    langTool = new JLanguageTool(lang);
+    rule = lang.createUnpairedBracketsRule(null);
     // correct sentences:
     assertMatches("A fost plecat (pentru puțin timp).", 0);
     assertMatches("Nu's de prin locurile astea.", 0);
@@ -58,7 +58,7 @@ public class GenericUnpairedBracketsRuleTest {
     assertMatches("A fost plecat „pentru... «puțin” timp».", 4);
   }
 
-  private void assertMatches(String input, int expectedMatches) throws IOException {
+  private void assertMatches(String input, int expectedMatches) throws Exception {
     final RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(input)));
     assertEquals(expectedMatches, matches.length);
   }

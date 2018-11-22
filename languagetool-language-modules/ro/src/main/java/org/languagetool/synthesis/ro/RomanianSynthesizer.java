@@ -18,14 +18,16 @@
  */
 package org.languagetool.synthesis.ro;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
-import org.languagetool.JLanguageTool;
+import morfologik.stemming.IStemmer;
+
 import org.languagetool.synthesis.BaseSynthesizer;
+import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.synthesis.ManualSynthesizer;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Romanian word form synthesizer.
@@ -34,20 +36,20 @@ import org.languagetool.databroker.ResourceDataBroker;
  */
 public class RomanianSynthesizer extends BaseSynthesizer {
 
-  private static final String RESOURCE_FILENAME = "/ro/romanian_synth.dict";
-  private static final String TAGS_FILE_NAME = "/ro/romanian_tags.txt";
-  private static final String USER_DICT_FILENAME = "/ro/added.txt";
+  // GTODO private static final String RESOURCE_FILENAME = "/ro/romanian_synth.dict";
+  // GTODO private static final String TAGS_FILE_NAME = "/ro/romanian_tags.txt";
+  // GTODO private static final String USER_DICT_FILENAME = "/ro/added.txt";
 
-  private static ManualSynthesizer manualSynthesizer;
+  private ManualSynthesizer manualSynthesizer;
 
-  public RomanianSynthesizer(ResourceDataBroker dataBroker) {
-    super(RESOURCE_FILENAME, TAGS_FILE_NAME, dataBroker);
+  public RomanianSynthesizer(ResourceBundle messages, IStemmer stemmer, Set<String> tags, ManualSynthesizer synthesizer) {
+      super(stemmer, tags);
+      manualSynthesizer = Objects.requireNonNull(synthesizer, "Synthesizer must be provided.");
   }
 
   @Override
   protected void lookup(String lemma, String posTag, List<String> results) {
     super.lookup(lemma, posTag, results);
-    initSynth();
     // add words that are missing from the romanian_synth.dict file
     final List<String> manualForms = manualSynthesizer.lookup(lemma, posTag);
     if (manualForms != null) {
@@ -55,6 +57,8 @@ public class RomanianSynthesizer extends BaseSynthesizer {
     }
   }
 
+/*
+GTODO
   @Override
   protected void initPossibleTags() throws IOException {
     super.initPossibleTags();
@@ -66,7 +70,9 @@ public class RomanianSynthesizer extends BaseSynthesizer {
       }
     }
   }
-
+*/
+/*
+GTODO
   private synchronized void initSynth() {
     if (manualSynthesizer == null) {
       try {
@@ -78,4 +84,5 @@ public class RomanianSynthesizer extends BaseSynthesizer {
       }
     }
   }
+  */
 }

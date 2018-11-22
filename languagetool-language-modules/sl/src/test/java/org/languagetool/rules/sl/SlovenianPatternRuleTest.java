@@ -20,14 +20,14 @@ package org.languagetool.rules.sl;
 
 import org.junit.Test;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
+import org.languagetool.language.Slovenian;
 
 public class SlovenianPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Slovenian lang = new Slovenian();
+    runTestForLanguage(lang);
   }
 
 }

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,15 +29,19 @@ import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class SlovakSentenceTokenizerTest {
 
-  private final Language lang = new Slovak();
   // accept \n as paragraph:
-  private final SentenceTokenizer stokenizer = new SRXSentenceTokenizer(lang);
+  private SentenceTokenizer stokenizer;
   // accept only \n\n as paragraph:
-  private final SentenceTokenizer stokenizer2 = new SRXSentenceTokenizer(lang);
+  private SentenceTokenizer stokenizer2;
 
   @Before
-  public final void setUp() {
+  public final void setUp() throws Exception {
+    Slovak lang1 = new Slovak();
+    stokenizer = lang1.getSentenceTokenizer();
     stokenizer.setSingleLineBreaksMarksParagraph(true);
+
+    Slovak lang2 = new Slovak();
+    stokenizer2 = lang2.getSentenceTokenizer();
     stokenizer2.setSingleLineBreaksMarksParagraph(false);
   }
 
@@ -130,17 +134,17 @@ public class SlovakSentenceTokenizerTest {
     testSplit("He won't say no.", "Not really.");
     testSplit("This is it: a test.");
     // one/two returns = paragraph = new sentence:
-    TestTools.testSplit(new String[] { "He won't\n\n", "Really." }, stokenizer2);
-    TestTools.testSplit(new String[] { "He won't\n", "Really." }, stokenizer);
-    TestTools.testSplit(new String[] { "He won't\n\n", "Really." }, stokenizer2);
-    TestTools.testSplit(new String[] { "He won't\nReally." }, stokenizer2);
+    TestTools.testSplit(stokenizer2, "He won't\n\n", "Really.");
+    TestTools.testSplit(stokenizer, "He won't\n", "Really.");
+    TestTools.testSplit(stokenizer2, "He won't\n\n", "Really.");
+    TestTools.testSplit(stokenizer2, "He won't\nReally.");
     // Missing space after sentence end:
     testSplit("James is from the Ireland!",
               "He lives in Spain now.");
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer2);
+    TestTools.testSplit(stokenizer2, sentences);
   }
 
 }

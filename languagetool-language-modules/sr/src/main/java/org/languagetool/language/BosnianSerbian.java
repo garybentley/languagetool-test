@@ -18,6 +18,8 @@
  */
 package org.languagetool.language;
 
+import java.util.Locale;
+
 /**
  * Support for Serbian language spoken in Bosnia and Herzegovina
  *
@@ -26,6 +28,15 @@ package org.languagetool.language;
  * @since 4.0
  */
 public class BosnianSerbian extends JekavianSerbian {
+
+    public static final String COUNTRY_ID = "BA";
+
+    public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+    @Override
+    public Locale getLocale() {
+        return LOCALE;
+    }
 
   @Override
   public String[] getCountries() {

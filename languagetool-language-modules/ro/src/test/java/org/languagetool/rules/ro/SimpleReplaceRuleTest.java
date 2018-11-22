@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,7 +26,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Romanian;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +43,9 @@ public class SimpleReplaceRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new SimpleReplaceRule(TestTools.getMessages("ro"));
-    langTool = new JLanguageTool(new Romanian());
+    Romanian lang = new Romanian();
+    rule = lang.createReplaceRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   /**
@@ -70,7 +70,7 @@ public class SimpleReplaceRuleTest {
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Paisprezece case.")).length);
@@ -134,7 +134,7 @@ public class SimpleReplaceRuleTest {
    * @param words the words that are correct (the suggested replacement). Use "/" to separate multiple forms.
    */
   private void checkSimpleReplaceRule(String sentence, String... words)
-          throws IOException {
+          throws Exception {
     final RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals("Invalid matches.length while checking sentence: "
             + sentence, words.length, matches.length);

@@ -18,18 +18,14 @@
  */
 package org.languagetool.language;
 
-
+import org.languagetool.Language;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.sr.jekavian.MorfologikJekavianSpellerRule;
 import org.languagetool.rules.sr.jekavian.SimpleGrammarJekavianReplaceRule;
 import org.languagetool.rules.sr.jekavian.SimpleStyleJekavianReplaceRule;
-import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.sr.JekavianSynthesizer;
-import org.languagetool.tagging.Tagger;
-import org.languagetool.tagging.sr.JekavianTagger;
+import org.languagetool.databroker.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -40,34 +36,39 @@ import java.util.ResourceBundle;
  *
  * @since 4.0
  */
-public class JekavianSerbian extends Serbian {
+public abstract class JekavianSerbian extends Serbian {
 
-  private Synthesizer synthesizer;
-  private Tagger tagger;
+    @Override
+    public boolean isVariant() {
+        return true;
+    }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new JekavianTagger();
-    }
-    return tagger;
+  public SerbianResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultJekavianSerbianResourceDataBroker(this, getClass().getClassLoader());
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new JekavianSynthesizer();
-    }
-    return synthesizer;
-  }
-
-  @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
-    List<Rule> rules = new ArrayList<>(getBasicRules(messages));
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+    List<Rule> rules = new ArrayList<>(super.getRelevantRules(messages, userConfig, altLanguages));
+    messages = getUseMessages(messages);
     // Rules specific for Jekavian Serbian
-    rules.add(new MorfologikJekavianSpellerRule(messages, this, null));
-    rules.add(new SimpleGrammarJekavianReplaceRule(messages));
-    rules.add(new SimpleStyleJekavianReplaceRule(messages));
+    rules.add(createMorfologikSpellerRule(messages, userConfig));
+    rules.add(createGrammarReplaceRule(messages));
+    rules.add(createStyleReplaceRule(messages));
     return rules;
   }
+
+  public MorfologikJekavianSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikJekavianSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig), getUseDataBroker().getSpellingIgnoreWords(), getUseDataBroker().getSpellingProhibitedWords());
+  }
+
+  public SimpleGrammarJekavianReplaceRule createGrammarReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleGrammarJekavianReplaceRule(getUseMessages(messages), getUseDataBroker().getGrammarWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleStyleJekavianReplaceRule createStyleReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleStyleJekavianReplaceRule(getUseMessages(messages), getUseDataBroker().getStyleWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
 }

@@ -18,16 +18,21 @@
  */
 package org.languagetool.tagging.sr;
 
+import morfologik.stemming.Dictionary;
 
-import java.util.Locale;
+import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /** @since 4.0 */
-public class EkavianTagger extends SerbianTagger {
+public class EkavianTagger extends BaseTagger {
 
-  public EkavianTagger() {
-    super(EKAVIAN_DICTIONARY_PATH + "serbian.dict", new Locale("sr"));
-  }
+    public EkavianTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+        super(baseDict, tagger, caseCon, true);
+    }
 
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return EKAVIAN_DICTIONARY_PATH + "added.txt";
@@ -37,4 +42,5 @@ public class EkavianTagger extends SerbianTagger {
   public String getManualRemovalsFileName() {
     return EKAVIAN_DICTIONARY_PATH + "removed.txt";
   }
+  */
 }

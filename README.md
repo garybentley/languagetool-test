@@ -169,6 +169,14 @@ This is a list of things that need to be changed/looked at:
 * gl/GalicianTagger (also pt/PortugueseTagger and maybe others) consider passing in IStemmer instead of creating one for each tag call.
 * el/Greek doesn't pass userConfig to morfo speller rule.
 * el virtually no tests, no speller check.
+* lt/speller rule, there is no hunspell subdir or lt_LT.dict file.  Speller rule removed.
+* a number of languages use GenericUnpairedBracketsRule but don't specify an id.
+* ml is supposed to have been removed in version 3.6
+* ro contains a resource file "coduri.html" which is 700KB but has no instructions or information on what it is.
+* sk file grammar-nezaradene.xml is present in the rules dir but no reference is made to it.
+* Investigate BaseTagger does it need to be abstract?
+* sr/MorfologikEkavianSpellerRule has an example but MorfologikJekavianSpellerRule doesn't.
+* sr probably need a EkavianSerbian to provide symmetry with class JekavianSerbian.
 
 ## The information below is from the standard LanguageTool README
 

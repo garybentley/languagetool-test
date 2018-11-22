@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,16 +18,16 @@
  */
 package org.languagetool.rules.ro;
 
-import org.languagetool.language.Romanian;
 import org.languagetool.rules.AbstractSimpleReplaceRule2;
 import org.languagetool.rules.Categories;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * A rule that matches words which should not be used and suggests correct ones instead. 
+ * A rule that matches words which should not be used and suggests correct ones instead.
  * Romanian implementations. Loads the list of words from
  * <code>/ro/replace.txt</code>.
  *
@@ -37,16 +37,11 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule2 {
 
   public static final String ROMANIAN_SIMPLE_REPLACE_RULE = "RO_SIMPLE_REPLACE";
 
-  private static final String FILE_NAME = "/ro/replace.txt";
-  private static final Locale RO_LOCALE = new Locale("ro");  // locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/ro/replace.txt";
+  // GTODO private static final Locale RO_LOCALE = new Locale("ro");  // locale used on case-conversion
 
-  @Override
-  public final String getFileName() {
-    return FILE_NAME;
-  }
-
-  public SimpleReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages, new Romanian());
+  public SimpleReplaceRule(ResourceBundle messages, List<Map<String, String>> wordinessWords, CaseConverter caseCon) throws Exception {
+    super(messages, wordinessWords, caseCon);
     super.setCategory(Categories.MISC.getCategory(messages));
   }
 
@@ -73,11 +68,6 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule2 {
   @Override
   public String getSuggestionsSeparator() {
     return " sau ";
-  }
-
-  @Override
-  public Locale getLocale() {
-    return RO_LOCALE;
   }
 
 }

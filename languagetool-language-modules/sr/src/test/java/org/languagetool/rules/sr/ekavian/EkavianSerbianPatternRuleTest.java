@@ -20,13 +20,13 @@ package org.languagetool.rules.sr.ekavian;
 
 import org.junit.Test;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
+import org.languagetool.language.SerbianSerbian;
 
 public class EkavianSerbianPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    SerbianSerbian lang = new SerbianSerbian();
+    runTestForLanguage(lang);
   }
 }

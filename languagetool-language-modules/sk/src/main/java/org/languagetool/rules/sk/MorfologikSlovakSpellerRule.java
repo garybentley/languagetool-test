@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,25 +19,23 @@
 
 package org.languagetool.rules.sk;
 
-import java.io.IOException;
+import java.util.Set;
+import java.util.List;
+import java.util.Collections;
 import java.util.ResourceBundle;
 
-import org.languagetool.Language;
+import morfologik.stemming.Dictionary;
+
+import org.languagetool.language.Slovak;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
 
-public final class MorfologikSlovakSpellerRule extends MorfologikSpellerRule {
+public class MorfologikSlovakSpellerRule extends MorfologikSpellerRule {
 
-  private static final String RESOURCE_FILENAME = "/sk/hunspell/sk_SK.dict";
+  // GTODO private static final String RESOURCE_FILENAME = "/sk/hunspell/sk_SK.dict";
 
-  public MorfologikSlovakSpellerRule(ResourceBundle messages,
-                                     Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
-  }
-
-  @Override
-  public String getFileName() {
-    return RESOURCE_FILENAME;
+  public MorfologikSlovakSpellerRule(ResourceBundle messages, Slovak language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, Collections.emptyList());
   }
 
   @Override

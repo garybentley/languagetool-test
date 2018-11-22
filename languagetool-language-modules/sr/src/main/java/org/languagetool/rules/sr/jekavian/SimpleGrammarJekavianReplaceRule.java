@@ -19,10 +19,9 @@
 package org.languagetool.rules.sr.jekavian;
 
 import org.languagetool.rules.AbstractSimpleReplaceRule;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -37,16 +36,10 @@ import java.util.ResourceBundle;
  */
 public class SimpleGrammarJekavianReplaceRule extends AbstractSimpleReplaceRule {
 
-  private static final Map<String, List<String>> wrongWords = load("/sr/jekavian/replace-grammar.txt");
-  private static final Locale SR_LOCALE = new Locale("sr");  // locale used on case-conversion
+  // GTODO private static final Map<String, List<String>> wrongWords = load("/sr/jekavian/replace-grammar.txt");
 
-  public SimpleGrammarJekavianReplaceRule(ResourceBundle messages) throws IOException {
-    super(messages);
-  }
-
-  @Override
-  protected Map<String, List<String>> getWrongWords() {
-    return wrongWords;
+  public SimpleGrammarJekavianReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+      super(messages, wrongWords, caseCon);
   }
 
   @Override
@@ -62,11 +55,6 @@ public class SimpleGrammarJekavianReplaceRule extends AbstractSimpleReplaceRule 
   @Override
   public String getShort() {
     return "Граматички погрешна ријеч тј. израз";
-  }
-
-  @Override
-  public Locale getLocale() {
-    return SR_LOCALE;
   }
 
   @Override

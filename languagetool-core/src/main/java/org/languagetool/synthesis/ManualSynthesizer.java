@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,17 +31,18 @@ import org.languagetool.tools.StringTools;
  * about new words or missing readings in the synthesizer *.dict file.
  * <p>
  * File Format: <tt>fullform baseform postags</tt> (tab separated)
- * 
+ *
  * @author Ionuț Păduraru
- * @see ManualTagger  
+ * @see ManualTagger
  * @see BaseSynthesizer
  */
 public final class ManualSynthesizer {
 
-  /** a map with the key composed by the lemma and POS (separated by "|"). The values are lists of inflected forms. */ 
+  /** a map with the key composed by the lemma and POS (separated by "|"). The values are lists of inflected forms. */
   private final Map<String, List<String>> mapping;
   private final Set<String> possibleTags;
 
+  // GTODO Change to pass mappings.
   public ManualSynthesizer(InputStream inputStream) throws IOException {
     MappingAndTags mappingAndTags = loadMapping(inputStream, "utf8");
     mapping = mappingAndTags.mapping;
@@ -54,10 +55,10 @@ public final class ManualSynthesizer {
   public Set<String> getPossibleTags() {
     return possibleTags;
   }
-  
+
   /**
    * Look up a word's inflected form as specified by the lemma and POS tag.
-   * 
+   *
    * @param lemma the lemma to inflect.
    * @param posTag the required POS tag.
    * @return a list with all the inflected forms of the specified lemma having the specified POS tag.

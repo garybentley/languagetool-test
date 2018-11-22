@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,17 +24,14 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Malayalam;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikMalayalamSpellerRuleTest {
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     final Malayalam language = new Malayalam();
-    final MorfologikMalayalamSpellerRule rule =
-            new MorfologikMalayalamSpellerRule (TestTools.getMessages("ml"), language, null);
+    final MorfologikMalayalamSpellerRule rule = language.createMorfologikSpellerRule(null, null);
 
     RuleMatch[] matches;
     final JLanguageTool langTool = new JLanguageTool(language);

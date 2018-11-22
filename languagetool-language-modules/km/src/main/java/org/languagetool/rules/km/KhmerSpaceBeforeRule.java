@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,16 +26,16 @@ import java.util.regex.Pattern;
 
 /**
  * A Khmer rule that checks if there is a missing space before some conjunctions.
- * 
+ *
  * @author Jaume Ortolà
  */
 public class KhmerSpaceBeforeRule extends AbstractSpaceBeforeRule {
 
-  private static final Pattern CONJUNCTIONS = 
+  private static final Pattern CONJUNCTIONS =
           Pattern.compile("ដើម្បី|និង|ពីព្រោះ", Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
-  public KhmerSpaceBeforeRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public KhmerSpaceBeforeRule(ResourceBundle messages) {
+    super(messages);
   }
 
   @Override
