@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,39 +26,52 @@ import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.*;
 import org.languagetool.rules.es.*;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.es.SpanishSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.es.SpanishHybridDisambiguator;
-import org.languagetool.tagging.es.SpanishTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.es.SpanishWordTokenizer;
+import org.languagetool.databroker.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class Spanish extends Language implements AutoCloseable{
+public class Spanish extends Language<SpanishResourceDataBroker> {
 
-  private SentenceTokenizer sentenceTokenizer;
-  private Tokenizer wordTokenizer;
-  private Synthesizer synthesizer;
-  private Tagger tagger;
-  private Disambiguator disambiguator;
-  private LuceneLanguageModel languageModel;
+  public static final String LANGUAGE_ID = "es";
+  public static final String COUNTRY_ID = "ES";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+  @Override
+  public SpanishResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
+  }
+
+  @Override
+  public SpanishResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultSpanishResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+    return null;
+  }
 
   @Override
   public String getName() {
     return "Spanish";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "es";
   }
 
   @Override
@@ -69,47 +82,32 @@ public class Spanish extends Language implements AutoCloseable{
             "BO", "SV", "HN", "NI", "PR", "US", "CU"
     };
   }
-  
+
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new SpanishTagger();
-    }
-    return tagger;
-  }
-  
-  @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new SpanishHybridDisambiguator();
-    }
-    return disambiguator;
-  }
-  
-  @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new SpanishWordTokenizer();
-    }
-    return wordTokenizer;
-  }
-  
-  @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new SpanishSynthesizer();
-    }
-    return synthesizer;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
-  
+
+  @Override
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
+  }
+
+  @Override
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
+  }
+
+  @Override
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
+  }
+
   @Override
   public Contributor[] getMaintainers() {
     return new Contributor[] {
@@ -118,47 +116,70 @@ public class Spanish extends Language implements AutoCloseable{
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     return Arrays.asList(
-            new CommaWhitespaceRule(messages),
-            new DoublePunctuationRule(messages),
-            new GenericUnpairedBracketsRule(messages,
-                    Arrays.asList("[", "(", "{", "“", "«", "»", "¿", "¡"),
-                    Arrays.asList("]", ")", "}", "”", "»", "«", "?", "!")),
-            new MorfologikSpanishSpellerRule(messages, this, userConfig),
-            new UppercaseSentenceStartRule(messages, this),
-            new WordRepeatRule(messages, this),
-            new MultipleWhitespaceRule(messages, this),
-            new SpanishWikipediaRule(messages)
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createMorfologikSpellerRule(messages, userConfig),
+            createUppercaseSentenceStartRule(messages),
+            createWordRepeatRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createWikipediaRule(messages)
     );
+  }
+
+  public MorfologikSpanishSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikSpanishSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig), getUseDataBroker().getSpellingIgnoreWords());
+  }
+
+  public GenericUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new GenericUnpairedBracketsRule(getUseMessages(messages),
+              Arrays.asList("[", "(", "{", "“", "«", "»", "¿", "¡"),
+              Arrays.asList("]", ")", "}", "”", "»", "«", "?", "!"));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages));
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this);
+  }
+
+  public WordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new WordRepeatRule(getUseMessages(messages));
+  }
+
+  public SpanishWikipediaRule createWikipediaRule(ResourceBundle messages) throws Exception {
+      return new SpanishWikipediaRule(getUseMessages(messages), getUseDataBroker().getWikipediaWords(), getUseDataBroker().getCaseConverter());
   }
 
   /** @since 3.1 */
   @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
-    if (languageModel == null) {
-      languageModel = new LuceneLanguageModel(new File(indexDir, getShortCode()));
-    }
-    return languageModel;
+  public LanguageModel getLanguageModel() throws Exception {
+      return getUseDataBroker().getLanguageModel();
   }
 
   /** @since 3.1 */
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new SpanishConfusionProbabilityRule(messages, languageModel, this)
+            createConfusionProbabilityRule(messages, languageModel)
     );
   }
 
-  /**
-   * Closes the language model, if any. 
-   * @since 3.1
-   */
-  @Override
-  public void close() throws Exception {
-    if (languageModel != null) {
-      languageModel.close();
-    }
+  public SpanishConfusionProbabilityRule createConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel) throws Exception {
+      return new SpanishConfusionProbabilityRule(getUseMessages(messages), languageModel, this, getUseDataBroker().getConfusionSets());
   }
 
   @Override

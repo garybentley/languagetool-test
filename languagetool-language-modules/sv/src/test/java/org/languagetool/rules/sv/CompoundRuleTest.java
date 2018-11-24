@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,18 +25,17 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Swedish;
 import org.languagetool.rules.AbstractCompoundRuleTest;
 
-import java.io.IOException;
-
 public class CompoundRuleTest extends AbstractCompoundRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    lt = new JLanguageTool(new Swedish());
-    rule = new CompoundRule(TestTools.getEnglishMessages());
+    Swedish lang = new Swedish();
+    lt = new JLanguageTool(lang);
+    rule = lang.createCompoundRule(null);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct:
     check(0, "skit-bra");
     check(0, "IP-Adress");
@@ -48,5 +47,5 @@ public class CompoundRuleTest extends AbstractCompoundRuleTest {
     check(1, "moll tonart", new String[]{"moll-tonart", "molltonart"});
     check(1, "e mail", new String[]{"e-mail"});
   }
-  
+
 }

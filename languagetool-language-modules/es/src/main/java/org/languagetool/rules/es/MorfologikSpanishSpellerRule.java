@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,11 +18,15 @@
  */
 package org.languagetool.rules.es;
 
-import org.languagetool.Language;
+import org.languagetool.language.Spanish;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
+import morfologik.stemming.Dictionary;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.Collections;
+
 import java.util.ResourceBundle;
 
 /**
@@ -30,15 +34,16 @@ import java.util.ResourceBundle;
  */
 public class MorfologikSpanishSpellerRule extends MorfologikSpellerRule {
 
-  public MorfologikSpanishSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+    public MorfologikSpanishSpellerRule(ResourceBundle messages, Spanish language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords) throws Exception {
+      super(messages, language, userConfig, dictionaries, ignoreWords, Collections.emptyList());
   }
-
+/*
+GTODO
   @Override
   public String getFileName() {
     return "/es/hunspell/es_ES.dict";
   }
-
+*/
   @Override
   public final String getId() {
     return "MORFOLOGIK_RULE_ES";

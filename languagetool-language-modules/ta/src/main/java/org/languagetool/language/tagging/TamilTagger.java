@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,11 @@
  */
 package org.languagetool.language.tagging;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * Tamil Part-of-speech tagger.
@@ -28,6 +32,11 @@ import org.languagetool.tagging.BaseTagger;
  */
 public class TamilTagger extends BaseTagger {
 
+    public TamilTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+        super(baseDict, tagger, caseCon, true);
+    }
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/ta/added.txt";
@@ -36,5 +45,5 @@ public class TamilTagger extends BaseTagger {
   public TamilTagger() {
     super("/ta/tamil.dict");
   }
-
+*/
 }

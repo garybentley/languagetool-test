@@ -1265,14 +1265,9 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    }
 
    public static WordTagger createWordTagger(MorfologikTagger morfoTagger, Path addedWords, Path removedWords, boolean overwriteWithAddedTagger) throws Exception {
-       if (Files.exists(addedWords)) {
-           addedWords = addedWords.toRealPath();
-       }
-       if (Files.exists(removedWords)) {
-           removedWords = removedWords.toRealPath();
-       }
        ManualTagger removalTagger = null;
-       if (Files.exists(removedWords)) {
+       if (removedWords != null && Files.exists(removedWords)) {
+           removedWords = removedWords.toRealPath();
            try (InputStream stream = Files.newInputStream(removedWords)) {
              removalTagger = new ManualTagger(stream);
          } catch(Exception e) {
@@ -1280,7 +1275,8 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
          }
        }
 
-       if (Files.exists(addedWords)) {
+       if (addedWords != null && Files.exists(addedWords)) {
+          addedWords = addedWords.toRealPath();
           try (InputStream stream = Files.newInputStream(addedWords)) {
              ManualTagger manualTagger = new ManualTagger(stream);
              return new CombiningTagger(morfoTagger, manualTagger, removalTagger, overwriteWithAddedTagger);

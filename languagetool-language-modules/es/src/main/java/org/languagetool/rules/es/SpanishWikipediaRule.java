@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,15 +24,16 @@ import org.languagetool.rules.Categories;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.tools.Tools;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.net.URL;
 
 
 /**
- * A rule that matches common Wikipedia errors. 
+ * A rule that matches common Wikipedia errors.
  * Spanish implementations. Loads the list of words from
  * <code>/es/wikipedia.txt</code>.
  *
@@ -42,16 +43,11 @@ import java.net.URL;
 public class SpanishWikipediaRule extends AbstractSimpleReplaceRule2 {
 
   public static final String WIKIPEDIA_COMMON_ERRORS = "ES_WIKIPEDIA_COMMON_ERRORS";
-  private static final String FILE_NAME = "/es/wikipedia.txt";
-  private static final Locale ES_LOCALE = new Locale("es");  // locale used on case-conversion
+  // GTODO private static final String FILE_NAME = "/es/wikipedia.txt";
+  // GTODO private static final Locale ES_LOCALE = new Locale("es");  // locale used on case-conversion
 
-  @Override
-  public final String getFileName() {
-    return FILE_NAME;
-  }
-
-  public SpanishWikipediaRule(ResourceBundle messages) throws IOException {
-    super(messages, new Spanish());
+  public SpanishWikipediaRule(ResourceBundle messages, List<Map<String, String>> wikipediaWords, CaseConverter caseCon) throws Exception {
+    super(messages, wikipediaWords, caseCon);
     super.setCategory(Categories.WIKIPEDIA.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Style);
     addExamplePair(Example.wrong("<marker>a basto</marker>"),
@@ -72,7 +68,7 @@ public class SpanishWikipediaRule extends AbstractSimpleReplaceRule2 {
   public String getShort() {
     return "Error gramatical u ortográfico";
   }
-  
+
   @Override
   public String getSuggestion() {
     return " es una expresión errónea. Pruebe a utilizar ";
@@ -88,8 +84,4 @@ public class SpanishWikipediaRule extends AbstractSimpleReplaceRule2 {
     return Tools.getUrl("https://es.wikipedia.org/wiki/Wikipedia:Lista_de_errores_ortogr%C3%A1ficos_comunes/M%C3%A1quinas");
   }
 
-  @Override
-  public Locale getLocale() {
-    return ES_LOCALE;
-  }
 }

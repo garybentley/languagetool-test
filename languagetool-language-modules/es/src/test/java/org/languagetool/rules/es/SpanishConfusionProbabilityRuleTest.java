@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,7 @@
 package org.languagetool.rules.es;
 
 import org.junit.Test;
-import org.languagetool.Languages;
+import org.languagetool.language.Spanish;
 import org.languagetool.TestTools;
 import org.languagetool.rules.ngrams.FakeLanguageModel;
 
@@ -27,8 +27,10 @@ public class SpanishConfusionProbabilityRuleTest {
 
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
   @Test
-  public void testConstructor() {
-    new SpanishConfusionProbabilityRule(TestTools.getEnglishMessages(), new FakeLanguageModel(), Languages.getLanguageForShortCode("es"));
+  public void testConstructor() throws Exception {
+    // GTODO What is the point of this test?
+    Spanish lang = new Spanish();
+    lang.createConfusionProbabilityRule(null, new FakeLanguageModel());
   }
-  
+
 }

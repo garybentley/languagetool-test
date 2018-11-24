@@ -177,6 +177,8 @@ This is a list of things that need to be changed/looked at:
 * Investigate BaseTagger does it need to be abstract?
 * sr/MorfologikEkavianSpellerRule has an example but MorfologikJekavianSpellerRule doesn't.
 * sr probably need a EkavianSerbian to provide symmetry with class JekavianSerbian.
+* ta breaks the directory naming convention.
+* LongSentenceRule (not subclass) will use the same user config parm (via rule id) for the sentence length, however each language should have its own length.
 
 ## The information below is from the standard LanguageTool README
 

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules.sv;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.AbstractCompoundRule;
@@ -29,10 +28,11 @@ import org.languagetool.rules.CompoundRuleData;
  */
 public class CompoundRule extends AbstractCompoundRule {
 
-  private static final CompoundRuleData compoundData = new CompoundRuleData("/sv/compounds.txt");
+  // GTODO private static final CompoundRuleData compoundData = new CompoundRuleData("/sv/compounds.txt");
 
-  public CompoundRule(ResourceBundle messages) throws IOException {
+  public CompoundRule(ResourceBundle messages, CompoundRuleData compounds) throws Exception {
     super(messages,
+            compounds,
             "Dessa ord skrivs samman med bindestreck.",
             "Dessa ord skrivs samman.",
             "Dessa ord skrivs samman med eller utan bindestreck.");
@@ -46,11 +46,6 @@ public class CompoundRule extends AbstractCompoundRule {
   @Override
   public String getDescription() {
     return "Särskrivningar, t.ex. 'e mail' bör skrivas 'e-mail'";
-  }
-
-  @Override
-  protected CompoundRuleData getCompoundRuleData() {
-    return compoundData;
   }
 
 }

@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,31 +16,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.tagging.sv;
+package org.languagetool.databroker;
 
-import morfologik.stemming.Dictionary;
+public interface TamilResourceDataBroker extends ResourceDataBroker {
 
-import org.languagetool.tagging.BaseTagger;
-import org.languagetool.tagging.WordTagger;
-import org.languagetool.rules.patterns.CaseConverter;
-
-/** Swedish Part-of-speech tagger.
- * Based on DSSO.
- */
-public class SwedishTagger extends BaseTagger {
-
-  public SwedishTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
-      super(baseDict, tagger, caseCon, true);
-  }
-/*
-GTODO
-  @Override
-  public String getManualAdditionsFileName() {
-    return "/sv/added.txt";
-  }
-
-  public SwedishTagger() {
-    super("/sv/swedish.dict", new Locale("sv"));
-  }
-  */
 }

@@ -20,14 +20,14 @@ package org.languagetool.rules.ta;
 
 import org.junit.Test;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
+import org.languagetool.language.Tamil;
 
 public class TamilPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Tamil lang = new Tamil();
+    runTestForLanguage(lang);
   }
 
 }

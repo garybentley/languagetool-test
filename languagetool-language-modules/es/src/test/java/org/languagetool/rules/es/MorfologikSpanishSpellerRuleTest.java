@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,20 +24,18 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Spanish;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikSpanishSpellerRuleTest {
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     Spanish language = new Spanish();
-    MorfologikSpanishSpellerRule rule = new MorfologikSpanishSpellerRule(TestTools.getMessages("en"), language, null);
+    MorfologikSpanishSpellerRule rule = language.createMorfologikSpellerRule(null, null);
     JLanguageTool langTool = new JLanguageTool(language);
 
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Escriba un texto aquí. LanguageTool le ayudará a afrontar algunas dificultades propias de la escritura.")).length);
-    
+
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence("Se a hecho un esfuerzo para detectar errores tipográficos, ortograficos y incluso gramaticales."));
     assertEquals(1, matches.length);
     assertEquals(59, matches[0].getFromPos());

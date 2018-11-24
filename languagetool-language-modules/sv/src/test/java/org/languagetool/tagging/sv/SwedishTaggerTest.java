@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,32 +22,36 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Swedish;
-import org.languagetool.tokenizers.WordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.tagging.BaseTagger;
 
 public class SwedishTaggerTest {
-    
-  private SwedishTagger tagger;
-  private WordTokenizer tokenizer;
-      
+
+  private Swedish lang;
+  private Tagger tagger;
+  private Tokenizer tokenizer;
+
   @Before
-  public void setUp() {
-    tagger = new SwedishTagger();
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    lang = new Swedish();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Swedish());
+  public void testDictionary() throws Exception {
+    if (tagger instanceof BaseTagger) {
+        TestTools.testTaggerDictionary(((BaseTagger) tagger).getDictionary(), lang);
+    }
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("Det är nog bäst att du får en klubba till",
-        "Det/[det]PN -- är/[vara]VB:PRS -- nog/[nog]AB -- bäst/[bra]JJ:S|bäst/[bäst]AB|bäst/[god]JJ:S -- att/[att]KN -- du/[du]PN -- får/[få]VB:PRS|får/[får]NN:OF:PLU:NOM:NEU|får/[får]NN:OF:SIN:NOM:NEU -- en/[en]NN:OF:SIN:NOM:UTR|en/[en]PN|en/[passant]en passant NN:OF:SIN:NOM:UTR|en/[passanten]en passant NN:BF:SIN:NOM:UTR|en/[passantens]en passant NN:BF:SIN:GEN:UTR|en/[passanter]en passant NN:OF:PLU:NOM:UTR|en/[passanterna]en passant NN:BF:PLU:NOM:UTR|en/[passanternas]en passant NN:BF:PLU:GEN:UTR|en/[passanters]en passant NN:OF:PLU:GEN:UTR|en/[passants]en passant NN:OF:SIN:GEN:UTR -- klubba/[klubba]NN:OF:SIN:NOM:UTR|klubba/[klubba]VB:IMP|klubba/[klubba]VB:INF -- till/[till]AB|till/[till]PP", tokenizer, tagger);        
+        "Det/[det]PN -- är/[vara]VB:PRS -- nog/[nog]AB -- bäst/[bra]JJ:S|bäst/[bäst]AB|bäst/[god]JJ:S -- att/[att]KN -- du/[du]PN -- får/[få]VB:PRS|får/[får]NN:OF:PLU:NOM:NEU|får/[får]NN:OF:SIN:NOM:NEU -- en/[en]NN:OF:SIN:NOM:UTR|en/[en]PN|en/[passant]en passant NN:OF:SIN:NOM:UTR|en/[passanten]en passant NN:BF:SIN:NOM:UTR|en/[passantens]en passant NN:BF:SIN:GEN:UTR|en/[passanter]en passant NN:OF:PLU:NOM:UTR|en/[passanterna]en passant NN:BF:PLU:NOM:UTR|en/[passanternas]en passant NN:BF:PLU:GEN:UTR|en/[passanters]en passant NN:OF:PLU:GEN:UTR|en/[passants]en passant NN:OF:SIN:GEN:UTR -- klubba/[klubba]NN:OF:SIN:NOM:UTR|klubba/[klubba]VB:IMP|klubba/[klubba]VB:INF -- till/[till]AB|till/[till]PP", tokenizer, tagger);
     TestTools.myAssert("Du menar sannolikt \"massera\" om du inte skriver om masarnas era förstås.",
-        "Du/[du]PN -- menar/[mena]VB:PRS -- sannolikt/[sannolik]JJ:PN|sannolikt/[sannolikt]AB -- massera/[massera]VB:IMP|massera/[massera]VB:INF -- om/[om]AB|om/[om]KN|om/[om]PP -- du/[du]PN -- inte/[inte]AB -- skriver/[skriva]VB:PRS -- om/[om]AB|om/[om]KN|om/[om]PP -- masarnas/[mas]NN:BF:PLU:GEN:UTR -- era/[era]NN:OF:SIN:NOM:UTR|era/[era]PN -- förstås/[förstå]VB:INF:PF|förstås/[förstå]VB:PRS:PF|förstås/[förstås]AB", tokenizer, tagger);        
+        "Du/[du]PN -- menar/[mena]VB:PRS -- sannolikt/[sannolik]JJ:PN|sannolikt/[sannolikt]AB -- massera/[massera]VB:IMP|massera/[massera]VB:INF -- om/[om]AB|om/[om]KN|om/[om]PP -- du/[du]PN -- inte/[inte]AB -- skriver/[skriva]VB:PRS -- om/[om]AB|om/[om]KN|om/[om]PP -- masarnas/[mas]NN:BF:PLU:GEN:UTR -- era/[era]NN:OF:SIN:NOM:UTR|era/[era]PN -- förstås/[förstå]VB:INF:PF|förstås/[förstå]VB:PRS:PF|förstås/[förstås]AB", tokenizer, tagger);
   }
 
 }

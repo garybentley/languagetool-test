@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2008 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,7 +24,6 @@ import org.languagetool.language.Spanish;
 import org.languagetool.rules.GenericUnpairedBracketsRule;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -35,9 +34,10 @@ public class GenericUnpairedBracketsRuleTest {
   private JLanguageTool langTool;
 
   @Test
-  public void testSpanishRule() throws IOException {
-    langTool = new JLanguageTool(new Spanish());
-    rule = org.languagetool.rules.GenericUnpairedBracketsRuleTest.getBracketsRule(langTool);
+  public void testSpanishRule() throws Exception {
+    Spanish lang = new Spanish();
+    langTool = new JLanguageTool(lang);
+    rule = lang.createUnpairedBracketsRule(null);
     // correct sentences:
     assertMatches("Soy un hombre (muy honrado).", 0);
     // incorrect sentences:
@@ -45,7 +45,7 @@ public class GenericUnpairedBracketsRuleTest {
     assertMatches("¡Atención", 1);
   }
 
-  private void assertMatches(String input, int expectedMatches) throws IOException {
+  private void assertMatches(String input, int expectedMatches) throws Exception {
     final RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(input)));
     assertEquals(expectedMatches, matches.length);
   }

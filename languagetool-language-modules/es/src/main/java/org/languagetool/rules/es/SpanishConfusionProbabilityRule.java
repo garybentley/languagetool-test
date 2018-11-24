@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,22 +18,29 @@
  */
 package org.languagetool.rules.es;
 
-import org.languagetool.Language;
+import org.languagetool.language.Spanish;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.ngrams.ConfusionProbabilityRule;
+import org.languagetool.rules.ConfusionSet;
 
 import java.util.ResourceBundle;
+import java.util.Map;
+import java.util.List;
 
 /**
  * @since 3.1
  */
 public class SpanishConfusionProbabilityRule extends ConfusionProbabilityRule {
 
-  public SpanishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Language language) {
-    super(messages, languageModel, language);
-    addExamplePair(Example.wrong("El proyecto no <marker>tubo</marker> una buena acogida."),
-                   Example.fixed("El proyecto no <marker>tuvo</marker> una buena acogida."));
+    public SpanishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Spanish language, Map<String,List<ConfusionSet>> confusionSets) {
+      this(messages, languageModel, language, 3, confusionSets);
+    }
+
+    public SpanishConfusionProbabilityRule(ResourceBundle messages, LanguageModel languageModel, Spanish language, int grams, Map<String,List<ConfusionSet>> confusionSets) {
+      super(messages, languageModel, language, grams, confusionSets);
+      addExamplePair(Example.wrong("El proyecto no <marker>tubo</marker> una buena acogida."),
+                     Example.fixed("El proyecto no <marker>tuvo</marker> una buena acogida."));
   }
 
 }

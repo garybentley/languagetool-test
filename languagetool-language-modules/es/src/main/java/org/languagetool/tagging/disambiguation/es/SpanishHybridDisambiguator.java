@@ -19,14 +19,11 @@
 
 package org.languagetool.tagging.disambiguation.es;
 
-import java.io.IOException;
+import java.util.Objects;
 
 import org.languagetool.AnalyzedSentence;
-import org.languagetool.language.Spanish;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.MultiWordChunker;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
 
 /**
  * Hybrid chunker-disambiguator for Spanish
@@ -35,8 +32,15 @@ import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
  */
 public class SpanishHybridDisambiguator extends AbstractDisambiguator {
 
-    private final Disambiguator chunker = new MultiWordChunker("/es/multiwords.txt");
-    private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Spanish());
+    private final Disambiguator chunker;
+    // GTODO = new MultiWordChunker("/es/multiwords.txt");
+    private final Disambiguator disambiguator;
+    // GTODO  = new XmlRuleDisambiguator(new Spanish());
+
+    public SpanishHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator) {
+        this.chunker = Objects.requireNonNull(chunker, "Chunker must be provided.");
+        this.disambiguator = Objects.requireNonNull(disambiguator, "Disambiguator must be provided.");
+    }
 
     /**
      * Calls two disambiguator classes: (1) a chunker; (2) a rule-based
@@ -44,7 +48,7 @@ public class SpanishHybridDisambiguator extends AbstractDisambiguator {
      */
     @Override
     public final AnalyzedSentence disambiguate(AnalyzedSentence input)
-            throws IOException {
+            throws Exception {
         return disambiguator.disambiguate(chunker.disambiguate(input));
     }
 

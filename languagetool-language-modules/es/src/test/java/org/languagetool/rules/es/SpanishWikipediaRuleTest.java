@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Spanish;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -41,12 +39,13 @@ public class SpanishWikipediaRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new SpanishWikipediaRule(TestTools.getMessages("es"));
-    langTool = new JLanguageTool(new Spanish());
+    Spanish lang = new Spanish();
+    rule = lang.createWikipediaRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Estas frases no tienen errores frecuentes en la Wikipedia.")).length);
@@ -64,7 +63,7 @@ public class SpanishWikipediaRuleTest {
    * @param sentence the sentence containing the incorrect/misspelled word.
    * @param word the word that is correct (the suggested replacement).
    */
-  private void checkSimpleReplaceRule(String sentence, String word) throws IOException {
+  private void checkSimpleReplaceRule(String sentence, String word) throws Exception {
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals("Invalid matches.length while checking sentence: "
             + sentence, 1, matches.length);
