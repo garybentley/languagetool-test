@@ -179,6 +179,11 @@ This is a list of things that need to be changed/looked at:
 * sr probably need a EkavianSerbian to provide symmetry with class JekavianSerbian.
 * ta breaks the directory naming convention.
 * LongSentenceRule (not subclass) will use the same user config parm (via rule id) for the sentence length, however each language should have its own length.
+* uk/UkranianTagger uses /uk/ukranian.dict but that file doesn't exist.
+* DefaultCaseConverter needs work to remove use of StringTools.
+* UkrainianSynthesizer uses /uk/ukrainian_synth.dict and /uk/ukrainian_tags.txt but the files don't exist.
+* MorfologikUkrainianSpellerRule uses /uk/hunspell/uk_UA.dict which doesn't exist.
+* uk nearly all tests have been @Ignored due to missing .dict files, especially that of tagger.
 
 ## The information below is from the standard LanguageTool README
 

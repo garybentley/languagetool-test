@@ -73,6 +73,10 @@ public class DefaultCaseConverter implements CaseConverter {
         return StringTools.isEmpty(str) ? str : StringTools.lowercaseFirstChar(str);
     }
 
+    public boolean isCapitalizedWord(String str) {
+        return StringTools.isEmpty(str) ? false : StringTools.isCapitalizedWord(str);
+    }
+
     /**
      * Convert the string according to the conversion provided and sample (optional).
      *

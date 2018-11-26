@@ -28,99 +28,45 @@ import java.util.stream.Collectors;
 
 import java.nio.charset.*;
 
-import morfologik.stemming.IStemmer;
 import morfologik.stemming.Dictionary;
-import morfologik.stemming.DictionaryLookup;
 
 import org.languagetool.UserConfig;
-import org.languagetool.language.Spanish;
-import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.BaseSynthesizer;
-import org.languagetool.tagging.disambiguation.es.SpanishHybridDisambiguator;
-import org.languagetool.tagging.disambiguation.Disambiguator;
+import org.languagetool.language.Tagalog;
 import org.languagetool.tagging.MorfologikTagger;
 import org.languagetool.tagging.WordTagger;
 import org.languagetool.tagging.Tagger;
-import org.languagetool.tagging.es.SpanishTagger;
-import org.languagetool.tokenizers.es.SpanishWordTokenizer;
+import org.languagetool.tagging.tl.TagalogTagger;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.rules.patterns.PatternRule;
-import org.languagetool.languagemodel.LanguageModel;
+import org.languagetool.language.tokenizers.TagalogWordTokenizer;
 
-public class DefaultSpanishResourceDataBroker extends DefaultResourceDataBroker implements SpanishResourceDataBroker {
+public class DefaultTagalogResourceDataBroker extends DefaultResourceDataBroker implements TagalogResourceDataBroker {
 
-    public static String WORD_TAGGER_DICT_FILE_NAME = "%1$s/spanish.dict";
-    public static String STEMMER_DICT_FILE_NAME = "%1$s/spanish_synth.dict";
-    public static String SYNTHESIZER_WORD_TAGS_FILE_NAME = "%1$s/spanish_tags.txt";
+    public static String WORD_TAGGER_DICT_FILE_NAME = "%1$s/tagalog.dict";
 
-    /**
-     * The filename to use for the base hunspell binary dictionary info.  The locale language and country values are replaced in the filename.
-     * For en_GB this would become: /en/hunspell/en_GB.info
-     */
     public static String PLAIN_TEXT_SPELLING_INFO_FILE_NAME = "%1$s/hunspell/%1$s_%2$s.info";
 
     public static String PLAIN_TEXT_BASE_SPELLING_FILE_NAME = "%1$s/hunspell/spelling.txt";
 
     /**
      * The filename to use for the base hunspell binary dictionary.  The locale language and country values are replaced in the filename.
-     * For en_GB this would become: /en/hunspell/en_GB.dict
+     * For tl_PH this would become: tl/hunspell/tl_PH.dict
      */
     public static String BINARY_DICT_FILE_NAME = "%1$s/hunspell/%1$s_%2$s.dict";
 
     public static String IGNORE_WORDS_FILE_NAME = "%1$s/hunspell/ignore.txt";
 
-    public static String WIKIPEDIA_WORDS_FILE_NAME = "%1$s/wikipedia.txt";
-
     private Tagger tagger;
-    private Tokenizer wordTokenizer;
-    private Disambiguator disambiguator;
-    private Synthesizer synthesizer;
     private Dictionary wordTaggerDictionary;
     private WordTagger wordTagger;
-    private IStemmer istemmer;
+    private SentenceTokenizer sentenceTokenizer;
+    private Tokenizer wordTokenizer;
     private Set<Dictionary> dictionaries;
-    private LanguageModel languageModel;
-    private List<Map<String, String>> wikipediaWords;
 
-    public DefaultSpanishResourceDataBroker(Spanish lang, ClassLoader classLoader) throws Exception {
+    public DefaultTagalogResourceDataBroker(Tagalog lang, ClassLoader classLoader) throws Exception {
         super(lang, classLoader);
     }
 
-    /**
-     * Get the wikipedia words for Spanish.
-     *
-     * @return The words.
-     */
-    @Override
-    public List<Map<String, String>> getWikipediaWords() throws Exception {
-        if (wikipediaWords == null) {
-            String file = String.format(WIKIPEDIA_WORDS_FILE_NAME, language.getLocale().getLanguage());
-            wikipediaWords = createWrongWords2FromRulesPath(file, getWordTokenizer());
-        }
-        return wikipediaWords;
-    }
-
-    @Override
-    public LanguageModel getLanguageModel() throws Exception {
-        if (languageModel == null) {
-            languageModel = createLanguageModelFromResourcePath();
-        }
-        return languageModel;
-    }
-
-    /**
-    * GTODO Tidy up doco
-     * Return the dictionaries we use for spelling, files we use are:
-     *   - /resource/<locale.language>/hunspell/<locale.language>_<locale.countrycode>.dict, this creates a binary hunspell dictionary.
-     *   - /resource/<locale.language>/hunspell/spelling.txt, a text based dictionary.
-     *   - /resource/<locale.language>/hunspell/spelling_<locale.language>-<locale.countrycode>.txt, a locale variant dictionary (optional)
-     *   - /resource/<locale.language>/hunspell/<locale.language>_<locale.countrycode>.info, the info for text dictionary.
-     *
-     * The plain text and variant dictionary are merged to form a single extra dictionary.
-     *
-     * @return The dictionaries to use for the language locale.
-     */
     @Override
     // GTODO Push this down into DefaultResourceDataBroker, pass the relevant filenames, en and de have slightly different naming for the variant files...
     public Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception {
@@ -172,31 +118,6 @@ public class DefaultSpanishResourceDataBroker extends DefaultResourceDataBroker 
         return loadSpellingIgnoreWordsFromResourcePath(String.format(PLAIN_TEXT_BASE_SPELLING_FILE_NAME, language.getLocale().getLanguage()), String.format(IGNORE_WORDS_FILE_NAME, language.getLocale().getLanguage()));
     }
 
-    public IStemmer getIStemmer() throws Exception {
-        if (istemmer == null) {
-            String file = String.format(STEMMER_DICT_FILE_NAME, language.getLocale().getLanguage());
-            try {
-                istemmer = new DictionaryLookup(getMorfologikBinaryDictionaryFromResourcePath(file));
-            } catch(Exception e) {
-                throw new Exception(String.format("Unable to load stemmer dictionary from: %1$s", file), e);
-            }
-        }
-        return istemmer;
-    }
-
-    public Set<String> getSynthesizerWordTags() throws Exception {
-        String file = String.format(SYNTHESIZER_WORD_TAGS_FILE_NAME, language.getLocale().getLanguage());
-        return createSynthesizerWordTagsFromResourcePath(file);
-    }
-
-    @Override
-    public Synthesizer getSynthesizer() throws Exception {
-        if (synthesizer == null) {
-            synthesizer = new BaseSynthesizer(getIStemmer(), getSynthesizerWordTags());
-        }
-        return synthesizer;
-    }
-
     @Override
     public WordTagger getWordTagger() throws Exception {
         if (wordTagger == null) {
@@ -215,47 +136,22 @@ public class DefaultSpanishResourceDataBroker extends DefaultResourceDataBroker 
     @Override
     public Tagger getTagger() throws Exception {
       if (tagger == null) {
-        tagger = new SpanishTagger(getWordTaggerDictionary(), getWordTagger(), getCaseConverter());
+        tagger = new TagalogTagger(getWordTaggerDictionary(), getWordTagger(), getCaseConverter());
       }
       return tagger;
     }
 
-    /**
-     * Get the disambiguator.  We override to return a specialization, however we still use {@link super.getDisambiguator()} to get the
-     * xml rule based disambiguator.
-     *
-     * @return The disambiguator.
-     */
-    @Override
-    public Disambiguator getDisambiguator() throws Exception {
-        if (disambiguator == null) {
-          disambiguator = new SpanishHybridDisambiguator(createMultiWordChunkerFromResourcePath(false), super.getDisambiguator());
-        }
-        return disambiguator;
-    }
-
     @Override
     public Tokenizer getWordTokenizer() throws Exception {
-      if (wordTokenizer == null) {
-        wordTokenizer = new SpanishWordTokenizer();
-      }
-      return wordTokenizer;
+        if (wordTokenizer == null) {
+            wordTokenizer = new TagalogWordTokenizer();
+        }
+        return wordTokenizer;
     }
 
     @Override
     public SentenceTokenizer getSentenceTokenizer() throws Exception {
         return getDefaultSentenceTokenizer();
-    }
-
-    /**
-     * Close our resources.
-     */
-    @Override
-    public void close() throws Exception {
-        super.close();
-        if (languageModel != null) {
-            languageModel.close();
-        }
     }
 
 }

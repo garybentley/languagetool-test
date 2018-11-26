@@ -1,5 +1,5 @@
 /* LanguageTool, a natural language style checker
- * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
+ * Copyright (C) 2018 Gary Bentley
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,18 +16,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301
  * USA
  */
-package org.languagetool.rules.tl;
+package org.languagetool.databroker;
 
-import org.junit.Test;
-import org.languagetool.rules.patterns.PatternRuleTest;
-import org.languagetool.language.Tagalog;
+import java.util.List;
+import java.util.Set;
 
-public class TagalogPatternRuleTest extends PatternRuleTest {
+import morfologik.stemming.Dictionary;
 
-  @Test
-  public void testRules() throws Exception {
-    Tagalog lang = new Tagalog();
-    runTestForLanguage(lang);
-  }
+import org.languagetool.UserConfig;
+
+public interface TagalogResourceDataBroker extends ResourceDataBroker {
+
+    Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception;
+
+    List<String> getSpellingIgnoreWords() throws Exception;
 
 }

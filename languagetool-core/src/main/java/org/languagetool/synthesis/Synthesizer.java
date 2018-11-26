@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,9 +23,9 @@ import java.io.IOException;
 import org.languagetool.AnalyzedToken;
 
 /**
- * Part-of-speech synthesizer interface. Implementations are 
+ * Part-of-speech synthesizer interface. Implementations are
  * heavily language-dependent.
- * 
+ *
  * @author Marcin Miłkowski
  */
 public interface Synthesizer {
@@ -35,17 +35,17 @@ public interface Synthesizer {
    * @param token the token to be used for synthesis
    * @param posTag POS tag of the form to be generated
    */
-  String[] synthesize(AnalyzedToken token, String posTag) throws IOException;
+  String[] synthesize(AnalyzedToken token, String posTag);
 
   /**
    * Generates a form of the word with a given POS tag for a given lemma.
-   * POS tag can be specified using regular expressions. 
+   * POS tag can be specified using regular expressions.
    * @param token the token to be used for synthesis
    * @param posTag POS tag of the form to be generated
    * @param posTagRegExp Specifies whether the posTag string is a regular expression.
    */
-  String[] synthesize(AnalyzedToken token, String posTag, boolean posTagRegExp) throws IOException;
-  
+  String[] synthesize(AnalyzedToken token, String posTag, boolean posTagRegExp);
+
   /**
    * Gets a corrected version of the POS tag used for synthesis.
    * Useful when the tagset defines special disjunction that

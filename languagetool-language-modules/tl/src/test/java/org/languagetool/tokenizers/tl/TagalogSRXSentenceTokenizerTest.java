@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,13 +19,21 @@
 package org.languagetool.tokenizers.tl;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Tagalog;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class TagalogSRXSentenceTokenizerTest {
 
-  private final SRXSentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Tagalog());
+  private SentenceTokenizer stokenizer;
+  private Tagalog lang;
+
+  @Before
+  public void setUp() throws Exception {
+      lang = new Tagalog();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public void testTokenize() {
@@ -36,7 +44,7 @@ public class TagalogSRXSentenceTokenizerTest {
   }
 
   private void testSplit(String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
-  
+
 }

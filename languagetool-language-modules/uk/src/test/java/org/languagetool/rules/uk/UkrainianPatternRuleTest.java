@@ -20,14 +20,14 @@ package org.languagetool.rules.uk;
 
 import org.junit.Test;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
+import org.languagetool.language.Ukrainian;
 
 public class UkrainianPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Ukrainian lang = new Ukrainian();
+    runTestForLanguage(lang);
   }
 
 }

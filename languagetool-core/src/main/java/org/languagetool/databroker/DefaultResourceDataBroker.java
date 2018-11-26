@@ -1669,7 +1669,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
        return ignoreCase + "\\b(" + str + ")\\b";
      }
 
-     public MultiWordChunker2 createMultiWordChunker2FromResourcePath(String path, Charset charset, boolean allowFirstCapitalized) throws IOException {
+     public Map<String, List<MultiWordEntry>> createMultiWordChunker2MappingFromResourcePath(String path, Charset charset) throws IOException {
          charset = (charset == null ? DEFAULT_CHARSET : charset);
          try {
            List<String[]> posTokens = (List<String[]>) loadWordsFromResourcePath(path, charset, multiWordChunkerStringProcessor);
@@ -1686,13 +1686,16 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
                multiwordItems = new ArrayList<>();
                map.put(tokens[0], multiwordItems);
              }
-
              multiwordItems.add(new MultiWordEntry(Arrays.asList(tokens), posTag));
            }
-           return new MultiWordChunker2(map, allowFirstCapitalized);
+           return map;
          } catch (Exception e) {
            throw new IOException(String.format("Unable to convert file: %1$s to multi word chunker.", path), e);
          }
+     }
+
+     public MultiWordChunker2 createMultiWordChunker2FromResourcePath(String path, Charset charset, boolean allowFirstCapitalized) throws IOException {
+         return new MultiWordChunker2(createMultiWordChunker2MappingFromResourcePath(path, charset), allowFirstCapitalized);
      }
 
      // GTODO Use a string processor.

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.rules.uk.LemmaHelper.Dir;
 import org.languagetool.tagging.uk.IPOSTag;
 import org.languagetool.tagging.uk.PosTagHelper;
+import org.languagetool.rules.patterns.CaseConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,19 +25,27 @@ import org.slf4j.LoggerFactory;
 public final class TokenAgreementNounVerbExceptionHelper {
   private static Logger logger = LoggerFactory.getLogger(TokenAgreementNounVerbExceptionHelper.class);
 
-  private static final Set<String> MASC_FEM_SET = extendSet(ExtraDictionaryLoader.loadSet("/uk/masc_fem.txt"), "екс-");
+  // GTODO private static final Set<String> MASC_FEM_SET = extendSet(ExtraDictionaryLoader.loadSet("/uk/masc_fem.txt"), "екс-");
+  private final Set<String> femSet;
+  private final CaseConverter caseConverter;
+  private CaseGovernmentHelper helper;
 
-  private TokenAgreementNounVerbExceptionHelper() {
+  public TokenAgreementNounVerbExceptionHelper(Set<String> femSet, CaseGovernmentHelper helper, CaseConverter caseCon) {
+      Objects.requireNonNull(femSet, "Set must be provided.");
+      this.femSet = extendSet(femSet, "екс-");
+      this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
+      this.helper = Objects.requireNonNull(helper, "Helper must be provided.");
   }
-
+/*
+GTODO
   private static boolean isCapitalized(String token) {
     return token != null
         && token.length() > 1
         && Character.isUpperCase(token.charAt(0))
         && Character.isLowerCase(token.charAt(1));
   }
-
-  public static boolean isException(AnalyzedTokenReadings[] tokens, int i,
+*/
+  public boolean isException(AnalyzedTokenReadings[] tokens, int i,
                                     List<TokenAgreementNounVerbRule.Inflection> nounInflections, List<TokenAgreementNounVerbRule.Inflection> verbInflections,
                                     List<AnalyzedToken> nounTokenReadings, List<AnalyzedToken> verbTokenReadings) {
 
@@ -48,8 +58,8 @@ public final class TokenAgreementNounVerbExceptionHelper {
     //    }
 
     // невідомі прізвища, що виглядають, як дієслово: Андрій Качала
-    if( isCapitalized(tokens[i].getToken())
-        && isCapitalized(tokens[i-1].getToken()) ) {
+    if( caseConverter.isCapitalizedWord(tokens[i].getToken())
+        && caseConverter.isCapitalizedWord(tokens[i-1].getToken()) ) {
       logException();
       return true;
     }
@@ -57,8 +67,8 @@ public final class TokenAgreementNounVerbExceptionHelper {
     // невідомі прізвища, як іменник
     // Любов Євтушок зауважила
     if( i > 2
-        && isCapitalized(tokens[i-1].getToken())
-        && isCapitalized(tokens[i-2].getToken())
+        && caseConverter.isCapitalizedWord(tokens[i-1].getToken())
+        && caseConverter.isCapitalizedWord(tokens[i-2].getToken())
         && ! Collections.disjoint(TokenAgreementNounVerbRule.getNounInflections(tokens[i-2].getReadings()), verbInflections) ) {
       logException();
       return true;
@@ -91,7 +101,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
       logException();
       return true;
     }
-    
+
     // handled by xml rule
     if( LemmaHelper.hasLemma(tokens[i-1], Arrays.asList("воно", "решта")) ) {
       if( PosTagHelper.hasPosTagPart(tokens[i], ":impers") ) {
@@ -106,15 +116,15 @@ public final class TokenAgreementNounVerbExceptionHelper {
       return true;
     }
 
-    
+
     if( PosTagHelper.hasPosTag(verbTokenReadings, ".*:p(:.*|$)") ) {
 
         // моя мама й сестра мешкали
         // каналізація і навіть охорона пропонувалися
         // Ґорбачов і його дружина виглядали
-        int pos0 = LemmaHelper.tokenSearch(tokens, i-2, (String)null, TokenAgreementAdjNounExceptionHelper.CONJ_FOR_PLULAR_PATTERN, 
+        int pos0 = LemmaHelper.tokenSearch(tokens, i-2, (String)null, TokenAgreementAdjNounExceptionHelper.CONJ_FOR_PLULAR_PATTERN,
             Pattern.compile("(noun|adj:.:v_naz|adv|part).*"), Dir.REVERSE);
-        
+
         if( pos0 > 1 ) {
           if( pos0 > 2 ) {
             // і та й інша
@@ -124,17 +134,17 @@ public final class TokenAgreementNounVerbExceptionHelper {
               logException();
               return true;
             }
-            
+
             // як Німеччина, так і Україна
             if( PosTagHelper.hasPosTagPart(tokens[pos0-1], "conj") ) {
               pos0 -= 1;
             }
-            
+
             // він особисто й облдержадміністрація винесли
             if( LemmaHelper.hasLemma(tokens[pos0-1], "особисто") ) {
               pos0 -= 1;
             }
-            
+
             // Німеччина (ще демократична) та Росія почали
             if( tokens[pos0-1].getToken().equals(")") ) {
               logException();
@@ -148,14 +158,14 @@ public final class TokenAgreementNounVerbExceptionHelper {
                 pos0 -= 2;
               }
             }
-            
+
             while( pos0 > 2 && tokens[pos0-1].getToken().matches("[,»“”\"]") ) {
               pos0 -= 1;
             }
           }
-          
-          if( PosTagHelper.hasPosTag(tokens[pos0-1], "noun.*") 
-              || isCapitalized(tokens[pos0-1].getToken()) ) {
+
+          if( PosTagHelper.hasPosTag(tokens[pos0-1], "noun.*")
+              || caseConverter.isCapitalizedWord(tokens[pos0-1].getToken()) ) {
             logException();
             return true;
           }
@@ -165,9 +175,9 @@ public final class TokenAgreementNounVerbExceptionHelper {
             return true;
           }
         }
-        
+
         // Усі розписи, а також архітектура відрізняються
-        int pos3 = LemmaHelper.tokenSearch(tokens, i-2, (String)null, Pattern.compile("також"), 
+        int pos3 = LemmaHelper.tokenSearch(tokens, i-2, (String)null, Pattern.compile("також"),
             Pattern.compile("(noun|adj:.:v_naz|adv|part).*"), Dir.REVERSE);
         if( pos3 > 1 ) {
           logException();
@@ -192,7 +202,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
 //          logException();
 //          return true;
 //        }
-        
+
         // зіркова пара Леброн Джеймс-Дуейн Вейн вирішили вивести
 //        int pos2 = LemmaHelper.tokenSearch(tokens, i-2, (String)null, Pattern.compile("пара"), Pattern.compile("noun.*"), Dir.REVERSE);
 //        if( pos2 > 0
@@ -200,14 +210,14 @@ public final class TokenAgreementNounVerbExceptionHelper {
 //          logException();
 //          return true;
 //        }
-        
+
         if( (PosTagHelper.hasPosTagPart(tokens[i-1], "numr")
             && ! LemmaHelper.hasLemma(tokens[i-1], "один"))
             || LemmaHelper.hasLemma(tokens[i-1], Arrays.asList("сотня", "тисяча", "десяток")) ) {
           logException();
           return true;
         }
-        
+
         if( i > 2
             && PosTagHelper.hasPosTagPart(tokens[i-2], "number")
             && (! tokens[i-2].getToken().endsWith("1") || tokens[i-2].getToken().endsWith("11")) ) {
@@ -218,7 +228,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
         // 50%+1 акція закріплюються
         // заінтересованість плюс гарна вивіска зіграли злий жарт
         if( i > 2
-            && (tokens[i-2].getToken().endsWith("+1") 
+            && (tokens[i-2].getToken().endsWith("+1")
                 || LemmaHelper.tokenSearch(tokens, i-2, (String)null, Pattern.compile("плюс"), Pattern.compile("(numr|adj).*.:v_naz.*"), Dir.REVERSE) > 0) ) {
           logException();
           return true;
@@ -236,7 +246,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
       logException();
       return true;
     }
-    
+
     // комітет порятунку села Оляниця вирішив
     if( i > 3
         && PosTagHelper.hasPosTagPart(tokens[i-1], "v_naz:prop")
@@ -245,7 +255,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
       logException();
       return true;
     }
-    
+
     // У невизнаній республіці Південна Осетія відбулися вибори
     if( i > 4
         && PosTagHelper.hasPosTagPart(tokens[i-1], "v_naz:prop")
@@ -255,7 +265,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
       logException();
       return true;
     }
-    
+
     // У штатах Техас і Луїзіана запроваджено надзвичайний стан
     // Хоча б межі курорту Східниця визначено?
     if( i > 2
@@ -272,7 +282,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
         && PosTagHelper.hasPosTag(tokens[i-3], Pattern.compile("adj:.*"))
         && PosTagHelper.hasPosTagPart(tokens[i-4], "prep") ) {
 
-      Collection<String> prepGovernedCases = CaseGovernmentHelper.getCaseGovernments(tokens[i-4], IPOSTag.prep.name());
+      Collection<String> prepGovernedCases = helper.getCaseGovernments(tokens[i-4], IPOSTag.prep.name());
       if( TokenAgreementPrepNounRule.hasVidmPosTag(prepGovernedCases, tokens[i-2])
             && TokenAgreementPrepNounRule.hasVidmPosTag(prepGovernedCases, tokens[i-3]) ) {
         logException();
@@ -284,8 +294,8 @@ public final class TokenAgreementNounVerbExceptionHelper {
     if( i < tokens.length - 1
         && tokens[i].getToken().equals("було") ) {
         int pos = LemmaHelper.tokenSearch(tokens, i+1, ":past", null, Pattern.compile("adv.*"), Dir.FORWARD); // PosTagHelper.hasPosTag(tokens[i+1], "verb.*:past.*")
-        if( pos >= 0 
-            && ! Collections.disjoint(TokenAgreementNounVerbRule.getNounInflections(tokens[i-1].getReadings()), 
+        if( pos >= 0
+            && ! Collections.disjoint(TokenAgreementNounVerbRule.getNounInflections(tokens[i-1].getReadings()),
                 TokenAgreementNounVerbRule.getVerbInflections(tokens[pos].getReadings())) ) {
           logException();
           return true;
@@ -319,30 +329,30 @@ public final class TokenAgreementNounVerbExceptionHelper {
       logException();
       return true;
     }
-    
+
     // пора було
-    if( Arrays.asList("пора").contains(tokens[i-1].getToken().toLowerCase()) 
+    if( Arrays.asList("пора").contains(tokens[i-1].getToken().toLowerCase())
         && Arrays.asList("було").contains(tokens[i].getToken()) ) {
       logException();
       return true;
     }
 
     // решта забороняються
-    if( Arrays.asList("решта", "частина", "частка", "половина", "третина", "чверть").contains(tokens[i-1].getToken().toLowerCase()) 
+    if( Arrays.asList("решта", "частина", "частка", "половина", "третина", "чверть").contains(tokens[i-1].getToken().toLowerCase())
         && PosTagHelper.hasPosTag(verbTokenReadings, ".*:[pn](:.*|$)") ) {
       logException();
       return true;
     }
-    
+
     // Решта 121 депутат висловилися проти
     if( i > 3
-        && LemmaHelper.hasLemma(tokens[i-3], "решта") 
-        && tokens[i-2].getToken() != null && tokens[i-2].getToken().matches(".+1") 
+        && LemmaHelper.hasLemma(tokens[i-3], "решта")
+        && tokens[i-2].getToken() != null && tokens[i-2].getToken().matches(".+1")
         && PosTagHelper.hasPosTag(verbTokenReadings, ".*:p(:.*|$)") ) {
       logException();
       return true;
     }
-    
+
     // більше ніж будь-хто маємо повне право
     if( i > 3
         && LemmaHelper.hasLemma(tokens[i-2], "ніж")) {
@@ -373,7 +383,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
       if( PosTagHelper.hasPosTag(tokens[vPos-2], Pattern.compile("noun:inanim:.*"))
           && PosTagHelper.hasPosTagPart(tokens[vPos-3], "prep") ) {
 
-        Collection<String> prepGovernedCases = CaseGovernmentHelper.getCaseGovernments(tokens[vPos-3], IPOSTag.prep.name());
+        Collection<String> prepGovernedCases = helper.getCaseGovernments(tokens[vPos-3], IPOSTag.prep.name());
         if( TokenAgreementPrepNounRule.hasVidmPosTag(prepGovernedCases, tokens[vPos-2]) ) {
           logException();
           return true;
@@ -385,7 +395,7 @@ public final class TokenAgreementNounVerbExceptionHelper {
     // Хотів би я подивитися
     int verbPos = LemmaHelper.tokenSearch(tokens, i-2, "verb", null, Pattern.compile("(adv|part).*"), Dir.REVERSE);
     if( verbPos != -1
-        && PosTagHelper.hasPosTag(verbTokenReadings, "verb.*:inf.*") 
+        && PosTagHelper.hasPosTag(verbTokenReadings, "verb.*:inf.*")
         && ! Collections.disjoint(TokenAgreementNounVerbRule.getVerbInflections(tokens[verbPos].getReadings()), nounInflections) ) {
       logException();
       return true;
@@ -393,9 +403,9 @@ public final class TokenAgreementNounVerbExceptionHelper {
 
     // чи готові ми сидіти
     if( i > 1
-        && PosTagHelper.hasPosTagPart(tokens[i-2], "adj") 
+        && PosTagHelper.hasPosTagPart(tokens[i-2], "adj")
         && PosTagHelper.hasPosTag(verbTokenReadings, "verb.*:inf.*")
-        && CaseGovernmentHelper.hasCaseGovernment(tokens[i-2], "v_inf")
+        && helper.hasCaseGovernment(tokens[i-2], "v_inf")
         && ! Collections.disjoint(InflectionHelper.getAdjInflections(tokens[i-2].getReadings()), InflectionHelper.getNounInflections(nounTokenReadings))) {
       logException();
       return true;
@@ -407,19 +417,19 @@ public final class TokenAgreementNounVerbExceptionHelper {
     // це я робити швидко вмію
     if( i < tokens.length - 1
         && PosTagHelper.hasPosTag(verbTokenReadings, "verb.*:inf.*") ) {
-      
+
       int verbPos2 = LemmaHelper.tokenSearch(tokens, i+1, Pattern.compile("verb.*"), null, Pattern.compile("(adv|part|adj|noun|conj|part|prep).*"), Dir.FORWARD);
       if( verbPos2 != -1
           && ! Collections.disjoint(TokenAgreementNounVerbRule.getVerbInflections(tokens[verbPos2].getReadings()), nounInflections) ) {
         logException();
         return true;
       }
-      
+
       // це ми рахувати не повинні
       // ми проходити зобов'язані
       int adjPos2 = LemmaHelper.tokenSearch(tokens, i+1, "adj", null, Pattern.compile("(adv|part).*"), Dir.FORWARD);
       if( adjPos2 != -1
-          && CaseGovernmentHelper.hasCaseGovernment(tokens[adjPos2], "v_inf")
+          && helper.hasCaseGovernment(tokens[adjPos2], "v_inf")
           && ! Collections.disjoint(InflectionHelper.getAdjInflections(tokens[adjPos2].getReadings()), InflectionHelper.getNounInflections(nounTokenReadings)) ) {
         logException();
         return true;
@@ -431,17 +441,17 @@ public final class TokenAgreementNounVerbExceptionHelper {
         && LemmaHelper.tokenSearch(tokens, i-2, (String)null, Pattern.compile("[Яя]к"), Pattern.compile("adj.*"), Dir.REVERSE) != -1 ) {
       logException();
       return true;
-    } 
-    
+    }
+
     return false;
   }
-  
 
-  private static boolean hasMascFemLemma(List<AnalyzedToken> nounTokenReadings) {
+
+  private boolean hasMascFemLemma(List<AnalyzedToken> nounTokenReadings) {
     String token = nounTokenReadings.get(0).getToken();
     if( token.endsWith("олог") || token.endsWith("знавець") )
       return true;
-    
+
     for (AnalyzedToken analyzedToken : nounTokenReadings) {
       String posTag = analyzedToken.getPOSTag();
       if( posTag != null && posTag.contains("noun:anim:m:v_naz") ) {
@@ -451,23 +461,23 @@ public final class TokenAgreementNounVerbExceptionHelper {
           return true;
       }
     }
-    
+
     return false;
   }
 
-  private static boolean isInMascFemSet(String lemma) {
-    return MASC_FEM_SET.contains(lemma.replace('\u2018', '-'));
+  private boolean isInMascFemSet(String lemma) {
+    return femSet.contains(lemma.replace('\u2018', '-'));
   }
 
 
-  private static Set<String> extendSet(Set<String> loadSet, String string) {
+  private Set<String> extendSet(Set<String> loadSet, String string) {
     Set<String> extraSet = loadSet.stream().map(line -> "екс-" + line).collect(Collectors.toSet());
     loadSet.addAll(extraSet);
     return loadSet;
   }
 
-  
-  private static void logException() {
+
+  private void logException() {
     if( logger.isDebugEnabled() ) {
       StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
       logger.debug("exception: " /*+ stackTraceElement.getFileName()*/ + stackTraceElement.getLineNumber());

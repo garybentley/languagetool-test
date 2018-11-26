@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Andriy Rysin
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,13 +18,13 @@
  */
 package org.languagetool.rules.uk;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,20 +42,22 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A rule that checks if noun and verb agree
- * 
+ *
  * @author Andriy Rysin
  * @since 3.6
  */
 public class TokenAgreementNounVerbRule extends Rule {
   private static Logger logger = LoggerFactory.getLogger(TokenAgreementNounVerbRule.class);
-  
+
   private static final Pattern VERB_INFLECTION_PATTERN = Pattern.compile(":([mfnps])(:([123])?|$)");
   private static final Pattern NOUN_INFLECTION_PATTERN = Pattern.compile("(?::((?:[iu]n)?anim))?:([mfnps]):(v_naz)");
   private static final Pattern NOUN_PERSON_PATTERN = Pattern.compile(":([123])");
 
+  private TokenAgreementNounVerbExceptionHelper helper;
 
-  public TokenAgreementNounVerbRule(ResourceBundle messages) throws IOException {
+  public TokenAgreementNounVerbRule(ResourceBundle messages, TokenAgreementNounVerbExceptionHelper helper) {
     super.setCategory(Categories.MISC.getCategory(messages));
+    this.helper = Objects.requireNonNull(helper, "Helper must be provided.");
 //    setDefaultOff();
   }
 
@@ -74,7 +76,7 @@ public class TokenAgreementNounVerbRule extends Rule {
   }
 
   /**
-   * Indicates if the rule is case-sensitive. 
+   * Indicates if the rule is case-sensitive.
    * @return true if the rule is case-sensitive, false otherwise.
    */
   public boolean isCaseSensitive() {
@@ -84,9 +86,9 @@ public class TokenAgreementNounVerbRule extends Rule {
   @Override
   public final RuleMatch[] match(AnalyzedSentence sentence) {
     List<RuleMatch> ruleMatches = new ArrayList<>();
-    AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();    
+    AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
 
-    List<AnalyzedToken> nounTokenReadings = new ArrayList<>(); 
+    List<AnalyzedToken> nounTokenReadings = new ArrayList<>();
     AnalyzedTokenReadings nounAnalyzedTokenReadings = null;
 
     for (int i = 1; i < tokens.length; i++) {
@@ -142,7 +144,7 @@ public class TokenAgreementNounVerbRule extends Rule {
       // see if we get a following verb
 //       System.err.println("Check for verb: " + tokenReadings);
 
-      List<AnalyzedToken> verbTokenReadings = new ArrayList<>(); 
+      List<AnalyzedToken> verbTokenReadings = new ArrayList<>();
       for (AnalyzedToken token: tokenReadings) {
         String verbPosTag = token.getPOSTag();
 
@@ -186,7 +188,7 @@ public class TokenAgreementNounVerbRule extends Rule {
       logger.debug("\t\t{}\n\t{}", masterInflections, slaveInflections);
 
       if( Collections.disjoint(masterInflections, slaveInflections) ) {
-        if( TokenAgreementNounVerbExceptionHelper.isException(tokens, i, masterInflections, slaveInflections, nounTokenReadings, verbTokenReadings)) {
+        if( helper.isException(tokens, i, masterInflections, slaveInflections, nounTokenReadings, verbTokenReadings)) {
           nounTokenReadings.clear();
           break;
         }
@@ -196,9 +198,9 @@ public class TokenAgreementNounVerbRule extends Rule {
             nounAnalyzedTokenReadings.getToken() + ": " + masterInflections + " // " + nounAnalyzedTokenReadings,
             verbTokenReadings.get(0).getToken() + ": " + slaveInflections+ " // " + verbTokenReadings));
         }
-        
-        String msg = String.format("Не узгоджено іменник з дієсловом: \"%s\" (%s) і \"%s\" (%s)", 
-            nounTokenReadings.get(0).getToken(), formatInflections(masterInflections, true), 
+
+        String msg = String.format("Не узгоджено іменник з дієсловом: \"%s\" (%s) і \"%s\" (%s)",
+            nounTokenReadings.get(0).getToken(), formatInflections(masterInflections, true),
             verbTokenReadings.get(0).getToken(), formatInflections(slaveInflections, false));
         RuleMatch potentialRuleMatch = new RuleMatch(this, sentence, nounAnalyzedTokenReadings.getStartPos(), tokenReadings.getEndPos(), msg, getShort());
         ruleMatches.add(potentialRuleMatch);
@@ -287,10 +289,10 @@ public class TokenAgreementNounVerbRule extends Rule {
         continue;
       }
       String gen = matcher.group(2);
-      
+
       Matcher matcherPerson = NOUN_PERSON_PATTERN.matcher(posTag2);
       String person = matcherPerson.find() ? matcherPerson.group(1) : null;
-      
+
       slaveInflections.add(new Inflection(gen, person));
     }
 //    System.err.println("nounInfl: " + slaveInflections);
@@ -323,7 +325,7 @@ public class TokenAgreementNounVerbRule extends Rule {
       }
       this.person = person;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
       if (this == obj)
@@ -339,7 +341,7 @@ public class TokenAgreementNounVerbRule extends Rule {
         if( ! person.equals(other.person) )
           return false;
       }
-      
+
       if( gender != null && other.gender != null ) {
 
         // infinitive matches all for now, otherwise too many false positives
@@ -374,15 +376,15 @@ public class TokenAgreementNounVerbRule extends Rule {
     public int compareTo(Inflection o) {
       Integer thisOrder = gender != null ? InflectionHelper.GEN_ORDER.get(gender) : 0;
       Integer otherOrder = o.gender != null ? InflectionHelper.GEN_ORDER.get(o.gender) : 0;
-      
+
       int compared = thisOrder.compareTo(otherOrder);
 //      if( compared != 0 )
         return compared;
-      
+
 //      compared = VIDM_ORDER.get(_case).compareTo(VIDM_ORDER.get(o._case));
 //      return compared;
     }
-  
+
 
   }
 

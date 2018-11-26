@@ -37,6 +37,8 @@ public interface CaseConverter {
 
     public String lowercaseFirstChar(String str);
 
+    public boolean isCapitalizedWord(String str);
+
     /**
      * Convert the string according to the conversion provided and sample (optional).
      *

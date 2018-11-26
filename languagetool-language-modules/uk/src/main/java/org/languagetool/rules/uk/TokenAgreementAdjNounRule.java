@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Andriy Rysin
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,7 @@
  */
 package org.languagetool.rules.uk;
 
-import java.io.IOException;
+import java.util.Objects;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,19 +47,22 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A rule that checks if adjective and following noun agree on gender and inflection
- * 
+ *
  * @author Andriy Rysin
  */
 public class TokenAgreementAdjNounRule extends Rule {
   private static Logger logger = LoggerFactory.getLogger(TokenAgreementAdjNounRule.class);
-  
+
   static final Pattern ADJ_INFLECTION_PATTERN = Pattern.compile(":([mfnp]):(v_...)(:r(in)?anim)?");
   static final Pattern NOUN_INFLECTION_PATTERN = Pattern.compile("(?::((?:[iu]n)?anim))?:([mfnps]):(v_...)");
 
-  private final Ukrainian ukrainian = new Ukrainian();
+  private TokenAgreementAdjNounExceptionHelper helper;
+  private Synthesizer synthesizer;
 
-  public TokenAgreementAdjNounRule(ResourceBundle messages) throws IOException {
+  public TokenAgreementAdjNounRule(ResourceBundle messages, TokenAgreementAdjNounExceptionHelper helper, Synthesizer synthesizer) {
     super.setCategory(Categories.MISC.getCategory(messages));
+    this.helper = Objects.requireNonNull(helper, "Helper must be provided.");
+    this.synthesizer = Objects.requireNonNull(synthesizer, "Synthesizer must be provided.");
 //    setDefaultOff();
   }
 
@@ -82,7 +85,7 @@ public class TokenAgreementAdjNounRule extends Rule {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
 
-    List<AnalyzedToken> adjTokenReadings = new ArrayList<>(); 
+    List<AnalyzedToken> adjTokenReadings = new ArrayList<>();
     AnalyzedTokenReadings adjAnalyzedTokenReadings = null;
 
     for (int i = 1; i < tokens.length; i++) {
@@ -159,7 +162,7 @@ public class TokenAgreementAdjNounRule extends Rule {
           continue;
         }
 
-        if( nounPosTag.startsWith("noun") 
+        if( nounPosTag.startsWith("noun")
             && ! nounPosTag.contains(PosTagHelper.NO_VIDMINOK_SUBSTR) ) {
 
           slaveTokenReadings.add(token);
@@ -192,7 +195,7 @@ public class TokenAgreementAdjNounRule extends Rule {
 
       if( Collections.disjoint(masterInflections, slaveInflections) ) {
 
-        if( TokenAgreementAdjNounExceptionHelper.isException(tokens, i, masterInflections, slaveInflections, adjTokenReadings, slaveTokenReadings) ) {
+        if( helper.isException(tokens, i, masterInflections, slaveInflections, adjTokenReadings, slaveTokenReadings) ) {
           adjTokenReadings.clear();
           continue;
         }
@@ -203,7 +206,7 @@ public class TokenAgreementAdjNounRule extends Rule {
             slaveTokenReadings.get(0).getToken() + ": " + slaveInflections+ " // " + slaveTokenReadings));
         }
 
-        String msg = String.format("Потенційна помилка: прикметник не узгоджений з іменником: \"%s\": [%s] і \"%s\": [%s]", 
+        String msg = String.format("Потенційна помилка: прикметник не узгоджений з іменником: \"%s\": [%s] і \"%s\": [%s]",
             adjTokenReadings.get(0).getToken(), formatInflections(masterInflections, true),
             slaveTokenReadings.get(0).getToken(), formatInflections(slaveInflections, false));
 
@@ -224,11 +227,7 @@ public class TokenAgreementAdjNounRule extends Rule {
 
         RuleMatch potentialRuleMatch = new RuleMatch(this, sentence, adjAnalyzedTokenReadings.getStartPos(), tokenReadings.getEndPos(), msg, getShort());
 
-        Synthesizer ukrainianSynthesizer = ukrainian.getSynthesizer();
         List<String> suggestions = new ArrayList<>();
-
-
-        try {
 
         for (Inflection adjInflection : masterInflections) {
           String genderTag = ":"+adjInflection.gender+":";
@@ -247,7 +246,7 @@ public class TokenAgreementAdjNounRule extends Rule {
 
                 String newNounPosTag = nounToken.getPOSTag().replaceFirst(":.:v_...", genderTag + vidmTag);
 
-                String[] synthesized = ukrainianSynthesizer.synthesize(nounToken, newNounPosTag, false);
+                String[] synthesized = synthesizer.synthesize(nounToken, newNounPosTag, false);
 
                 for (String s : synthesized) {
                   String suggestion = adjAnalyzedTokenReadings.getToken() + " " + s;
@@ -270,7 +269,7 @@ public class TokenAgreementAdjNounRule extends Rule {
           for(AnalyzedToken adjToken: adjTokenReadings) {
             String newAdjTag = adjToken.getPOSTag().replaceFirst(":.:v_...(:r(in)?anim)?", genderTag + vidmTag);
 
-            String[] synthesized = ukrainianSynthesizer.synthesize(adjToken, newAdjTag, false);
+            String[] synthesized = synthesizer.synthesize(adjToken, newAdjTag, false);
 
             for (String s : synthesized) {
               String suggestion = s + " " + tokenReadings.getToken();
@@ -281,12 +280,6 @@ public class TokenAgreementAdjNounRule extends Rule {
           }
 
         }
-
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-
-//        System.err.println("### " + suggestions);
 
         if( suggestions.size() > 0 ) {
             potentialRuleMatch.setSuggestedReplacements(suggestions);
@@ -304,9 +297,9 @@ public class TokenAgreementAdjNounRule extends Rule {
   private static String formatInflections(List<Inflection> inflections, boolean adj) {
 
     Collections.sort(inflections);
-    
+
     Map<String, List<String>> map = new LinkedHashMap<>();
-    
+
     for (Inflection inflection : inflections) {
       if( ! map.containsKey(inflection.gender) ) {
         map.put(inflection.gender, new ArrayList<>());
@@ -318,16 +311,16 @@ public class TokenAgreementAdjNounRule extends Rule {
       map.get(inflection.gender).add(caseStr);
     }
 
-    
+
     List<String> list = new ArrayList<>();
     for(Entry<String, List<String>> entry : map.entrySet()) {
       String genderStr = PosTagHelper.GENDER_MAP.get(entry.getKey());
-      
+
       List<String> caseValues = entry.getValue();
 
       list.add(genderStr + ": " + StringUtils.join(caseValues, ", "));
     }
-    
+
     return StringUtils.join(list, ", ");
   }
 

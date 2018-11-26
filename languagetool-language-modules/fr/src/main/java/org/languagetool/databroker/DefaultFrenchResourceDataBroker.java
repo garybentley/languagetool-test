@@ -281,4 +281,15 @@ public class DefaultFrenchResourceDataBroker extends DefaultResourceDataBroker i
         return wordTaggerDictionary;
     }
 
+    /**
+     * Close our resources.
+     */
+    @Override
+    public void close() throws Exception {
+        super.close();
+        if (languageModel != null) {
+            languageModel.close();
+        }
+    }
+
 }

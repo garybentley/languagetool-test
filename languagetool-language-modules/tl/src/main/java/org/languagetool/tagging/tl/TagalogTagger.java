@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,15 +20,24 @@ package org.languagetool.tagging.tl;
 
 import java.util.Locale;
 
-import org.languagetool.tagging.BaseTagger;
+import morfologik.stemming.Dictionary;
 
-/** 
+import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.WordTagger;
+import org.languagetool.rules.patterns.CaseConverter;
+
+/**
  * Filipino Part-of-speech tagger.
- * 
+ *
  * @author Nathaniel Oco
  */
 public class TagalogTagger extends BaseTagger {
 
+    public TagalogTagger(Dictionary baseDict, WordTagger tagger, CaseConverter caseCon) {
+        super(baseDict, tagger, caseCon, true);
+    }
+/*
+GTODO
   @Override
   public String getManualAdditionsFileName() {
     return "/tl/added.txt";
@@ -37,4 +46,5 @@ public class TagalogTagger extends BaseTagger {
   public TagalogTagger() {
     super("/tl/tagalog.dict", Locale.ENGLISH);
   }
+  */
 }

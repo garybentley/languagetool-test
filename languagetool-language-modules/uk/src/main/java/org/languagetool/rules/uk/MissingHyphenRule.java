@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,11 +18,11 @@
  */
 package org.languagetool.rules.uk;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,25 +35,27 @@ import org.languagetool.tagging.WordTagger;
 import org.languagetool.tagging.uk.PosTagHelper;
 
 /**
- * 
+ *
  * @author Andriy Rysin
  */
 public class MissingHyphenRule extends Rule {
 
-  private static final Set<String> dashPrefixes = ExtraDictionaryLoader.loadSet("/uk/dash_prefixes.txt");
+  private final Set<String> dashPrefixes;
+  // GTODO  = ExtraDictionaryLoader.loadSet("/uk/dash_prefixes.txt");
   private static final Pattern ALL_LOWER = Pattern.compile("[а-яіїєґ'-]+");
   private WordTagger wordTagger;
 
 
-  public MissingHyphenRule(ResourceBundle messages, WordTagger wordTagger) throws IOException {
+  public MissingHyphenRule(ResourceBundle messages, WordTagger wordTagger, Set<String> dashPrefixes) throws Exception {
     super(messages);
     setLocQualityIssueType(ITSIssueType.Misspelling);
-    this.wordTagger = wordTagger;
-    
+    this.wordTagger = Objects.requireNonNull(wordTagger, "Word tagger must be provided.");
+    this.dashPrefixes = Objects.requireNonNull(dashPrefixes, "Dash prefixes must be provided.");
+
     // these two generate too many false positives
-    dashPrefixes.remove("блок");
-    dashPrefixes.remove("рейтинг");
-    for(java.util.Iterator<String> it = dashPrefixes.iterator(); it.hasNext(); ) {
+    this.dashPrefixes.remove("блок");
+    this.dashPrefixes.remove("рейтинг");
+    for(java.util.Iterator<String> it = this.dashPrefixes.iterator(); it.hasNext(); ) {
       if( ! ALL_LOWER.matcher(it.next()).matches() ) {
         it.remove();
       }
@@ -71,24 +73,24 @@ public class MissingHyphenRule extends Rule {
   }
 
   @Override
-  public RuleMatch[] match(AnalyzedSentence sentence) throws IOException {
+  public RuleMatch[] match(AnalyzedSentence sentence) throws Exception {
     List<RuleMatch> ruleMatches = new ArrayList<>();
-    AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();    
+    AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
 
     for (int i = 1; i < tokens.length-1; i++) {
       AnalyzedTokenReadings tokenReadings = tokens[i];
       AnalyzedTokenReadings nextTokenReadings = tokens[i + 1];
-      
+
       boolean isCapitalized = Character.isUpperCase(tokenReadings.getToken().charAt(0));
-      
+
       if (isInPrefixes(tokenReadings, isCapitalized)
           && PosTagHelper.hasPosTagPart(nextTokenReadings, "noun")
 //          && ! PosTagHelper.hasPosTag(nextTokenReadings, Pattern.compile("^(?!noun).*"))
           && ALL_LOWER.matcher(nextTokenReadings.getToken()).matches() ) {
-    
+
         String hyphenedWord = tokenReadings.getToken() + "-" + nextTokenReadings.getToken();
         String tokenToCheck = isCapitalized ? StringUtils.uncapitalize(hyphenedWord) : hyphenedWord;
-        
+
         if ( wordTagger.tag(tokenToCheck).size() > 0 ) {
           RuleMatch potentialRuleMatch = new RuleMatch(this, sentence, tokenReadings.getStartPos(), nextTokenReadings.getEndPos(), "Можливо, пропущено дефіс?", getDescription());
           potentialRuleMatch.setSuggestedReplacement(hyphenedWord);
@@ -96,9 +98,9 @@ public class MissingHyphenRule extends Rule {
           ruleMatches.add(potentialRuleMatch);
         }
       }
-      
+
     }
-    
+
     return ruleMatches.toArray(new RuleMatch[0]);
   }
 
@@ -110,5 +112,5 @@ public class MissingHyphenRule extends Rule {
     return dashPrefixes.contains(token);
   }
 
-  
+
 }

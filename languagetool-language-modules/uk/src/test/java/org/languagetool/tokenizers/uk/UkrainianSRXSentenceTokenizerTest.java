@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,13 +20,20 @@
 package org.languagetool.tokenizers.uk;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Ukrainian;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class UkrainianSRXSentenceTokenizerTest {
 
-  private final SRXSentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Ukrainian());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Ukrainian lang = new Ukrainian();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public final void testTokenize() {
@@ -53,9 +60,9 @@ public class UkrainianSRXSentenceTokenizerTest {
     testSplit("З 300 р. до н.е., і по цей день.");
     testSplit("Пролісок (рос. пролесок) — маленька квітка.");
     testSplit("Квітка Цісик (англ. Kvitka Cisyk також Kacey Cisyk від ініціалів К.С.); 4 квітня 1953р., Квінз, Нью-Йорк — 29 березня 1998 р., Мангеттен, Нью-Йорк) — американська співачка українського походження.");
-    testSplit("До Інституту ім. Глієра під'їжджає чорне авто."); 
-    testSplit("До Інституту ім. акад. Вернадського."); 
-    testSplit("До вулиці гетьмана Скоропадського під'їжджає чорне авто."); 
+    testSplit("До Інституту ім. Глієра під'їжджає чорне авто.");
+    testSplit("До Інституту ім. акад. Вернадського.");
+    testSplit("До вулиці гетьмана Скоропадського під'їжджає чорне авто.");
     testSplit("До табору «Артек».");
     testSplit("Спільні пральні й т. д.");
     testSplit("Спільні пральні й т. д. й т. п.");
@@ -87,15 +94,15 @@ public class UkrainianSRXSentenceTokenizerTest {
     testSplit("Швидкістю 30 м/с. ", "Поїхали.");
     testSplit("Останні 100 м. ", "І тут все пропало.");
     testSplit("Корисна площа 67 тис. кв.  м. ", "У 1954 році над Держпромом...");
-    testSplit("На 0,6°C. ", "Але ми все маємо."); //лат С 
+    testSplit("На 0,6°C. ", "Але ми все маємо."); //лат С
     testSplit("На 0,6°С. ", "Але ми все маємо."); //укр С
-    testSplit("На 0,6 °C. ", "Але ми все маємо."); //лат С 
+    testSplit("На 0,6 °C. ", "Але ми все маємо."); //лат С
     testSplit("На 0,6 °С. ", "Але ми все маємо."); //укр С
     testSplit("Приїхав у США. ", "Проте на другий рік.");
     testSplit("Маємо страшне диво з див. ", "І кращого варіанту немає.");
     testSplit("Взяти бодай XIII—XIX ст.", "Раніше п’єса була домінантою.");
   }
-  
+
   @Test
   public void testTokenizeWithSpecialChars() {
     testSplit("відбув у тюрмах.\u202fНещодавно письменник");
@@ -105,7 +112,7 @@ public class UkrainianSRXSentenceTokenizerTest {
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

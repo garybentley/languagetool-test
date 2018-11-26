@@ -18,7 +18,6 @@
  */
 package org.languagetool.language;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +28,6 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
 import org.languagetool.UserConfig;
-import org.languagetool.databroker.ResourceDataBroker;
 import org.languagetool.rules.CommaWhitespaceRule;
 import org.languagetool.rules.Example;
 import org.languagetool.rules.MultipleWhitespaceRule;
@@ -46,16 +44,14 @@ import org.languagetool.rules.uk.TokenAgreementAdjNounRule;
 import org.languagetool.rules.uk.TokenAgreementNounVerbRule;
 import org.languagetool.rules.uk.UkrainianWordRepeatRule;
 import org.languagetool.synthesis.Synthesizer;
-import org.languagetool.synthesis.uk.UkrainianSynthesizer;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.uk.UkrainianHybridDisambiguator;
-import org.languagetool.tagging.uk.UkrainianTagger;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
+import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
-import org.languagetool.tokenizers.uk.UkrainianWordTokenizer;
+import org.languagetool.databroker.*;
 
-public class Ukrainian extends Language {
+public class Ukrainian extends Language<UkranianResourceDataBroker> {
+
   private static final List<String> RULE_FILES = Arrays.asList(
       "grammar-spelling.xml",
       "grammar-grammar.xml",
@@ -63,14 +59,44 @@ public class Ukrainian extends Language {
       "grammar-style.xml",
       "grammar-punctuation.xml"
       );
-
+/*
   private Tagger tagger;
   private SRXSentenceTokenizer sentenceTokenizer;
   private Tokenizer wordTokenizer;
   private Synthesizer synthesizer;
   private Disambiguator disambiguator;
-
+*/
   public Ukrainian() {
+  }
+
+  public static final String LANGUAGE_ID = "uk";
+  public static final String COUNTRY_ID = "UA";
+
+  public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
+
+  @Override
+  public UkranianResourceDataBroker getUseDataBroker() throws Exception {
+      return super.getUseDataBroker();
+  }
+
+  @Override
+  public UkranianResourceDataBroker getDefaultDataBroker() throws Exception {
+      return new DefaultUkranianResourceDataBroker(this, getClass().getClassLoader());
+  }
+
+  @Override
+  public Locale getLocale() {
+      return LOCALE;
+  }
+
+  @Override
+  public boolean isVariant() {
+      return false;
+  }
+
+  @Override
+  public Language getDefaultLanguageVariant() {
+    return null;
   }
 
   @Override
@@ -79,18 +105,8 @@ public class Ukrainian extends Language {
   }
 
   @Override
-  public Locale getLocale() {
-    return new Locale(getShortCode());
-  }
-
-  @Override
   public String getName() {
     return "Ukrainian";
-  }
-
-  @Override
-  public String getShortCode() {
-    return "uk";
   }
 
   @Override
@@ -99,43 +115,28 @@ public class Ukrainian extends Language {
   }
 
   @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new UkrainianTagger();
-    }
-    return tagger;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new UkrainianSynthesizer();
-    }
-    return synthesizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new UkrainianHybridDisambiguator();
-    }
-    return disambiguator;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new UkrainianWordTokenizer();
-    }
-    return wordTokenizer;
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override
-  public SRXSentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
@@ -147,37 +148,92 @@ public class Ukrainian extends Language {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-        new CommaWhitespaceRule(messages,
-            Example.wrong("Ми обідали борщем<marker> ,</marker> пловом і салатом."),
-            Example.fixed("Ми обідали борщем<marker>,</marker> пловом і салатом")),
+        createCommaWhitespaceRule(messages),
 
         // TODO: does not handle dot in abbreviations in the middle of the sentence, and also !.., ?..
         //            new UppercaseSentenceStartRule(messages),
-        new MultipleWhitespaceRule(messages, this),
-        new UkrainianWordRepeatRule(messages, this),
+        createMultipleWhitespaceRule(messages),
+        createWordRepeatRule(messages),
 
         // TODO: does not handle !.. and ?..
         //            new DoublePunctuationRule(messages),
-        new MorfologikUkrainianSpellerRule(messages, this, userConfig),
+        createMorfologikSpellerRule(messages, userConfig),
 
-        new MissingHyphenRule(messages, ((UkrainianTagger)getTagger()).getWordTagger()),
+        createMissingHyphenRule(messages),
 
-        new TokenAgreementNounVerbRule(messages),
-        new TokenAgreementAdjNounRule(messages),
-        new TokenAgreementPrepNounRule(messages),
+        createTokenAgreementNounVerbRule(messages),
+        createTokenAgreementAdjNounRule(messages),
+        createTokenAgreementPrepNounRule(messages),
 
-        new MixedAlphabetsRule(messages),
+        createMixedAlphabetsRule(messages),
 
-        new SimpleReplaceRule(messages),
-        new SimpleReplaceSoftRule(messages),
-        new SimpleReplaceRenamedRule(messages),
+        createReplaceRule(messages),
+        createReplaceSoftRule(messages),
+        createReplaceRenamedRule(messages),
 
-        new HiddenCharacterRule(messages)
+        createHiddenCharacterRule(messages)
     );
   }
 
+  public TokenAgreementNounVerbRule createTokenAgreementNounVerbRule(ResourceBundle messages) throws Exception {
+      return new TokenAgreementNounVerbRule(getUseMessages(messages), getUseDataBroker().getTokenAgreementNounVerbExceptionHelper());
+  }
+
+  public TokenAgreementPrepNounRule createTokenAgreementPrepNounRule(ResourceBundle messages) throws Exception {
+      return new TokenAgreementPrepNounRule(getUseMessages(messages), getUseDataBroker().getCaseGovernmentHelper(), getUseDataBroker().getSynthesizer());
+  }
+
+  public TokenAgreementAdjNounRule createTokenAgreementAdjNounRule(ResourceBundle messages) throws Exception {
+      return new TokenAgreementAdjNounRule(getUseMessages(messages), getUseDataBroker().getTokenAgreementAdjNounExceptionHelper(), getUseDataBroker().getSynthesizer());
+  }
+
+  public SimpleReplaceRenamedRule createReplaceRenamedRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRenamedRule(getUseMessages(messages), getUseDataBroker().getRenamedWrongWords());
+  }
+
+  public MissingHyphenRule createMissingHyphenRule(ResourceBundle messages) throws Exception {
+      return new MissingHyphenRule(getUseMessages(messages), getUseDataBroker().getWordTagger(), getUseDataBroker().getDashPrefixes());
+  }
+
+  public MixedAlphabetsRule createMixedAlphabetsRule(ResourceBundle messages) throws Exception {
+      return new MixedAlphabetsRule(getUseMessages(messages));
+  }
+
+  public HiddenCharacterRule createHiddenCharacterRule(ResourceBundle messages) throws Exception {
+      return new HiddenCharacterRule(getUseMessages(messages));
+  }
+
+  public SimpleReplaceSoftRule createReplaceSoftRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceSoftRule(getUseMessages(messages), getUseDataBroker().getSoftWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public MorfologikUkrainianSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikUkrainianSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig), getUseDataBroker().getSpellingIgnoreWords());
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages),
+              Example.wrong("Ми обідали борщем<marker> ,</marker> пловом і салатом."),
+              Example.fixed("Ми обідали борщем<marker>,</marker> пловом і салатом"));
+  }
+
+  public UkrainianWordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new UkrainianWordRepeatRule(getUseMessages(messages));
+  }
+
+/*
+GTODO
   @Override
   public List<String> getRuleFileNames() {
     List<String> ruleFileNames = super.getRuleFileNames();
@@ -188,7 +244,7 @@ public class Ukrainian extends Language {
     }
     return ruleFileNames;
   }
-
+*/
   @Override
   public LanguageMaintainedState getMaintainedState() {
     return LanguageMaintainedState.ActivelyMaintained;

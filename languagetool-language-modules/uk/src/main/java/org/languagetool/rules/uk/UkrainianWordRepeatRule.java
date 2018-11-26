@@ -19,8 +19,8 @@ public class UkrainianWordRepeatRule extends WordRepeatRule {
       Arrays.asList("Джей", "Бі", "Сі")
   );
 
-  public UkrainianWordRepeatRule(ResourceBundle messages, Language language) {
-    super(messages, language);
+  public UkrainianWordRepeatRule(ResourceBundle messages) {
+    super(messages);
   }
 
   @Override
@@ -32,15 +32,15 @@ public class UkrainianWordRepeatRule extends WordRepeatRule {
   public boolean ignore(AnalyzedTokenReadings[] tokens, int position) {
     AnalyzedTokenReadings analyzedTokenReadings = tokens[position];
     String token = analyzedTokenReadings.getToken();
-    
+
     // від добра добра не шукають
-    if( position > 2 
+    if( position > 2
         && token.equals("добра")
         && tokens[position-2].getToken().equalsIgnoreCase("від") )
       return true;
-    
+
     // Тому що що?
-    if( position > 1 
+    if( position > 1
         && token.equals("що")
         && tokens[position-2].getToken().equalsIgnoreCase("тому") )
       return true;
@@ -57,10 +57,10 @@ public class UkrainianWordRepeatRule extends WordRepeatRule {
 
     if( REPEAT_ALLOWED_CAPS_SET.contains(token) )
       return true;
-    
+
     if( PosTagHelper.hasPosTag(analyzedTokenReadings, "date|time|number") )
       return true;
-    
+
     for(AnalyzedToken analyzedToken: analyzedTokenReadings.getReadings()) {
       String posTag = analyzedToken.getPOSTag();
       if( posTag != null ) {
@@ -75,7 +75,7 @@ public class UkrainianWordRepeatRule extends WordRepeatRule {
 
   private boolean isInitial(AnalyzedToken analyzedToken, AnalyzedTokenReadings[] tokens, int position) {
     return analyzedToken.getPOSTag().contains(IPOSTag.abbr.getText())
-        || (analyzedToken.getToken().length() == 1 
+        || (analyzedToken.getToken().length() == 1
         && Character.isUpperCase(analyzedToken.getToken().charAt(0))
         && position < tokens.length-1 && tokens[position+1].getToken().equals("."));
   }
@@ -86,7 +86,7 @@ public class UkrainianWordRepeatRule extends WordRepeatRule {
     if( doubleI ) {
       msg += " або, можливо, перша І має бути латинською.";
     }
-    
+
     RuleMatch ruleMatch = super.createRuleMatch(prevToken, token, prevPos, pos, msg, sentence);
 
     if( doubleI ) {

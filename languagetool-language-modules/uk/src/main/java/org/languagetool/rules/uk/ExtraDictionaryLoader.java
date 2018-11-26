@@ -18,7 +18,8 @@ import org.languagetool.databroker.ResourceDataBroker;
  * @since 2.9
  */
 public class ExtraDictionaryLoader {
-
+/*
+GTODO REemove this class, no longer needed.
   public static Set<String> loadSet(String path, ResourceDataBroker dataBroker) {
     Set<String> result = new HashSet<>();
     try (InputStream is = dataBroker.getFromResourceDirAsStream(path);
@@ -34,7 +35,9 @@ public class ExtraDictionaryLoader {
       throw new RuntimeException(e);
     }
   }
-
+*/
+/*
+GTODO
   public static Map<String, List<String>> loadLists(String path, ResourceDataBroker dataBroker) {
     Map<String, List<String>> result = new HashMap<>();
     try (InputStream is = dataBroker.getFromRulesDirAsStream(path);
@@ -52,5 +55,5 @@ public class ExtraDictionaryLoader {
       throw new RuntimeException(e);
     }
   }
-
+*/
 }

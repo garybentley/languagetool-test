@@ -1,7 +1,5 @@
 package org.languagetool.rules.uk;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Objects;
 
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
@@ -17,14 +16,22 @@ import org.languagetool.tagging.uk.PosTagHelper;
 
 public class CaseGovernmentHelper {
 
-  static final Map<String, Set<String>> CASE_GOVERNMENT_MAP = loadMap("/uk/case_government.txt");
+  private final Map<String, Set<String>> mappings;
+  //CASE_GOVERNMENT_MAP = loadMap("/uk/case_government.txt");
 
+/*
+GTODO
   static {
     CASE_GOVERNMENT_MAP.put("згідно з", new HashSet<>(Arrays.asList("v_oru")));
   }
+*/
+  public CaseGovernmentHelper(Map<String, Set<String>> mapping) {
+      this.mappings = Objects.requireNonNull(mapping, "Mapping must be provided.");
+      this.mappings.put("згідно з", new HashSet<>(Arrays.asList("v_oru")));
+  }
 
-
-
+/*
+GTODO
   private static Map<String, Set<String>> loadMap(String path, ResourceDataBroker dataBroker) {
     Map<String, Set<String>> result = new HashMap<>();
     try (InputStream is = dataBroker.getFromResourceDirAsStream(path);
@@ -41,28 +48,32 @@ public class CaseGovernmentHelper {
       throw new RuntimeException(e);
     }
   }
-
-  public static boolean hasCaseGovernment(AnalyzedTokenReadings analyzedTokenReadings, String rvCase) {
+*/
+  public boolean hasCaseGovernment(AnalyzedTokenReadings analyzedTokenReadings, String rvCase) {
     for(AnalyzedToken token: analyzedTokenReadings.getReadings()) {
       if( rvCase.equals("v_oru") && PosTagHelper.hasPosTagPart(token, "adjp:pasv") )
         return true;
 
-      if( CASE_GOVERNMENT_MAP.containsKey(token.getLemma())
-          && CASE_GOVERNMENT_MAP.get(token.getLemma()).contains(rvCase) )
+      if( mappings.containsKey(token.getLemma())
+          && mappings.get(token.getLemma()).contains(rvCase) )
         return true;
     }
     return false;
   }
 
-  public static Set<String> getCaseGovernments(AnalyzedTokenReadings analyzedTokenReadings, String startPosTag, ResourceDataBroker dataBroker) {
+  public Set<String> getInflections(String key) {
+      return mappings.get(key);
+  }
+
+  public Set<String> getCaseGovernments(AnalyzedTokenReadings analyzedTokenReadings, String startPosTag) {
     LinkedHashSet<String> list = new LinkedHashSet<>();
     for(AnalyzedToken token: analyzedTokenReadings.getReadings()) {
       if( token.getPOSTag() != null
           && (token.getPOSTag().startsWith(startPosTag)
               || (startPosTag == "prep" && token.getPOSTag().equals("<prep>")) )
-          && CASE_GOVERNMENT_MAP.containsKey(token.getLemma()) ) {
+          && mappings.containsKey(token.getLemma()) ) {
 
-        Set<String> rvList = CASE_GOVERNMENT_MAP.get(token.getLemma());
+        Set<String> rvList = mappings.get(token.getLemma());
         list.addAll(rvList);
 
         if( token.getPOSTag().contains("adjp:pasv") ) {

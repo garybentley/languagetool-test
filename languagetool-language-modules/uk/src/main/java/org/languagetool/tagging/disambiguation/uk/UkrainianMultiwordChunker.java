@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,21 +19,24 @@
 
 package org.languagetool.tagging.disambiguation.uk;
 
+import java.util.Map;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.tagging.disambiguation.MultiWordChunker2;
+import org.languagetool.tagging.disambiguation.MultiWordEntry;
 import org.languagetool.tagging.uk.PosTagHelper;
 
-class UkrainianMultiwordChunker extends MultiWordChunker2 {
-  UkrainianMultiwordChunker(String filename, boolean allowFirstCapitalized) {
-    super(filename, allowFirstCapitalized);
+public class UkrainianMultiwordChunker extends MultiWordChunker2 {
+  public UkrainianMultiwordChunker(Map<String, List<MultiWordEntry>> tokenToPosTagMap, boolean allowFirstCapitalized) {
+    super(tokenToPosTagMap, allowFirstCapitalized);
   }
 
   protected boolean matches(String matchText, AnalyzedTokenReadings inputTokens) {
     if( ! matchText.startsWith("/") )
       return super.matches(matchText, inputTokens);
-    
+
     // TODO: this is a bit slow - we recompile regex every time, need better solution
     // possible more flexibility in MultiWordChunker2
     return PosTagHelper.hasPosTag(inputTokens, Pattern.compile(matchText.substring(1)));

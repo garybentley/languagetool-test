@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,10 +19,11 @@
 
 package org.languagetool.tagging.disambiguation.uk;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -37,9 +38,8 @@ import org.languagetool.language.Ukrainian;
 import org.languagetool.rules.uk.LemmaHelper;
 import org.languagetool.tagging.disambiguation.AbstractDisambiguator;
 import org.languagetool.tagging.disambiguation.Disambiguator;
-import org.languagetool.tagging.disambiguation.rules.XmlRuleDisambiguator;
 import org.languagetool.tagging.uk.PosTagHelper;
-import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
 
 /**
  * Hybrid chunker-disambiguator for Ukrainian.
@@ -59,19 +59,32 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
   private static final Pattern DIGITS_PATTERN = Pattern.compile("[0-9]+([–—-][0-9]+)?");
   private static final Pattern STATION_NAME_PATTERN = Pattern.compile("метро|[А-Я][а-яіїєґ'-]+");
 
-  private final Disambiguator chunker = new UkrainianMultiwordChunker("/uk/multiwords.txt", true);
+  private final Disambiguator chunker;
+  // GTODO = new UkrainianMultiwordChunker("/uk/multiwords.txt", true);
 
-  private final Disambiguator disambiguator = new XmlRuleDisambiguator(new Ukrainian());
-  private final SimpleDisambiguator simpleDisambiguator = new SimpleDisambiguator();
+  private final Disambiguator disambiguator;
+  // GTODO  = new XmlRuleDisambiguator(new Ukrainian());
+  private final SimpleDisambiguator simpleDisambiguator;
+  private final CaseConverter caseConverter;
 
+  public UkrainianHybridDisambiguator (Disambiguator chunker, Disambiguator disambiguator, Map<String, SimpleDisambiguator.TokenMatcher> disambigRemoveMap, CaseConverter caseCon) {
+      this.chunker = Objects.requireNonNull(chunker, "Chunker must be provided.");
+      this.disambiguator = Objects.requireNonNull(disambiguator, "Disambiguator must be provided.");
+      this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
+      this.simpleDisambiguator = new SimpleDisambiguator(disambigRemoveMap);
+  }
+
+  public Disambiguator getChunker() {
+      return chunker;
+  }
 
   /**
    * Calls two disambiguator classes: (1) a chunker; (2) a rule-based disambiguator.
    */
   @Override
-  public final AnalyzedSentence disambiguate(AnalyzedSentence input) throws IOException {
+  public final AnalyzedSentence disambiguate(AnalyzedSentence input) throws Exception {
     preDisambiguate(input);
-    
+
     return disambiguator.disambiguate(chunker.disambiguate(input));
   }
 
@@ -94,16 +107,16 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
     AnalyzedTokenReadings[] tokens = input.getTokensWithoutWhitespace();
     for (int i = 1; i < tokens.length; i++) {
       if( tokens[i].getReadings().size() > 1
-          && StringTools.isCapitalizedWord(tokens[i].getToken())
+          && caseConverter.isCapitalizedWord(tokens[i].getToken())
           && LemmaHelper.hasLemma(tokens[i], Pattern.compile("[А-ЯІЇЄҐ][а-яіїєґ'-].*"), Pattern.compile(".*?:prop")) ) {
 
         String lowerLemmaToCheck = tokens[i].getAnalyzedToken(0).getLemma().toLowerCase();
-        
+
         List<AnalyzedToken> analyzedTokens = tokens[i].getReadings();
         for(int j=analyzedTokens.size()-1; j>=0; j--) {
           AnalyzedToken analyzedToken = analyzedTokens.get(j);
-          
-          if( PosTagHelper.hasPosTagPart(analyzedToken, ":bad") 
+
+          if( PosTagHelper.hasPosTagPart(analyzedToken, ":bad")
               && lowerLemmaToCheck.equals(analyzedToken.getLemma()) ) {
             tokens[i].removeReading(analyzedToken);
           }
@@ -118,30 +131,30 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
     for (int i = 1; i < tokens.length; i++) {
       if( StringUtils.isAllUpperCase(tokens[i].getToken())
           && PosTagHelper.hasPosTagPart(tokens[i], ":abbr") ) {
-        
+
         List<AnalyzedToken> analyzedTokens = tokens[i].getReadings();
         for(int j=analyzedTokens.size()-1; j>=0; j--) {
           AnalyzedToken analyzedToken = analyzedTokens.get(j);
-          
-          if( ! PosTagHelper.hasPosTagPart(analyzedToken, ":abbr") 
+
+          if( ! PosTagHelper.hasPosTagPart(analyzedToken, ":abbr")
               && ! JLanguageTool.SENTENCE_END_TAGNAME.equals(analyzedToken) ) {
             tokens[i].removeReading(analyzedToken);
           }
         }
       }
-    }    
+    }
   }
 
   private void removeInanimVKly(AnalyzedSentence input) {
     AnalyzedTokenReadings[] tokens = input.getTokensWithoutWhitespace();
     for (int i = 1; i < tokens.length; i++) {
       List<AnalyzedToken> analyzedTokens = tokens[i].getReadings();
-      
+
       if( i < tokens.length -1
-          && Arrays.asList(",", "!", "»", "\u201C", "\u201D", "...").contains(tokens[i+1].getToken()) 
+          && Arrays.asList(",", "!", "»", "\u201C", "\u201D", "...").contains(tokens[i+1].getToken())
           && PosTagHelper.hasPosTag(tokens[i-1], "adj.*v_kly.*") )
         continue;
-      
+
       ArrayList<AnalyzedToken> inanimVklyReadings = new ArrayList<>();
       boolean otherFound = false;
       for(int j=0; j<analyzedTokens.size(); j++) {
@@ -150,7 +163,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
           break;
         if( posTag.equals(JLanguageTool.SENTENCE_END_TAGNAME) )
           continue;
-          
+
         if( INANIM_VKLY.matcher(posTag).matches() ) {
           inanimVklyReadings.add(analyzedTokens.get(j));
         }
@@ -173,7 +186,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
     AnalyzedTokenReadings[] tokens = input.getTokensWithoutWhitespace();
     for (int i = 1; i < tokens.length; i++) {
       List<AnalyzedToken> analyzedTokens = tokens[i].getReadings();
-      
+
       if( i > 1
           && (PosTagHelper.hasPosTag(tokens[i-1], "adj:p:.*")
               //TODO: unify adj and noun
@@ -182,17 +195,17 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
         continue;
 
       // Юріїв Луценків
-      if( i<tokens.length-1 
+      if( i<tokens.length-1
           && PosTagHelper.hasPosTag(tokens[i+1], PLURAL_LNAME) )
         continue;
-      
+
       // Андріїв Фартушняка й Варанкова
       if( i<tokens.length-3
           && PosTagHelper.hasPosTagPart(tokens[i+1], ":lname")
           && PosTagHelper.hasPosTagPart(tokens[i+3], ":lname") )
         continue;
 
-      
+
       ArrayList<AnalyzedToken> pluralNameReadings = new ArrayList<>();
       boolean otherFound = false;
       for(int j=0; j<analyzedTokens.size(); j++) {
@@ -201,7 +214,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
           break;
         if( posTag.equals(JLanguageTool.SENTENCE_END_TAGNAME) )
           continue;
-          
+
 //        System.err.println("-- " + analyzedTokens.get(j));
         if( PLURAL_NAME.matcher(posTag).matches() ) {
           pluralNameReadings.add(analyzedTokens.get(j));
@@ -241,7 +254,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
         lastName = tokens[i];
     if( input.toString().contains("Баку") )
         logger.debug("lastN: " + lastName);
-        
+
         // split before next inital starts: "для Л.Кучма Л.Кравчук"
         if( initialsIdxs.size() > 0 ) {
           checkForInitialRetag(lastName, initialsIdxs, tokens);
@@ -319,7 +332,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
 
       if (i < tokens.length - 1) {
         // столова
-        if (LemmaHelper.hasLemma(tokens[i + 1], "ложка") 
+        if (LemmaHelper.hasLemma(tokens[i + 1], "ложка")
             || tokens[i + 1].getToken().equals("л.")) {
           Pattern pattern = Pattern.compile("adj:[fp]:.*");
           remove(tokens[i], pattern);
@@ -344,7 +357,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
           continue;
         }
       }
-      
+
       // століття
       if (i > 1) {
         if( LATIN_DIGITS_PATTERN.matcher(tokens[i - 1].getToken()).matches() ) {
@@ -376,7 +389,7 @@ public class UkrainianHybridDisambiguator extends AbstractDisambiguator {
 
     }
   }
-  
+
 /*
 TODO:
 рт.ст.
@@ -419,7 +432,7 @@ TODO:
         tokens[pos].getToken().endsWith(".")
         && INITIAL_REGEX.matcher(tokens[pos].getToken()).matches();
   }
-  
+
 //  private static boolean isSpace(String str) {
 //    return str != null && (str.equals(" ") || str.equals("\u00A0")|| str.equals("\u202F"));
 //  }

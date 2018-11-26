@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules.uk;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +26,7 @@ import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.languagetool.JLanguageTool;
@@ -43,17 +43,18 @@ import org.languagetool.tagging.uk.PosTagHelper;
 /**
  * A rule that matches proper names that has been renamed
  * Loads the relevant words from <code>rules/uk/replace_renamed.txt</code>.
- * 
+ *
  * @author Andriy Rysin
  */
 public class SimpleReplaceRenamedRule extends Rule {
 
-  private static final Map<String, List<String>> RENAMED_LIST = ExtraDictionaryLoader.loadLists("/uk/replace_renamed.txt");
+  // GTODO private static final Map<String, List<String>> RENAMED_LIST = ExtraDictionaryLoader.loadLists("/uk/replace_renamed.txt");
   private static final Pattern GEO_POSTAG_PATTERN = Pattern.compile("noun:inanim.*?:prop.*|adj.*");
+  private final Map<String, List<String>> renamed;
 
-
-  public SimpleReplaceRenamedRule(ResourceBundle messages) {
+  public SimpleReplaceRenamedRule(ResourceBundle messages, Map<String, List<String>> wrongWords) {
     super(messages);
+    this.renamed = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
     setLocQualityIssueType(ITSIssueType.Style);
   }
 
@@ -77,13 +78,13 @@ public class SimpleReplaceRenamedRule extends Rule {
       LinkedHashSet<String> renamedLemmas = new LinkedHashSet<>();
       for(AnalyzedToken reading: tokenReadings.getReadings()) {
         String lemma = reading.getLemma();
-        
+
         if( JLanguageTool.SENTENCE_END_TAGNAME.equals(reading.getPOSTag()) )
           continue;
 
 
         if( lemma != null ) {
-          if( RENAMED_LIST.containsKey(lemma)
+          if( renamed.containsKey(lemma)
               && PosTagHelper.hasPosTag(reading, GEO_POSTAG_PATTERN) ) {
             renamedLemmas.add(lemma);
           }
@@ -99,9 +100,9 @@ public class SimpleReplaceRenamedRule extends Rule {
         String info = "";
         List<String> replacements = new ArrayList<>();
         for(String lemma: renamedLemmas) {
-          List<String> repl = RENAMED_LIST.get(lemma);
+          List<String> repl = renamed.get(lemma);
           replacements.add(repl.get(0));
-          
+
           for(int i=1; i<repl.size()-1; i++) {
             replacements.add(repl.get(i));
           }

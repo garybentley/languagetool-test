@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,16 +24,14 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Tagalog;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class MorfologikTagalogSpellerRuleTest {
 
   @Test
-  public void testMorfologikSpeller() throws IOException {
+  public void testMorfologikSpeller() throws Exception {
     Tagalog language = new Tagalog();
-    MorfologikTagalogSpellerRule rule = new MorfologikTagalogSpellerRule(TestTools.getMessages("en"), language, null);
+    MorfologikTagalogSpellerRule rule = language.createMorfologikSpellerRule(null, null);
     JLanguageTool langTool = new JLanguageTool(language);
 
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Ang talatang ito ay nagpapakita ng ng kakayahan ng LanguageTool at halimbawa kung paano ito gamitin.")).length);
