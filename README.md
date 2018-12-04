@@ -184,6 +184,9 @@ This is a list of things that need to be changed/looked at:
 * UkrainianSynthesizer uses /uk/ukrainian_synth.dict and /uk/ukrainian_tags.txt but the files don't exist.
 * MorfologikUkrainianSpellerRule uses /uk/hunspell/uk_UA.dict which doesn't exist.
 * uk nearly all tests have been @Ignored due to missing .dict files, especially that of tagger.
+* server needs to be changed to better handle the language model and word2vec model dirs.  For now those features have been disabled.
+* ca/ReflexiveVerbsRule should have configuration files, espcially for verbsPotencialmentPronominals.
+* commandline - some tests aren't working but I'm getting very tired of this now!
 
 ## The information below is from the standard LanguageTool README
 

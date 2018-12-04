@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -48,7 +48,7 @@ class DatabaseHandler extends ResultHandler {
 
   private final PreparedStatement insertSt;
   private final int batchSize;
-  
+
   private int batchCount = 0;
 
   DatabaseHandler(File propertiesFile, int maxSentences, int maxErrors) {
@@ -97,7 +97,7 @@ class DatabaseHandler extends ResultHandler {
       java.sql.Date nowDate = new java.sql.Date(new Date().getTime());
       for (RuleMatch match : ruleMatches) {
         String smallContext = smallContextTools.getContext(match.getFromPos(), match.getToPos(), sentence.getText());
-        insertSt.setString(1, language.getShortCode());
+        insertSt.setString(1, language.getLocale().getLanguage());
         Rule rule = match.getRule();
         insertSt.setString(2, rule.getId());
         insertSt.setString(3, rule.getCategory().getName());
@@ -117,7 +117,7 @@ class DatabaseHandler extends ResultHandler {
         }
         insertSt.setString(7, context);
         insertSt.setString(8, StringUtils.abbreviate(smallContext, 255));
-        
+
         insertSt.setDate(9, nowDate);  // should actually be the dump's date, but isn't really used anyway...
         insertSt.setDate(10, nowDate);
         insertSt.setString(11, sentence.getUrl());

@@ -56,15 +56,15 @@ abstract class TextChecker {
   protected abstract List<String> getEnabledRuleIds(Map<String, String> parameters);
   @NotNull
   protected abstract List<String> getDisabledRuleIds(Map<String, String> parameters);
-    
+
   protected static final int CONTEXT_SIZE = 40; // characters
 
   protected final HTTPServerConfig config;
 
   private static final String ENCODING = "UTF-8";
   private static final int CACHE_STATS_PRINT = 500; // print cache stats every n cache requests
-  
-  private final Map<String,Integer> languageCheckCounts = new HashMap<>(); 
+
+  private final Map<String,Integer> languageCheckCounts = new HashMap<>();
   private final boolean internalServer;
   private Queue<Runnable> workQueue;
   private RequestCounter reqCounter;
@@ -74,7 +74,7 @@ abstract class TextChecker {
   private final DatabaseLogger logger;
   private final Long logServerId;
 
-  TextChecker(HTTPServerConfig config, boolean internalServer, Queue<Runnable> workQueue, RequestCounter reqCounter) {
+  TextChecker(HTTPServerConfig config, boolean internalServer, Queue<Runnable> workQueue, RequestCounter reqCounter) throws Exception {
     this.config = config;
     this.internalServer = internalServer;
     this.workQueue = workQueue;
@@ -94,7 +94,7 @@ abstract class TextChecker {
   void shutdownNow() {
     executorService.shutdownNow();
   }
-  
+
   void checkText(AnnotatedText aText, HttpExchange httpExchange, Map<String, String> parameters, ErrorRequestLimiter errorRequestLimiter,
                  String remoteAddress) throws Exception {
     checkParams(parameters);
@@ -126,7 +126,7 @@ abstract class TextChecker {
     List<String> preferredVariants = getPreferredVariants(parameters);
     DetectedLanguage detLang = getLanguage(aText.getPlainText(), parameters, preferredVariants);
     Language lang = detLang.getGivenLanguage();
-    Integer count = languageCheckCounts.get(lang.getShortCodeWithCountryAndVariant());
+    Integer count = languageCheckCounts.get(lang.getLocale().toLanguageTag());
     if (count == null) {
       count = 1;
     } else {
@@ -134,7 +134,7 @@ abstract class TextChecker {
     }
     //print("Starting check: " + aText.getPlainText().length() + " chars, #" + count);
     String motherTongueParam = parameters.get("motherTongue");
-    Language motherTongue = motherTongueParam != null ? Languages.getLanguageForShortCode(motherTongueParam) : null;
+    Language motherTongue = motherTongueParam != null ? Languages.getLanguage(motherTongueParam) : null;
     boolean useEnabledOnly = "yes".equals(parameters.get("enabledOnly")) || "true".equals(parameters.get("enabledOnly"));
     List<String> enabledRules = getEnabledRuleIds(parameters);
 
@@ -154,7 +154,7 @@ abstract class TextChecker {
     boolean allowIncompleteResults = "true".equals(parameters.get("allowIncompleteResults"));
     boolean enableHiddenRules = "true".equals(parameters.get("enableHiddenRules"));
     JLanguageTool.Mode mode = ServerTools.getMode(parameters);
-    QueryParams params = new QueryParams(enabledRules, disabledRules, enabledCategories, disabledCategories, 
+    QueryParams params = new QueryParams(enabledRules, disabledRules, enabledCategories, disabledCategories,
             useEnabledOnly, useQuerySettings, allowIncompleteResults, enableHiddenRules, mode);
 
     Long textSessionId = null;
@@ -168,7 +168,7 @@ abstract class TextChecker {
 
 
     List<RuleMatch> ruleMatchesSoFar = Collections.synchronizedList(new ArrayList<>());
-    
+
     Future<List<RuleMatch>> future = executorService.submit(new Callable<List<RuleMatch>>() {
       @Override
       public List<RuleMatch> call() throws Exception {
@@ -211,7 +211,7 @@ abstract class TextChecker {
         }
         String message = "Text checking took longer than allowed maximum of " + limits.getMaxCheckTimeMillis() +
                          " milliseconds (cancelled: " + cancelled +
-                         ", lang: " + lang.getShortCodeWithCountryAndVariant() +
+                         ", lang: " + lang.getLocale().toLanguageTag() +
                          ", detected: " + detLang +
                          ", #" + count +
                          ", " + aText.getPlainText().length() + " characters of text" +
@@ -219,7 +219,7 @@ abstract class TextChecker {
         if (params.allowIncompleteResults) {
           print(message + " - returning " + ruleMatchesSoFar.size() + " matches found so far");
           matches = new ArrayList<>(ruleMatchesSoFar);  // threads might still be running, so make a copy
-          incompleteResultReason = "Results are incomplete: text checking took longer than allowed maximum of " + 
+          incompleteResultReason = "Results are incomplete: text checking took longer than allowed maximum of " +
                   String.format(Locale.ENGLISH, "%.2f", limits.getMaxCheckTimeMillis()/1000.0) + " seconds";
         } else {
           logger.log(new DatabaseCheckErrorLogEntry("MaxCheckTimeExceeded",
@@ -245,7 +245,7 @@ abstract class TextChecker {
     }
     String response = getResponse(aText, detLang, motherTongue, matches, hiddenMatches, incompleteResultReason);
     String messageSent = "sent";
-    String languageMessage = lang.getShortCodeWithCountryAndVariant();
+    String languageMessage = lang.getLocale().toLanguageTag();
     try {
       httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.getBytes(ENCODING).length);
       httpExchange.getResponseBody().write(response.getBytes(ENCODING));
@@ -254,12 +254,12 @@ abstract class TextChecker {
       messageSent = "notSent: " + exception.getMessage();
     }
     if (motherTongue != null) {
-      languageMessage += " (mother tongue: " + motherTongue.getShortCodeWithCountryAndVariant() + ")";
+      languageMessage += " (mother tongue: " + motherTongue.getLocale().toLanguageTag() + ")";
     }
     if (autoDetectLanguage) {
       languageMessage += "[auto]";
     }
-    languageCheckCounts.put(lang.getShortCodeWithCountryAndVariant(), count);
+    languageCheckCounts.put(lang.getLocale().toLanguageTag(), count);
     int computationTime = (int) (System.currentTimeMillis() - timeStart);
     print("Check done: " + aText.getPlainText().length() + " chars, " + languageMessage + ", #" + count + ", " + referrer + ", "
             + matches.size() + " matches, "
@@ -328,7 +328,7 @@ abstract class TextChecker {
   Language detectLanguageOfString(String text, String fallbackLanguage, List<String> preferredVariants) {
     Language lang = identifier.detectLanguage(text);
     if (lang == null) {
-      lang = Languages.getLanguageForShortCode(fallbackLanguage != null ? fallbackLanguage : "en");
+      lang = Languages.getLanguage(fallbackLanguage != null ? fallbackLanguage : "en");
     }
     if (preferredVariants.size() > 0) {
       for (String preferredVariant : preferredVariants) {
@@ -336,8 +336,8 @@ abstract class TextChecker {
           throw new IllegalArgumentException("Invalid format for 'preferredVariants', expected a dash as in 'en-GB': '" + preferredVariant + "'");
         }
         String preferredVariantLang = preferredVariant.split("-")[0];
-        if (preferredVariantLang.equals(lang.getShortCode())) {
-          lang = Languages.getLanguageForShortCode(preferredVariant);
+        if (preferredVariantLang.equals(lang.getLocale().getLanguage())) {
+          lang = Languages.getLanguage(preferredVariant);
           if (lang == null) {
             throw new IllegalArgumentException("Invalid 'preferredVariants', no such language/variant found: '" + preferredVariant + "'");
           }
@@ -361,10 +361,10 @@ abstract class TextChecker {
     JLanguageTool lt = new JLanguageTool(lang, motherTongue, cache, userConfig);
     lt.setMaxErrorsPerWordRate(config.getMaxErrorsPerWordRate());
     if (config.getLanguageModelDir() != null) {
-      lt.activateLanguageModelRules(config.getLanguageModelDir());
+      // GTODO Removed for now until a config file is passed to the resource data broker to indicate whereh resources are found.  lt.activateLanguageModelRules(config.getLanguageModelDir());
     }
     if (config.getWord2VecModelDir () != null) {
-      lt.activateWord2VecModelRules(config.getWord2VecModelDir());
+      // GTODO Removed for now until a config file is passed to the resource data broker to indicate whereh resources are found.  lt.activateWord2VecModelRules(config.getWord2VecModelDir());
     }
     if (config.getRulesConfigFile() != null) {
       configureFromRulesFile(lt, lang);
@@ -378,7 +378,7 @@ abstract class TextChecker {
     return lt;
   }
 
-  private void configureFromRulesFile(JLanguageTool langTool, Language lang) throws IOException {
+  private void configureFromRulesFile(JLanguageTool langTool, Language lang) throws Exception {
     print("Using options configured in " + config.getRulesConfigFile());
     // If we are explicitly configuring from rules, ignore the useGUIConfig flag
     if (config.getRulesConfigFile() != null) {
@@ -389,7 +389,7 @@ abstract class TextChecker {
     }
   }
 
-  private void configureFromGUI(JLanguageTool langTool, Language lang) throws IOException {
+  private void configureFromGUI(JLanguageTool langTool, Language lang) throws Exception {
     Configuration config = new Configuration(lang);
     if (internalServer && config.getUseGUIConfig()) {
       print("Using options configured in the GUI");

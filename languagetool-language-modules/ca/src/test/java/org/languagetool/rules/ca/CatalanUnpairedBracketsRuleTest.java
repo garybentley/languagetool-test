@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Daniel Naber (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,7 +27,6 @@ import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.TextLevelRule;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,15 +36,16 @@ public class CatalanUnpairedBracketsRuleTest {
 
   private TextLevelRule rule;
   private JLanguageTool langTool;
-  
+
   @Before
-  public void setUp() throws IOException {
-    rule = new CatalanUnpairedBracketsRule(TestTools.getEnglishMessages(), new Catalan());
-    langTool = new JLanguageTool(new Catalan());
+  public void setUp() throws Exception {
+    Catalan lang = new Catalan();
+    rule = lang.createUnpairedBracketsRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
     // correct sentences:
     assertCorrect("L'«home és així»");
     assertCorrect("l'«home»");
@@ -77,7 +77,7 @@ public class CatalanUnpairedBracketsRuleTest {
     //assertCorrect("el minut en 60 parts iguals, tenim el segon (1\"):");
     assertCorrect("El tràiler té una picada d'ullet quan diu que \"no es pot fer una pel·lícula 'slasher' com si fos una sèrie\".");
     assertCorrect("El tràiler –que té una picada d'ullet quan diu que \"no es pot fer una pel·lícula 'slasher' com si fos una sèrie\"– ja ");
-    
+
     //assertCorrect("The screen is 20\" wide.");
     assertCorrect("This is a [test] sentence...");
     assertCorrect("The plight of Tamil refugees caused a surge of support from most of the Tamil political parties.[90]");
@@ -121,18 +121,18 @@ public class CatalanUnpairedBracketsRuleTest {
     assertEquals(3, matches.length);
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(sentence)));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(Collections.singletonList(langTool.getAnalyzedSentence(sentence)));
     assertEquals(1, matches.length);
   }
 
   @Test
-  public void testMultipleSentences() throws IOException {
+  public void testMultipleSentences() throws Exception {
     final JLanguageTool tool = new JLanguageTool(new Catalan());
     tool.enableRule("CA_UNPAIRED_BRACKETS");
 
@@ -151,11 +151,11 @@ public class CatalanUnpairedBracketsRuleTest {
         .check("Aquesta és una sentència múltiple amb claudàtors: "
             + "[Ací hi ha un claudàtor. Amb algun text. I ací continua.\n\n");
     assertEquals(1, matches.size());
-    
+
     matches = tool
         .check("«Els manaments diuen: \"No desitjaràs la dona del teu veí\"»");
     //assertEquals(0, matches.size());
-            
+
     matches = tool
         .check("Aquesta és una sentència múltiple amb parèntesis "
             + "(Ací hi ha un parèntesi. \n\n Amb algun text.) i ací continua.");

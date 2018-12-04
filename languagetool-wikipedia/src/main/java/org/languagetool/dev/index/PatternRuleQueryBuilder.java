@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -44,7 +44,7 @@ import static org.languagetool.dev.index.LanguageToolFilter.POS_PREFIX;
  * requires an index where each document contains only one sentence. It returns
  * potential matches, i.e. LanguageTool still needs to run over the matches
  * to make sure there is indeed an error.
- * 
+ *
  * @author Tao Lin
  * @author Daniel Naber
  */
@@ -53,7 +53,7 @@ public class PatternRuleQueryBuilder {
   public static final String FIELD_NAME = "field";
   public static final String SOURCE_FIELD_NAME = "source";
   public static final String FIELD_NAME_LOWERCASE = "fieldLowercase";
-  
+
   private final Language language;
   private final IndexSearcher indexSearcher;
 
@@ -70,6 +70,8 @@ public class PatternRuleQueryBuilder {
     BooleanQuery.Builder builder = new BooleanQuery.Builder();
     for (PatternToken patternToken : rule.getPatternTokens()) {
       try {
+        // GTODO This is using exceptions for flow control, the call should return null if there is no appropriate
+        // clause that can be built.
         BooleanClause clause = makeQuery(patternToken);
         builder.add(clause);
       } catch (UnsupportedPatternRuleException e) {
@@ -106,7 +108,7 @@ public class PatternRuleQueryBuilder {
         // should not happen, we always use Occur.MUST:
         throw new UnsupportedPatternRuleException("Term/POS combination not supported yet: " + patternToken);
       }
-    
+
     } else if (termQuery != null) {
       return termQuery;
 
@@ -158,7 +160,12 @@ public class PatternRuleQueryBuilder {
       Query query = new TermQuery(lemmaQueryTerm);
       return new BooleanClause(query, BooleanClause.Occur.MUST);
       */
-      Synthesizer synthesizer = language.getSynthesizer();
+      Synthesizer synthesizer;
+      try {
+          synthesizer = language.getSynthesizer();
+      } catch(Exception e) {
+          throw new RuntimeException("Unable to get langauge synthesizer.", e);
+      }
       if (synthesizer != null) {
         try {
           String[] synthesized = synthesizer.synthesize(new AnalyzedToken(termStr, null, termStr), ".*", true);
@@ -169,7 +176,7 @@ public class PatternRuleQueryBuilder {
             query = new RegexpQuery(getTermQueryTerm(patternToken, StringUtils.join(synthesized, "|")));
           }
           return new BooleanClause(query, BooleanClause.Occur.MUST);
-        } catch (IOException e) {
+        } catch (Exception e) {
           throw new RuntimeException("Could not build Lucene query for '" + patternToken + "' and '" + termStr + "'", e);
         }
       }

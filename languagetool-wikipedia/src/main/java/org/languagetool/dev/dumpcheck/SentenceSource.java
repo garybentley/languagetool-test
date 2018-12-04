@@ -39,12 +39,12 @@ public abstract class SentenceSource implements Iterator<Sentence> {
   private final Tokenizer wordTokenizer;
   private final Pattern acceptPattern;
 
-  SentenceSource(Language language) {
+  SentenceSource(Language language) throws Exception {
     this(language, null);
   }
 
   /** @since 3.0 */
-  SentenceSource(Language language, Pattern acceptPattern) {
+  SentenceSource(Language language, Pattern acceptPattern) throws Exception {
     wordTokenizer = language.getWordTokenizer();
     this.acceptPattern = acceptPattern;
   }

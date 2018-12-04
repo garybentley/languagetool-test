@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 /**
  * Provides access to the sentences of a Wikipedia XML dump. Note that
  * conversion exceptions are logged to STDERR and are otherwise ignored.
- * 
+ *
  * To get an XML dump, download {@code pages-articles.xml.bz2} from
  * <a href="http://download.wikimedia.org/backup-index.html">http://download.wikimedia.org/backup-index.html</a>, e.g.
  * {@code http://download.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2}.
@@ -59,12 +59,12 @@ public class WikipediaSentenceSource extends SentenceSource {
   private int namespaceSkipCount = 0;
   private int redirectSkipCount = 0;
 
-  public WikipediaSentenceSource(InputStream xmlInput, Language language) {
+  public WikipediaSentenceSource(InputStream xmlInput, Language language) throws Exception {
     this(xmlInput, language, null);
   }
 
   /** @since 3.0 */
-  public WikipediaSentenceSource(InputStream xmlInput, Language language, Pattern filter) {
+  public WikipediaSentenceSource(InputStream xmlInput, Language language, Pattern filter) throws Exception {
     super(language, filter);
     textFilter.enableMapping(false);  // improves performance
     try {
@@ -97,7 +97,7 @@ public class WikipediaSentenceSource extends SentenceSource {
         throw new NoSuchElementException();
       }
       WikipediaSentence wikiSentence = sentences.remove(0);
-      String url = "http://" + language.getShortCode() + ".wikipedia.org/wiki/" + wikiSentence.title;
+      String url = "http://" + language.getLocale().getLanguage() + ".wikipedia.org/wiki/" + wikiSentence.title;
       return new Sentence(wikiSentence.sentence, getSource(), wikiSentence.title, url, wikiSentence.articleCount);
     } catch (XMLStreamException e) {
       throw new RuntimeException(e);

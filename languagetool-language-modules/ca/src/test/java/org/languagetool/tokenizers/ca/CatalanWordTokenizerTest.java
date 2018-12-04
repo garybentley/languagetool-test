@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,13 +23,17 @@ import org.junit.Test;
 
 import java.util.List;
 
+import org.languagetool.language.Catalan;
+import org.languagetool.tokenizers.Tokenizer;
+
 import static org.junit.Assert.assertEquals;
 
 public class CatalanWordTokenizerTest {
 
   @Test
-  public void testTokenize() {
-    CatalanWordTokenizer wordTokenizer = new CatalanWordTokenizer();
+  public void testTokenize() throws Exception {
+    Catalan lang = new Catalan();
+    Tokenizer wordTokenizer = lang.getWordTokenizer();
     List<String> tokens;
     tokens = wordTokenizer.tokenize("name@example.com");
     assertEquals(tokens.size(), 1);
@@ -111,6 +115,6 @@ public class CatalanWordTokenizerTest {
     assertEquals("[Sud, -, Est]", tokens.toString());
     tokens = wordTokenizer.tokenize("Sud-est");
     assertEquals(tokens.size(), 1);
-    
+
   }
 }

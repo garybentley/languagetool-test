@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà i Font
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,19 +20,27 @@
 package org.languagetool.synthesis.ca;
 
 import org.junit.Test;
+import org.junit.Before;
+import org.languagetool.language.Catalan;
 import org.languagetool.AnalyzedToken;
+import org.languagetool.synthesis.Synthesizer;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
 public class CatalanSynthesizerTest {
 
-  private final CatalanSynthesizer synth = new CatalanSynthesizer();
+  private Synthesizer synth;
+
+  @Before
+  public void setUp() throws Exception {
+      Catalan lang = new Catalan();
+      synth = lang.getSynthesizer();
+  }
 
   @Test
-  public final void testSynthesizeStringString() throws IOException {
+  public final void testSynthesizeStringString() throws Exception {
     assertEquals(0, synth.synthesize(dummyToken("blablabla"), "blablabla").length);
 
     assertEquals("[nostres]", synth("nostre", "PX1CP0P0"));
@@ -52,15 +60,15 @@ public class CatalanSynthesizerTest {
     assertEquals("[per les úniques, per l'única, pels únics, per l'únic]", synthNonRegex("únic", "DTper"));
   }
 
-  private String synth(String word, String pos) throws IOException {
+  private String synth(String word, String pos) throws Exception {
     return Arrays.toString(synth.synthesize(dummyToken(word), pos));
   }
 
-  private String synthRegex(String word, String pos) throws IOException {
+  private String synthRegex(String word, String pos) throws Exception {
     return Arrays.toString(synth.synthesize(dummyToken(word), pos, true));
   }
 
-  private String synthNonRegex(String word, String pos) throws IOException {
+  private String synthNonRegex(String word, String pos) throws Exception {
     return Arrays.toString(synth.synthesize(dummyToken(word), pos, false));
   }
 

@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -53,14 +53,14 @@ import org.languagetool.tools.ContextTools;
  * Will transparently handle rules that are not supported, i.e. run on the candidate matches
  * up to a limit.
  * See {@link Indexer} for how to create the index.
- * 
+ *
  * @author Tao Lin
  * @author Daniel Naber
  */
 public class Searcher {
 
   private static final boolean WIKITEXT_OUTPUT = false;
-  
+
   private final Directory directory;
 
   private int maxHits = 1000;
@@ -214,7 +214,7 @@ public class Searcher {
     return new PossiblyLimitedTopDocs(topCollector.topDocs(), timeLimitActivated);
   }
 
-  List<PatternRule> getRuleById(String ruleId, Language language) throws IOException {
+  List<PatternRule> getRuleById(String ruleId, Language language) throws Exception {
     List<PatternRule> rules = new ArrayList<>();
     JLanguageTool langTool = new JLanguageTool(language);
     for (Rule rule : langTool.getAllRules()) {
@@ -237,7 +237,7 @@ public class Searcher {
     return sentencesChecked;
   }
 
-  private List<MatchingSentence> findMatchingSentences(IndexSearcher indexSearcher, TopDocs topDocs, JLanguageTool languageTool) throws IOException {
+  private List<MatchingSentence> findMatchingSentences(IndexSearcher indexSearcher, TopDocs topDocs, JLanguageTool languageTool) throws Exception {
     List<MatchingSentence> matchingSentences = new ArrayList<>();
     for (ScoreDoc match : topDocs.scoreDocs) {
       Document doc = indexSearcher.doc(match.doc);
@@ -254,7 +254,7 @@ public class Searcher {
     return matchingSentences;
   }
 
-  private JLanguageTool getLanguageToolWithOneRule(Language lang, PatternRule patternRule) {
+  private JLanguageTool getLanguageToolWithOneRule(Language lang, PatternRule patternRule) throws Exception {
     JLanguageTool langTool = new JLanguageTool(lang);
     for (Rule rule : langTool.getAllActiveRules()) {
       if (!rule.getId().equals(patternRule.getId())) {
@@ -361,7 +361,7 @@ public class Searcher {
     long startTime = System.currentTimeMillis();
     String[] ruleIds = args[0].split(",");
     String languageCode = args[1];
-    Language language = Languages.getLanguageForShortCode(languageCode);
+    Language language = Languages.getLanguage(languageCode);
     File indexDir = new File(args[2]);
     boolean limitSearch = !(args.length > 3 && "--no_limit".equals(args[3]));
     Searcher searcher = new Searcher(new SimpleFSDirectory(indexDir.toPath()));

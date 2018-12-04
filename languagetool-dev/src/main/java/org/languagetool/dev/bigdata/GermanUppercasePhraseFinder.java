@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -49,12 +49,12 @@ final class GermanUppercasePhraseFinder {
   private GermanUppercasePhraseFinder() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 1) {
       System.out.println("Usage: " + GermanUppercasePhraseFinder.class.getSimpleName() + " <ngramIndexDir>");
       System.exit(1);
     }
-    JLanguageTool lt = new JLanguageTool(Languages.getLanguageForShortCode("de"));
+    JLanguageTool lt = new JLanguageTool(Languages.getLanguage("de"));
     FSDirectory fsDir = FSDirectory.open(new File(args[0]).toPath());
     IndexReader reader = DirectoryReader.open(fsDir);
     IndexSearcher searcher = new IndexSearcher(reader);
@@ -105,7 +105,7 @@ final class GermanUppercasePhraseFinder {
     }
   }
 
-  private static boolean isRelevant(JLanguageTool lt, String term) throws IOException {
+  private static boolean isRelevant(JLanguageTool lt, String term) throws Exception {
     AnalyzedSentence analyzedSentence = lt.analyzeText(term).get(0);
     AnalyzedTokenReadings[] tokens = analyzedSentence.getTokensWithoutWhitespace();
     if (tokens.length == 1+2) {  // 1 is for sentence start
@@ -125,5 +125,5 @@ final class GermanUppercasePhraseFinder {
     Document document = reader.document(docId);
     return Long.parseLong(document.get("count"));
   }
-  
+
 }

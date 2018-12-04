@@ -33,10 +33,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 public class MatchDatabaseTest {
-  
+
   @Test
   public void test() throws SQLException, ClassNotFoundException {
-    Language language = Languages.getLanguageForShortCode("de");
+    Language language = Languages.getLanguage("de");
     MatchDatabase database = new MatchDatabase("jdbc:derby:atomFeedChecksDB;create=true", "user", "pass");
     database.dropTables();
     database.createTables();
@@ -74,5 +74,5 @@ public class MatchDatabaseTest {
     assertThat(database.getLatestDate(language), is(new Date(0)));
     assertThat(database.getCheckDates().size(), is(0));
   }
-  
+
 }

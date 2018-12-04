@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
 import org.apache.commons.lang3.StringUtils;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 
 /**
  * Check if a word is repeated twice, e.g. "the the".

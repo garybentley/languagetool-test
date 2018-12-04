@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,6 +20,7 @@ package org.languagetool.gui;
 
 import java.awt.Component;
 import java.util.ResourceBundle;
+import java.awt.Image;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -38,7 +39,7 @@ import org.languagetool.databroker.ResourceDataBroker;
 class LanguageComboBoxRenderer extends JLabel implements ListCellRenderer<LanguageAdapter> {
 
   private static final Border BORDER = new EmptyBorder(1, 3, 1, 1);
-  
+
   private final ResourceBundle messages;
   private final String extLangSuffix;
 
@@ -72,18 +73,26 @@ class LanguageComboBoxRenderer extends JLabel implements ListCellRenderer<Langua
       Language lang = adapter.getLanguage();
       if (lang != null) {
         setText(getTranslatedName(lang));
-        String langTag = lang.getLocaleWithCountryAndVariant().toLanguageTag();
-        String country = lang.getLocaleWithCountryAndVariant().getCountry().toLowerCase();
-        ResourceDataBroker dataBroker = JLanguageTool.getDataBroker();
-        String filename = "flags/bytag/" + langTag + ".png";
-        if (!dataBroker.resourceExists(filename)) {
-          filename = "flags/" + country + ".png";
+        String langTag = lang.getLocale().toLanguageTag();
+        String country = lang.getLocale().getCountry().toLowerCase();
+
+        try {
+            String filename = "flags/bytag/" + langTag + ".png";
+            Image img = Main.getImageResource(filename);
+            if (img == null) {
+              filename = "flags/" + country + ".png";
+              img = Main.getImageResource(filename);
+            }
+            if (img == null) {
+              filename = "flags/empty.png";
+              img = Main.getImageResource(filename);
+            }
+            ImageIcon icon = new ImageIcon(img);
+            setIcon(icon);
+        } catch(Exception e) {
+            System.err.println(String.format("Unable to set icon for: %1$s", langTag));
+            e.printStackTrace(System.err);
         }
-        if (!dataBroker.resourceExists(filename)) {
-          filename = "flags/empty.png";
-        }
-        ImageIcon icon = new ImageIcon(dataBroker.getFromResourceDirAsUrl(filename));
-        setIcon(icon);
       } else {
         setText(adapter.getValue());
         setIcon(null);

@@ -45,12 +45,12 @@ final class RuleSimplifier {
 
   private int touchedRulesCount;
 
-  private void run(Language lang) throws IOException {
+  private void run(Language lang) throws Exception {
     File basePath = new File("/lt/git/languagetool/languagetool-language-modules");
     if (!basePath.exists()) {
       throw new RuntimeException("basePath does not exist: " + basePath);
     }
-    String langCode = lang.getShortCode();
+    String langCode = lang.getLocale().getLanguage();
     File xml = new File(basePath, "/" + langCode + "/src/main/resources/org/languagetool/rules/" + langCode + "/grammar.xml");
     List<String> xmlLines = IOUtils.readLines(new FileReader(xml));
     JLanguageTool tool = new JLanguageTool(lang);
@@ -80,7 +80,7 @@ final class RuleSimplifier {
             && rule.getStartPositionCorrection() == 0
             && rule.getEndPositionCorrection() == 0;
   }
-  
+
   private boolean isSimple(PatternToken t) {
     return !(t.getNegation() || t.getPOSNegation() || t.hasAndGroup() || t.hasExceptionList() ||
             t.hasNextException() || t.hasOrGroup() || t.isInflected() || t.isPOStagRegularExpression() ||
@@ -115,7 +115,7 @@ final class RuleSimplifier {
   private boolean containsBackRef(String str) {
     return str.matches(".*\\\\\\d+.*");
   }
-  
+
   private void appendTokenString(StringBuilder sb, String str, boolean setAllParenthesis) {
     if (str.contains("|") || setAllParenthesis) {
       sb.append("(").append(str).append(")");
@@ -193,9 +193,9 @@ final class RuleSimplifier {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     RuleSimplifier prg = new RuleSimplifier();
-    prg.run(Languages.getLanguageForShortCode("de"));
+    prg.run(Languages.getLanguage("de"));
   }
 
 }

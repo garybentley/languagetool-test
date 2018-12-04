@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,6 +27,9 @@ import org.languagetool.MultiThreadedJLanguageTool;
 import org.languagetool.UserConfig;
 import org.languagetool.language.LanguageIdentifier;
 import org.languagetool.rules.*;
+import org.languagetool.databroker.*;
+import org.languagetool.languagemodel.*;
+import org.languagetool.rules.neuralnetwork.Word2VecModel;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -38,6 +41,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
@@ -89,7 +93,7 @@ class LanguageToolSupport {
   /**
    * LanguageTool support for a JTextComponent
    */
-  LanguageToolSupport(JFrame frame, JTextComponent textComponent) {
+  LanguageToolSupport(JFrame frame, JTextComponent textComponent) throws Exception {
     this(frame, textComponent, null);
   }
 
@@ -97,12 +101,12 @@ class LanguageToolSupport {
    * LanguageTool support for a JTextComponent
    * @since 2.7
    */
-  LanguageToolSupport(JFrame frame, JTextComponent textComponent, UndoRedoSupport support) {
+  LanguageToolSupport(JFrame frame, JTextComponent textComponent, UndoRedoSupport support) throws Exception {
     this.frame = frame;
     this.textComponent = textComponent;
     this.messages = JLanguageTool.getMessageBundle();
     ruleMatches = new ArrayList<>();
-    documentSpans = new ArrayList<>();    
+    documentSpans = new ArrayList<>();
     this.undo = support;
     this.langIdentifier = new LanguageIdentifier();
     init();
@@ -147,14 +151,14 @@ class LanguageToolSupport {
     return this.ruleMatches;
   }
 
-  void reloadConfig() {
+  void reloadConfig() throws Exception {
     //FIXME
     //if mother tongue changes then create new JLanguageTool instance
 
     boolean update = false;
-  
+
     Language language = languageTool.getLanguage();
-    languageTool = new MultiThreadedJLanguageTool(language, config.getMotherTongue(), 
+    languageTool = new MultiThreadedJLanguageTool(language, config.getMotherTongue(),
         new UserConfig(config.getConfigurableValues()));
 
     Set<String> disabledRules = config.getDisabledRuleIds();
@@ -168,7 +172,7 @@ class LanguageToolSupport {
     toDisable.removeAll(common);
     Set<String> toEnable = new HashSet<>(languageTool.getDisabledRules());
     toEnable.removeAll(common);
-    
+
     for (String ruleId : toDisable) {
       languageTool.disableRule(ruleId);
       update = true;
@@ -184,7 +188,7 @@ class LanguageToolSupport {
     }
     Set<CategoryId> disabledCategories = new HashSet<>();
     Map<CategoryId, Category> langCategories = languageTool.getCategories();
-    
+
     for (CategoryId id : langCategories.keySet()) {
       String categoryName = langCategories.get(id).getName();
       if (disabledCategoryNames.contains(categoryName)) {
@@ -198,7 +202,7 @@ class LanguageToolSupport {
         ltDisabledCategories.add(id);
       }
     }
-    
+
     Set<CategoryId> commonCat = new HashSet<>(disabledCategories);
     commonCat.retainAll(ltDisabledCategories);
 
@@ -213,7 +217,7 @@ class LanguageToolSupport {
     }
     for(CategoryId id : toEnableCat) {
       languageTool.enableRuleCategory(id);
-    }      
+    }
     if (!toDisableCat.isEmpty() || !toEnableCat.isEmpty()) {
       // ugly hack to trigger reInitSpellCheckIgnoreWords()
       update = true;
@@ -227,7 +231,7 @@ class LanguageToolSupport {
       languageTool.enableRule(ruleName);
       update = true;
     }
-    
+
 //    languageTool.setConfigValues(config.getConfigValues());
 
     if (update) {
@@ -249,7 +253,7 @@ class LanguageToolSupport {
       //if (languageTool != null) {
       //  languageTool.shutdownWhenDone();
       //}
-      languageTool = new MultiThreadedJLanguageTool(language, config.getMotherTongue(), 
+      languageTool = new MultiThreadedJLanguageTool(language, config.getMotherTongue(),
           new UserConfig(config.getConfigurableValues()));
       languageTool.setCleanOverlappingMatches(false);
       Tools.configureFromRules(languageTool, config);
@@ -262,10 +266,12 @@ class LanguageToolSupport {
 
   private void activateLanguageModelRules(Language language) {
     if (config.getNgramDirectory() != null) {
-      File ngramLangDir = new File(config.getNgramDirectory(), language.getShortCode());
+      File ngramLangDir = new File(config.getNgramDirectory(), language.getLocale().getLanguage());
       if (ngramLangDir.exists()) {
         try {
-          languageTool.activateLanguageModelRules(config.getNgramDirectory());
+          // GTODO Assuming a Lucene language model here, this may be incorrect.
+          LanguageModel langModel = DefaultResourceDataBroker.createLuceneLanguageModel(config.getNgramDirectory().toPath());
+          languageTool.activateLanguageModelRules(langModel);
         } catch (Exception e) {
           JOptionPane.showMessageDialog(null, "Error while loading ngram database.\n" + e.getMessage());
         }
@@ -280,10 +286,11 @@ class LanguageToolSupport {
 
   private void activateWord2VecModelRules(Language language) {
     if (config.getWord2VecDirectory() != null) {
-      File word2vecDir = new File(config.getWord2VecDirectory(), language.getShortCode());
+      File word2vecDir = new File(config.getWord2VecDirectory(), language.getLocale().getLanguage());
       if (word2vecDir.exists()) {
         try {
-          languageTool.activateWord2VecModelRules(config.getWord2VecDirectory());
+          Word2VecModel model = DefaultResourceDataBroker.createWord2VecModel(word2vecDir.toPath(), word2vecDir.toPath());
+          languageTool.activateWord2VecModelRules(model);
         } catch (Exception e) {
           JOptionPane.showMessageDialog(null, "Error while loading word2vec model.\n" + e.getMessage());
         }
@@ -293,16 +300,16 @@ class LanguageToolSupport {
     }
   }
 
-  private void init() {
+  private void init() throws Exception {
     try {
       config = new Configuration(new File(System.getProperty("user.home")), CONFIG_FILE, null);
     } catch (IOException ex) {
-      throw new RuntimeException("Could not load configuration", ex);
+      throw new IOException("Could not load configuration", ex);
     }
 
     Language defaultLanguage = config.getLanguage();
     if (defaultLanguage == null) {
-        defaultLanguage = Languages.getLanguageForLocale(Locale.getDefault());
+        defaultLanguage = Languages.getLanguage(Locale.getDefault());
     }
 
     /**
@@ -311,7 +318,7 @@ class LanguageToolSupport {
      * rules. We just assume that the default language is the language that the user
      * often uses and init the LT object for that now, not just when it's first used.
      * This makes the first check feel much faster:
-     */    
+     */
     reloadLanguageTool(defaultLanguage);
 
     checkExecutor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
@@ -704,16 +711,18 @@ class LanguageToolSupport {
   Language autoDetectLanguage(String text) {
     Language lang = langIdentifier.detectLanguage(text);
     if (lang == null) {
-      lang = Languages.getLanguageForLocale(Locale.getDefault());
+      lang = Languages.getLanguage(Locale.getDefault());
     }
-    if (lang.hasVariant()) {
+    if (!lang.isVariant()) {
       // UI only shows variants like "English (American)", not just "English", so use that:
-      lang = lang.getDefaultLanguageVariant();
+      Language def = lang.getDefaultLanguageVariant();
+      lang = def != null ? def : lang;
     }
+
     return lang;
   }
 
-  private synchronized List<RuleMatch> checkText(Object caller) throws IOException {
+  private synchronized List<RuleMatch> checkText(Object caller) throws Exception {
     if (this.mustDetectLanguage) {
       mustDetectLanguage = false;
       if (!this.textComponent.getText().isEmpty()) {
@@ -859,7 +868,7 @@ class LanguageToolSupport {
   }
 
   private void showDialog(Component parent, String title, String message, Rule rule) {
-    Tools.showRuleInfoDialog(parent, title, message, rule, messages, languageTool.getLanguage().getShortCodeWithCountryAndVariant());
+    Tools.showRuleInfoDialog(parent, title, message, rule, messages, languageTool.getLanguage().getLocale().toLanguageTag());
   }
 
   private static class ReplaceMenuItem extends JMenuItem {
@@ -875,7 +884,7 @@ class LanguageToolSupport {
   private static class Span {
 
     private static final int MAX_SUGGESTIONS = 5;
-    
+
     private int start;
     private int end;
     private final String msg;

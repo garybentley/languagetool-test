@@ -28,13 +28,15 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.util.Locale;
+
 /**
  * Command line tool to extract sentences from a compressed Wikipedia XML dump.
  * @since 2.6
  */
 class WikipediaSentenceExtractor {
 
-  private void extract(Language language, String xmlDumpPath) throws IOException, CompressorException {
+  private void extract(Language language, String xmlDumpPath) throws Exception, CompressorException {
     try (FileInputStream fis = new FileInputStream(xmlDumpPath);
          BufferedInputStream bis = new BufferedInputStream(fis);
          CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis)) {
@@ -64,6 +66,10 @@ class WikipediaSentenceExtractor {
       System.exit(1);
     }
     WikipediaSentenceExtractor extractor = new WikipediaSentenceExtractor();
-    extractor.extract(Languages.getLanguageForShortCode(args[0]), args[1]);
+    try {
+        extractor.extract(Languages.getLanguage(args[0]), args[1]);
+    } catch(Exception e) {
+        e.printStackTrace(System.err);
+    }
   }
 }

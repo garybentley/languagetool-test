@@ -34,13 +34,19 @@ import java.util.List;
 final class ExampleSentencePrinter {
 
   private static final int MAX_BLOCK_SIZE = 5000;
-  
+
   private void run(Language lang) {
     File basePath = new File("/home/dnaber/lt/git/languagetool/languagetool-language-modules");
     if (!basePath.exists()) {
       throw new RuntimeException("basePath does not exist: " + basePath);
     }
-    JLanguageTool tool = new JLanguageTool(lang);
+    JLanguageTool tool = null;
+
+    try {
+        tool = new JLanguageTool(lang);
+    } catch(Exception e) {
+        throw new RuntimeException("Unable to create language tool instance.", e);
+    }
     System.out.println("<html>");
     System.out.println("<head>");
     System.out.println("  <title>LanguageTool examples sentences</title>");
@@ -72,7 +78,7 @@ final class ExampleSentencePrinter {
 
   public static void main(String[] args) {
     ExampleSentencePrinter prg = new ExampleSentencePrinter();
-    prg.run(Languages.getLanguageForShortCode("de"));
+    prg.run(Languages.getLanguage("de"));
   }
 
 }

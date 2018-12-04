@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,8 @@ package org.languagetool.dev.bigdata;
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.rules.ConfusionSetLoader;
+import org.languagetool.databroker.*;
+import org.languagetool.language.English;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,10 +54,13 @@ final class NGramUrlGenerator {
     System.out.println(url.replace("<XX>", "punctuation"));
   }
 
-  public static void mainDownloadSome(String[] args) throws IOException {
-    ConfusionSetLoader confusionSetLoader =  new ConfusionSetLoader();
-    InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/en/homophones.txt");
-    Map<String,List<ConfusionSet>> map = confusionSetLoader.loadConfusionSet(inputStream);
+  public static void mainDownloadSome(String[] args) throws Exception {
+    English lang = new English();
+
+    // GTODO ConfusionSetLoader confusionSetLoader =  new ConfusionSetLoader();
+    // GTODO InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/en/homophones.txt");
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    Map<String,List<ConfusionSet>> map = broker.getConfusionSetFromResourcePath("en/homophones.txt", DefaultResourceDataBroker.DEFAULT_CHARSET);
     String url = "http://storage.googleapis.com/books/ngrams/books/googlebooks-eng-all-2gram-20120701-<XX>.gz";
     Set<String> nameSet = new HashSet<>();
     for (String s : map.keySet()) {

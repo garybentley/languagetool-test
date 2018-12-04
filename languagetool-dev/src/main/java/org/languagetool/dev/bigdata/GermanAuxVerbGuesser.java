@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.dev.bigdata;
 
 import org.languagetool.languagemodel.LuceneLanguageModel;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,7 @@ final class GermanAuxVerbGuesser {
   private GermanAuxVerbGuesser() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + GermanAuxVerbGuesser.class.getName() + " <ngramDataIndex> <lemmaFile>");
       System.out.println("   <lemmaFile> is a text file with 'participle2 \\t lemma' per line, e.g. 'getrunken \t trinken'");
@@ -50,7 +51,7 @@ final class GermanAuxVerbGuesser {
     int match = 0;
     int noMatch = 0;
     int unambiguous = 0;
-    try (LuceneLanguageModel lm = new LuceneLanguageModel(new File(indexTopDir))) {
+    try (LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(new File(indexTopDir).toPath().toRealPath())) {
       for (String line : lines) {
         String pa2 = line.split("\t")[0];
         String lemma = line.split("\t")[1];
@@ -74,7 +75,7 @@ final class GermanAuxVerbGuesser {
   }
 
   private static long countHaben(LuceneLanguageModel lm, String pa2, String lemma) {
-    return 
+    return
         lm.getCount(asList("habe", pa2))
       + lm.getCount(asList("hast", pa2))
       + lm.getCount(asList("hat", pa2))
@@ -86,7 +87,7 @@ final class GermanAuxVerbGuesser {
       + lm.getCount(asList("hatte", pa2))
       + lm.getCount(asList("hatten", pa2))
       + lm.getCount(asList("hattet", pa2))
-      
+
       + lm.getCount(asList("werde", pa2, "haben"))
       + lm.getCount(asList("wirst", pa2, "haben"))
       + lm.getCount(asList("wird", pa2, "haben"))

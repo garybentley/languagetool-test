@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -57,7 +57,7 @@ class AfterTheDeadlineEvaluator {
     this.urlPrefix = urlPrefix;
   }
 
-  private void run(Language lang) throws IOException, InterruptedException {
+  private void run(Language lang) throws Exception, InterruptedException {
     List<Rule> rules = getRules(lang);
     int sentenceCount = 0;
     int errorFoundCount = 0;
@@ -93,7 +93,7 @@ class AfterTheDeadlineEvaluator {
     System.out.printf("Expected errors found: " + errorFoundCount + " (%.2f%%)\n", percentage);
   }
 
-  private List<Rule> getRules(Language lang) throws IOException {
+  private List<Rule> getRules(Language lang) throws Exception {
     JLanguageTool langTool = new JLanguageTool(lang);
     return langTool.getAllActiveRules();
   }
@@ -179,6 +179,6 @@ class AfterTheDeadlineEvaluator {
       System.exit(1);
     }
     AfterTheDeadlineEvaluator evaluator = new AfterTheDeadlineEvaluator(args[1]);
-    evaluator.run(Languages.getLanguageForShortCode(args[0]));
+    evaluator.run(Languages.getLanguage(args[0]));
   }
 }

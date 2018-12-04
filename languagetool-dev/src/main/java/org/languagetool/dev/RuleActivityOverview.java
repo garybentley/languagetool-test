@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,8 +35,8 @@ import org.languagetool.tools.StringTools;
 
 /**
  * Command line tool to list activity for grammar files. Requires a typical developer setup,
- * i.e. a local "git" command and the sources cloned from git. 
- * 
+ * i.e. a local "git" command and the sources cloned from git.
+ *
  * @author Daniel Naber
  */
 final class RuleActivityOverview {
@@ -49,7 +49,7 @@ final class RuleActivityOverview {
   private void run() {
     System.out.println("Commits per language in the last " + PAST_DAYS + " days");
     System.out.println("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-    
+
     List<String> sortedLanguages = new ArrayList<>();
     for (Language element : Languages.get()) {
       sortedLanguages.add(element.getName());
@@ -63,12 +63,15 @@ final class RuleActivityOverview {
   }
 
   int getActivityFor(Language lang, int pastDays) {
+      /*
+      GTODO This should be changed to use the github api, i.e. https://developer.github.com/v3/repos/commits/
+      combined with a config file that contains the rule files.
     try {
       Calendar past = GregorianCalendar.getInstance();
       past.add(Calendar.DAY_OF_MONTH, -pastDays);
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       String pastString = dateFormat.format(past.getTime());
-      String langCode = lang.getShortCode();
+      String langCode = lang.getLocale().getLanguage();
       List<File> xmlFiles = getAllXmlFiles(lang, langCode);
       int commits = 0;
       for (File file : xmlFiles) {
@@ -87,8 +90,12 @@ final class RuleActivityOverview {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    */
+    return 0;
   }
 
+/*
+GTODO NO longer applies
   private List<File> getAllXmlFiles(Language lang, String langCode) {
     List<File> files = new ArrayList<>();
     List<String> ruleFileNames = lang.getRuleFileNames();
@@ -102,7 +109,7 @@ final class RuleActivityOverview {
     }
     return files;
   }
-
+*/
   private int getCommits(String svnOutput) {
     int count = 0;
     try (Scanner scanner = new Scanner(svnOutput)) {

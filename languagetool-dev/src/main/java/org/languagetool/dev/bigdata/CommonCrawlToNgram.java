@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -46,14 +46,14 @@ import java.util.Map;
 /**
  * Indexing the CommonCrawl-based data from http://data.statmt.org/ngrams/
  * to ngrams.
- * 
+ *
  * @since 3.2
  */
 class CommonCrawlToNgram implements AutoCloseable {
 
   private static final double THRESHOLD = 0.00000000001;
   private static final int MAX_TOKEN_LENGTH = 20;
-  
+
   private final File input;
   private final File indexTopDir;
   private final File evalFile;
@@ -63,12 +63,12 @@ class CommonCrawlToNgram implements AutoCloseable {
   private final Map<String, Long> bigramToCount = new HashMap<>();
   private final Map<String, Long> trigramToCount = new HashMap<>();
   private final Map<Integer, LuceneLiveIndex> indexes = new HashMap<>();
-  
+
   private int cacheLimit = 1_000_000;  // max. number of trigrams in HashMap before we flush to Lucene
   private long charCount = 0;
   private long lineCount = 0;
 
-  CommonCrawlToNgram(Language language, File input, File indexTopDir, File evalFile) throws IOException {
+  CommonCrawlToNgram(Language language, File input, File indexTopDir, File evalFile) throws Exception {
     this.input = input;
     this.indexTopDir = indexTopDir;
     this.evalFile = evalFile;
@@ -78,7 +78,7 @@ class CommonCrawlToNgram implements AutoCloseable {
     indexes.put(2, new LuceneLiveIndex(new File(indexTopDir, "2grams")));
     indexes.put(3, new LuceneLiveIndex(new File(indexTopDir, "3grams")));
   }
-  
+
   @Override
   public void close() throws IOException {
     for (LuceneLiveIndex index : indexes.values()) {
@@ -89,8 +89,8 @@ class CommonCrawlToNgram implements AutoCloseable {
   void setCacheLimit(int cacheLimit) {
     this.cacheLimit = cacheLimit;
   }
-  
-  void indexInputFile() throws IOException {
+
+  void indexInputFile() throws Exception {
     writeAndEvaluate();  // run now so we have a baseline
     FileInputStream fin = new FileInputStream(input);
     BufferedInputStream in = new BufferedInputStream(fin);
@@ -106,7 +106,7 @@ class CommonCrawlToNgram implements AutoCloseable {
     writeAndEvaluate();
   }
 
-  private void indexLine(String[] lines) throws IOException {
+  private void indexLine(String[] lines) throws Exception {
     for (String line : lines) {
       if (lineCount++ % 50_000 == 0) {
         float mb = (float) charCount / 1000 / 1000;
@@ -120,7 +120,7 @@ class CommonCrawlToNgram implements AutoCloseable {
     }
   }
 
-  private void indexSentence(String sentence) throws IOException {
+  private void indexSentence(String sentence) throws Exception {
     List<String> tokens = wordTokenizer.tokenize(sentence);
     tokens.add(0, LanguageModel.GOOGLE_SENTENCE_START);
     tokens.add(LanguageModel.GOOGLE_SENTENCE_END);
@@ -153,7 +153,7 @@ class CommonCrawlToNgram implements AutoCloseable {
     }
   }
 
-  private void writeAndEvaluate() throws IOException {
+  private void writeAndEvaluate() throws Exception {
     writeToLucene(1, unigramToCount);
     writeToLucene(2, bigramToCount);
     writeToLucene(3, trigramToCount);
@@ -167,7 +167,7 @@ class CommonCrawlToNgram implements AutoCloseable {
       System.out.println("Skipping evaluation, no evaluation file specified");
     }
   }
-  
+
   private void writeToLucene(int ngramSize, Map<String, Long> ngramToCount) throws IOException {
     long startTime = System.currentTimeMillis();
     System.out.println("Writing " + ngramToCount.size() + " cached ngrams to Lucene index (ngramSize=" + ngramSize + ")...");
@@ -241,13 +241,13 @@ class CommonCrawlToNgram implements AutoCloseable {
     writer.addDocument(doc);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 4) {
       System.out.println("Usage: " + CommonCrawlToNgram.class + " <langCode> <input.xz> <ngramIndexDir> <simpleEvalFile>");
       System.out.println(" <simpleEvalFile> a plain text file with simple error markup");
       System.exit(1);
     }
-    Language language = Languages.getLanguageForShortCode(args[0]);
+    Language language = Languages.getLanguage(args[0]);
     File input = new File(args[1]);
     File outputDir = new File(args[2]);
     File evalFile = new File(args[3]);
@@ -255,7 +255,7 @@ class CommonCrawlToNgram implements AutoCloseable {
       prg.indexInputFile();
     }
   }
-  
+
   static class LuceneLiveIndex {
 
     private final Directory directory;
@@ -272,7 +272,7 @@ class CommonCrawlToNgram implements AutoCloseable {
       reader = DirectoryReader.open(indexWriter, false);
       searcher = new IndexSearcher(reader);
     }
-    
+
     void close() throws IOException {
       reader.close();
       indexWriter.close();

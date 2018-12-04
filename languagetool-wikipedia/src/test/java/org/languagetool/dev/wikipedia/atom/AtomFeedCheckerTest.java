@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.languagetool.language.English;
 import org.languagetool.language.German;
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class AtomFeedCheckerTest {
 
   @Ignore("Interactive use only - for testing the 'recent changes' XML we get from the API")
   @Test
-  public void testCheckManually() throws IOException {
+  public void testCheckManually() throws Exception {
     AtomFeedChecker atomFeedChecker = new AtomFeedChecker(new English());
     CheckResult checkResult = atomFeedChecker.checkChanges(new FileInputStream("/home/dnaber/wiki.xml"));
     List<ChangeAnalysis> changeAnalysisList = checkResult.getCheckResults();
@@ -60,7 +61,7 @@ public class AtomFeedCheckerTest {
   }
 
   @Test
-  public void testCheck() throws IOException {
+  public void testCheck() throws Exception {
     AtomFeedChecker atomFeedChecker = new AtomFeedChecker(new German());
     CheckResult checkResult = atomFeedChecker.checkChanges(getStream());
     List<ChangeAnalysis> changeAnalysis = checkResult.getCheckResults();
@@ -83,7 +84,7 @@ public class AtomFeedCheckerTest {
   }
 
   @Test
-  public void testCheckToDatabase() throws IOException, SQLException {
+  public void testCheckToDatabase() throws Exception, SQLException {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
     initDatabase();
@@ -123,8 +124,12 @@ public class AtomFeedCheckerTest {
     database.createTables();
   }
 
-  private InputStream getStream() throws IOException {
-    return Tools.getStream("/org/languagetool/dev/wikipedia/atom/feed1.xml");
+  private InputStream getStream() throws Exception {
+    English lang = new English();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    InputStream stream = broker.getResourceDirPathStream("/org/languagetool/dev/wikipedia/atom/feed1.xml");
+    return stream;
+    // GTODO Tools.getStream("/org/languagetool/dev/wikipedia/atom/feed1.xml");
   }
-  
+
 }

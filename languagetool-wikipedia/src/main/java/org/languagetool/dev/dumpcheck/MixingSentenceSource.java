@@ -35,14 +35,14 @@ public class MixingSentenceSource extends SentenceSource {
 
   private final List<SentenceSource> sources;
   private final Map<String, Integer> sourceDistribution = new HashMap<>();
-  
+
   private int count;
 
-  public static MixingSentenceSource create(List<String> dumpFileNames, Language language) throws IOException {
+  public static MixingSentenceSource create(List<String> dumpFileNames, Language language) throws Exception {
     return create(dumpFileNames, language, null);
   }
 
-  public static MixingSentenceSource create(List<String> dumpFileNames, Language language, Pattern filter) throws IOException {
+  public static MixingSentenceSource create(List<String> dumpFileNames, Language language, Pattern filter) throws Exception {
     List<SentenceSource> sources = new ArrayList<>();
     for (String dumpFileName : dumpFileNames) {
       File file = new File(dumpFileName);
@@ -62,7 +62,7 @@ public class MixingSentenceSource extends SentenceSource {
     return new MixingSentenceSource(sources, language);
   }
 
-  private MixingSentenceSource(List<SentenceSource> sources, Language language) {
+  private MixingSentenceSource(List<SentenceSource> sources, Language language) throws Exception {
     super(language);
     this.sources = sources;
   }
@@ -70,7 +70,7 @@ public class MixingSentenceSource extends SentenceSource {
   Map<String, Integer> getSourceDistribution() {
     return sourceDistribution;
   }
-  
+
   @Override
   public boolean hasNext() {
     for (SentenceSource source : sources) {

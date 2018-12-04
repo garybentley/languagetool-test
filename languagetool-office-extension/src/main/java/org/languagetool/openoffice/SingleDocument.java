@@ -43,24 +43,24 @@ import com.sun.star.uno.XComponentContext;
 import static java.lang.System.arraycopy;
 
 /**
- * Class for checking text of one LO document 
+ * Class for checking text of one LO document
  * @since 4.3
  * @author Fred Kruse, Marcin Miłkowski
  */
 class SingleDocument {
-  
+
   /**
    * Full text Check:
    * numParasToCheck: Paragraphs to be checked for full text rules
    * < 0 check full text (time intensive)
    * == 0 check only one paragraph (works like LT Version <= 3.9)
    * > 0 checks numParasToCheck before and after the processed paragraph
-   * 
+   *
    * Cache:
    * sentencesCache: only used for doResetCheck == true (LO checks again only changed paragraphs by default)
    * paragraphsCache: used to store LT matches for a fast return to LO (numParasToCheck != 0)
    * singleParaCache: used for one paragraph check by default or for special paragraphs like headers, footers, footnotes, etc.
-   *  
+   *
    */
   private static final String END_OF_PARAGRAPH = "\n";  //  Paragraph Separator like in standalone GUI
   private static final String MANUAL_LINEBREAK = "\r";  //  to distinguish from paragraph separator
@@ -71,7 +71,7 @@ class SingleDocument {
 
 
   private static int debugMode = 0;         //  should be 0 except for testing; 1 = low level; 2 = advanced level
-  
+
   private Configuration config;
 
   private int numParasToCheck = 5;                // will be overwritten by config
@@ -98,7 +98,7 @@ class SingleDocument {
   private boolean firstCheckDone = false;         //  Is set to true, if first iteration of whole document is done
   private int resetFrom = 0;                      //  Reset from paragraph
   private int resetTo = 0;                        //  Reset to paragraph
-  
+
   SingleDocument(XComponentContext xContext, Configuration config, String docID, XComponent xComponent) {
     this.xContext = xContext;
     this.config = config;
@@ -111,16 +111,16 @@ class SingleDocument {
       this.linguServices = new LinguisticServices(xContext);
     }
   }
-  
-  /**  get the result for a check of a single document 
-   * 
+
+  /**  get the result for a check of a single document
+   *
    * @param paraText          paragraph text
    * @param paRes             proof reading result
    * @param footnotePositions position of footnotes
    * @param isParallelThread  true: check runs as parallel thread
    * @return                  proof reading result
    */
-  ProofreadingResult getCheckResults(String paraText, Locale locale, ProofreadingResult paRes, 
+  ProofreadingResult getCheckResults(String paraText, Locale locale, ProofreadingResult paRes,
       int[] footnotePositions, boolean isParallelThread, JLanguageTool langTool) {
     try {
       this.locale = locale;
@@ -136,8 +136,8 @@ class SingleDocument {
         }
       }
       if (debugMode > 1) {
-        MessageHandler.printToLogFile("... Check Sentence: numCurPara: " + paraNum 
-            + "; startPos: " + paRes.nStartOfSentencePosition + "; Paragraph: " + paraText 
+        MessageHandler.printToLogFile("... Check Sentence: numCurPara: " + paraNum
+            + "; startPos: " + paRes.nStartOfSentencePosition + "; Paragraph: " + paraText
             + ", sErrors: " + (sErrors == null ? 0 : sErrors.length) + logLineBreak);
       }
       if(sErrors == null) {
@@ -146,7 +146,7 @@ class SingleDocument {
         paRes.nStartOfSentencePosition = sfp.getPosition();
         paRes.nStartOfNextSentencePosition = sfp.getPosition() + sentence.length();
         paRes.nBehindEndOfSentencePosition = paRes.nStartOfNextSentencePosition;
-        sErrors = checkSentence(sentence, paRes.nStartOfSentencePosition, paRes.nStartOfNextSentencePosition, 
+        sErrors = checkSentence(sentence, paRes.nStartOfSentencePosition, paRes.nStartOfNextSentencePosition,
             paraNum, footnotePositions, isParallelThread, langTool);
         setFirstCheckDone();
       }
@@ -173,7 +173,7 @@ class SingleDocument {
     defaultParaCheck = numParasToCheck * PARA_CHECK_FACTOR;
     doResetCheck = config.isResetCheck();
   }
-  
+
   /** Set XComponentContext and XComponent of the document
    */
   void setXComponent(XComponentContext xContext, XComponent xComponent) {
@@ -183,19 +183,19 @@ class SingleDocument {
       this.linguServices = new LinguisticServices(xContext);
     }
   }
-  
+
   /** Get xComponent of the document
    */
   XComponent getXComponent() {
     return xComponent;
   }
-  
+
   /** Get ID of the document
    */
   String getDocID() {
     return docID;
   }
-  
+
   /** Reset all caches of the document
    */
   void resetCache() {
@@ -204,8 +204,8 @@ class SingleDocument {
     singleParaCache.removeAll();
     firstCheckDone = false;
   }
-  
-  /** 
+
+  /**
    * Do a reset to check document again
    */
   boolean doresetCheck() {
@@ -214,8 +214,8 @@ class SingleDocument {
     }
     return resetCheck;
   }
-  
-  /** 
+
+  /**
    * Reset only changed paragraphs
    */
   void optimizeReset() {
@@ -224,14 +224,14 @@ class SingleDocument {
       flatPara.markFlatParasAsChecked(resetFrom, resetTo);
     }
   }
-  
+
   // Fix numbers that are (probably) foot notes.
   // See https://bugs.freedesktop.org/show_bug.cgi?id=69416
   // public for test reasons
   String cleanFootnotes(String paraText) {
     return paraText.replaceAll("([^\\d][.!?])\\d ", "$1¹ ");
   }
-  
+
   /**
    * Search for Position of Paragraph
    * gives Back the Position in full text / -1 if Paragraph can not be found
@@ -344,7 +344,7 @@ class SingleDocument {
     nParas = flatPara.getNumberOfAllFlatPara();
 
     if (debugMode > 0) {
-      MessageHandler.printToLogFile("numLastFlPara: " + numLastFlPara + " (isParallelThread: " + isParallelThread 
+      MessageHandler.printToLogFile("numLastFlPara: " + numLastFlPara + " (isParallelThread: " + isParallelThread
           + "); nParas: " + nParas + "; docID: " + docID + logLineBreak);
     }
 
@@ -361,7 +361,7 @@ class SingleDocument {
 
     nParas -= divNum;
     numLastFlPara = nParas;
-    
+
     if (!chPara.equals(allParas.get(nParas))) {
       if (isReset || isParallelThread) {
         return -1;
@@ -369,7 +369,7 @@ class SingleDocument {
         if (debugMode > 0) {
           MessageHandler.printToLogFile("!!! allParas set: NParas: " + nParas + "; divNum: " + divNum
                   + "; docID: " + docID
-                  + logLineBreak + "old: " + allParas.get(nParas) + logLineBreak 
+                  + logLineBreak + "old: " + allParas.get(nParas) + logLineBreak
                   + "new: " + chPara + logLineBreak);
         }
         allParas.set(nParas, chPara);
@@ -417,10 +417,10 @@ class SingleDocument {
     }
     return true;
   }
-  
+
   /**
    * Heuristic try to find next position (dialog box or automatic iteration)
-   * Is paragraph same, next not empty after or before   
+   * Is paragraph same, next not empty after or before
    */
   private int findNextParaPos(int startPara, String paraStr) {
     if (allParas == null || allParas.size() < 1) {
@@ -560,24 +560,24 @@ class SingleDocument {
   }
 
   @Nullable
-  private SingleProofreadingError[] checkParaRules( String paraText, int paraNum, 
+  private SingleProofreadingError[] checkParaRules( String paraText, int paraNum,
       int startSentencePos, int endSentencePos, boolean isParallelThread, JLanguageTool langTool) {
 
     List<RuleMatch> paragraphMatches;
     SingleProofreadingError[] pErrors = null;
     try {
-      
+
       // use Cache for check in single paragraph mode only after the first call of paragraph
       if(numParasToCheck != 0 && paraNum >= 0) {
         pErrors = paragraphsCache.getFromPara(paraNum, startSentencePos, endSentencePos);
       } else if (startSentencePos > 0) {
         pErrors = singleParaCache.getFromPara(0, startSentencePos, endSentencePos);
-        
+
       }
       if(pErrors != null || isParallelThread) {   // return Cache result if available
         return pErrors;                           // for parallel Thread only use cache
       }
-      
+
       String textToCheck;
       if(paraNum < 0 || numParasToCheck == 0) {
         textToCheck = fixLinebreak(paraText);
@@ -585,7 +585,7 @@ class SingleDocument {
         textToCheck = getDocAsString(paraNum);
       }
       paragraphMatches = langTool.check(textToCheck, true, JLanguageTool.ParagraphHandling.ONLYPARA);
-      
+
       //  One paragraph check (set by options or proof of footnote, etc.)
       if (numParasToCheck == 0 || paraNum < 0) {
         if(paragraphMatches == null || paragraphMatches.isEmpty()) {
@@ -604,11 +604,11 @@ class SingleDocument {
           } else {
             singleParaCache.put(0, new SingleProofreadingError[0]);
           }
-        }  
+        }
         return singleParaCache.getFromPara(0, startSentencePos, endSentencePos);
       }
 
-      //  check of numParasToCheck or full text 
+      //  check of numParasToCheck or full text
       int startPara;
       int endPara;
       if(numParasToCheck < 0) {
@@ -675,8 +675,8 @@ class SingleDocument {
     }
     return null;
   }
-  
-  private SingleProofreadingError[] checkSentence(String sentence, int startPos, int nextPos, 
+
+  private SingleProofreadingError[] checkSentence(String sentence, int startPos, int nextPos,
       int numCurPara, int[] footnotePositions, boolean isParallelThread, JLanguageTool langTool) {
     try {
       SingleProofreadingError[] errorArray;
@@ -699,8 +699,8 @@ class SingleDocument {
       }
       if(!isParallelThread && numParasToCheck != 0 && doResetCheck) {
         if (debugMode > 1) {
-          MessageHandler.printToLogFile("--> Enter to sentences cache: numCurPara: " + numCurPara 
-              + "; startPos: " + startPos + "; Sentence: " + sentence 
+          MessageHandler.printToLogFile("--> Enter to sentences cache: numCurPara: " + numCurPara
+              + "; startPos: " + startPos + "; Sentence: " + sentence
               + "; Error number: " + errorArray.length + logLineBreak);
         }
         sentencesCache.remove(numCurPara, startPos);
@@ -712,7 +712,7 @@ class SingleDocument {
     }
     return null;
   }
-  
+
   /**
    * Creates a SingleGrammarError object for use in LO/OO.
    */
@@ -793,7 +793,7 @@ class SingleDocument {
     private int position;
     private String str;
 
-    SentenceFromPara(String paraText, int startPos, JLanguageTool langTool) {
+    SentenceFromPara(String paraText, int startPos, JLanguageTool langTool) throws Exception {
       List<String> tokenizedSentences = langTool.sentenceTokenize(cleanFootnotes(paraText));
       if (!tokenizedSentences.isEmpty()) {
         int i = 0;
@@ -828,7 +828,7 @@ class SingleDocument {
     if (!firstCheckDone && allParas != null) {
       int numParas = sentencesCache.getNumberOfParas();
       if (debugMode > 1) {
-        MessageHandler.printToLogFile("firstCheckDone --> sentenceCache: " + numParas 
+        MessageHandler.printToLogFile("firstCheckDone --> sentenceCache: " + numParas
             + "; allParas: " + allParas.size() + "; docID: " + docID + logLineBreak
             + "sentenceCache entries: " + sentencesCache.getNumberOfEntries()
             + "; paragraphsCache entries: " + paragraphsCache.getNumberOfEntries()
@@ -859,5 +859,5 @@ class SingleDocument {
     }
     return allSynonyms.toArray(new String[allSynonyms.size()]);
   }
-  
+
 }

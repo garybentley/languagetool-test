@@ -18,17 +18,17 @@
  */
 package org.languagetool.rules.ca;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.WrongWordInContextRule;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.ContextWords;
 
 public class CatalanWrongWordInContextRule extends WrongWordInContextRule {
 
-  public CatalanWrongWordInContextRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
+  public CatalanWrongWordInContextRule(final ResourceBundle messages, List<ContextWords> wrongWords) {
+    super(messages, wrongWords);
     setLocQualityIssueType(ITSIssueType.Grammar);
     setMatchLemmmas();
   }
@@ -47,12 +47,13 @@ public class CatalanWrongWordInContextRule extends WrongWordInContextRule {
   public String getDescription() {
     return "Confusió segons el context (infligir/infringir, etc.)";
   }
-
+/*
+GTODO
   @Override
   protected String getFilename() {
     return "/ca/wrongWordInContext.txt";
   }
-
+*/
   @Override
   protected String getMessageString() {
     return "¿Volíeu dir <suggestion>$SUGGESTION</suggestion> en lloc de '$WRONGWORD'?";

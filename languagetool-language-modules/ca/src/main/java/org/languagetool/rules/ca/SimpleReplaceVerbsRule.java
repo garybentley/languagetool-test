@@ -18,12 +18,11 @@
  */
 package org.languagetool.rules.ca;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,10 +30,10 @@ import java.util.regex.Pattern;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.rules.*;
-import org.languagetool.synthesis.ca.CatalanSynthesizer;
-import org.languagetool.tagging.ca.CatalanTagger;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.tagging.Tagger;
 
 /**
  * A rule that matches incorrect verbs (including all inflected forms) and
@@ -46,9 +45,8 @@ import org.languagetool.tagging.ca.CatalanTagger;
  */
 public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale CA_LOCALE = new Locale("CA");
-
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
       if (wrongWords == null) {
@@ -56,23 +54,23 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
       }
     return wrongWords;
   }
-
+*/
   private static final String endings = "a|à|ada|ades|am|ant|ar|ara|arà|aran|aràs|aré|arem|àrem|"
       + "aren|ares|areu|àreu|aria|aríem|arien|aries|aríeu|às|àssem|assen|asses|àsseu|àssim|assin|"
       + "assis|àssiu|at|ats|au|ava|àvem|aven|aves|àveu|e|em|en|es|és|éssem|essen|esses|ésseu|éssim|"
       + "essin|essis|éssiu|eu|i|í|in|is|o|ïs";
   private static final Pattern desinencies_1conj_0 = Pattern.compile("(.+?)(" + endings + ")");
   private static final Pattern desinencies_1conj_1 = Pattern.compile("(.+)("  + endings + ")");
-  private CatalanTagger tagger;
-  private CatalanSynthesizer synth;
+  private Tagger tagger;
+  private Synthesizer synth;
 
-  public SimpleReplaceVerbsRule(final ResourceBundle messages, Language language) {
-    super(messages, language.getUseDataBroker());
+  public SimpleReplaceVerbsRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, Tagger tagger, Synthesizer synthesizer, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     super.setCategory(Categories.TYPOS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     super.setIgnoreTaggedWords();
-    tagger = (CatalanTagger) language.getTagger();
-    synth = (CatalanSynthesizer) language.getSynthesizer();
+    this.tagger = Objects.requireNonNull(tagger, "Tagger must be provided.");
+    this.synth = Objects.requireNonNull(synthesizer, "Synthesizer must be provided.");
   }
 
   @Override
@@ -96,11 +94,6 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
   }
 
   @Override
-  public Locale getLocale() {
-    return CA_LOCALE;
-  }
-
-  @Override
   public final RuleMatch[] match(final AnalyzedSentence sentence) {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
@@ -110,7 +103,7 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
       if (ignoreTaggedWords && tokenReadings.isTagged()) {
         continue;
       }
-      String tokenString = originalTokenStr.toLowerCase(getLocale());
+      String tokenString = getCaseConverter().toLowerCase(originalTokenStr);
       AnalyzedTokenReadings analyzedTokenReadings = null;
       String infinitive = null;
       int i = 0;
@@ -142,7 +135,7 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
             desinence = "i" + desinence.substring(1, desinence.length());
           }
           infinitive = lexeme.concat("ar");
-          if (wrongWords.containsKey(infinitive)) {
+          if (containsWord(infinitive)) {
             List<String> wordAsArray = Arrays.asList("cant".concat(desinence));
             List<AnalyzedTokenReadings> analyzedTokenReadingsList = tagger.tag(wordAsArray);
             if (analyzedTokenReadingsList != null) {
@@ -157,7 +150,7 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
       if (analyzedTokenReadings != null) {
         List<String> possibleReplacements = new ArrayList<>();
         String[] synthesized = null;
-        List<String> replacementInfinitives = wrongWords.get(infinitive);
+        List<String> replacementInfinitives = getReplacements(infinitive);
         for (String replacementInfinitive : replacementInfinitives) {
           if (replacementInfinitive.startsWith("(")) {
             possibleReplacements.add(replacementInfinitive);
@@ -167,14 +160,8 @@ public class SimpleReplaceVerbsRule extends AbstractSimpleReplaceRule {
             AnalyzedToken infinitiveAsAnTkn = new AnalyzedToken(parts[0],
                 "V.*", parts[0]);
             for (AnalyzedToken analyzedToken : analyzedTokenReadings) {
-              try {
                 synthesized = synth.synthesize(infinitiveAsAnTkn,
                     analyzedToken.getPOSTag());
-              } catch (IOException e) {
-                throw new RuntimeException("Could not synthesize: "
-                    + infinitiveAsAnTkn + " with tag "
-                    + analyzedToken.getPOSTag(), e);
-              }
               for (String s : synthesized) {
                 for (int j = 1; j < parts.length; j++) {
                   s = s.concat(" ").concat(parts[j]);

@@ -29,11 +29,11 @@ import java.net.URLEncoder;
 import java.util.*;
 
 /**
- * Runs checks for all languages with the empty string, to 
+ * Runs checks for all languages with the empty string, to
  * measure overhead. Requires a HTTP service running on default port.
  */
 public class HTTPServerOverheadTest {
-  
+
   @Test
   @Ignore("for interactive use only")
   public void test() throws IOException {
@@ -73,7 +73,7 @@ public class HTTPServerOverheadTest {
   }
 
   private String checkTextOnServer(Language lang, String text) throws IOException {
-    String postData = "language=" + lang.getShortCodeWithCountryAndVariant() + "&text=" + URLEncoder.encode(text, "UTF-8");
+    String postData = "language=" + lang.getLocale().toLanguageTag() + "&text=" + URLEncoder.encode(text, "UTF-8");
     URL url = new URL("http://localhost:" + HTTPTools.getDefaultPort() + "/v2/check");
     return HTTPTools.checkAtUrlByPost(url, postData);
   }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -61,10 +61,22 @@ class LanguageComboBoxModel extends DefaultComboBoxModel<LanguageAdapter> {
     ArrayList<Language> internal = new ArrayList<>(Languages.get());
     Collections.sort(internal, comparator);
     for (Language l : internal) {
-      if (includeHidden || !l.isHiddenFromGui()) {
+      if (includeHidden || !isHiddenFromGui(l)) {
         model.addElement(new LanguageAdapter(l));
       }
     }
     return model;
   }
+
+  public static boolean isHiddenFromGui(Language lang) {
+      Language def = lang.getDefaultLanguageVariant();
+      if (lang.isVariant()) {
+          return false;
+      }
+      if (def == null) {
+          return false;
+      }
+      return true;
+  }
+
 }

@@ -99,13 +99,13 @@ public class MultiThreadingTest1 {
     }
   }
 
-  private void initExpectedResults(List<Language> languages) throws IOException {
+  private void initExpectedResults(List<Language> languages) throws Exception {
     for (Language lang : languages) {
       JLanguageTool lt = new JLanguageTool(lang);
-      String input = examples.get(lang.getShortCodeWithCountryAndVariant());
+      String input = examples.get(lang.getLocale().toLanguageTag());
       if (input != null) {
         List<RuleMatch> matches = lt.check(input);
-        expectedResults.put(lang.getShortCodeWithCountryAndVariant(), toString(matches));
+        expectedResults.put(lang.getLocale().toLanguageTag(), toString(matches));
       }
     }
   }
@@ -132,19 +132,19 @@ public class MultiThreadingTest1 {
 
     @Override
     public void run() {
-      String input = examples.get(lang.getShortCodeWithCountryAndVariant());
+      String input = examples.get(lang.getLocale().toLanguageTag());
       if (input != null) {
         try {
           JLanguageTool lt = new JLanguageTool(lang);
           //System.out.println("Running with " + lang.getShortNameWithCountryAndVariant());
           List<RuleMatch> matches = lt.check(input);
           //System.out.println("=>" + matches);
-          String expected = expectedResults.get(lang.getShortCodeWithCountryAndVariant());
+          String expected = expectedResults.get(lang.getLocale().toLanguageTag());
           String real = MultiThreadingTest1.toString(matches);
-          if (!expectedResults.get(lang.getShortCodeWithCountryAndVariant()).equals(real)) {
+          if (!expectedResults.get(lang.getLocale().toLanguageTag()).equals(real)) {
             fail(lang + ": got '" + real + "', expected '" + expected + "'");
           }
-        } catch (IOException e) {
+        } catch (Exception e) {
           throw new RuntimeException(e);
         }
       } else {

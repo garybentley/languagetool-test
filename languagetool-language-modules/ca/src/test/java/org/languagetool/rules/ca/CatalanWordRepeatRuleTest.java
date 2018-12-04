@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class CatalanWordRepeatRuleTest {
@@ -35,10 +33,11 @@ public class CatalanWordRepeatRuleTest {
    * Test method for 'org.languagetool.rules.ca.CatalanWordRepeatRule.match(AnalyzedSentence)'
    */
   @Test
-  public void testRule() throws IOException {
-    final CatalanWordRepeatRule rule = new CatalanWordRepeatRule(TestTools.getMessages("ca"), new Catalan());
+  public void testRule() throws Exception {
+    Catalan lang = new Catalan();
+    final CatalanWordRepeatRule rule = lang.createWordRepeatRule(null);
     RuleMatch[] matches;
-    JLanguageTool langTool = new JLanguageTool(new Catalan());
+    JLanguageTool langTool = new JLanguageTool(lang);
     //correct
     matches = rule.match(langTool.getAnalyzedSentence("Sempre pensa en en Joan."));
     assertEquals(0, matches.length);
@@ -60,7 +59,7 @@ public class CatalanWordRepeatRuleTest {
     assertEquals(0, matches.length);
     matches = rule.match(langTool.getAnalyzedSentence("cada un un llibre"));
     assertEquals(0, matches.length);
-        
+
     //incorrect
     matches = rule.match(langTool.getAnalyzedSentence("Tots els els homes són iguals."));
     assertEquals(1, matches.length);

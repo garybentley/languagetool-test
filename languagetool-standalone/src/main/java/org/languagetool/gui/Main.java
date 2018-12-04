@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -41,6 +41,7 @@ import java.awt.Rectangle;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.Image;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -71,6 +72,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import javax.imageio.*;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -203,6 +205,15 @@ public final class Main {
     messages = JLanguageTool.getMessageBundle();
   }
 
+  public static Image getImageResource(String path) throws Exception {
+      ClassLoader cl = Main.class.getClassLoader();
+      URL url = cl.getResource(path);
+      if (url == null) {
+          return null;
+      }
+      return ImageIO.read(url);
+  }
+
   private void loadFile() {
     File file = Tools.openFileDialog(frame, new PlainTextFileFilter());
     if (file == null) {  // user clicked cancel
@@ -277,7 +288,7 @@ public final class Main {
     languageBox.selectLanguage(ltSupport.getLanguage());
   }
 
-  private void showOptions() {
+  private void showOptions() throws Exception {
     JLanguageTool langTool = ltSupport.getLanguageTool();
     List<Rule> rules = langTool.getAllRules();
     ConfigurationDialog configDialog = getCurrentConfigDialog();
@@ -333,7 +344,7 @@ public final class Main {
     frame.setTitle(sb.toString());
   }
 
-  private void createGUI() {
+  private void createGUI() throws Exception {
     loadRecentFiles();
     frame = new JFrame("LanguageTool " + JLanguageTool.VERSION);
 
@@ -347,8 +358,7 @@ public final class Main {
 
     frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     frame.addWindowListener(new CloseListener());
-    URL iconUrl = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(TRAY_ICON);
-    frame.setIconImage(new ImageIcon(iconUrl).getImage());
+    frame.setIconImage(getImageResource(TRAY_ICON));
 
     textArea = new JTextArea();
     textArea.setLineWrap(true);
@@ -584,7 +594,7 @@ public final class Main {
     return KeyStroke.getKeyStroke(keyEvent, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
   }
 
-  private JMenuBar createMenuBar() {
+  private JMenuBar createMenuBar() throws Exception {
     JMenuBar menuBar = new JMenuBar();
     JMenu fileMenu = new JMenu(getLabel("guiMenuFile"));
     fileMenu.setMnemonic(getMnemonic("guiMenuFile"));
@@ -717,7 +727,7 @@ public final class Main {
       if (config.getLookAndFeelName() != null) {
         lookAndFeelName = config.getLookAndFeelName();
       }
-    } catch (IOException ex) {
+    } catch (Exception ex) {
       // ignore
     }
     if (lookAndFeelName == null) {
@@ -769,12 +779,11 @@ public final class Main {
     textArea.setText(s);
   }
 
-  private void hideToTray() {
+  private void hideToTray() throws Exception {
     if (!isInTray) {
       SystemTray tray = SystemTray.getSystemTray();
       String iconPath = tray.getTrayIconSize().height > 16 ? TRAY_ICON : TRAY_SMALL_ICON;
-      URL iconUrl = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(iconPath);
-      Image img = Toolkit.getDefaultToolkit().getImage(iconUrl);
+      Image img = getImageResource(iconPath);
       PopupMenu popup = makePopupMenu();
       try {
         trayIcon = new TrayIcon(img, TRAY_TOOLTIP, popup);
@@ -800,6 +809,8 @@ public final class Main {
       public void run() {
         try {
           tagTextAndDisplayResults();
+        } catch(Exception e) {
+            Tools.showError(e);
         } finally {
           SwingUtilities.invokeLater(() -> unsetWaitCursor());
         }
@@ -807,7 +818,7 @@ public final class Main {
     }.start();
   }
 
-  private void quitOrHide() {
+  private void quitOrHide() throws Exception {
     if (closeHidesToTray) {
       hideToTray();
     } else {
@@ -816,12 +827,12 @@ public final class Main {
   }
 
   private void quit() {
-    stopServer();
     try {
+      stopServer();
       Configuration config = ltSupport.getConfig();
       config.setLanguage(ltSupport.getLanguage());
       config.saveConfiguration(ltSupport.getLanguage());
-    } catch (IOException e) {
+    } catch (Exception e) {
       Tools.showError(e);
     }
 
@@ -832,7 +843,7 @@ public final class Main {
     if(comp instanceof JSplitPane) {
       bean.setDividerLocation(((JSplitPane)comp).getDividerLocation());
     } else {
-      MainWindowStateBean old = 
+      MainWindowStateBean old =
         localStorage.loadProperty(GUI_STATE, MainWindowStateBean.class);
       bean.setDividerLocation(old.getDividerLocation());
     }
@@ -843,7 +854,7 @@ public final class Main {
     System.exit(0);
   }
 
-  private void setTrayIcon() {
+  private void setTrayIcon() throws Exception {
     if (trayIcon != null) {
       SystemTray tray = SystemTray.getSystemTray();
       boolean httpServerRunning = httpServer != null && httpServer.isRunning();
@@ -856,8 +867,7 @@ public final class Main {
         trayIcon.setToolTip(TRAY_TOOLTIP);
         iconPath = smallTray ? TRAY_SMALL_ICON : TRAY_ICON;
       }
-      URL iconUrl = JLanguageTool.getDataBroker().getFromResourceDirAsUrl(iconPath);
-      Image img = Toolkit.getDefaultToolkit().getImage(iconUrl);
+      Image img = getImageResource(iconPath);
       trayIcon.setImage(img);
     }
   }
@@ -901,7 +911,7 @@ public final class Main {
     return s;
   }
 
-  private boolean maybeStartServer() {
+  private boolean maybeStartServer() throws Exception {
     Configuration config = ltSupport.getConfig();
     if (config.getRunServer()) {
       try {
@@ -920,7 +930,7 @@ public final class Main {
     return httpServer != null && httpServer.isRunning();
   }
 
-  private void stopServer() {
+  private void stopServer() throws Exception {
     if (httpServer != null) {
       httpServer.stop();
       if (enableHttpServerItem != null) {
@@ -1032,7 +1042,7 @@ public final class Main {
     return odd;
   }
 
-  private void tagTextAndDisplayResults() {
+  private void tagTextAndDisplayResults() throws Exception {
     JLanguageTool langTool = ltSupport.getLanguageTool();
     // tag text
     List<String> sentences = langTool.sentenceTokenize(textArea.getText());
@@ -1246,7 +1256,7 @@ public final class Main {
           config.saveConfiguration(ltSupport.getLanguage());
           stopServer();
         }
-      } catch (IOException ex) {
+      } catch (Exception ex) {
         Tools.showError(ex);
       }
     }
@@ -1294,7 +1304,11 @@ public final class Main {
 
     @Override
     public void windowClosing(@SuppressWarnings("unused")WindowEvent e) {
-      quitOrHide();
+      try {
+          quitOrHide();
+      } catch(Exception ex) {
+          Tools.showError(ex);
+      }
     }
 
   }
@@ -1316,7 +1330,7 @@ public final class Main {
 
   class OpenAction extends AbstractAction {
 
-    OpenAction() {
+    OpenAction() throws Exception {
       super(getLabel("guiMenuOpen"));
       putValue(Action.SHORT_DESCRIPTION, messages.getString("guiMenuOpenShortDesc"));
       putValue(Action.LONG_DESCRIPTION, messages.getString("guiMenuOpenLongDesc"));
@@ -1334,7 +1348,7 @@ public final class Main {
 
   class SaveAction extends AbstractAction {
 
-    SaveAction() {
+    SaveAction() throws Exception {
       super(getLabel("guiMenuSave"));
       putValue(Action.SHORT_DESCRIPTION, messages.getString("guiMenuSaveShortDesc"));
       putValue(Action.LONG_DESCRIPTION, messages.getString("guiMenuSaveLongDesc"));
@@ -1352,7 +1366,7 @@ public final class Main {
 
   class SaveAsAction extends AbstractAction {
 
-    SaveAsAction() {
+    SaveAsAction() throws Exception {
       super(getLabel("guiMenuSaveAs"));
       putValue(Action.SHORT_DESCRIPTION, messages.getString("guiMenuSaveAsShortDesc"));
       putValue(Action.LONG_DESCRIPTION, messages.getString("guiMenuSaveAsLongDesc"));
@@ -1422,7 +1436,11 @@ public final class Main {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      showOptions();
+      try {
+          showOptions();
+      } catch(Exception ex) {
+          Tools.showError(ex);
+      }
     }
   }
 
@@ -1471,7 +1489,11 @@ public final class Main {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      hideToTray();
+      try {
+          hideToTray();
+      } catch(Exception ex) {
+          Tools.showError(ex);
+      }
     }
   }
 
@@ -1505,7 +1527,7 @@ public final class Main {
 
   class CheckAction extends AbstractAction {
 
-    CheckAction() {
+    CheckAction() throws Exception {
       super(getLabel("checkText"));
       putValue(Action.SHORT_DESCRIPTION, messages.getString("checkTextShortDesc"));
       putValue(Action.LONG_DESCRIPTION, messages.getString("checkTextLongDesc"));
@@ -1524,7 +1546,7 @@ public final class Main {
 
     private boolean enable;
 
-    AutoCheckAction(boolean initial) {
+    AutoCheckAction(boolean initial) throws Exception {
       super(getLabel("autoCheckText"));
       putValue(Action.SHORT_DESCRIPTION, messages.getString("autoCheckTextShortDesc"));
       putValue(Action.LONG_DESCRIPTION, messages.getString("autoCheckTextLongDesc"));
@@ -1545,7 +1567,7 @@ public final class Main {
 
   class ClearTextAction extends AbstractAction {
 
-    ClearTextAction() {
+    ClearTextAction() throws Exception {
       super(getLabel("clearText"));
       putValue(Action.SHORT_DESCRIPTION, messages.getString("clearText"));
       putValue(Action.SMALL_ICON, getImageIcon("sc_closedoc.png"));
@@ -1616,9 +1638,8 @@ public final class Main {
     }
   }
 
-  private ImageIcon getImageIcon(String filename) {
-    Image image = Toolkit.getDefaultToolkit().getImage(
-            JLanguageTool.getDataBroker().getFromResourceDirAsUrl(filename));
+  private ImageIcon getImageIcon(String filename) throws Exception {
+    Image image = getImageResource(filename);
     return new ImageIcon(image);
   }
 

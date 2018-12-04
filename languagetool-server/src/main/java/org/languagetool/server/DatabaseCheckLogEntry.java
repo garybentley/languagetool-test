@@ -66,8 +66,8 @@ class DatabaseCheckLogEntry extends DatabaseLogEntry {
     map.put("user_id", userId);
     map.put("textsize", textSize);
     map.put("matches", matches);
-    map.put("language", lang.getShortCodeWithCountryAndVariant());
-    map.put("language_detected", langDetected.getShortCodeWithCountryAndVariant());
+    map.put("language", lang.getLocale().toLanguageTag());
+    map.put("language_detected", langDetected.getLocale().toLanguageTag());
     map.put("computation_time", computationTime);
     map.put("text_session_id", textSessionId);
     map.put("server", server);

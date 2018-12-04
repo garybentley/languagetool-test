@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,8 +26,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -40,12 +38,13 @@ public class SimpleReplaceRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new SimpleReplaceRule(TestTools.getMessages("ca"));
-    langTool = new JLanguageTool(new Catalan());
+    Catalan lang = new Catalan();
+    rule = lang.createReplaceRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Això està força bé.")).length);
@@ -57,15 +56,15 @@ public class SimpleReplaceRuleTest {
     assertEquals("ordinari", matches[0].getSuggestedReplacements().get(0));
     assertEquals("transportista", matches[0].getSuggestedReplacements().get(1));
     assertEquals("vaga", matches[1].getSuggestedReplacements().get(0));
-    
+
     matches = rule.match(langTool.getAnalyzedSentence("EEUU"));
     assertEquals(1, matches.length);
     assertEquals("EUA", matches[0].getSuggestedReplacements().get(0));
-    
+
     matches = rule.match(langTool.getAnalyzedSentence("Aconteixements"));
     assertEquals(1, matches.length);
     assertEquals("Esdeveniments", matches[0].getSuggestedReplacements().get(0));
-    
+
   }
 
 }

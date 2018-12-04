@@ -75,6 +75,19 @@ public abstract class MorfologikSpellerRule extends SpellingCheckRule {
     //GTODO this.suggestionsOrderer = new SuggestionsOrderer(language, this);
   }
 
+  public MorfologikMultiSpeller getSpeller(int i) {
+      if (i == 1) {
+          return speller1;
+      }
+      if (i == 2) {
+          return speller2;
+      }
+      if (i == 3) {
+          return speller3;
+      }
+      throw new IllegalArgumentException(String.format("Speller index: %1$s is not supported, only i values in range 1-3 are supported."));
+  }
+
   public void setSuggestionsOrderer(SuggestionsOrderer orderer) {
       suggestionsOrderer = orderer;
   }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà i Font
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,7 +34,8 @@ import java.util.Scanner;
 class AccentuationDataLoader {
 
   private static final String FILE_ENCODING = "utf-8";
-
+/*
+GTODO Remove this class
   Map<String, AnalyzedTokenReadings> loadWords(String path) {
     final Map<String, AnalyzedTokenReadings> map = new HashMap<>();
     final InputStream inputStream = JLanguageTool.getDataBroker().getFromRulesDirAsStream(path);
@@ -56,5 +57,5 @@ class AccentuationDataLoader {
     }
     return map;
   }
-  
+  */
 }

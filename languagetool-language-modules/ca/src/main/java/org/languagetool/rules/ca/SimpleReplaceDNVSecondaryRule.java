@@ -18,11 +18,12 @@
  */
 package org.languagetool.rules.ca;
 
-import org.languagetool.Language;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.synthesis.Synthesizer;
 
-import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -37,11 +38,11 @@ import java.util.ResourceBundle;
  */
 public class SimpleReplaceDNVSecondaryRule extends AbstractSimpleReplaceLemmasRule {
 
-  public SimpleReplaceDNVSecondaryRule(final ResourceBundle messages, Language language) throws IOException {
-    super(messages, language);
+  public SimpleReplaceDNVSecondaryRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, Synthesizer synthesizer, CaseConverter caseCon) {
+    super(messages, wrongWords, synthesizer, caseCon);
     super.setCategory(Categories.REGIONALISMS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Style);
-    wrongLemmas = load("/ca/replace_dnv_secondary.txt", language.getUseDataBroker());
+    // GTODO wrongLemmas = load("/ca/replace_dnv_secondary.txt", language.getUseDataBroker());
   }
 
   @Override

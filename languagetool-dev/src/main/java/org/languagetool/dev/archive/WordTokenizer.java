@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,7 +35,7 @@ import org.languagetool.Languages;
  */
 public final class WordTokenizer {
 
-  public static void main(final String[] args) throws IOException {
+  public static void main(final String[] args) throws Exception {
     final WordTokenizer prg = new WordTokenizer();
     if (args.length != 1) {
       System.err.println("Please supply the language code as the only argument.");
@@ -44,9 +44,9 @@ public final class WordTokenizer {
     prg.run(args[0]);
   }
 
-  private void run(final String lang) throws IOException {
+  private void run(final String lang) throws Exception {
     JLanguageTool langTool = new JLanguageTool(
-            Languages.getLanguageForShortCode(lang));
+            Languages.getLanguage(lang));
     BufferedReader in = null;
     BufferedWriter out = null;
     try {

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Fred Kruse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,6 +35,8 @@ import org.languagetool.gui.Configuration;
 import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.Rule;
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.*;
+import org.languagetool.languagemodel.LanguageModel;
 
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.frame.XModel;
@@ -54,12 +56,12 @@ import com.sun.star.uno.XComponentContext;
  */
 public class MultiDocumentsHandler {
 
-  // LibreOffice (since 4.2.0) special tag for locale with variant 
+  // LibreOffice (since 4.2.0) special tag for locale with variant
   // e.g. language ="qlt" country="ES" variant="ca-ES-valencia":
   private static final String LIBREOFFICE_SPECIAL_LANGUAGE_TAG = "qlt";
 
   private static final boolean debugMode = false;   //  should be false except for testing
-  
+
   private JLanguageTool langTool = null;
   private Language docLanguage;
   private ResourceBundle MESSAGES;
@@ -67,7 +69,7 @@ public class MultiDocumentsHandler {
   private final File configDir;
   private final String configFile;
   private Configuration config;
-  
+
   private XComponentContext xContext;       //  The context of the document
   private List<SingleDocument> documents;   //  The List of LO documents to be checked
   private boolean proofIsRunning = false;   //  true if a check is almost running
@@ -88,9 +90,9 @@ public class MultiDocumentsHandler {
     this.xEventListener = xEventListener;
     documents = new ArrayList<>();
   }
-  
+
   ProofreadingResult getCheckResults(String paraText, Locale locale, ProofreadingResult paRes, int[] footnotePositions) {
-    
+
     if (!hasLocale(locale)) {
       return paRes;
     }
@@ -106,10 +108,10 @@ public class MultiDocumentsHandler {
     } else {
       proofIsRunning = true;  // main thread is running
     }
-    
+
     docNum = getNumDoc(paRes.aDocumentIdentifier);
     paRes = documents.get(docNum).getCheckResults(paraText, locale, paRes, footnotePositions, isParallelThread, langTool);
-    
+
     if(isParallelThread) {
       isParallelThread = false;
     } else {
@@ -117,42 +119,42 @@ public class MultiDocumentsHandler {
     }
     return paRes;
   }
-  
+
   /**
    *  Set all documents to be checked again
    */
   void setRecheck() {
     recheck = true;
   }
-  
+
   /**
    *  Set XComponentContext
    */
   void setComponentContext(XComponentContext xContext) {
     this.xContext = xContext;
   }
-  
+
   /**
    *  Set a document as closed
    */
   void setContextOfClosedDoc(XComponent context) {
     goneContext = context;
   }
-  
+
   /**
    *  get LanguageTool
    */
   JLanguageTool getLanguageTool() {
     return langTool;
   }
-  
+
   /**
    *  get Configuration
    */
   Configuration getConfiguration() {
     return config;
   }
-  
+
   /**
    * Allow xContext == null for test cases
    */
@@ -160,8 +162,8 @@ public class MultiDocumentsHandler {
     testMode = mode;
   }
 
-  
-  /** 
+
+  /**
    * Do a reset to check document again
    */
   boolean doResetCheck() {
@@ -171,7 +173,7 @@ public class MultiDocumentsHandler {
     return documents.get(docNum).doresetCheck();
   }
 
-  /** 
+  /**
    * Reset only changed paragraphs
    */
   void optimizeReset() {
@@ -179,7 +181,7 @@ public class MultiDocumentsHandler {
       documents.get(docNum).optimizeReset();
     }
   }
-  
+
   /**
    * Checks the language under the cursor. Used for opening the configuration dialog.
    * @return the language under the visible cursor
@@ -192,7 +194,7 @@ public class MultiDocumentsHandler {
     try {
       XModel model = UnoRuntime.queryInterface(XModel.class, xComponent);
       if(model == null) {
-        return Languages.getLanguageForShortCode("en-US");
+        return Languages.getLanguage(new java.util.Locale("en", "US"));
       }
       XTextViewCursorSupplier xViewCursorSupplier =
           UnoRuntime.queryInterface(XTextViewCursorSupplier.class, model.getCurrentController());
@@ -212,25 +214,25 @@ public class MultiDocumentsHandler {
       // whether the text is e.g. Khmer or Tamil (the only "complex text layout (CTL)" languages we support so far).
       // Thus we check the text itself:
       if (new KhmerDetector().isThisLanguage(xCursor.getText().getString())) {
-        return Languages.getLanguageForShortCode("km");
+        return Languages.getLanguage(new java.util.Locale("km"));
       }
       if (new TamilDetector().isThisLanguage(xCursor.getText().getString())) {
-        return Languages.getLanguageForShortCode("ta");
+        return Languages.getLanguage(new java.util.Locale("ta"));
       }
 
       Object obj = xCursorProps.getPropertyValue("CharLocale");
       if (obj == null) {
-        return Languages.getLanguageForShortCode("en-US");
+        return Languages.getLanguage(new java.util.Locale("en", "US"));
       }
       charLocale = (Locale) obj;
       boolean langIsSupported = false;
       for (Language element : Languages.get()) {
         if (charLocale.Language.equalsIgnoreCase(LIBREOFFICE_SPECIAL_LANGUAGE_TAG)
-            && element.getShortCodeWithCountryAndVariant().equalsIgnoreCase(charLocale.Variant)) {
+            && element.getLocale().toLanguageTag().equalsIgnoreCase(charLocale.Variant)) {
           langIsSupported = true;
           break;
         }
-        if (element.getShortCode().equals(charLocale.Language)) {
+        if (element.getLocale().getLanguage().equals(charLocale.Language)) {
           langIsSupported = true;
           break;
         }
@@ -255,10 +257,10 @@ public class MultiDocumentsHandler {
     try {
       for (Language element : Languages.get()) {
         if (locale.Language.equalsIgnoreCase(LIBREOFFICE_SPECIAL_LANGUAGE_TAG)
-            && element.getShortCodeWithCountryAndVariant().equals(locale.Variant)) {
+            && element.getLocale().toLanguageTag().equals(locale.Variant)) {
           return true;
         }
-        if (element.getShortCode().equals(locale.Language)) {
+        if (element.getLocale().getLanguage().equals(locale.Language)) {
           return true;
         }
       }
@@ -282,12 +284,12 @@ public class MultiDocumentsHandler {
   private Language getLanguage(Locale locale) {
     try {
       if (locale.Language.equalsIgnoreCase(LIBREOFFICE_SPECIAL_LANGUAGE_TAG)) {
-        return Languages.getLanguageForShortCode(locale.Variant);
+        return Languages.getLanguage(new java.util.Locale(locale.Variant));
       } else {
-        return Languages.getLanguageForShortCode(locale.Language + "-" + locale.Country);
+        return Languages.getLanguage(new java.util.Locale(locale.Language, locale.Country));
       }
     } catch (IllegalArgumentException e) {
-      return Languages.getLanguageForShortCode(locale.Language);
+      return Languages.getLanguage(new java.util.Locale(locale.Language));
     }
   }
 
@@ -316,7 +318,7 @@ public class MultiDocumentsHandler {
     }
     //  Add new document
     XComponent xComponent = null;
-    if (!testMode) {              //  xComponent == null for test cases 
+    if (!testMode) {              //  xComponent == null for test cases
       xComponent = OfficeTools.getCurrentComponent(xContext);
       if (xComponent == null) {
         MessageHandler.printToLogFile("Error: Document (ID: " + docID + ") has no XComponent -> Internal space can not be deleted when document disposes");
@@ -367,14 +369,16 @@ public class MultiDocumentsHandler {
     try {
       config = new Configuration(configDir, configFile, docLanguage);
       // not using MultiThreadedJLanguageTool here fixes "osl::Thread::Create failed", see https://bugs.documentfoundation.org/show_bug.cgi?id=90740:
-      langTool = new JLanguageTool(docLanguage, config.getMotherTongue(), null, 
+      langTool = new JLanguageTool(docLanguage, config.getMotherTongue(), null,
           new UserConfig(config.getConfigurableValues()));
       docLanguage.getSentenceTokenizer().setSingleLineBreaksMarksParagraph(true);
       File ngramDirectory = config.getNgramDirectory();
       if (ngramDirectory != null) {
-        File ngramLangDir = new File(config.getNgramDirectory(), docLanguage.getShortCode());
+        File ngramLangDir = new File(config.getNgramDirectory(), docLanguage.getLocale().getLanguage());
         if (ngramLangDir.exists()) {  // user might have ngram data only for some languages and that's okay
-          langTool.activateLanguageModelRules(ngramDirectory);
+          // GTODO Here we assume a Lucene language model.
+          LanguageModel langModel = DefaultResourceDataBroker.createLuceneLanguageModel(ngramLangDir.toPath());
+          langTool.activateLanguageModelRules(langModel);
         }
       }
       for (Rule rule : langTool.getAllActiveOfficeRules()) {

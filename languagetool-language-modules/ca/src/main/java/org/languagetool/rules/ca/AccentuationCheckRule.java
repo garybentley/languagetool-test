@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà i Font
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,11 +18,11 @@
  */
 package org.languagetool.rules.ca;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +39,7 @@ import org.languagetool.tools.StringTools;
  * This rule checks if a word without graphical accent and with a verb POS tag
  * should be a noun or an adjective with graphical accent. It uses two lists of
  * word pairs: verb-noun and verb-adjective.
- * 
+ *
  * @author Jaume Ortolà i Font
  */
 public class AccentuationCheckRule extends Rule {
@@ -80,14 +80,16 @@ public class AccentuationCheckRule extends Rule {
   private static final Pattern LOCUCIONS = Pattern.compile(".*LOC.*");
   private static final Pattern PRONOM_FEBLE = Pattern.compile("P0.{6}|PP3CN000|PP3NN000|PP3CP000|PP3CSD00"); // Exclosos: PP3..A00 (coincideixe amb articles determinats)
 
-  private static final Map<String, AnalyzedTokenReadings> relevantWords = 
-          new AccentuationDataLoader().loadWords("/ca/verb_senseaccent_nom_ambaccent.txt");
-  private static final Map<String, AnalyzedTokenReadings> relevantWords2 =
-          new AccentuationDataLoader().loadWords("/ca/verb_senseaccent_adj_ambaccent.txt");
+  private final Map<String, AnalyzedTokenReadings> relevantWords;
+          // GTODO new AccentuationDataLoader().loadWords("/ca/verb_senseaccent_nom_ambaccent.txt");
+  private final Map<String, AnalyzedTokenReadings> relevantWords2;
+          // GTODO new AccentuationDataLoader().loadWords("/ca/verb_senseaccent_adj_ambaccent.txt");
 
-  public AccentuationCheckRule(ResourceBundle messages) throws IOException {
+  public AccentuationCheckRule(ResourceBundle messages, Map<String, AnalyzedTokenReadings> relevantWords1, Map<String, AnalyzedTokenReadings> relevantWords2) {
     super.setCategory(Categories.MISC.getCategory(messages));
     setLocQualityIssueType(ITSIssueType.Misspelling);
+    this.relevantWords = Objects.requireNonNull(relevantWords1, "Relevant words 1 must be provided.");
+    this.relevantWords2 = Objects.requireNonNull(relevantWords2, "Relevant words 2 must be provided.");
   }
 
   @Override
@@ -104,7 +106,7 @@ public class AccentuationCheckRule extends Rule {
   public RuleMatch[] match(final AnalyzedSentence sentence) {
     final List<RuleMatch> ruleMatches = new ArrayList<>();
     final AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
-    for (int i = 1; i < tokens.length; i++) { 
+    for (int i = 1; i < tokens.length; i++) {
       // ignoring token 0, i.e. SENT_START
       final String token;
       if (i == 1) {
@@ -147,8 +149,8 @@ public class AccentuationCheckRule extends Rule {
           && !prevToken.startsWith("-")) {
         continue;
       }
-      
-      
+
+
       String replacement = null;
       final Matcher mPreposicioDE = PREPOSICIO_DE.matcher(nextToken);
       final Matcher mExcepcionsDE = EXCEPCIONS_DARRERE_DE.matcher(nextNextToken);
@@ -165,22 +167,22 @@ public class AccentuationCheckRule extends Rule {
             && !matchPostagRegexp(tokens[i], INFINITIU)) {
           replacement = relevantWords.get(token).getToken();
         }
-        else if (i > 2 && tokens[i - 2].hasPosTag("SPS00") 
+        else if (i > 2 && tokens[i - 2].hasPosTag("SPS00")
             && !tokens[i - 2].hasPosTag("RG")
             && !matchPostagRegexp(tokens[i - 2], DETERMINANT)
-            && (matchPostagRegexp(tokens[i - 1], DETERMINANT) 
-                || mArticleELMS.matches() || mArticleELFS.matches() 
+            && (matchPostagRegexp(tokens[i - 1], DETERMINANT)
+                || mArticleELMS.matches() || mArticleELFS.matches()
                 || mArticleELMP.matches() || mArticleELFP.matches() )
             && !matchPostagRegexp(tokens[i], INFINITIU)) {
           replacement = relevantWords.get(token).getToken();
         }
         // aquestes renuncies
-        else if (((matchPostagRegexp(tokens[i - 1], DETERMINANT_MS) && matchPostagRegexp(relevantWords.get(token), NOM_MS) 
+        else if (((matchPostagRegexp(tokens[i - 1], DETERMINANT_MS) && matchPostagRegexp(relevantWords.get(token), NOM_MS)
               && !token.equals("cantar"))
             || (matchPostagRegexp(tokens[i - 1], DETERMINANT_MP) && matchPostagRegexp(relevantWords.get(token), NOM_MP))
             || (matchPostagRegexp(tokens[i - 1], DETERMINANT_FS) && matchPostagRegexp(relevantWords.get(token), NOM_FS)
-                && !token.equals("venia") && !token.equals("tenia") && !token.equals("continua") && !token.equals("genera") 
-                && !token.equals("faria")) 
+                && !token.equals("venia") && !token.equals("tenia") && !token.equals("continua") && !token.equals("genera")
+                && !token.equals("faria"))
             || (matchPostagRegexp(tokens[i - 1], DETERMINANT_FP) && matchPostagRegexp(relevantWords.get(token), NOM_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -189,7 +191,7 @@ public class AccentuationCheckRule extends Rule {
             && matchPostagRegexp(tokens[i - 2], VERB_CONJUGAT)
             && ((matchPostagRegexp(tokens[i - 1], DETERMINANT_MS) && matchPostagRegexp(relevantWords.get(token), NOM_MS))
                 || (matchPostagRegexp(tokens[i - 1], DETERMINANT_MP) && matchPostagRegexp(relevantWords.get(token), NOM_MP))
-                || (matchPostagRegexp(tokens[i - 1], DETERMINANT_FS) && matchPostagRegexp(relevantWords.get(token), NOM_FS)) 
+                || (matchPostagRegexp(tokens[i - 1], DETERMINANT_FS) && matchPostagRegexp(relevantWords.get(token), NOM_FS))
                 || (matchPostagRegexp(tokens[i - 1], DETERMINANT_FP) && matchPostagRegexp(relevantWords.get(token), NOM_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -198,7 +200,7 @@ public class AccentuationCheckRule extends Rule {
             && matchPostagRegexp(tokens[i - 2], VERB_CONJUGAT)
             && ((mArticleELMS.matches() && matchPostagRegexp(relevantWords.get(token), NOM_MS))
                 || (mArticleELMP.matches() && matchPostagRegexp(relevantWords.get(token), NOM_MP))
-                || (mArticleELFS.matches() && matchPostagRegexp(relevantWords.get(token), NOM_FS)) 
+                || (mArticleELFS.matches() && matchPostagRegexp(relevantWords.get(token), NOM_FS))
                 || (mArticleELFP.matches() && matchPostagRegexp(relevantWords.get(token),NOM_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -253,14 +255,14 @@ public class AccentuationCheckRule extends Rule {
             && (i < tokens.length - 1)
             && ((matchPostagRegexp(relevantWords.get(token), NOM_MS) && matchPostagRegexp(tokens[i + 1], ADJECTIU_MS))
                 || (matchPostagRegexp(relevantWords.get(token), NOM_FS) && matchPostagRegexp(tokens[i + 1], ADJECTIU_FS))
-                || (matchPostagRegexp(relevantWords.get(token), NOM_MP) && matchPostagRegexp(tokens[i + 1], ADJECTIU_MP)) 
+                || (matchPostagRegexp(relevantWords.get(token), NOM_MP) && matchPostagRegexp(tokens[i + 1], ADJECTIU_MP))
                 || (matchPostagRegexp(relevantWords.get(token), NOM_FP) && matchPostagRegexp(tokens[i + 1], ADJECTIU_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
         // les seves contraries
         else if ((matchPostagRegexp(relevantWords.get(token), NOM_MS) && matchPostagRegexp(tokens[i - 1], ADJECTIU_MS)
               && !matchPostagRegexp(tokens[i], VERB_3S) && !matchPostagRegexp(tokens[i], GRUP_VERBAL))
-            || (matchPostagRegexp(relevantWords.get(token), NOM_FS) && matchPostagRegexp(tokens[i - 1], ADJECTIU_FS) 
+            || (matchPostagRegexp(relevantWords.get(token), NOM_FS) && matchPostagRegexp(tokens[i - 1], ADJECTIU_FS)
               && !matchPostagRegexp(tokens[i], VERB_3S))
             || (matchPostagRegexp(relevantWords.get(token), NOM_MP) && matchPostagRegexp(tokens[i - 1], ADJECTIU_MP))
             || (matchPostagRegexp(relevantWords.get(token), NOM_FP) && matchPostagRegexp(tokens[i - 1], ADJECTIU_FP))) {
@@ -282,7 +284,7 @@ public class AccentuationCheckRule extends Rule {
         else if (nextToken.equals("que")
             && ((mArticleELMS.matches() && matchPostagRegexp(relevantWords.get(token), NOM_MS))
                 || (mArticleELFS.matches() && matchPostagRegexp(relevantWords.get(token), NOM_FS))
-                || (mArticleELMP.matches() && matchPostagRegexp(relevantWords.get(token), NOM_MP)) 
+                || (mArticleELMP.matches() && matchPostagRegexp(relevantWords.get(token), NOM_MP))
                 || (mArticleELFP.matches() && matchPostagRegexp(relevantWords.get(token), NOM_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -292,11 +294,11 @@ public class AccentuationCheckRule extends Rule {
                 && !token.equals("tenies") && !token.equals("continua") && !token.equals("continues")
                 && !token.equals("faria") && !token.equals("faries") && !token.equals("genera")
                 && !token.equals("figuri")
-            && i>2 
-            && tokens[i - 2].hasPosTag("SPS00") && !tokens[i - 2].hasPosTag("RG")           
+            && i>2
+            && tokens[i - 2].hasPosTag("SPS00") && !tokens[i - 2].hasPosTag("RG")
             && ((matchPostagRegexp(relevantWords.get(token), NOM_MS) && matchPostagRegexp(tokens[i - 1], ADJECTIU_MS))
                 || (matchPostagRegexp(relevantWords.get(token), NOM_FS) && matchPostagRegexp(tokens[i - 1], ADJECTIU_FS))
-                || (matchPostagRegexp(relevantWords.get(token), NOM_MP) && matchPostagRegexp(tokens[i - 1], ADJECTIU_MP)) 
+                || (matchPostagRegexp(relevantWords.get(token), NOM_MP) && matchPostagRegexp(tokens[i - 1], ADJECTIU_MP))
                 || (matchPostagRegexp(relevantWords.get(token), NOM_FP) && matchPostagRegexp(tokens[i - 1], ADJECTIU_FP)))) {
           replacement = relevantWords.get(token).getToken();
         }
@@ -306,9 +308,9 @@ public class AccentuationCheckRule extends Rule {
       if (isRelevantWord2 && !matchPostagRegexp(tokens[i], GN) && !matchPostagRegexp(tokens[i], LOCUCIONS)) {
         // de manera obvia, circumstàncies extraordinaries.
         if ((matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MS) && matchPostagRegexp(tokens[i - 1], NOM_MS)
-              && !tokens[i - 1].hasPosTag("_GN_FS") && matchPostagRegexp(tokens[i], VERB_CONJUGAT) 
+              && !tokens[i - 1].hasPosTag("_GN_FS") && matchPostagRegexp(tokens[i], VERB_CONJUGAT)
               && !matchPostagRegexp(tokens[i], VERB_3S))
-            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FS) && prevPrevToken.equalsIgnoreCase("de") 
+            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FS) && prevPrevToken.equalsIgnoreCase("de")
                 && (prevToken.equals("manera") || prevToken.equals("forma")))
             || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MP) && matchPostagRegexp(tokens[i - 1], NOM_MP))
             || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FP) && matchPostagRegexp(tokens[i - 1], NOM_FP))) {
@@ -318,13 +320,13 @@ public class AccentuationCheckRule extends Rule {
         else if ((i < tokens.length - 1)
             && !prevToken.equals("que")
             && !matchPostagRegexp(tokens[i - 1], NOT_IN_PREV_TOKEN)
-            && ((matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MS) && matchPostagRegexp(tokens[i + 1], NOM_MS) 
+            && ((matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MS) && matchPostagRegexp(tokens[i + 1], NOM_MS)
                 && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_MS))
-            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FS) && matchPostagRegexp(tokens[i + 1], NOM_FS) 
+            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FS) && matchPostagRegexp(tokens[i + 1], NOM_FS)
                 && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_FS))
-            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MP) && matchPostagRegexp(tokens[i + 1], NOM_MP) 
-                && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_MP)) 
-            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FP) && matchPostagRegexp(tokens[i + 1], NOM_FP) 
+            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MP) && matchPostagRegexp(tokens[i + 1], NOM_MP)
+                && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_MP))
+            || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FP) && matchPostagRegexp(tokens[i + 1], NOM_FP)
                 && matchPostagRegexp(tokens[i - 1], BEFORE_ADJECTIVE_FP)))) {
           replacement = relevantWords2.get(token).getToken();
         }
@@ -335,7 +337,7 @@ public class AccentuationCheckRule extends Rule {
             || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FS)
                 && matchPostagRegexp(tokens[i + 1], NOM_FS) && mArticleELFS.matches())
             || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_MP)
-                && matchPostagRegexp(tokens[i + 1], NOM_MP) && mArticleELMP.matches()) 
+                && matchPostagRegexp(tokens[i + 1], NOM_MP) && mArticleELMP.matches())
             || (matchPostagRegexp(relevantWords2.get(token), ADJECTIU_FP)
                 && matchPostagRegexp(tokens[i + 1], NOM_FP) && mArticleELFP.matches()))) {
           replacement = relevantWords2.get(token).getToken();

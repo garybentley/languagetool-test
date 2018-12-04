@@ -31,9 +31,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TatoebaSentenceSourceTest {
-  
+
   @Test
-  public void testTatoebaSource() {
+  public void testTatoebaSource() throws Exception {
     InputStream stream = WikipediaSentenceSourceTest.class.getResourceAsStream("/org/languagetool/dev/wikipedia/tatoeba-en.txt");
     TatoebaSentenceSource source = new TatoebaSentenceSource(stream, new English());
     assertTrue(source.hasNext());
@@ -44,7 +44,7 @@ public class TatoebaSentenceSourceTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testTatoebaSourceInvalidInput() throws UnsupportedEncodingException {
+  public void testTatoebaSourceInvalidInput() throws UnsupportedEncodingException, Exception {
     ByteArrayInputStream stream = new ByteArrayInputStream("just a text".getBytes("utf-8"));
     TatoebaSentenceSource source = new TatoebaSentenceSource(stream, new English());
     source.hasNext();

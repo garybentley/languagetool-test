@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -40,12 +40,13 @@ public class SimpleReplaceDNVSecondaryRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new SimpleReplaceDNVSecondaryRule(TestTools.getMessages("ca"), new ValencianCatalan());
-    langTool = new JLanguageTool(new ValencianCatalan());
+    ValencianCatalan lang = new ValencianCatalan();
+    rule = lang.createDNVSecondaryRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Estan dispostes, estan indisposts, dispost a tot.")).length);
@@ -54,8 +55,7 @@ public class SimpleReplaceDNVSecondaryRuleTest {
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence("S'ha dispost a fer-ho."));
     assertEquals(1, matches.length);
     assertEquals("disposat", matches[0].getSuggestedReplacements().get(0));
-    
+
   }
 
 }
-

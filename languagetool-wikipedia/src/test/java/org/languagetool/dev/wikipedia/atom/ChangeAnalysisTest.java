@@ -19,6 +19,7 @@
 package org.languagetool.dev.wikipedia.atom;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.rules.RuleMatch;
@@ -31,9 +32,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class ChangeAnalysisTest {
-  
-  private static final Language LANGUAGE = Languages.getLanguageForShortCode("de");
-  
+
+  private Language LANGUAGE;
+
+  @Before
+  public void setUp() {
+      LANGUAGE = Languages.getLanguage("de");
+  }
+
   @Test
   public void testAdd() {
     List<WikipediaRuleMatch> oldMatches = makeMatches(1, 2);
@@ -43,7 +49,7 @@ public class ChangeAnalysisTest {
     assertThat(analysis.getAddedMatches().get(0).getRule().getId(), is("ID_3"));
     assertThat(analysis.getRemovedMatches().size(), is(0));
   }
-  
+
   @Test
   public void testRemove() {
     List<WikipediaRuleMatch> oldMatches = makeMatches(1, 2, 3);
@@ -53,7 +59,7 @@ public class ChangeAnalysisTest {
     assertThat(analysis.getRemovedMatches().size(), is(1));
     assertThat(analysis.getRemovedMatches().get(0).getRule().getId(), is("ID_3"));
   }
-  
+
   @Test
   public void testMove() {
     List<WikipediaRuleMatch> oldMatches = makeMatches(1, 2, 3);
@@ -64,7 +70,7 @@ public class ChangeAnalysisTest {
     assertThat(analysis.getRemovedMatches().size(), is(1));
     assertThat(analysis.getRemovedMatches().get(0).getRule().getId(), is("ID_2"));
   }
-  
+
   private List<WikipediaRuleMatch> makeMatches(int... ids) {
     List<WikipediaRuleMatch> matches = new ArrayList<>();
     for (int id : ids) {
@@ -74,5 +80,5 @@ public class ChangeAnalysisTest {
     }
     return matches;
   }
-  
+
 }

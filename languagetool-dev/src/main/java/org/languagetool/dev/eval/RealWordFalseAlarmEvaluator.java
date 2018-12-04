@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,6 +27,7 @@ import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.*;
 import org.languagetool.rules.en.EnglishConfusionProbabilityRule;
 import org.languagetool.rules.ngrams.ConfusionProbabilityRule;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,37 +48,43 @@ class RealWordFalseAlarmEvaluator {
   private static final int MIN_SENTENCES = 0;
   // maximum error rate of a homophone in homophones-info.txt, items with a larger error rate will be ignored (eval mode only):
   private static final float MAX_ERROR_RATE = 10;
-  
+
   private final JLanguageTool langTool;
   private final ConfusionProbabilityRule confusionRule;
   private final Map<String,List<ConfusionSet>> confusionSets;
   private final LanguageModel languageModel;
-  
+
   private int globalSentenceCount;
   private int globalRuleMatches;
 
-  RealWordFalseAlarmEvaluator(File languageModelIndexDir) throws IOException {
+  RealWordFalseAlarmEvaluator(File languageModelIndexDir) throws Exception {
+      BritishEnglish lang = new BritishEnglish();
+      confusionSets = lang.getUseDataBroker().getConfusionSets();
+/*
     try (InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/en/confusion_sets.txt")) {
       ConfusionSetLoader confusionSetLoader = new ConfusionSetLoader();
       confusionSets = confusionSetLoader.loadConfusionSet(inputStream);
+
     }
-    langTool = new JLanguageTool(new BritishEnglish());
+    */
+    langTool = new JLanguageTool(lang);
     List<Rule> rules = langTool.getAllActiveRules();
     for (Rule rule : rules) {
       langTool.disableRule(rule.getId());
     }
-    languageModel = new LuceneLanguageModel(languageModelIndexDir);
-    confusionRule = new EnglishConfusionProbabilityRule(JLanguageTool.getMessageBundle(), languageModel, new English());
+
+    languageModel = DefaultResourceDataBroker.createLuceneLanguageModel(languageModelIndexDir.toPath().toRealPath());
+    confusionRule = lang.createConfusionProbabilityRule(JLanguageTool.getMessageBundle(), languageModel);
     langTool.addRule(confusionRule);
   }
-  
+
   void close() {
     if (languageModel != null) {
       languageModel.close();
     }
   }
 
-  void run(File dir) throws IOException {
+  void run(File dir) throws Exception {
     if (EVAL_MODE) {
       System.out.println("Running in eval mode, no 'DATA' lines will be printed, only a subset of the homophones will be used.");
     } else {
@@ -105,7 +112,7 @@ class RealWordFalseAlarmEvaluator {
     System.out.printf("%.2f%% of sentences have a match\n", percentage);
   }
 
-  private void checkLines(List<String> lines, String name) throws IOException {
+  private void checkLines(List<String> lines, String name) throws Exception {
     List<ConfusionSet> subConfusionSet = confusionSets.get(name);
     if (subConfusionSet == null) {
       System.out.println("Skipping '" + name + "', homophone not loaded");
@@ -147,7 +154,7 @@ class RealWordFalseAlarmEvaluator {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + RealWordFalseAlarmEvaluator.class.getSimpleName() + " <languageModel> <sentenceDirectory>");
       System.out.println("   <languageModel> is a Lucene index with ngram frequency information");

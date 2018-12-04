@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,7 +32,7 @@ public class RealWordCorpusEvaluatorTest {
 
   @Ignore("requires local ngram index")
   @Test
-  public void testCheck() throws IOException {
+  public void testCheck() throws Exception {
     RealWordCorpusEvaluator evaluator = new RealWordCorpusEvaluator(new File("/data/google-ngram-index/"));
     URL errors = RealWordCorpusEvaluatorTest.class.getResource("/org/languagetool/dev/eval");
     evaluator.run(new File(errors.getFile()));

@@ -39,7 +39,7 @@ class V2TextChecker extends TextChecker {
 
   private static final String JSON_CONTENT_TYPE = "application/json";
 
-  V2TextChecker(HTTPServerConfig config, boolean internalServer, Queue<Runnable> workQueue, RequestCounter reqCounter) {
+  V2TextChecker(HTTPServerConfig config, boolean internalServer, Queue<Runnable> workQueue, RequestCounter reqCounter) throws Exception {
     super(config, internalServer, workQueue, reqCounter);
   }
 
@@ -97,7 +97,7 @@ class V2TextChecker extends TextChecker {
       throw new IllegalArgumentException("You specified 'autodetect' but automatic language detection is now activated with 'language=auto' in v2 of the API");
     }
   }
-  
+
   @Override
   @NotNull
   protected DetectedLanguage getLanguage(String text, Map<String, String> parameters, List<String> preferredVariants) {
@@ -107,7 +107,7 @@ class V2TextChecker extends TextChecker {
     if (getLanguageAutoDetect(parameters)) {
       givenLang = detectedLang;
     } else {
-      givenLang = Languages.getLanguageForShortCode(langParam);
+      givenLang = Languages.getLanguage(langParam);
     }
     return new DetectedLanguage(givenLang, detectedLang);
   }

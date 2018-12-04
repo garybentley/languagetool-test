@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -53,7 +53,7 @@ class GuiLangConfigPanel extends JPanel implements SavablePanel, ItemListener {
     applyComponentOrientation(
       ComponentOrientation.getOrientation(Locale.getDefault()));
     setBorder(BorderFactory.createTitledBorder(messages.getString("guiLanguage")));
-    this.messages = messages;    
+    this.messages = messages;
     this.storage = storage;
     system = new LanguageAdapter(messages.getString("guiLanguageSystem"));
     //create a ComboBox with flags, do not include hidden languages,
@@ -77,7 +77,7 @@ class GuiLangConfigPanel extends JPanel implements SavablePanel, ItemListener {
     if (e.getStateChange() == ItemEvent.SELECTED) {
       guiLang = (LanguageAdapter) e.getItem();
       needsRestartLabel.setText(messages.getString("quiLanguageNeedsRestart"));
-      needsRestartLabel.setForeground(Color.red);      
+      needsRestartLabel.setForeground(Color.red);
     }
   }
 
@@ -93,10 +93,10 @@ class GuiLangConfigPanel extends JPanel implements SavablePanel, ItemListener {
     if (guiLang == null) {
       return;
     }
-    needsRestart = true;    
+    needsRestart = true;
     if (guiLang.getLanguage() != null) {
       storage.saveProperty("gui.locale", new LocaleBean(
-              guiLang.getLanguage().getLocaleWithCountryAndVariant()));
+              guiLang.getLanguage().getLocale()));
     } else {
       storage.saveProperty("gui.locale", null);
     }
@@ -106,11 +106,11 @@ class GuiLangConfigPanel extends JPanel implements SavablePanel, ItemListener {
     guiLang = null;
     if (!needsRestart) {
       needsRestartLabel.setText("");
-    }    
+    }
     LocaleBean lang = storage.loadProperty("gui.locale", LocaleBean.class);
     if (lang != null) {
       Locale l = lang.asLocale();
-      languageBox.selectLanguage(Languages.getLanguageForLocale(l));
+      languageBox.selectLanguage(Languages.getLanguage(l));
     } else {
       languageBox.setSelectedItem(system);
     }

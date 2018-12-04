@@ -51,7 +51,7 @@ public class DatabaseLoggerTest {
       DatabaseAccess.createAndFillTestTables();
 
       HTTPServer server = new HTTPServer(config);
-      Language en = Languages.getLanguageForShortCode("en-US");
+      Language en = Languages.getLanguage("en-US");
       try {
         server.run();
         check(en, "This is a test.", UserDictTest.USERNAME1, UserDictTest.API_KEY1, null, null);
@@ -167,7 +167,7 @@ public class DatabaseLoggerTest {
   }
 
   private String check(Language lang, String text, String username, String apiKey, String textSessionId, String agent) throws IOException {
-    String urlOptions = "?language=" + lang.getShortCodeWithCountryAndVariant();
+    String urlOptions = "?language=" + lang.getLocale().toLanguageTag();
     urlOptions += "&text=" + URLEncoder.encode(text, "UTF-8");
     if (username != null && apiKey != null) {
       urlOptions += "&username=" + URLEncoder.encode(username, "UTF-8");

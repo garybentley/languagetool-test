@@ -31,19 +31,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class WikipediaSentenceSourceTest {
-  
+
   @Test
-  public void testWikipediaSource() throws XMLStreamException, IOException {
+  public void testWikipediaSource() throws XMLStreamException, Exception {
     InputStream stream = WikipediaSentenceSourceTest.class.getResourceAsStream("/org/languagetool/dev/wikipedia/wikipedia-en.xml");
     WikipediaSentenceSource source = new WikipediaSentenceSource(stream, new English());
     assertTrue(source.hasNext());
     assertThat(source.next().getText(), is("This is the first document."));
     assertThat(source.next().getText(), is("It has three sentences."));
     assertThat(source.next().getText(), is("Here's the last sentence."));
-    
+
     assertThat(source.next().getText(), is("This is the second document."));
     assertThat(source.next().getText(), is("It has two sentences."));
     assertFalse(source.hasNext());
   }
-  
+
 }

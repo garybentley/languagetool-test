@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -78,6 +78,8 @@ class XmlUsageCounter {
     XmlUsageCounter counter = new XmlUsageCounter();
     Set<String> countedFiles = new HashSet<>();
     for (Language language : Languages.get()) {
+        /*
+        GTODO Removed for now since rule files no longer apply
       List<String> ruleFileNames = language.getRuleFileNames();
       //comment in this to count disambiguation files instead:
       //List<String> ruleFileNames = Collections.singletonList(ResourceDataBroker.RESOURCE_DIR + "/" +
@@ -95,6 +97,7 @@ class XmlUsageCounter {
         counter.countElementsAndAttributes(ruleStream);
         countedFiles.add(ruleFileName);
       }
+      */
     }
     counter.printResult();
   }

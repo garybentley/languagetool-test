@@ -47,13 +47,14 @@ class ExampleSentenceProvider {
     for (Language language : Languages.get()) {
       try {
         initExampleSentences(language);
-      } catch (IOException e) {
+      } catch (Exception e) {
+        // GTODO This will bring the entire testing to a screeching halt...
         throw new RuntimeException(e);
       }
     }
   }
 
-  private void initExampleSentences(Language language) throws IOException {
+  private void initExampleSentences(Language language) throws Exception {
     JLanguageTool lt = new JLanguageTool(language);
     List<Rule> rules = lt.getAllActiveRules();
     List<ExampleSentence> sentences = new ArrayList<>();

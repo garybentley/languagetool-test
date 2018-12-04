@@ -19,16 +19,15 @@
 package org.languagetool.rules.de;
 
 import org.junit.Test;
-import org.languagetool.language.German;
+import org.languagetool.language.SimpleGerman;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class SimpleGermanPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest(new German());
+  public void testRules() throws Exception {
+    SimpleGerman lang = new SimpleGerman();
+    runTestForLanguage(lang);
   }
 
 }

@@ -29,17 +29,17 @@ import static org.junit.Assert.assertEquals;
 public class RuleLinkTest {
 
   @Test
-  public void testBuildDeactivationLink() {
-    Language language = new English();
-    RuleLink ruleLink = RuleLink.buildDeactivationLink(new WordRepeatRule(TestTools.getMessages(language.getShortCode()), language));
+  public void testBuildDeactivationLink() throws Exception {
+    English language = new English();
+    RuleLink ruleLink = RuleLink.buildDeactivationLink(language.createWordRepeatRule(TestTools.getMessages(language.getLocale().getLanguage())));
     assertEquals("WORD_REPEAT_RULE", ruleLink.getId());
     assertEquals("http://languagetool.org/deactivate/WORD_REPEAT_RULE", ruleLink.toString());
   }
 
   @Test
-  public void testBuildReactivationLink() {
-    Language language = new English();
-    RuleLink ruleLink = RuleLink.buildReactivationLink(new WordRepeatRule(TestTools.getMessages(language.getShortCode()), language));
+  public void testBuildReactivationLink() throws Exception {
+    English language = new English();
+    RuleLink ruleLink = RuleLink.buildReactivationLink(language.createWordRepeatRule(TestTools.getMessages(language.getLocale().getLanguage())));
     assertEquals("WORD_REPEAT_RULE", ruleLink.getId());
     assertEquals("http://languagetool.org/reactivate/WORD_REPEAT_RULE", ruleLink.toString());
   }

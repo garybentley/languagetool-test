@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -58,7 +58,7 @@ public final class CommandLineTools {
    * @param contents Text to tag.
    * @param lt LanguageTool instance
    */
-  public static void tagText(String contents, JLanguageTool lt) throws IOException {
+  public static void tagText(String contents, JLanguageTool lt) throws Exception {
     AnalyzedSentence analyzedText;
     List<String> sentences = lt.sentenceTokenize(contents);
     for (String sentence : sentences) {
@@ -67,17 +67,17 @@ public final class CommandLineTools {
     }
   }
 
-  public static int checkText(String contents, JLanguageTool lt) throws IOException {
+  public static int checkText(String contents, JLanguageTool lt) throws Exception {
     return checkText(contents, lt, false, false, -1, 0, 0, StringTools.ApiPrintMode.NORMAL_API, false, Collections.<String>emptyList());
   }
 
   public static int checkText(String contents, JLanguageTool lt,
-                              boolean isXmlFormat, boolean isJsonFormat, int lineOffset) throws IOException {
+                              boolean isXmlFormat, boolean isJsonFormat, int lineOffset) throws Exception {
     return checkText(contents, lt, isXmlFormat, isJsonFormat, -1, lineOffset, 0, StringTools.ApiPrintMode.NORMAL_API, false, Collections.<String>emptyList());
   }
-  
+
   public static int checkText(String contents, JLanguageTool lt,
-          boolean isXmlFormat, boolean isJsonFormat, int lineOffset, boolean listUnknownWords) throws IOException {
+          boolean isXmlFormat, boolean isJsonFormat, int lineOffset, boolean listUnknownWords) throws Exception {
     return checkText(contents, lt, isXmlFormat, isJsonFormat, -1, lineOffset, 0, StringTools.ApiPrintMode.NORMAL_API, listUnknownWords, Collections.<String>emptyList());
 }
 
@@ -97,7 +97,7 @@ public final class CommandLineTools {
   public static int checkText(String contents, JLanguageTool lt,
                               boolean isXmlFormat, boolean isJsonFormat, int contextSize, int lineOffset,
                               int prevMatches, StringTools.ApiPrintMode apiMode,
-                              boolean listUnknownWords, List<String> unknownWords) throws IOException {
+                              boolean listUnknownWords, List<String> unknownWords) throws Exception {
     if (contextSize == -1) {
       contextSize = DEFAULT_CONTEXT_SIZE;
     }
@@ -119,7 +119,7 @@ public final class CommandLineTools {
       out.print(xml);
     } else if (isJsonFormat) {
       RuleMatchesAsJsonSerializer serializer = new RuleMatchesAsJsonSerializer();
-      String json = serializer.ruleMatchesToJson(ruleMatches, contents, contextSize, lt.getLanguage(), null);      
+      String json = serializer.ruleMatchesToJson(ruleMatches, contents, contextSize, lt.getLanguage(), null);
       PrintStream out = new PrintStream(System.out, true, "UTF-8");
       out.print(json);
     } else {
@@ -196,7 +196,7 @@ public final class CommandLineTools {
   }
 
   /**
-   * Checks the bilingual input (bitext) and displays the output (considering the target 
+   * Checks the bilingual input (bitext) and displays the output (considering the target
    * language) in API format or in the simple text format.
    *
    * NOTE: the positions returned by the rule matches are adjusted
@@ -212,7 +212,7 @@ public final class CommandLineTools {
   public static int checkBitext(BitextReader reader,
                                 JLanguageTool srcLt, JLanguageTool trgLt,
                                 List<BitextRule> bRules,
-                                boolean isXmlFormat) throws IOException {
+                                boolean isXmlFormat) throws Exception {
     long startTime = System.currentTimeMillis();
     int contextSize = DEFAULT_CONTEXT_SIZE;
     List<RuleMatch> ruleMatches = new ArrayList<>();
@@ -264,7 +264,7 @@ public final class CommandLineTools {
    * @param lt instance of LanguageTool
    */
   public static void profileRulesOnText(String contents,
-                                        JLanguageTool lt) throws IOException {
+                                        JLanguageTool lt) throws Exception {
     long[] workTime = new long[10];
     List<Rule> rules = lt.getAllActiveRules();
     int ruleCount = rules.size();
@@ -318,7 +318,7 @@ public final class CommandLineTools {
    */
   public static void correctBitext(BitextReader reader,
                                    JLanguageTool sourceLt, JLanguageTool targetLt,
-                                   List<BitextRule> bRules) throws IOException {
+                                   List<BitextRule> bRules) throws Exception {
     for (StringPair srcAndTrg : reader) {
       List<RuleMatch> curMatches = Tools.checkBitext(
               srcAndTrg.getSource(), srcAndTrg.getTarget(),
@@ -327,7 +327,7 @@ public final class CommandLineTools {
       for (RuleMatch thisMatch : curMatches) {
         fixedMatches.add(
                 targetLt.adjustRuleMatchPos(thisMatch,
-                        0, //don't need to adjust at all, we have zero offset related to trg sentence 
+                        0, //don't need to adjust at all, we have zero offset related to trg sentence
                         reader.getTargetColumnCount(),
                         reader.getLineCount(),
                         reader.getCurrentLine(), null));

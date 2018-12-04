@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -30,12 +30,12 @@ import org.languagetool.*;
 
 /**
  * Tag text and display only POS tags to create an n-gram language model.
- * 
+ *
  * @author Marcin Milkowski
  */
 public final class POSTagLanguageModel {
 
-  public static void main(final String[] args) throws IOException {
+  public static void main(final String[] args) throws Exception {
     if (args.length == 1) {
       final Language language = getLanguageOrExit(args[0]);
       final JLanguageTool lt = new JLanguageTool(language, null);
@@ -50,8 +50,8 @@ public final class POSTagLanguageModel {
     boolean foundLanguage = false;
     final List<String> supportedLanguages = new ArrayList<>();
     for (final Language tmpLang : Languages.get()) {
-      supportedLanguages.add(tmpLang.getShortCode());
-      if (lang.equals(tmpLang.getShortCode())) {
+      supportedLanguages.add(tmpLang.getLocale().getLanguage());
+      if (lang.equals(tmpLang.getLocale().getLanguage())) {
         language = tmpLang;
         foundLanguage = true;
         break;
@@ -69,7 +69,7 @@ public final class POSTagLanguageModel {
     System.out.println("Usage: java org.languagetool.dev.archive.POSTagLanguageModel <language>");
   }
 
-  private static void runOnStdIn(final JLanguageTool lt) throws IOException {
+  private static void runOnStdIn(final JLanguageTool lt) throws Exception {
     final int MAX_FILE_SIZE = 64_000;
     InputStreamReader isr = null;
     BufferedReader br = null;
@@ -101,7 +101,7 @@ public final class POSTagLanguageModel {
   }
 
   private static void tagText(final String contents, final JLanguageTool lt)
-      throws IOException {
+      throws Exception {
     AnalyzedSentence analyzedText;
     final List<String> sentences = lt.sentenceTokenize(contents);
     for (final String sentence : sentences) {
@@ -134,5 +134,5 @@ public final class POSTagLanguageModel {
     }
     return sb.toString();
   }
-  
+
 }

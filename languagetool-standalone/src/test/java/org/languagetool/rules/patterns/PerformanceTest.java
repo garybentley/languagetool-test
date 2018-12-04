@@ -22,6 +22,8 @@ import org.languagetool.*;
 //import org.languagetool.markup.AnnotatedText;
 //import org.languagetool.markup.AnnotatedTextBuilder;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.*;
+import org.languagetool.languagemodel.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,16 +33,18 @@ import java.io.IOException;
  * Check performance per sentence. Not a unit test, for interactive use only.
  */
 final class PerformanceTest {
-  
+
   private static final long RUNS = 1;
 
   private PerformanceTest() {
   }
 
-  private void run(JLanguageTool lt, File textFile) throws IOException {
+  private void run(JLanguageTool lt, File textFile) throws Exception {
     String text = StringTools.readStream(new FileInputStream(textFile), "utf-8");
     int sentenceCount = lt.sentenceTokenize(text).size();
-    lt.activateLanguageModelRules(new File("data/ngrams"));
+    // GTODO Assume a LuceneLanguageModel here, also the relative path will fail.
+    LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(new File("data/ngrams").toPath().toRealPath());
+    lt.activateLanguageModelRules(lm);
     //lt.activateLanguageModelRules(new File("/home/dnaber/data/google-ngram-index"));
     System.out.println("Language: " +  lt.getLanguage() +
                        ", Text length: " + text.length() + " chars, " + sentenceCount + " sentences");
@@ -67,7 +71,7 @@ final class PerformanceTest {
     System.out.printf("Average time per sentence = %.1fms\n", avg);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + PerformanceTest.class.getSimpleName() + " <languageCode> <text_file>");
       System.exit(1);
@@ -78,7 +82,7 @@ final class PerformanceTest {
     //ResultCache cache = new ResultCache(1000, 5, TimeUnit.MINUTES);
     //JLanguageTool lt = new JLanguageTool(Languages.getLanguageForShortCode(languageCode));
     //JLanguageTool lt = new JLanguageTool(Languages.getLanguageForShortCode(languageCode), null, cache);
-    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(Languages.getLanguageForShortCode(languageCode));
+    MultiThreadedJLanguageTool lt = new MultiThreadedJLanguageTool(Languages.getLanguage(languageCode));
     //MultiThreadedJLanguageTool langTool = new MultiThreadedJLanguageTool(Languages.getLanguageForShortCode(languageCode), null, cache);
     test.run(lt, textFile);
     lt.shutdown();

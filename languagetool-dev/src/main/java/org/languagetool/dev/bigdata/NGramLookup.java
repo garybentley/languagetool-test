@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,6 +20,7 @@ package org.languagetool.dev.bigdata;
 
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.ngrams.Probability;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.util.Arrays;
@@ -32,14 +33,14 @@ final class NGramLookup {
   private NGramLookup() {
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     if (args.length < 2) {
       System.out.println("Usage: " + NGramLookup.class.getName() + " <ngram...> <ngramDataIndex>");
       System.out.println("  Example: " + NGramLookup.class.getName() + " \"my house\" /data/ngram-index");
       System.exit(1);
     }
     String indexTopDir = args[args.length-1];
-    try (LuceneLanguageModel lm = new LuceneLanguageModel(new File(indexTopDir))) {
+    try (LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(new File(indexTopDir).toPath().toRealPath())) {
       double totalP = 1;
       for (int i = 0; i < args.length -1; i++) {
         String[] lookup = args[i].split(" ");

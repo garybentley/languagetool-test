@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,28 +22,33 @@ import org.junit.Before;
 import org.junit.Test;
 import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
-import org.languagetool.tokenizers.WordTokenizer;
-
-import java.io.IOException;
+import org.languagetool.tokenizers.Tokenizer;
+import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.tagging.BaseTagger;
+import org.languagetool.tagging.Tagger;
 
 public class CatalanTaggerTest {
 
-  private CatalanTagger tagger;
-  private WordTokenizer tokenizer;
+  private Catalan lang;
+  private Tagger tagger;
+  private Tokenizer tokenizer;
 
   @Before
-  public void setUp() {
-    tagger = new CatalanTagger(new Catalan());
-    tokenizer = new WordTokenizer();
+  public void setUp() throws Exception {
+    lang = new Catalan();
+    tagger = lang.getTagger();
+    tokenizer = lang.getWordTokenizer();
   }
 
   @Test
-  public void testDictionary() throws IOException {
-    TestTools.testDictionary(tagger, new Catalan());
+  public void testDictionary() throws Exception {
+      if (tagger instanceof BaseTagger) {
+          TestTools.testTaggerDictionary(((BaseTagger) tagger).getDictionary(), lang);
+      }
   }
 
   @Test
-  public void testTagger() throws IOException {
+  public void testTagger() throws Exception {
     TestTools.myAssert("UPF", "UPF/[UPF]NPFSO00", tokenizer, tagger);
     TestTools
         .myAssert(

@@ -21,9 +21,12 @@ package org.languagetool.language;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 import org.languagetool.UserConfig;
+import org.languagetool.Language;
 import org.languagetool.rules.CommaWhitespaceRule;
 import org.languagetool.rules.DoublePunctuationRule;
 import org.languagetool.rules.Example;
@@ -62,6 +65,11 @@ public class ValencianCatalan extends Catalan {
     }
 
     @Override
+    public Language getDefaultLanguageVariant() {
+        return null;
+    }
+
+    @Override
     public boolean isVariant() {
         return true;
     }
@@ -82,8 +90,8 @@ public class ValencianCatalan extends Catalan {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Langauge> altLanguages) throws Exception {
-      List<Rule> rules = super.getRelevantRules(messages, userConfig, altLanguages);
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      List<Rule> rules = new ArrayList<>(super.getRelevantRules(messages, userConfig, altLanguages));
       /*
       GTODO CLean up, all these rules are in our super call
     return Arrays.asList(
@@ -116,15 +124,25 @@ public class ValencianCatalan extends Catalan {
             new SimpleReplaceDiacriticsIEC(messages, getUseDataBroker()),
             new SimpleReplaceDiacriticsTraditional(messages, getUseDataBroker()),
             */
+            /*
 GTODO - need to sort missing file issues before Catalan can be used
 Also, a number of classes are called "Catalan[X]" but actually use valencia type resources but the default
 variant (in Catalan) is Catalan.
+*/
             // This rule uses CatalanTagger which needs to know whether the language is a variant...
-            new SimpleReplaceVerbsRule(messages, this),
+            // DEALT WITH rules.add(new SimpleReplaceVerbsRule(messages, this));
 
-            rules.add(new SimpleReplaceDNVColloquialRule(messages, this));
-            rules.add(new SimpleReplaceDNVSecondaryRule(messages, this));
+            rules.add(createDNVColloquialRule(messages));
+            rules.add(createDNVSecondaryRule(messages));
     return rules;
+  }
+
+  public SimpleReplaceDNVSecondaryRule createDNVSecondaryRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceDNVSecondaryRule(getUseMessages(messages), getUseDataBroker().getDNVSecondaryWrongWords(), getUseDataBroker().getSynthesizer(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceDNVColloquialRule createDNVColloquialRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceDNVColloquialRule(getUseMessages(messages), getUseDataBroker().getDNVColloquialWrongWords(), getUseDataBroker().getSynthesizer(), getUseDataBroker().getCaseConverter());
   }
 
   @Override

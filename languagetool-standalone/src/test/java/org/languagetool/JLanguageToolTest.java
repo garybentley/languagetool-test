@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -44,8 +44,9 @@ public class JLanguageToolTest {
   private static final English english = new English();
 
   @Test
-  public void testGetAllActiveRules() {
-    JLanguageTool lt = new JLanguageTool(new Demo());
+  public void testGetAllActiveRules() throws Exception {
+    TestLanguage lang = TestTools.getTestLanguage();
+    JLanguageTool lt = new JLanguageTool(lang);
     List<String> ruleIds = getActiveRuleIds(lt);
     assertTrue(ruleIds.contains("DEMO_RULE"));
     assertFalse(ruleIds.contains("DEMO_RULE_OFF"));
@@ -64,28 +65,29 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testEnableRulesCategories() {
-    JLanguageTool lt = new JLanguageTool(new Demo());
+  public void testEnableRulesCategories() throws Exception {
+    TestLanguage lang = TestTools.getTestLanguage();
+    JLanguageTool lt = new JLanguageTool(lang);
     List<String> ruleIds = getActiveRuleIds(lt);
     assertTrue(ruleIds.contains("DEMO_RULE"));
     assertFalse(ruleIds.contains("IN_OFF_CATEGORY"));
-    
+
     lt.disableCategory(new CategoryId("MISC"));
     List<String> ruleIds2 = getActiveRuleIds(lt);
     assertFalse(ruleIds2.contains("DEMO_RULE"));
     assertFalse(ruleIds2.contains("IN_OFF_CATEGORY"));
-    
+
     lt.enableRuleCategory(new CategoryId("MISC"));
     List<String> ruleIds3 = getActiveRuleIds(lt);
     assertTrue(ruleIds3.contains("DEMO_RULE"));
     assertFalse(ruleIds3.contains("IN_OFF_CATEGORY"));
-    
+
     lt.enableRuleCategory(new CategoryId("DEFAULT_OFF"));
     List<String> ruleIds4 = getActiveRuleIds(lt);
     assertTrue(ruleIds4.contains("DEMO_RULE"));
     assertTrue(ruleIds4.contains("IN_OFF_CATEGORY"));
     assertFalse(ruleIds4.contains("IN_OFF_CATEGORY_OFF_ITSELF"));
-    
+
     lt.enableRule("IN_OFF_CATEGORY_OFF_ITSELF");
     List<String> ruleIds5 = getActiveRuleIds(lt);
     assertTrue(ruleIds5.contains("IN_OFF_CATEGORY_OFF_ITSELF"));
@@ -100,7 +102,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testGetMessageBundle() {
+  public void testGetMessageBundle() throws Exception {
     ResourceBundle bundle1 = JLanguageTool.getMessageBundle(new GermanyGerman());
     assertThat(bundle1.getString("de"), is("Deutsch"));
 
@@ -120,7 +122,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testSentenceTokenize() {
+  public void testSentenceTokenize() throws Exception {
     JLanguageTool lt = new JLanguageTool(english);
     List<String> sentences = lt.sentenceTokenize("This is a sentence! This is another one.");
     assertEquals(2, sentences.size());
@@ -129,7 +131,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testAnnotateTextCheck() throws IOException {
+  public void testAnnotateTextCheck() throws Exception {
     JLanguageTool lt = new JLanguageTool(english);
     AnnotatedText annotatedText = new AnnotatedTextBuilder()
             .addMarkup("<b>")
@@ -144,7 +146,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testAnnotateTextCheckMultipleSentences() throws IOException {
+  public void testAnnotateTextCheckMultipleSentences() throws Exception {
     JLanguageTool lt = new JLanguageTool(english);
     AnnotatedText annotatedText = new AnnotatedTextBuilder()
             .addMarkup("<b>")
@@ -165,7 +167,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testAnnotateTextCheckMultipleSentences2() throws IOException {
+  public void testAnnotateTextCheckMultipleSentences2() throws Exception {
     JLanguageTool lt = new JLanguageTool(english);
     AnnotatedText annotatedText = new AnnotatedTextBuilder()
             .addText("here")
@@ -186,7 +188,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testAnnotateTextCheckPlainText() throws IOException {
+  public void testAnnotateTextCheckPlainText() throws Exception {
     JLanguageTool lt = new JLanguageTool(english);
     AnnotatedText annotatedText = new AnnotatedTextBuilder()
             .addText("A good sentence. But here's a error.").build();
@@ -197,14 +199,14 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testStrangeInput() throws IOException {
+  public void testStrangeInput() throws Exception {
     JLanguageTool lt = new JLanguageTool(english);
     List<RuleMatch> matches = lt.check("­");  // used to be a bug (it's not a normal dash)
     assertThat(matches.size(), is(0));
   }
 
   @Test
-  public void testCache() throws IOException {
+  public void testCache() throws Exception {
     ResultCache cache = new ResultCache(1000);
     JLanguageTool ltEnglish = new JLanguageTool(english, null, cache);
     assertThat(ltEnglish.check("This is an test").size(), is(1));
@@ -221,7 +223,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testMatchPositionsWithCache() throws IOException {
+  public void testMatchPositionsWithCache() throws Exception {
     ResultCache cache = new ResultCache(1000);
     JLanguageTool lt = new JLanguageTool(english, null, cache);
     List<RuleMatch> matches1 = lt.check("A test. This is an test.");
@@ -239,7 +241,7 @@ public class JLanguageToolTest {
   }
 
   @Test
-  public void testCacheWithTextLevelRules() throws IOException {
+  public void testCacheWithTextLevelRules() throws Exception {
     ResultCache cache = new ResultCache(1000);
     JLanguageTool ltNoCache = new JLanguageTool(new GermanyGerman(), null);
     assertThat(ltNoCache.check("Ein Delfin. Noch ein Delfin.").size(), is(0));

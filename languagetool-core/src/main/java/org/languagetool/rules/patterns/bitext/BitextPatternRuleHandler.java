@@ -54,8 +54,6 @@ public class BitextPatternRuleHandler extends AbstractPatternRuleHandler<BitextP
 
   //private final List<BitextPatternRule> rules = new ArrayList<>();
 
-  protected String name;
-
   private PatternRule srcRule;
   private PatternRule trgRule;
 
@@ -79,7 +77,7 @@ GTODO: Clean up
   @Override
   public void handleStartElementRulesCase(Attributes attrs) {
       String languageStr = attrs.getValue("targetLang");
-      Language l = Languages.getLanguage(new Locale(languageStr));
+      Language l = Languages.getBestMatchLanguage(new Locale(languageStr));
       if (l == null) {
           throw new RuntimeException(String.format("Unable to find target language: %1$s", languageStr));
       }
@@ -309,7 +307,7 @@ This is already handled
     PatternRule rule = null;
     if (phrasePatternTokens.isEmpty()) {
       rule = new PatternRule(id, language, patternTokens,
-          name, "", shortMessage.toString());
+          getName(), "", shortMessage.toString());
       prepareRule(rule);
     } else {
       if (!patternTokens.isEmpty()) {
@@ -320,7 +318,7 @@ This is already handled
       for (List<PatternToken> phrasePatternToken : phrasePatternTokens) {
         processElement(phrasePatternToken);
         rule = new PatternRule(id, language, phrasePatternToken,
-            name, message.toString(), shortMessage.toString(), "",
+            getName(), message.toString(), shortMessage.toString(), "",
             phrasePatternTokens.size() > 1);
         prepareRule(rule);
       }

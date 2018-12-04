@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Marcin Milkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -83,7 +83,7 @@ public class PolishWordTokenizer extends WordTokenizer {
    * but not words in which the hyphen occurs before a morphological ending
    * (such as <em>SMS-y</em>).
    * </ol>
-   * 
+   *
    * @param text String of words to tokenize.
    */
   @Override
@@ -117,8 +117,6 @@ public class PolishWordTokenizer extends WordTokenizer {
             List<String> testedTokens = new ArrayList<>(tokenParts.length + 1);
             Collections.addAll(testedTokens, tokenParts);
             testedTokens.add(token);
-            try {
-
               List<AnalyzedTokenReadings> taggedToks = tagger.tag(testedTokens);
               if (taggedToks.size() == tokenParts.length + 1
                   && !taggedToks.get(tokenParts.length).isTagged()){
@@ -155,9 +153,6 @@ public class PolishWordTokenizer extends WordTokenizer {
               } else {
                 l.add(token);
               }
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
           }
         } else {
           l.add(token);
@@ -174,11 +169,11 @@ public class PolishWordTokenizer extends WordTokenizer {
    * in the constructor of Polish class, but if the class is used
    * separately, it has to be called after the constructor to use
    * the hybrid hyphen-tokenizing.
-   * 
+   *
    * @param tagger The tagger to use (compatible only with the
    * Polish {@link BaseTagger} that uses the delivered PoliMorfologik 2.1
    * or later).
-   * 
+   *
    * @since 2.5
    */
   public void setTagger(Tagger tagger) {

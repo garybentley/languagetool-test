@@ -21,6 +21,7 @@ package org.languagetool.language;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 import org.languagetool.Language;
 import org.languagetool.LanguageMaintainedState;
@@ -53,6 +54,7 @@ import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tokenizers.ca.CatalanWordTokenizer;
+import org.languagetool.databroker.*;
 
 public class Catalan extends Language<CatalanResourceDataBroker> {
 
@@ -61,13 +63,13 @@ public class Catalan extends Language<CatalanResourceDataBroker> {
     public static final Locale LOCALE = new Locale(LANGUAGE_ID, COUNTRY_ID);
 
   private static final Language DEFAULT_CATALAN = new Catalan();
-
+/*
   private Tagger tagger;
   private SentenceTokenizer sentenceTokenizer;
   private Tokenizer wordTokenizer;
   private Synthesizer synthesizer;
   private Disambiguator disambiguator;
-
+*/
   public CatalanResourceDataBroker getDefaultDataBroker() throws Exception {
       return new DefaultCatalanResourceDataBroker(this, getClass().getClassLoader());
   }
@@ -98,91 +100,166 @@ public class Catalan extends Language<CatalanResourceDataBroker> {
   }
 
   @Override
-  public String getShortCode() {
-    return "ca";
-  }
-
-  @Override
-  public Language getDefaultLanguageVariant() {
-    return DEFAULT_CATALAN;
-  }
-
-  @Override
   public Contributor[] getMaintainers() {
     return new Contributor[] { new Contributor("Ricard Roca"), new Contributor("Jaume Ortolà") };
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws Exception {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
+      messages = getUseMessages(messages);
     return Arrays.asList(
-            new CommaWhitespaceRule(messages,
-            		Example.wrong("A parer seu<marker> ,</marker> no era veritat."),
-            		Example.fixed("A parer seu<marker>,</marker> no era veritat.")),
-            new DoublePunctuationRule(messages),
-            new CatalanUnpairedBracketsRule(messages, this),
-            new UppercaseSentenceStartRule(messages, this,
-            		Example.wrong("Preus de venda al públic. <marker>han</marker> pujat molt."),
-            		Example.fixed("Preus de venda al públic. <marker>Han</marker> pujat molt.")),
-            new MultipleWhitespaceRule(messages, this),
-            new LongSentenceRule(messages, userConfig),
+            createCommaWhitespaceRule(messages),
+            createDoublePunctuationRule(messages),
+            createUnpairedBracketsRule(messages),
+            createUppercaseSentenceStartRule(messages),
+            createMultipleWhitespaceRule(messages),
+            createLongSentenceRule(messages, userConfig),
             // specific to Catalan:
-            new CatalanWordRepeatRule(messages, this),
-            new MorfologikCatalanSpellerRule(messages, this, userConfig),
-            new CatalanUnpairedQuestionMarksRule(messages, this),
-            new CatalanUnpairedExclamationMarksRule(messages, this),
-            new AccentuationCheckRule(messages),
-            new ComplexAdjectiveConcordanceRule(messages),
-            new CatalanWrongWordInContextRule(messages, getUseDataBroker()),
-            new CatalanWrongWordInContextDiacriticsRule(messages, getUseDataBroker()),
-            new ReflexiveVerbsRule(messages),
-            new SimpleReplaceVerbsRule(messages, this),
-            new SimpleReplaceBalearicRule(messages, getUseDataBroker()),
-            new SimpleReplaceRule(messages, getUseDataBroker()),
-            new ReplaceOperationNamesRule(messages, this),
-            new SimpleReplaceDNVRule(messages, this), // can be removed here after updating dictionaries
-            new SimpleReplaceDiacriticsIEC(messages, getUseDataBroker()),
-            new SimpleReplaceDiacriticsTraditional(messages, getUseDataBroker())
+            createWordRepeatRule(messages),
+            // GTODO Removed for now until missing file issues are resolved createMorfologikSpellerRule(messages, userConfig),
+            createUnpairedQuestionMarksRule(messages),
+            createUnpairedExclamationMarksRule(messages),
+            createAccentuationCheckRule(messages),
+            createComplexAdjectiveConcordanceRule(messages),
+            createWrongWordInContextRule(messages),
+            createWrongWordInContextDiacriticsRule(messages),
+            createReflexiveVerbsRule(messages),
+            createVerbsRule(messages),
+            createBalearicRule(messages),
+            createReplaceRule(messages),
+            createOperationNamesRule(messages),
+            createDNVRule(messages), // can be removed here after updating dictionaries
+            createDiacriticsIECRule(messages),
+            createDiacriticsTraditionalRule(messages)
     );
   }
 
-  @Override
-  public Tagger getTagger() {
-    if (tagger == null) {
-      tagger = new CatalanTagger(this);
+  public CatalanUnpairedBracketsRule createUnpairedBracketsRule(ResourceBundle messages) throws Exception {
+      return new CatalanUnpairedBracketsRule(getUseMessages(messages));
+  }
+
+  public MorfologikCatalanSpellerRule createMorfologikSpellerRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      return new MorfologikCatalanSpellerRule(getUseMessages(messages), this, userConfig, getUseDataBroker().getDictionaries(userConfig),
+                      getUseDataBroker().getSpellingIgnoreWords(), getUseDataBroker().getTagger());
+  }
+
+  public CatalanWrongWordInContextRule createWrongWordInContextRule(ResourceBundle messages) throws Exception {
+      return new CatalanWrongWordInContextRule(messages, getUseDataBroker().getWrongWordsInContext());
+  }
+
+  public CatalanWrongWordInContextDiacriticsRule createWrongWordInContextDiacriticsRule(ResourceBundle messages) throws Exception {
+      return new CatalanWrongWordInContextDiacriticsRule(messages, getUseDataBroker().getDiacriticWrongWordsInContext());
+  }
+
+  public CommaWhitespaceRule createCommaWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new CommaWhitespaceRule(getUseMessages(messages),
+          Example.wrong("A parer seu<marker> ,</marker> no era veritat."),
+          Example.fixed("A parer seu<marker>,</marker> no era veritat."));
     }
-    return tagger;
+
+  public UppercaseSentenceStartRule createUppercaseSentenceStartRule(ResourceBundle messages) throws Exception {
+      return new UppercaseSentenceStartRule(getUseMessages(messages), this,
+          Example.wrong("Preus de venda al públic. <marker>han</marker> pujat molt."),
+          Example.fixed("Preus de venda al públic. <marker>Han</marker> pujat molt."));
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      }
+      return createLongSentenceRule(getUseMessages(messages), confWords);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords);
+  }
+
+  public ComplexAdjectiveConcordanceRule createComplexAdjectiveConcordanceRule(ResourceBundle messages) throws Exception {
+      return new ComplexAdjectiveConcordanceRule(getUseMessages(messages));
+  }
+
+  public AccentuationCheckRule createAccentuationCheckRule(ResourceBundle messages) throws Exception {
+      return new AccentuationCheckRule(getUseMessages(messages), getUseDataBroker().getAccentuationRelevantWords1(), getUseDataBroker().getAccentuationRelevantWords2());
+  }
+
+  public CatalanUnpairedExclamationMarksRule createUnpairedExclamationMarksRule(ResourceBundle messages) throws Exception {
+      return new CatalanUnpairedExclamationMarksRule(getUseMessages(messages));
+  }
+
+  public CatalanUnpairedQuestionMarksRule createUnpairedQuestionMarksRule(ResourceBundle messages) throws Exception {
+      return new CatalanUnpairedQuestionMarksRule(getUseMessages(messages));
+  }
+
+  public CatalanWordRepeatRule createWordRepeatRule(ResourceBundle messages) throws Exception {
+      return new CatalanWordRepeatRule(getUseMessages(messages));
+  }
+
+  public ReflexiveVerbsRule createReflexiveVerbsRule(ResourceBundle messages) throws Exception {
+      return new ReflexiveVerbsRule(getUseMessages(messages), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceDiacriticsTraditional createDiacriticsTraditionalRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceDiacriticsTraditional(getUseMessages(messages), getUseDataBroker().getDiactriticsTraditionalWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public DoublePunctuationRule createDoublePunctuationRule(ResourceBundle messages) throws Exception {
+      return new DoublePunctuationRule(getUseMessages(messages));
+  }
+
+  public MultipleWhitespaceRule createMultipleWhitespaceRule(ResourceBundle messages) throws Exception {
+      return new MultipleWhitespaceRule(getUseMessages(messages));
+  }
+
+  public SimpleReplaceBalearicRule createBalearicRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceBalearicRule(getUseMessages(messages), getUseDataBroker().getBalearicWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceDNVRule createDNVRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceDNVRule(getUseMessages(messages), getUseDataBroker().getDNVWrongWords(), getUseDataBroker().getSynthesizer(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceVerbsRule createVerbsRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceVerbsRule(getUseMessages(messages), getUseDataBroker().getVerbsWrongWords(),
+                getUseDataBroker().getTagger(), getUseDataBroker().getSynthesizer(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceDiacriticsIEC createDiacriticsIECRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceDiacriticsIEC(getUseMessages(messages), getUseDataBroker().getDiactriticsIECWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public SimpleReplaceRule createReplaceRule(ResourceBundle messages) throws Exception {
+      return new SimpleReplaceRule(getUseMessages(messages), getUseDataBroker().getWrongWords(), getUseDataBroker().getCaseConverter());
+  }
+
+  public ReplaceOperationNamesRule createOperationNamesRule(ResourceBundle messages) throws Exception {
+      messages = getUseMessages(messages);
+      return new ReplaceOperationNamesRule(messages, getUseDataBroker().getOperationNameWrongWords(), getUseDataBroker().getSynthesizer(), getUseDataBroker().getCaseConverter());
   }
 
   @Override
-  public Synthesizer getSynthesizer() {
-    if (synthesizer == null) {
-      synthesizer = new CatalanSynthesizer(getUseDataBroker());
-    }
-    return synthesizer;
+  public Tagger getTagger() throws Exception {
+      return getUseDataBroker().getTagger();
   }
 
   @Override
-  public SentenceTokenizer getSentenceTokenizer() {
-    if (sentenceTokenizer == null) {
-      sentenceTokenizer = new SRXSentenceTokenizer(this);
-    }
-    return sentenceTokenizer;
+  public Synthesizer getSynthesizer() throws Exception {
+      return getUseDataBroker().getSynthesizer();
   }
 
   @Override
-  public Disambiguator getDisambiguator() {
-    if (disambiguator == null) {
-      disambiguator = new CatalanHybridDisambiguator(getUseDataBroker());
-    }
-    return disambiguator;
+  public SentenceTokenizer getSentenceTokenizer() throws Exception {
+      return getUseDataBroker().getSentenceTokenizer();
   }
 
   @Override
-  public Tokenizer getWordTokenizer() {
-    if (wordTokenizer == null) {
-      wordTokenizer = new CatalanWordTokenizer(getUseDataBroker());
-    }
-    return wordTokenizer;
+  public Disambiguator getDisambiguator() throws Exception {
+      return getUseDataBroker().getDisambiguator();
+  }
+
+  @Override
+  public Tokenizer getWordTokenizer() throws Exception {
+      return getUseDataBroker().getWordTokenizer();
   }
 
   @Override

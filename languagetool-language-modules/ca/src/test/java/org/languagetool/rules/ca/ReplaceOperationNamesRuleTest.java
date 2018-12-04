@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,13 +36,14 @@ public class ReplaceOperationNamesRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new ReplaceOperationNamesRule(TestTools.getEnglishMessages(), new Catalan());
-    langTool = new JLanguageTool(new Catalan());
+  public void setUp() throws Exception {
+    Catalan lang = new Catalan();
+    rule = lang.createOperationNamesRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     //assertCorrect("els etiquetadors sobre els etiquetats.");
@@ -73,7 +72,7 @@ public class ReplaceOperationNamesRuleTest {
     assertCorrect("filtrat per Wikileaks");
     assertCorrect("una vegada filtrat");
     assertCorrect("no equilibrat");
-    
+
     // errors:
     assertIncorrect("Assecat del braç del riu");
     assertIncorrect("Cal vigilar el filtrat del vi");
@@ -85,13 +84,13 @@ public class ReplaceOperationNamesRuleTest {
 
     RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence("El repicat i el rejuntat."));
     assertEquals(2, matches.length);
-    
+
     matches = rule.match(langTool.getAnalyzedSentence("El procés de relligat dels llibres."));
     assertEquals(1, matches.length);
     assertEquals ("relligadura", matches[0].getSuggestedReplacements().get(0));
     assertEquals ("relligament", matches[0].getSuggestedReplacements().get(1));
     assertEquals ("relligada", matches[0].getSuggestedReplacements().get(2));
-    
+
     matches = rule.match(langTool.getAnalyzedSentence("Els rentats de cervell."));
     assertEquals(1, matches.length);
     assertEquals ("rentades", matches[0].getSuggestedReplacements().get(0));
@@ -99,23 +98,24 @@ public class ReplaceOperationNamesRuleTest {
     assertEquals ("rentaments", matches[0].getSuggestedReplacements().get(2));
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool
         .getAnalyzedSentence(sentence));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool
         .getAnalyzedSentence(sentence));
     assertEquals(1, matches.length);
   }
 
   @Test
-  public void testPositions() throws IOException {
-    final AccentuationCheckRule rule = new AccentuationCheckRule(TestTools.getEnglishMessages());
+  public void testPositions() throws Exception {
+    Catalan lang = new Catalan();
+    final AccentuationCheckRule rule = lang.createAccentuationCheckRule(null);
     final RuleMatch[] matches;
-    final JLanguageTool langTool = new JLanguageTool(new Catalan());
+    final JLanguageTool langTool = new JLanguageTool(lang);
 
     matches = rule.match(langTool
         .getAnalyzedSentence("Són circumstancies extraordinàries."));

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,8 @@ import com.google.common.base.Charsets;
 import morfologik.fsa.FSA;
 import org.languagetool.JLanguageTool;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.*;
+import org.languagetool.language.German;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,19 +32,19 @@ import java.nio.file.Files;
 import java.util.*;
 
 /**
- * Export German nouns, to be used by jWordSplitter.  
- * 
+ * Export German nouns, to be used by jWordSplitter.
+ *
  * @author Daniel Naber
  */
 public class ExportGermanNouns {
 
   private static final String DICT_FILENAME = "/de/german.dict";
   private static final String ADDED_DICT_FILENAME = "languagetool-language-modules/de/src/main/resources/org/languagetool/resource/de/added.txt";
-  
+
   private ExportGermanNouns() {
   }
-  
-  private List<String> getSortedWords() throws IOException {
+
+  private List<String> getSortedWords() throws Exception {
     Set<String> words1 = getBinaryDictWords();
     Set<String> words2 = getAddedDictWords();
     List<String> sortedWords = new ArrayList<>();
@@ -52,8 +54,10 @@ public class ExportGermanNouns {
     return sortedWords;
   }
 
-  private Set<String> getBinaryDictWords() throws IOException {
-    final FSA fsa = FSA.read(JLanguageTool.getDataBroker().getFromResourceDirAsStream(DICT_FILENAME));
+  private Set<String> getBinaryDictWords() throws Exception {
+    German language = new German();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(language, language.getClass().getClassLoader());
+    final FSA fsa = FSA.read(broker.getResourceDirPathStream(DICT_FILENAME));
     final Set<String> set = new HashSet<>();
     for (ByteBuffer buffer : fsa) {
       final byte [] sequence = new byte [buffer.remaining()];
@@ -85,8 +89,8 @@ public class ExportGermanNouns {
     boolean isNoun = output.contains("SUB:") || (output.contains("EIG:") && output.contains("COU"));
     return isNoun && !output.contains(":ADJ") && !StringTools.isAllUppercase(output);
   }
-  
-  public static void main(String[] args) throws IOException {
+
+  public static void main(String[] args) throws Exception {
     ExportGermanNouns prg = new ExportGermanNouns();
     List<String> words = prg.getSortedWords();
     System.out.println("# DO NOT MODIFY - automatically exported");
@@ -102,5 +106,5 @@ public class ExportGermanNouns {
     }
     //System.err.println("Done. Printed " + words.size() + " words.");
   }
-    
+
 }

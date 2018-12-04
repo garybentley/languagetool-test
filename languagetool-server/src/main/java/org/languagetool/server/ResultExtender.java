@@ -63,7 +63,7 @@ class ResultExtender {
   }
 
   /**
-   * Filter {@code extensionMatches} so that only those matches are left that don't cover or touch one of the {@code matches}. 
+   * Filter {@code extensionMatches} so that only those matches are left that don't cover or touch one of the {@code matches}.
    */
   @NotNull
   List<RuleMatch> getFilteredExtensionMatches(List<RuleMatch> matches, List<RemoteRuleMatch> extensionMatches) {
@@ -80,8 +80,8 @@ class ResultExtender {
   @NotNull
   Future<List<RemoteRuleMatch>> getExtensionMatchesFuture(String plainText, Language lang) throws IOException, XMLStreamException {
     return executor.submit(() -> getExtensionMatches(plainText, lang));
-  }  
-  
+  }
+
   @NotNull
   List<RemoteRuleMatch> getExtensionMatches(String plainText, Language lang) throws IOException, XMLStreamException {
     HttpURLConnection huc = (HttpURLConnection) url.openConnection();
@@ -93,7 +93,7 @@ class ResultExtender {
     try {
       huc.connect();
       try (DataOutputStream wr = new DataOutputStream(huc.getOutputStream())) {
-        String urlParameters = "language=" + lang.getShortCodeWithCountryAndVariant() + "&text=" + plainText;
+        String urlParameters = "language=" + lang.getLocale().toLanguageTag() + "&text=" + plainText;
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
         wr.write(postData);
       }
@@ -172,7 +172,7 @@ class ResultExtender {
     }
     return l;
   }
-  
+
   class HiddenRule extends Rule {
     @Override
     public String getId() {

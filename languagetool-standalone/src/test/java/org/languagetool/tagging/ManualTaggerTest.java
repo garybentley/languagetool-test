@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,8 +20,8 @@ package org.languagetool.tagging;
 
 import org.junit.Test;
 import org.languagetool.JLanguageTool;
-
-import java.io.IOException;
+import org.languagetool.language.German;
+import org.languagetool.databroker.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -32,8 +32,10 @@ public class ManualTaggerTest {
   private static final String MANUAL_DICT_FILENAME = "/de/added.txt";
 
   @Test
-  public void testTag() throws IOException {
-    ManualTagger tagger = new ManualTagger(JLanguageTool.getDataBroker().getFromResourceDirAsStream(MANUAL_DICT_FILENAME));
+  public void testTag() throws Exception {
+    German lang = new German();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    ManualTagger tagger = new ManualTagger(broker.getResourceDirPathStream(MANUAL_DICT_FILENAME));
     assertThat(tagger.tag("").size(), is(0));
     assertThat(tagger.tag("gibtsnicht").size(), is(0));
 

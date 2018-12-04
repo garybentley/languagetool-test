@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2009 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -61,18 +61,18 @@ public class ToolsTest {
   }
 
   @Test
-  public void testBitextCheck() throws IOException, ParserConfigurationException, SAXException {
+  public void testBitextCheck() throws Exception, ParserConfigurationException, SAXException {
     testBitextCheck(null);
     testBitextCheck(new ResultCache(100));
   }
-  
-  private void testBitextCheck(ResultCache cache) throws IOException, ParserConfigurationException, SAXException {
-    Language english = Languages.getLanguageForShortCode("en");
+
+  private void testBitextCheck(ResultCache cache) throws Exception, ParserConfigurationException, SAXException {
+    Language english = Languages.getLanguage("en");
     JLanguageTool srcTool = new JLanguageTool(english, null, cache);
-    Language polish = Languages.getLanguageForShortCode("pl");
+    Language polish = Languages.getLanguage("pl");
     JLanguageTool trgTool = new JLanguageTool(polish, null, cache);
     List<BitextRule> rules = Tools.getBitextRules(english, polish);
-    
+
     int matchCount = Tools.checkBitext(
         "This is a perfectly good sentence.",
         "To jest całkowicie prawidłowe zdanie.", srcTool, trgTool, rules).size();

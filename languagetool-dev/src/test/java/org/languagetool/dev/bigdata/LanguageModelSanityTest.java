@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,6 +21,7 @@ package org.languagetool.dev.bigdata;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.languagetool.languagemodel.LuceneLanguageModel;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +35,8 @@ public class LanguageModelSanityTest {
 
   @Test
   @Ignore("Interactive use only, requires local ngram index")
-  public void testEnglishLanguageModelSanity() throws IOException {
-    LuceneLanguageModel lm = new LuceneLanguageModel(new File(NGRAM_DIR));
+  public void testEnglishLanguageModelSanity() throws Exception {
+    LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(new File(NGRAM_DIR).toPath().toRealPath());
     // 1gram:
     assertMatches(lm, "the");
     assertMatches(lm, "The");

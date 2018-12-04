@@ -268,7 +268,6 @@ public final class Languages {
     Objects.requireNonNull(locale);
     // Check for an exact match...
     Language lang = getLanguageProvider().get(l -> l.getLocale().equals(locale));
-
     if (lang == null) {
         if (!"".equals(locale.getCountry())) {
             // There is a country.  Search for a match with language/country only.

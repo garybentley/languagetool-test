@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,16 +36,17 @@ public class ComplexAdjectiveConcordanceRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new ComplexAdjectiveConcordanceRule(TestTools.getEnglishMessages());
-    langTool = new JLanguageTool(new Catalan());
+  public void setUp() throws Exception {
+    Catalan lang = new Catalan();
+    rule = lang.createComplexAdjectiveConcordanceRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
-    
+
     //de l'altra més neguitós
     //per primera vegada documentat
     //en alguns casos documentat
@@ -84,7 +83,7 @@ public class ComplexAdjectiveConcordanceRuleTest {
     assertCorrect("l'endeutament que generà fou força elevat");
     assertCorrect("el text de més àmplia i persistent influència");
     assertCorrect("el text de més àmplia influència");
-    assertCorrect("Ell i jo som una altra vegada partidaris del rei"); 
+    assertCorrect("Ell i jo som una altra vegada partidaris del rei");
     assertCorrect("despres de la revolta contra el poder pontifici iniciada a Bolonya");
     assertCorrect("-Així, ¿viatges sola? -va dir");
     assertCorrect("El riu passa engorjat en aquest sector ");
@@ -117,7 +116,7 @@ public class ComplexAdjectiveConcordanceRuleTest {
     assertCorrect("amb alguns motllurats de guixeria retallada");
     assertCorrect("a confondre en un mateix amor amics i enemics");
     assertCorrect("En l'eix esquerra-dreta.");
-    assertCorrect("podrien també esdevenir correlacionades"); 
+    assertCorrect("podrien també esdevenir correlacionades");
     assertCorrect("Cada polinomi en forma expandida");
     assertCorrect("El 1967 una partida de liberals rebel al govern");
     assertCorrect("El 1640 una junta de nobles reunida a Lisboa");
@@ -267,16 +266,16 @@ public class ComplexAdjectiveConcordanceRuleTest {
     // assertIncorrect("Índex de desenvolupament humà i qualitat de vida elevat");
     assertIncorrect("La massa, el radi i la lluminositat llistat per ell.");
     assertIncorrect("La massa, el radi i la lluminositat llistades per ell.");
-    
+
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool
         .getAnalyzedSentence(sentence));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool
         .getAnalyzedSentence(sentence));
     assertEquals(1, matches.length);

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,8 +26,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -40,12 +38,13 @@ public class SimpleReplaceBalearicRuleTest {
 
   @Before
   public void setUp() throws Exception {
-    rule = new SimpleReplaceBalearicRule(TestTools.getMessages("ca"));
-    langTool = new JLanguageTool(new Catalan());
+    Catalan lang = new Catalan();
+    rule = lang.createBalearicRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertEquals(0, rule.match(langTool.getAnalyzedSentence("Això està força bé.")).length);
@@ -56,7 +55,7 @@ public class SimpleReplaceBalearicRuleTest {
     assertEquals(2, matches.length);
     assertEquals("càlcul", matches[0].getSuggestedReplacements().get(0));
     assertEquals("telèfon", matches[1].getSuggestedReplacements().get(0));
-        
+
   }
 
 }

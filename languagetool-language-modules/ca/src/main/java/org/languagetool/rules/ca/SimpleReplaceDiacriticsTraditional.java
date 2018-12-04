@@ -22,9 +22,8 @@ import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Category;
 import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.ITSIssueType;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,9 +39,8 @@ import java.util.ResourceBundle;
  */
 public class SimpleReplaceDiacriticsTraditional extends AbstractSimpleReplaceRule {
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale CA_LOCALE = new Locale("CA");
-
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
       if (wrongWords == null) {
@@ -50,9 +48,9 @@ public class SimpleReplaceDiacriticsTraditional extends AbstractSimpleReplaceRul
       }
     return wrongWords;
   }
-
-  public SimpleReplaceDiacriticsTraditional(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
+*/
+  public SimpleReplaceDiacriticsTraditional(final ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     super.setCategory(new Category(new CategoryId("DIACRITICS_TRADITIONAL"), "Z) Accents diacrítics tradicionals"));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     super.setDefaultOn();
@@ -82,11 +80,6 @@ public class SimpleReplaceDiacriticsTraditional extends AbstractSimpleReplaceRul
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return CA_LOCALE;
   }
 
 }

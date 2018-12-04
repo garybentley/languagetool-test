@@ -195,16 +195,12 @@ GTODO Clean up
       throw new RuntimeException(e);
     }
   }
-/*
-GTODO Clean up
-  protected LuceneSearcher getLuceneSearcher(int ngramSize) {
-    LuceneSearcher luceneSearcher = luceneSearcherMap.get(ngramSize);
-    if (luceneSearcher == null) {
-      throw new RuntimeException("No " + ngramSize + "grams directory found in " + topIndexDir);
-    }
+
+  protected IndexSearcher getIndexSearcher(int ngramSize) {
+    IndexSearcher luceneSearcher = luceneSearcherMap.get(ngramSize);
     return luceneSearcher;
   }
-*/
+
 /*
 GTODO Clean up
   private LuceneSearcher getCachedLuceneSearcher(File indexDir) {

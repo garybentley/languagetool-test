@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Runs LanguageTool on Jenny Pedler's Real-word Error Corpus, available at
  * http://www.dcs.bbk.ac.uk/~jenny/resources.html.
- * 
+ *
  * Results as of 2014-09-03 (pure LT without corpus data, i.e. without confusion rule):
  * <pre>
  * Counting matches, no matter whether the first suggestion is correct:
@@ -44,7 +44,7 @@ import java.util.List;
  * 119 out of 206 matches are real errors => 0,58 precision, 0,14 recall
  * => 0,3593 F(0.5) measure
  * </pre>
- * 
+ *
  * Results as of 2014-09-03 (LT with 3grams from Google ngram index, in form of a Lucene index), with a cleaned
  * up Pedler corpus (see resources/data/pedler_corpus.diff):
  * <pre>
@@ -59,7 +59,7 @@ import java.util.List;
  * 172 out of 259 matches are real errors => 0,66 precision, 0,21 recall
  * => 0,4604 F(0.5) measure
  * </pre>
- * 
+ *
  * <p>After the Deadline has a precision of 89.4% and a recall of 27.1%  ("The Design of a Proofreading Software Service",
  * Raphael Mudge, 2010). The recall is calculated by comparing only the first suggestion to the expected correction.
  * Also see the constructor of this class where you can comment in AtDEvalChecker to run a direct comparison.
@@ -70,7 +70,7 @@ class RealWordCorpusEvaluator {
 
   private final Evaluator evaluator;
   private final List<String> badConfusionMatchWords = new ArrayList<>();
-  
+
   private int sentenceCount;
   private int errorsInCorpusCount;
   private int perfectMatches;
@@ -80,12 +80,12 @@ class RealWordCorpusEvaluator {
   private int goodConfusionMatches;
   private int badConfusionMatches;
 
-  RealWordCorpusEvaluator(File indexDir) throws IOException {
+  RealWordCorpusEvaluator(File indexDir) throws Exception {
     evaluator = getEvaluator(indexDir);
   }
 
   @NotNull
-  protected Evaluator getEvaluator(File indexTopDir) throws IOException {
+  protected Evaluator getEvaluator(File indexTopDir) throws Exception {
     Evaluator checker = new LanguageToolEvaluator(indexTopDir);
     // use this to run AtD as the backend, so results can easily be compared to LT:
     //checker = new AtDEvalChecker("http://en.service.afterthedeadline.com/checkDocument?key=test&data=");
@@ -96,7 +96,7 @@ class RealWordCorpusEvaluator {
   protected ErrorCorpus getCorpus(File dir) throws IOException {
     return new PedlerCorpus(dir);
   }
-  
+
   void close() {
     evaluator.close();
   }
@@ -117,7 +117,7 @@ class RealWordCorpusEvaluator {
     return perfectMatches;
   }
 
-  void run(File dir) throws IOException {
+  void run(File dir) throws Exception {
     System.out.println("Output explanation:");
     System.out.println("    [  ] = this is not an expected error");
     System.out.println("    [+ ] = this is an expected error");
@@ -129,7 +129,7 @@ class RealWordCorpusEvaluator {
     printResults();
   }
 
-  private void checkLines(ErrorCorpus corpus) throws IOException {
+  private void checkLines(ErrorCorpus corpus) throws Exception {
     for (ErrorSentence sentence : corpus) {
       List<RuleMatch> matches = evaluator.check(sentence.getAnnotatedText());
       sentenceCount++;
@@ -185,7 +185,7 @@ class RealWordCorpusEvaluator {
             + goodConfusionMatches + " good, " + badConfusionMatches + " bad (" + badConfusionMatchWords + ")");
 
     System.out.println("\nCounting matches, no matter whether the first suggestion is correct:");
-    
+
     System.out.print("  " + goodMatches + " out of " + matchCount + " matches are real errors");
     float goodPrecision = (float)goodMatches / matchCount;
     float goodRecall = (float)goodMatches / errorsInCorpusCount;
@@ -193,7 +193,7 @@ class RealWordCorpusEvaluator {
 
     System.out.printf("  => %.4f F(0.5) measure\n",
             FMeasure.getWeightedFMeasure(goodPrecision, goodRecall));
-    
+
     System.out.println("\nCounting only matches with a perfect first suggestion:");
 
     System.out.print("  " + perfectMatches + " out of " + matchCount + " matches are real errors");
@@ -215,7 +215,7 @@ class RealWordCorpusEvaluator {
     return false;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 1 && args.length != 2) {
       System.out.println("Usage: " + RealWordCorpusEvaluator.class.getSimpleName() + " <corpusDirectory> [languageModel]");
       System.out.println("   [languageModel] is a Lucene index directory with ngram frequency information (optional)");
@@ -232,5 +232,5 @@ class RealWordCorpusEvaluator {
     evaluator.run(new File(args[0]));
     evaluator.close();
   }
-  
+
 }

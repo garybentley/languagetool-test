@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,8 +28,8 @@ import java.util.List;
  * @since 2.7
  */
 interface Evaluator {
-  
-  List<RuleMatch> check(AnnotatedText annotatedText) throws IOException;
+
+  List<RuleMatch> check(AnnotatedText annotatedText) throws Exception;
 
   void close();
 }

@@ -37,7 +37,7 @@ import java.util.*;
 import static org.languagetool.server.ServerTools.print;
 
 /**
- * Handle requests to {@code /v2/} of the HTTP API. 
+ * Handle requests to {@code /v2/} of the HTTP API.
  * @since 3.4
  */
 class ApiV2 {
@@ -114,7 +114,7 @@ class ApiV2 {
     List<UserDictEntry> words = db.getWords(limits.getPremiumUid(), offset, limit);
     writeListResponse("words", words, httpExchange);
   }
-  
+
   private void handleWordAddRequest(HttpExchange httpExchange, Map<String, String> parameters, HTTPServerConfig config) throws Exception {
     ensurePostMethod(httpExchange, "/words/add");
     UserLimits limits = getUserLimits(parameters, config);
@@ -136,7 +136,7 @@ class ApiV2 {
       throw new IllegalArgumentException(url + " needs to be called with GET");
     }
   }
-  
+
   private void ensurePostMethod(HttpExchange httpExchange, String url) {
     if (!httpExchange.getRequestMethod().equalsIgnoreCase("post")) {
       throw new IllegalArgumentException(url + " needs to be called with POST");
@@ -161,7 +161,7 @@ class ApiV2 {
     }
     sendJson(httpExchange, sw);
   }
-  
+
   private void writeListResponse(String fieldName, List<UserDictEntry> words, HttpExchange httpExchange) throws IOException {
     StringWriter sw = new StringWriter();
     try (JsonGenerator g = factory.createGenerator(sw)) {
@@ -253,8 +253,8 @@ class ApiV2 {
       for (Language lang : languages) {
         g.writeStartObject();
         g.writeStringField("name", lang.getName());
-        g.writeStringField("code", lang.getShortCode());
-        g.writeStringField("longCode", lang.getShortCodeWithCountryAndVariant());
+        g.writeStringField("code", lang.getLocale().getLanguage());
+        g.writeStringField("longCode", lang.getLocale().toLanguageTag());
         g.writeEndObject();
       }
       g.writeEndArray();

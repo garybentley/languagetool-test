@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -36,7 +36,7 @@ public class POSDictionaryBuilderTest extends DictionaryBuilderTestHelper {
   @Ignore("for interactive use only")
   public void testExportAndImport() throws Exception {
     for (Language language : Languages.get()) {
-      String langCode = language.getShortCode();
+      String langCode = language.getLocale().getLanguage();
       File dir = new File("./languagetool-language-modules/" + langCode + "/src/main/resources/org/languagetool/resource/" + langCode);
       File oldBinaryFile = new File(dir, language.getName().toLowerCase() + ".dict");
       File infoFile = new File(dir, language.getName().toLowerCase() + ".info");
@@ -59,8 +59,8 @@ public class POSDictionaryBuilderTest extends DictionaryBuilderTestHelper {
       System.out.println("");
     }
   }
-  
-  private static final String INFO = 
+
+  private static final String INFO =
       "fsa.dict.separator=+\n" +
       "fsa.dict.encoding=cp1251\n" +
       "fsa.dict.encoder=SUFFIX";
@@ -74,10 +74,10 @@ public class POSDictionaryBuilderTest extends DictionaryBuilderTestHelper {
       Files.write(inputFile, Arrays.asList("word\tlemma\ttag"));
       Files.write(infoFile, Arrays.asList(INFO));
       POSDictionaryBuilder.main(new String[] {
-          "-i", inputFile.toAbsolutePath().toString(), 
-          "-info", infoFile.toAbsolutePath().toString(), 
+          "-i", inputFile.toAbsolutePath().toString(),
+          "-info", infoFile.toAbsolutePath().toString(),
           "-o", outFile.toAbsolutePath().toString()} );
-      
+
       assertTrue(outFile.toFile().length() >= 40);
     } finally {
       outFile.toFile().deleteOnExit();

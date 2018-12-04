@@ -21,20 +21,20 @@ package org.languagetool.rules.ca;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.RuleMatch;
-import org.languagetool.synthesis.ca.CatalanSynthesizer;
+import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Objects;
 
 /**
  * Adds simple replacement using lemmas
@@ -43,29 +43,17 @@ import java.util.ResourceBundle;
  */
 public abstract class AbstractSimpleReplaceLemmasRule extends AbstractSimpleReplaceRule {
 
-  protected Map<String, List<String>> wrongLemmas = null;
-  private static final Locale CA_LOCALE = new Locale("CA");
-  private CatalanSynthesizer synth;
+  private Synthesizer synth;
 
-  public AbstractSimpleReplaceLemmasRule(final ResourceBundle messages, Language language) throws IOException {
-    super(messages, language.getUseDataBroker());
+  public AbstractSimpleReplaceLemmasRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, Synthesizer synthesizer, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     this.setIgnoreTaggedWords();
-    synth = (CatalanSynthesizer) language.getSynthesizer();
-  }
-
-  @Override
-  protected Map<String, List<String>> getWrongWords() {
-    return wrongLemmas;
+    synth = Objects.requireNonNull(synthesizer, "Synthesizer must be provided.");
   }
 
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return CA_LOCALE;
   }
 
   @Override
@@ -94,19 +82,11 @@ public abstract class AbstractSimpleReplaceLemmasRule extends AbstractSimpleRepl
         String[] synthesized = null;
         // synthesize replacements
         for (String replacementLemma : replacementLemmas) {
-          try {
             synthesized = synth.synthesize(new AnalyzedToken(replacementLemma, replacePOSTag, replacementLemma),
                 replacePOSTag);
-          } catch (IOException e) {
-            throw new RuntimeException("Could not synthesize: " + replacementLemma + " with tag " + replacePOSTag, e);
-          } // try with another gender
           if (synthesized.length == 0) {
-            try {
               String replacePOSTag2 = replacePOSTag.replaceAll("[MFC]S",".S").replaceAll("[MFC]P",".P");
               synthesized = synth.synthesize(new AnalyzedToken(replacementLemma, replacePOSTag, replacementLemma), replacePOSTag2);
-            } catch (IOException e) {
-              throw new RuntimeException("Could not synthesize: " + replacementLemma + " with tag " + replacePOSTag, e);
-            }
           } // add the suggestion without inflection
           if (synthesized.length == 0 && replacementLemma.length()>1) {
             possibleReplacements.add(replacementLemma);

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,13 +34,13 @@ import java.util.List;
 /**
  * Configuration like list of disabled rule IDs, server mode etc.
  * Configuration is loaded from and stored to a properties file.
- * 
+ *
  * @author Daniel Naber
  */
 public class Configuration {
-  
+
   static final int DEFAULT_SERVER_PORT = 8081;  // should be HTTPServerConfig.DEFAULT_PORT but we don't have that dependency
-  static final int DEFAULT_NUM_CHECK_PARAS = 5;  //  default number of parameters to be checked by TextLevelRules in LO/OO 
+  static final int DEFAULT_NUM_CHECK_PARAS = 5;  //  default number of parameters to be checked by TextLevelRules in LO/OO
   static final int FONT_STYLE_INVALID = -1;
   static final int FONT_SIZE_INVALID = -1;
   static final Color STYLE_COLOR = new Color( 0, 175, 0);
@@ -114,18 +114,18 @@ public class Configuration {
 
   /**
    * Uses the configuration file from the default location.
-   * @param lang The language for the configuration, used to distinguish 
+   * @param lang The language for the configuration, used to distinguish
    * rules that are enabled or disabled per language.
    */
-  public Configuration(Language lang) throws IOException {
+  public Configuration(Language lang) throws Exception {
     this(new File(System.getProperty("user.home")), CONFIG_FILE, lang);
   }
 
-  public Configuration(File baseDir, Language lang) throws IOException {
+  public Configuration(File baseDir, Language lang) throws Exception {
     this(baseDir, CONFIG_FILE, lang);
   }
 
-  public Configuration(File baseDir, String filename, Language lang) throws IOException {
+  public Configuration(File baseDir, String filename, Language lang) throws Exception {
     if (baseDir == null || !baseDir.isDirectory()) {
       throw new IllegalArgumentException("Cannot open file " + filename + " in directory " + baseDir);
     }
@@ -200,7 +200,7 @@ public class Configuration {
     for (Map.Entry<String, String> entry : configuration.specialTabCategories.entrySet()) {
       this.specialTabCategories.put(entry.getKey(), entry.getValue());
     }
-    
+
   }
 
   public Set<String> getDisabledRuleIds() {
@@ -321,7 +321,7 @@ public class Configuration {
   }
 
   /**
-   * get the number of paragraphs to be checked for TextLevelRules 
+   * get the number of paragraphs to be checked for TextLevelRules
    * @since 4.0
    */
   public int getNumParasToCheck() {
@@ -329,13 +329,13 @@ public class Configuration {
   }
 
   /**
-   * set the number of paragraphs to be checked for TextLevelRules 
+   * set the number of paragraphs to be checked for TextLevelRules
    * @since 4.0
    */
   public void setNumParasToCheck(int numParas) {
     this.numParasToCheck = numParas;
   }
-  
+
   /**
    * will all paragraphs check after every change of text?
    * @since 4.2
@@ -351,7 +351,7 @@ public class Configuration {
   public void setDoResetCheck(boolean resetCheck) {
     this.doResetCheck = resetCheck;
   }
-  
+
   /**
    * Returns the name of the GUI's editing textarea font.
    * @return the name of the font.
@@ -485,7 +485,7 @@ public class Configuration {
    * @since 4.3
    * Initialize set of style like categories
    */
-  private void initStyleCategories(Language lang) {
+  private void initStyleCategories(Language lang) throws Exception {
     if (lang == null) {
       lang = language;
       if (lang == null) {
@@ -640,11 +640,11 @@ public class Configuration {
 
       String languageStr = (String) props.get(LANGUAGE_KEY);
       if (languageStr != null) {
-        language = Languages.getLanguageForShortCode(languageStr);
+          language = Languages.getLanguage(languageStr);
       }
       String motherTongueStr = (String) props.get(MOTHER_TONGUE_KEY);
       if (motherTongueStr != null && !motherTongueStr.equals("xx")) {
-        motherTongue = Languages.getLanguageForShortCode(motherTongueStr);
+        motherTongue = Languages.getLanguage(motherTongueStr);
       }
       String ngramDir = (String) props.get(NGRAM_DIR_KEY);
       if (ngramDir != null) {
@@ -690,12 +690,12 @@ public class Configuration {
       if (paraCheckString != null) {
         numParasToCheck = Integer.parseInt(paraCheckString);
       }
-      
+
       String resetCheckString = (String) props.get(RESET_CHECK_KEY);
       if (resetCheckString != null) {
         doResetCheck = Boolean.parseBoolean(resetCheckString);
       }
-      
+
       String rulesValuesString = (String) props.get(CONFIGURABLE_RULE_VALUES_KEY);
       parseConfigurableRuleValues(rulesValuesString);
 
@@ -707,7 +707,7 @@ public class Configuration {
 
       //store config for other languages
       loadConfigForOtherLanguages(lang, props);
-      
+
     } catch (FileNotFoundException e) {
       // file not found: okay, leave disabledRuleIds empty
     }
@@ -758,7 +758,7 @@ public class Configuration {
   private String getQualifier(Language lang) {
     String qualifier = "";
     if (lang != null) {
-      qualifier = "." + lang.getShortCodeWithCountryAndVariant();
+      qualifier = "." + lang.getLocale().toLanguageTag();
     }
     return qualifier;
   }
@@ -766,7 +766,7 @@ public class Configuration {
   private void loadConfigForOtherLanguages(Language lang, Properties prop) {
     for (Language otherLang : Languages.get()) {
       if (!otherLang.equals(lang)) {
-        String languageSuffix = "." + otherLang.getShortCodeWithCountryAndVariant();
+        String languageSuffix = "." + otherLang.getLocale().toLanguageTag();
         storeConfigKeyFromProp(prop, DISABLED_RULES_KEY + languageSuffix);
         storeConfigKeyFromProp(prop, ENABLED_RULES_KEY + languageSuffix);
         storeConfigKeyFromProp(prop, DISABLED_CATEGORIES_KEY + languageSuffix);
@@ -799,10 +799,10 @@ public class Configuration {
     addListToProperties(props, DISABLED_CATEGORIES_KEY + qualifier, disabledCategoryNames);
     addListToProperties(props, ENABLED_CATEGORIES_KEY + qualifier, enabledCategoryNames);
     if (language != null && !language.isExternal()) {  // external languages won't be known at startup, so don't save them
-      props.setProperty(LANGUAGE_KEY, language.getShortCodeWithCountryAndVariant());
+      props.setProperty(LANGUAGE_KEY, language.getLocale().toLanguageTag());
     }
     if (motherTongue != null) {
-      props.setProperty(MOTHER_TONGUE_KEY, motherTongue.getShortCode());
+      props.setProperty(MOTHER_TONGUE_KEY, motherTongue.getLocale().getCountry());
     }
     if (ngramDirectory != null) {
       props.setProperty(NGRAM_DIR_KEY, ngramDirectory.getAbsolutePath());
@@ -870,5 +870,5 @@ public class Configuration {
       props.setProperty(key, String.join(DELIMITER,  list));
     }
   }
-  
+
 }

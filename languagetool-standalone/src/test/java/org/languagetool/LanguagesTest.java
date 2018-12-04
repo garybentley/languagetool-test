@@ -54,18 +54,13 @@ public class LanguagesTest {
 
   @Test
   public void testGetLanguageForShortName() {
-    assertEquals("en-US", Languages.getLanguageForShortCode("en-us").getShortCodeWithCountryAndVariant());
-    assertEquals("en-US", Languages.getLanguageForShortCode("EN-US").getShortCodeWithCountryAndVariant());
-    assertEquals("en-US", Languages.getLanguageForShortCode("en-US").getShortCodeWithCountryAndVariant());
-    assertEquals("de", Languages.getLanguageForShortCode("de").getShortCodeWithCountryAndVariant());
-    try {
-      Languages.getLanguageForShortCode("xy");
-      fail();
-    } catch (IllegalArgumentException ignored) {}
-    try {
-      Languages.getLanguageForShortCode("YY-KK");
-      fail();
-    } catch (IllegalArgumentException ignored) {}
+      // GTODO These tests should be changed to use the Language.LOCALE value.
+    assertEquals("en-US", Languages.getLanguage("en-us").getLocale().toLanguageTag());
+    assertEquals("en-US", Languages.getLanguage("EN-US").getLocale().toLanguageTag());
+    assertEquals("en-US", Languages.getLanguage("en-US").getLocale().toLanguageTag());
+    assertEquals("de", Languages.getLanguage("de").getLocale().toLanguageTag());
+    assertEquals(null, Languages.getLanguage("xy"));
+    assertEquals(null, Languages.getLanguage("YY-KK"));
   }
 
   @Test
@@ -83,7 +78,10 @@ public class LanguagesTest {
     assertFalse(Languages.isLanguageSupported("zz"));
     assertFalse(Languages.isLanguageSupported("somthing totally invalid"));
   }
-
+/*
+GTODO These tests are no longer valid since the expected behaviour is to return null rather than throw an exception.
+That's flow control through exceptions which I intensely dislike.  These tests should be changed to test for null.
+Also they have some redundancy.
   @Test(expected=IllegalArgumentException.class)
   public void testIsLanguageSupportedInvalidCode() {
     Languages.isLanguageSupported("somthing-totally-inv-alid");
@@ -103,25 +101,33 @@ public class LanguagesTest {
   public void testInvalidShortName3() {
     Languages.getLanguageForShortCode("xyz-xx");
   }
-
+*/
   @Test
   public void testGetLanguageForName() {
-    assertEquals("en-US", Languages.getLanguageForName("English (US)").getShortCodeWithCountryAndVariant());
-    assertEquals("de", Languages.getLanguageForName("German").getShortCodeWithCountryAndVariant());
+    assertEquals("en-US", Languages.getLanguageForName("English (US)").getLocale().toLanguageTag());
+    assertEquals("de", Languages.getLanguageForName("German").getLocale().toLanguageTag());
     assertEquals(null, Languages.getLanguageForName("Foobar"));
   }
 
   @Test
   public void testIsVariant() {
+      /*
+      GTODO This is not the business of the standalone to be testing whether a language has a variant.
+      The relevant language module should test for this.
+
     Assert.assertTrue(Languages.getLanguageForShortCode("en-US").isVariant());
     Assert.assertTrue(Languages.getLanguageForShortCode("de-CH").isVariant());
 
     assertFalse(Languages.getLanguageForShortCode("en").isVariant());
     assertFalse(Languages.getLanguageForShortCode("de").isVariant());
+    */
   }
 
   @Test
   public void testHasVariant() {
+      /*
+      GTODO This is not the business of the standalone to be testing whether a language has a variant.
+      The relevant language module should test for this.
     Assert.assertTrue(Languages.getLanguageForShortCode("en").hasVariant());
     Assert.assertTrue(Languages.getLanguageForShortCode("de").hasVariant());
 
@@ -135,39 +141,22 @@ public class LanguagesTest {
         assertNotNull("Language " + language + " needs a default variant", language.getDefaultLanguageVariant());
       }
     }
-  }
-  
-  @Test
-  public void isHiddenFromGui() {
-    Assert.assertTrue(Languages.getLanguageForShortCode("en").isHiddenFromGui());
-    Assert.assertTrue(Languages.getLanguageForShortCode("de").isHiddenFromGui());
-    Assert.assertTrue(Languages.getLanguageForShortCode("pt").isHiddenFromGui());
-
-    assertFalse(Languages.getLanguageForShortCode("en-US").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("de-CH").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("ast").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("pl").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("ca-ES").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("ca-ES-valencia").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("de-DE-x-simple-language").isHiddenFromGui());
-    assertFalse(Languages.getLanguageForShortCode("de-DE").isHiddenFromGui());
-
+    */
   }
 
   @Test
   public void testGetLanguageForLocale() {
-    assertEquals("de", Languages.getLanguageForLocale(Locale.GERMAN).getShortCode());
-    assertEquals("de", Languages.getLanguageForLocale(Locale.GERMANY).getShortCode());
-    assertEquals("de-DE", Languages.getLanguageForLocale(new Locale("de", "DE")).getShortCodeWithCountryAndVariant());
-    assertEquals("de-AT", Languages.getLanguageForLocale(new Locale("de", "AT")).getShortCodeWithCountryAndVariant());
-    assertEquals("en-US", Languages.getLanguageForLocale(new Locale("en", "US")).getShortCodeWithCountryAndVariant());
-    assertEquals("en-GB", Languages.getLanguageForLocale(new Locale("en", "GB")).getShortCodeWithCountryAndVariant());
+    assertEquals("de", Languages.getLanguage(Locale.GERMAN).getLocale().getLanguage());
+    assertEquals("de", Languages.getLanguage(Locale.GERMANY).getLocale().getLanguage());
+    assertEquals("de-DE", Languages.getLanguage(new Locale("de", "DE")).getLocale().toLanguageTag());
+    assertEquals("de-AT", Languages.getLanguage(new Locale("de", "AT")).getLocale().toLanguageTag());
+    assertEquals("en-US", Languages.getLanguage(new Locale("en", "US")).getLocale().toLanguageTag());
+    assertEquals("en-GB", Languages.getLanguage(new Locale("en", "GB")).getLocale().toLanguageTag());
     // fallback to the language's default variant if not specified:
-    assertEquals("en-US", Languages.getLanguageForLocale(new Locale("en")).getShortCodeWithCountryAndVariant());
-    assertEquals("de-DE", Languages.getLanguageForLocale(new Locale("de")).getShortCodeWithCountryAndVariant());
-    assertEquals("pl-PL", Languages.getLanguageForLocale(new Locale("pl")).getShortCodeWithCountryAndVariant());
+    assertEquals("en-US", Languages.getBestMatchLanguage(new Locale("en")).getLocale().toLanguageTag());
+    assertEquals("de-DE", Languages.getBestMatchLanguage(new Locale("de")).getLocale().toLanguageTag());
+    assertEquals("pl-PL", Languages.getBestMatchLanguage(new Locale("pl")).getLocale().toLanguageTag());
     // final fallback is everything else fails:
-    assertEquals("en-US", Languages.getLanguageForLocale(Locale.KOREAN).getShortCodeWithCountryAndVariant());
-    assertEquals("en-US", Languages.getLanguageForLocale(new Locale("zz")).getShortCodeWithCountryAndVariant());
+    // GTODO This is just bad, if you ask for Korean you should either get Korean or nothing since the caller would assume that they received Korean.  assertEquals("en-US", Languages.getLanguageForLocale(Locale.KOREAN).getShortCodeWithCountryAndVariant());
   }
 }

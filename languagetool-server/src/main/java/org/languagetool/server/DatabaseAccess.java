@@ -74,7 +74,7 @@ class DatabaseAccess {
       print("Not setting up database access, dbDriver is not configured");
     }
   }
-  
+
   static synchronized void init(HTTPServerConfig config) {
     if (instance == null) {
       instance = new DatabaseAccess(config);
@@ -131,7 +131,7 @@ class DatabaseAccess {
       return session.selectList("org.languagetool.server.UserDictMapper.selectWordList", map, new RowBounds(offset, limit));
     }
   }
-  
+
   boolean addWord(String word, Long userId) {
     validateWord(word);
     if (sqlSessionFactory == null) {
@@ -278,13 +278,13 @@ class DatabaseAccess {
       map.put("user_id", userId);
       map.put("textsize", textSize);
       map.put("matches", matches);
-      map.put("language", lang.getShortCodeWithCountryAndVariant());
+      map.put("language", lang.getLocale().toLanguageTag());
       session.insert("org.languagetool.server.LogMapper.logCheck", map);
     } catch (Exception e) {
       print("Could not log check for " + userId + ": " + e.getMessage());
     }
   }
-  
+
   private void validateWord(String word) {
     if (word == null || word.trim().isEmpty()) {
       throw new IllegalArgumentException("Invalid word, cannot be empty or whitespace only");
@@ -304,7 +304,7 @@ class DatabaseAccess {
       session.insert("org.languagetool.server.UserDictMapper.createTestUser2");
     }
   }
-  
+
   /** For unit tests only! */
   public static void deleteTestTables() {
     try (SqlSession session = sqlSessionFactory.openSession(true)) {

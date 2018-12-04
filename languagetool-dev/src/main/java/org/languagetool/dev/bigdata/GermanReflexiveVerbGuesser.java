@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,7 @@ import org.languagetool.AnalyzedToken;
 import org.languagetool.language.GermanyGerman;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.synthesis.Synthesizer;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,15 +37,15 @@ import static java.util.Arrays.asList;
 final class GermanReflexiveVerbGuesser {
 
   private final Synthesizer synthesizer;
-          
-  private GermanReflexiveVerbGuesser() {
+
+  private GermanReflexiveVerbGuesser() throws Exception {
     synthesizer = new GermanyGerman().getSynthesizer();
   }
-  
-  private void run(File indexTopDir, File lemmaListFile) throws IOException {
+
+  private void run(File indexTopDir, File lemmaListFile) throws Exception {
     List<String> lemmas = Files.readAllLines(lemmaListFile.toPath());
     System.out.println("Durchschnitt Prozent | Anzahl Lemma | mich/uns/euch ... | ... mich/uns/euch | Lemma");
-    try (LuceneLanguageModel lm = new LuceneLanguageModel(indexTopDir)) {
+    try (LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(indexTopDir.toPath().toRealPath())) {
       for (String lemma : lemmas) {
         //if (!lemma.equals("reklamieren")) { continue; }
         //if (!lemma.equals("hertreiben")) { continue; }
@@ -52,7 +53,7 @@ final class GermanReflexiveVerbGuesser {
         String[] thirdPsSinArray = synthesizer.synthesize(new AnalyzedToken(lemma, "VER:INF:NON", lemma), "VER:3:SIN:PRÄ.*", true);
         String firstPsSin = firstPsSinArray.length > 0 ? firstPsSinArray[0] : null;
         String thirdPsSin = thirdPsSinArray.length > 0 ? thirdPsSinArray[0] : null;
-        long reflexiveCount1 = count1(lm, lemma, firstPsSin, thirdPsSin) 
+        long reflexiveCount1 = count1(lm, lemma, firstPsSin, thirdPsSin)
                                - counterExamples("für", lm, lemma, firstPsSin, thirdPsSin)
                                - counterExamples("vor", lm, lemma, firstPsSin, thirdPsSin);
         long reflexiveCount2 = count2(lm, lemma, firstPsSin, thirdPsSin);
@@ -98,7 +99,7 @@ final class GermanReflexiveVerbGuesser {
       + lm.getCount(asList(lemma, "sich"));
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + GermanReflexiveVerbGuesser.class.getName() + " <ngramDataIndex> <verbLemmaFile>");
       System.exit(1);

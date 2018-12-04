@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -38,7 +38,7 @@ import org.languagetool.JLanguageTool;
 
 /**
  * A filter that indexes the tokens with POS tags.
- * 
+ *
  * @author Tao Lin
  */
 public final class LanguageToolFilter extends TokenFilter {
@@ -95,7 +95,13 @@ public final class LanguageToolFilter extends TokenFilter {
           sentenceStr = collectedInput.toString();
           collectedInput.setLength(0);
         }
-        AnalyzedSentence sentence = languageTool.getAnalyzedSentence(sentenceStr);
+        AnalyzedSentence sentence = null;
+
+        try {
+            languageTool.getAnalyzedSentence(sentenceStr);
+        } catch(Exception e) {
+            throw new IOException(String.format("Unable to analyze sentence: %1$s", sentenceStr), e);
+        }
         List<AnalyzedTokenReadings> tokenBuffer = Arrays.asList(sentence.getTokens());
         tokenIter = tokenBuffer.iterator();
         /*

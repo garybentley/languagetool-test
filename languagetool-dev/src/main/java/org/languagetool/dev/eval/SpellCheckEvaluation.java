@@ -34,15 +34,15 @@ import java.util.List;
  * @since 2.7
  */
 public class SpellCheckEvaluation {
-  
+
   private static final int MAX_SUGGESTIONS = 5;
 
-  private void run(Language language, File file) throws IOException {
+  private void run(Language language, File file) throws Exception {
     JLanguageTool lt = getLanguageToolForSpellCheck(language);
     checkFile(file, lt);
   }
 
-  private JLanguageTool getLanguageToolForSpellCheck(Language language) {
+  private JLanguageTool getLanguageToolForSpellCheck(Language language) throws Exception {
     JLanguageTool lt = new JLanguageTool(language);
     for (Rule rule : lt.getAllActiveRules()) {
       if (!rule.isDictionaryBasedSpellingRule()) {
@@ -52,7 +52,7 @@ public class SpellCheckEvaluation {
     return lt;
   }
 
-  private void checkFile(File file, JLanguageTool lt) throws IOException {
+  private void checkFile(File file, JLanguageTool lt) throws Exception {
     try (
       FileInputStream fis = new FileInputStream(file);
       InputStreamReader reader = new InputStreamReader(fis, "utf-8");
@@ -71,12 +71,12 @@ public class SpellCheckEvaluation {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + SpellCheckEvaluation.class.getSimpleName() + " <langCode> <textFile>");
       System.exit(1);
     }
     SpellCheckEvaluation eval = new SpellCheckEvaluation();
-    eval.run(Languages.getLanguageForShortCode(args[0]), new File(args[1]));
+    eval.run(Languages.getLanguage(args[0]), new File(args[1]));
   }
 }

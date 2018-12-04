@@ -42,8 +42,7 @@ public class ManualTaggerAdapter implements Tagger {
   }
 
   @Override
-  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens)
-          throws IOException {
+  public List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) {
     List<AnalyzedTokenReadings> tokenReadings = new ArrayList<>();
     int pos = 0;
     for (String word : sentenceTokens) {

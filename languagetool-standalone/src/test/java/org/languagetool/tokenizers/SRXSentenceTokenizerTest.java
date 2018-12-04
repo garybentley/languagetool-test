@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,18 +28,18 @@ import static org.junit.Assert.fail;
 public class SRXSentenceTokenizerTest {
 
   @Test
-  public void testOfficeFootnoteTokenize() {
+  public void testOfficeFootnoteTokenize() throws Exception {
     int count = 0;
     for (Language language : Languages.get()) {
       if (language.getSentenceTokenizer().getClass() != SRXSentenceTokenizer.class) {
         continue;
       }
-      if (language.getShortCode().equals("km") || language.getShortCode().equals("ml")) {
+      if (language.getLocale().getLanguage().equals("km") || language.getLocale().getLanguage().equals("ml")) {
         // TODO: I don't know about these...
         continue;
       }
       String input = "A sentence.\u0002 And another one.";
-      SentenceTokenizer tokenizer = new SRXSentenceTokenizer(language);
+      SentenceTokenizer tokenizer = language.getSentenceTokenizer();
       assertEquals("Sentence not split correctly for " + language + ": '" + input + "'",
               "[A sentence.\u0002 , And another one.]", tokenizer.tokenize(input).toString());
       count++;

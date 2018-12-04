@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà  i Font
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,7 +18,6 @@
  */
 package org.languagetool.rules.ca;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -34,7 +33,7 @@ import org.languagetool.rules.*;
  * This rule checks if an adjective doesn't agree with the previous noun and at
  * the same time it doesn't agree with any of the previous words. Takes care of
  * some exceptions.
- * 
+ *
  * @author Jaume Ortolà i Font
  */
 public class ComplexAdjectiveConcordanceRule extends Rule {
@@ -73,7 +72,7 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
   private static final Pattern GN_FP = Pattern.compile("N.[FC][PN].*|A..[FC][PN].*|V.P..PF.?|PX.FP.*|D[NDA0I]0FP0");
   private static final Pattern GN_CP = Pattern.compile("N.[FMC][PN].*|A..[FMC][PN].*|D[NDA0I]0[FM]P0");
   private static final Pattern GN_CS = Pattern.compile("N.[FMC][SN].*|A..[FMC][SN].*|D[NDA0I]0[FM]S0");
-  
+
   //private static final Pattern NOM_ADJ = Pattern.compile("N.*|A.*|V.P.*");
 
   private static final Pattern ADJECTIU = Pattern.compile("AQ.*|V.P.*|PX.*|.*LOC_ADJ.*");
@@ -115,8 +114,7 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
   boolean conjunctionAppeared = false;
   boolean punctuationAppeared = false;
 
-  public ComplexAdjectiveConcordanceRule(ResourceBundle messages)
-      throws IOException {
+  public ComplexAdjectiveConcordanceRule(ResourceBundle messages) {
     super.setCategory(new Category(new CategoryId("CONCORDANCES_GRUPS_NOMINALS"), "Z) Concordances en grups nominals"));
     setLocQualityIssueType(ITSIssueType.Grammar);
     addExamplePair(Example.wrong("Anàlisis <marker>clínic</marker>."),
@@ -222,7 +220,7 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
           continue goToNextToken;
         }
         // exceptions: un cop, una volta, una vegada...
-        if ((((prevPrevToken.equals("un") || prevPrevToken.equals("altre")) && (prevToken.equals("cop") || prevToken.equals("colp"))) 
+        if ((((prevPrevToken.equals("un") || prevPrevToken.equals("altre")) && (prevToken.equals("cop") || prevToken.equals("colp")))
             || ((prevPrevToken.equals("una") || prevPrevToken.equals("altra") || prevPrevToken.equals("aquesta")) && (prevToken.equals("volta") || prevToken.equals("vegada"))))
             ) {
           continue goToNextToken;
@@ -275,7 +273,7 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
             if (matchPostagRegexp(tokens[i - j], NOM) || (
             // adjectiu o participi sense nom, però amb algun determinant davant
                 i - j - 1 > 0 && !matchPostagRegexp(tokens[i - j], NOM)
-                    && matchPostagRegexp(tokens[i - j], ADJECTIU) 
+                    && matchPostagRegexp(tokens[i - j], ADJECTIU)
                     && matchPostagRegexp(tokens[i - j - 1], DET))) {
               if (matchPostagRegexp(tokens[i - j], _GN_MS)) {
                 cNMS[level]++;
@@ -396,11 +394,11 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
           j++;
         }
         // there is no noun, (no determinant --> && cDtotal==0)
-        if (cNtotal == 0 && cDtotal == 0) { 
+        if (cNtotal == 0 && cDtotal == 0) {
           continue goToNextToken;
-        }        
+        }
 
-        // patterns according to the analyzed adjective 
+        // patterns according to the analyzed adjective
         if (matchPostagRegexp(tokens[i], ADJECTIU_CS)) {
           substPattern = GN_CS;
           adjPattern = ADJECTIU_S;
@@ -431,7 +429,7 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
           continue goToNextToken;
         }
 
-        // combinations Det/Nom + adv (1,2..) + adj. 
+        // combinations Det/Nom + adv (1,2..) + adj.
         // If there is agreement, the rule doesn't match
         j = 1;
         boolean keepCount = true;
@@ -456,10 +454,10 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
             || (i>2 && matchPostagRegexp(tokens[i - 1], ADVERBIS_ACCEPTATS) && !matchPostagRegexp(tokens[i - 2], VERB) && !matchPostagRegexp(tokens[i - 2], PREPOSICIONS))
             || (i>3 && matchPostagRegexp(tokens[i - 1], LOC_ADV) && matchPostagRegexp(tokens[i - 2], LOC_ADV) && !matchPostagRegexp(tokens[i - 3], VERB) && !matchPostagRegexp(tokens[i - 3], PREPOSICIONS))
             ) {
-          
+
         } else {
           continue goToNextToken;
-        }        
+        }
 
         // Adjective can't be singular. The rule matches
         if (!(isPlural && matchPostagRegexp(tokens[i], ADJECTIU_S))) {
@@ -471,12 +469,12 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
             if (!matchPostagRegexp(tokens[i - j], _GN_)
                 && matchPostagRegexp(tokens[i - j], NOM_DET)
                 && matchPostagRegexp(tokens[i - j], substPattern)) {
-              continue goToNextToken; 
-            // there is a previous agreeing adjective (in a nominal group) 
+              continue goToNextToken;
+            // there is a previous agreeing adjective (in a nominal group)
             } else if ( matchPostagRegexp(tokens[i - j], gnPattern)) {
               continue goToNextToken;
             // if there is no nominal group, it requires noun
-            } /*else if (!matchPostagRegexp(tokens[i - j], _GN_) 
+            } /*else if (!matchPostagRegexp(tokens[i - j], _GN_)
                 && matchPostagRegexp(tokens[i - j], substPattern)) {
               continue goToNextToken; // there is a previous agreeing noun
             }*/
@@ -510,7 +508,7 @@ public class ComplexAdjectiveConcordanceRule extends Rule {
     return (matchPostagRegexp(aTr, KEEP_COUNT)
         || matchRegexp(aTr.getToken(), KEEP_COUNT2) || matchPostagRegexp(aTr,
           ADVERBIS_ACCEPTATS))
-        && !matchRegexp(aTr.getToken(), STOP_COUNT) 
+        && !matchRegexp(aTr.getToken(), STOP_COUNT)
         && (!matchPostagRegexp(aTr, GV) || matchPostagRegexp(aTr, _GN_));
   }
 

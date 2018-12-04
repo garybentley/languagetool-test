@@ -20,6 +20,8 @@ package org.languagetool.dev.wikipedia.atom;
 
 import org.junit.Test;
 import org.languagetool.tools.Tools;
+import org.languagetool.language.English;
+import org.languagetool.databroker.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -29,11 +31,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class AtomFeedParserTest {
-  
+
   @Test
-  public void testParsing() throws IOException, XMLStreamException {
+  public void testParsing() throws Exception, XMLStreamException {
     AtomFeedParser atomFeedParser = new AtomFeedParser();
-    List<AtomFeedItem> items = atomFeedParser.getAtomFeedItems(Tools.getStream("/org/languagetool/dev/wikipedia/atom/feed1.xml"));
+    English lang = new English();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    List<AtomFeedItem> items = atomFeedParser.getAtomFeedItems(broker.getResourceDirPathStream("/org/languagetool/dev/wikipedia/atom/feed1.xml"));
     assertThat(items.size(), is(3));
 
     AtomFeedItem item1 = items.get(0);

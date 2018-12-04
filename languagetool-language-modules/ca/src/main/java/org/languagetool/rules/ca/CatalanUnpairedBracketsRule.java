@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.rules.GenericUnpairedBracketsRule;
 import org.languagetool.rules.SymbolLocator;
 import org.languagetool.rules.UnsyncStack;
@@ -37,12 +36,12 @@ public class CatalanUnpairedBracketsRule extends GenericUnpairedBracketsRule {
   private static final List<String> CA_END_SYMBOLS   = Arrays.asList("]", ")", "}", "”", "»", "\"", "'", "’");
 
   //private static final Pattern NUMBER = Pattern.compile("[\\d,.]*\\d");
-  
+
   private static final Pattern VALID_BEFORE_CLOSING_PARENTHESIS = Pattern
       .compile("\\d+|[a-zA-Z]", Pattern.UNICODE_CASE);
   private static final Pattern NUMBER = Pattern.compile("\\d[\\d., ]+\\d|\\d{1,2}", Pattern.UNICODE_CASE);
 
-  public CatalanUnpairedBracketsRule(ResourceBundle messages, Language language) {
+  public CatalanUnpairedBracketsRule(ResourceBundle messages) {
     super(messages, CA_START_SYMBOLS, CA_END_SYMBOLS);
   }
 

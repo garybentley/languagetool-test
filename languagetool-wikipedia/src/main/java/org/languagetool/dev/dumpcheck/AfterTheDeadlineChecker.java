@@ -44,9 +44,9 @@ import java.util.List;
 /**
  * After the Deadline (http://openatd.wordpress.com) uses LanguageTool internally
  * for non-English checks but does some additional filtering on the matches. This class
- * checks Wikipedia and Tatoeba sentences with AtD so one can evaluate changes in the 
+ * checks Wikipedia and Tatoeba sentences with AtD so one can evaluate changes in the
  * AtD filtering.
- * 
+ *
  * @since 2.6
  */
 class AfterTheDeadlineChecker {
@@ -59,7 +59,7 @@ class AfterTheDeadlineChecker {
     this.maxSentenceCount = maxSentenceCount;
   }
 
-  private void run(Language lang, List<String> fileNames) throws IOException, XPathExpressionException {
+  private void run(Language lang, List<String> fileNames) throws Exception, XPathExpressionException {
     MixingSentenceSource mixingSource = MixingSentenceSource.create(fileNames, lang);
     int sentenceCount = 0;
     while (mixingSource.hasNext()) {
@@ -123,7 +123,7 @@ class AfterTheDeadlineChecker {
       System.out.println("   <file...>       Wikipedia and/or Tatoeba file(s)");
       System.exit(1);
     }
-    Language language = Languages.getLanguageForShortCode(args[0]);
+    Language language = Languages.getLanguage(args[0]);
     String urlPrefix = args[1];
     int maxSentenceCount = Integer.parseInt(args[2]);
     List<String> files = Arrays.asList(args).subList(3, args.length);

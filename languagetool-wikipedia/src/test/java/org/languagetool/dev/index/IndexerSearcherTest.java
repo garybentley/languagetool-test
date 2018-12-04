@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -109,7 +109,7 @@ public class IndexerSearcherTest extends LuceneTestCase {
           }
           if (!foundExpectedMatch) {
             System.out.println("Error: No match found for " + patternRule);
-            System.out.println("Query      : " + searcherResult.getRelaxedQuery().toString(FIELD_NAME_LOWERCASE)); 
+            System.out.println("Query      : " + searcherResult.getRelaxedQuery().toString(FIELD_NAME_LOWERCASE));
             System.out.println("Default field: " + FIELD_NAME_LOWERCASE);
             System.out.println("Lucene Hits: " + searcherResult.getLuceneMatchCount());
             System.out.println("Matches    : " + matchingSentences);
@@ -146,7 +146,7 @@ public class IndexerSearcherTest extends LuceneTestCase {
     return ids;
   }
 
-  private int createIndex(JLanguageTool lt) throws IOException {
+  private int createIndex(JLanguageTool lt) throws Exception {
     int ruleCount = 0;
     try (Indexer indexer = new Indexer(directory, lt.getLanguage())) {
       List<Rule> rules = lt.getAllActiveRules();
@@ -215,7 +215,7 @@ public class IndexerSearcherTest extends LuceneTestCase {
     } catch (PatternRuleNotFoundException ignored) {}
   }
 
-  private PatternRule getFirstRule(String ruleId, Language language) throws IOException {
+  private PatternRule getFirstRule(String ruleId, Language language) throws Exception {
     return errorSearcher.getRuleById(ruleId, language).get(0);
   }
 
@@ -332,7 +332,7 @@ public class IndexerSearcherTest extends LuceneTestCase {
     }
   }
 
-  private void createIndex(String content) throws IOException {
+  private void createIndex(String content) throws Exception {
     directory = new RAMDirectory();
     //directory = FSDirectory.open(new File("/tmp/lucenetest"));  // for debugging
     Indexer.run(content, directory, new English());

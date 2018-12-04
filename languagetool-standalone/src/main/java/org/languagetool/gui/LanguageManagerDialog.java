@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -49,10 +49,12 @@ import org.languagetool.language.LanguageBuilder;
 
 /**
  * Dialog for managing externally loaded rules.
- * 
+ *
  * @author Daniel Naber
  */
 public class LanguageManagerDialog implements ActionListener {
+
+// GTODO This class needs to be rewritten given that rule files are no longer directly applicable to languages.
 
   private final List<File> ruleFiles = new ArrayList<>();
   private final Frame owner;
@@ -66,18 +68,21 @@ public class LanguageManagerDialog implements ActionListener {
 
   public LanguageManagerDialog(Frame owner, List<Language> languages) {
     this.owner = owner;
+    /*
+     GTODO Removed, needs a rewrite
     for (Language lang : languages) {
       for (String ruleFile : lang.getRuleFileNames()) {
         ruleFiles.add(new File(ruleFile));
       }
     }
+    */
     messages = JLanguageTool.getMessageBundle();
   }
-  
+
   public void show() {
     dialog = new JDialog(owner, true);
     dialog.setTitle(messages.getString("guiLanguageManagerDialog"));
-    
+
     // close dialog when user presses Escape key:
     // TODO: taken from ConfigurationDialog, avoid duplication:
     KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
@@ -85,7 +90,7 @@ public class LanguageManagerDialog implements ActionListener {
       @Override
       @SuppressWarnings("unused")
       public void actionPerformed(ActionEvent actionEvent) {
-        dialog.setVisible(false); 
+        dialog.setVisible(false);
       }
     };
     JRootPane rootPane = dialog.getRootPane();
@@ -103,11 +108,11 @@ public class LanguageManagerDialog implements ActionListener {
     cons.weightx = 2.0f;
     cons.weighty = 2.0f;
     contentPane.add(new JScrollPane(list), cons);
-    
+
     cons = new GridBagConstraints();
     cons.insets = new Insets(4, 4, 4, 4);
     cons.fill = GridBagConstraints.HORIZONTAL;
-    
+
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new GridBagLayout());
     addButton = new JButton(messages.getString("guiAddButton"));
@@ -133,7 +138,7 @@ public class LanguageManagerDialog implements ActionListener {
     cons = new GridBagConstraints();
     cons.anchor = GridBagConstraints.NORTH;
     contentPane.add(buttonPanel, cons);
-    
+
     dialog.pack();
     dialog.setSize(300, 200);
     dialog.setLocationByPlatform(true);
@@ -146,8 +151,9 @@ public class LanguageManagerDialog implements ActionListener {
       Configuration config;
       try {
         config = new Configuration(null);
-      } catch (IOException e1) {
-        throw new RuntimeException(e1);
+      } catch (Exception e1) {
+        Tools.showError(e1);
+        return;
       }
       File initialDir;
       File ruleFile;
@@ -168,7 +174,8 @@ public class LanguageManagerDialog implements ActionListener {
       try {
         config.saveConfiguration(null);
       } catch (IOException e1) {
-        throw new RuntimeException(e1);
+        Tools.showError(e1);
+        return;
       }
       if (!ruleFiles.contains(ruleFile)) {
         ruleFiles.add(ruleFile);
@@ -189,7 +196,7 @@ public class LanguageManagerDialog implements ActionListener {
       throw new IllegalArgumentException("Don't know how to handle " + e);
     }
   }
-  
+
   /**
    * Return all external Languages.
    */
@@ -197,17 +204,18 @@ public class LanguageManagerDialog implements ActionListener {
     List<Language> languages = new ArrayList<>();
     for (File ruleFile : ruleFiles) {
       if (ruleFile != null) {
-        Language newLanguage = LanguageBuilder.makeAdditionalLanguage(ruleFile);
-        languages.add(newLanguage);
+        // GTODO Need to change this to:   public static Language makeAdditionalLanguage(Locale locale, String langName, Path ruleFile) throws Exception {
+        // GTODO Removed until call changed to new interface Language newLanguage = LanguageBuilder.makeAdditionalLanguage(ruleFile);
+        // GTODO languages.add(newLanguage);
       }
     }
     return languages;
   }
-  
+
   static class XMLFileFilter extends FileFilter {
     @Override
     public boolean accept(File f) {
-      if (f.getName().startsWith("rules") && f.getName().toLowerCase().endsWith(".xml") 
+      if (f.getName().startsWith("rules") && f.getName().toLowerCase().endsWith(".xml")
               || f.isDirectory()) {
         return true;
       }

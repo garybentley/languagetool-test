@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 public class FalseFriendRuleTest {
 
   @Test
-  public void testHintsForGermanSpeakers() throws IOException, ParserConfigurationException, SAXException {
+  public void testHintsForGermanSpeakers() throws Exception, ParserConfigurationException, SAXException {
     JLanguageTool lt = new JLanguageTool(new English(), new German());
     List<RuleMatch> matches = assertErrors(1, "We will berate you.", lt);
     assertEquals(matches.get(0).getSuggestedReplacements().toString(), "[provide advice, give advice]");
@@ -47,7 +47,7 @@ public class FalseFriendRuleTest {
   }
 
   @Test
-  public void testHintsForGermanSpeakersWithVariant() throws IOException, ParserConfigurationException, SAXException {
+  public void testHintsForGermanSpeakersWithVariant() throws Exception, ParserConfigurationException, SAXException {
     JLanguageTool lt = new JLanguageTool(new BritishEnglish(), new SwissGerman());
     List<RuleMatch> matches = assertErrors(1, "We will berate you.", lt);
     assertEquals(matches.get(0).getSuggestedReplacements().toString(), "[provide advice, give advice]");
@@ -58,7 +58,7 @@ public class FalseFriendRuleTest {
   }
 
   @Test
-  public void testHintsForDemoLanguage() throws IOException, ParserConfigurationException, SAXException {
+  public void testHintsForDemoLanguage() throws Exception, ParserConfigurationException, SAXException {
     JLanguageTool lt1 = new JLanguageTool(new BritishEnglish(), new German());
     lt1.disableRule(MorfologikBritishSpellerRule.RULE_ID);
     List<RuleMatch> matches1 = assertErrors(1, "And forDemoOnly.", lt1);
@@ -75,7 +75,7 @@ public class FalseFriendRuleTest {
   }
 
   @Test
-  public void testHintsForEnglishSpeakers() throws IOException, ParserConfigurationException, SAXException {
+  public void testHintsForEnglishSpeakers() throws Exception, ParserConfigurationException, SAXException {
     JLanguageTool lt = new JLanguageTool(new German(), new English());
     assertErrors(1, "Man sollte ihn nicht so beraten.", lt);
     assertErrors(0, "Man sollte ihn nicht so beschimpfen.", lt);
@@ -83,7 +83,7 @@ public class FalseFriendRuleTest {
   }
 
   @Test
-  public void testHintsForPolishSpeakers() throws IOException, ParserConfigurationException, SAXException {
+  public void testHintsForPolishSpeakers() throws Exception, ParserConfigurationException, SAXException {
     JLanguageTool lt = new JLanguageTool(new English() {
       @Override
       protected synchronized List<AbstractPatternRule> getPatternRules() {
@@ -96,15 +96,15 @@ public class FalseFriendRuleTest {
     assertErrors(1, "I have to speak to my advocate.", lt);
     assertSuggestions(3, "My brother is politic.", lt);
   }
-  
-  private List<RuleMatch> assertErrors(int errorCount, String s, JLanguageTool lt) throws IOException {
+
+  private List<RuleMatch> assertErrors(int errorCount, String s, JLanguageTool lt) throws Exception {
     List<RuleMatch> matches = lt.check(s);
     //System.err.println(matches);
     assertEquals("Matches found: " + matches, errorCount, matches.size());
     return matches;
   }
-  
-  private void assertSuggestions(int suggestionCount, String text, JLanguageTool lt) throws IOException {
+
+  private void assertSuggestions(int suggestionCount, String text, JLanguageTool lt) throws Exception {
     List<RuleMatch> matches = lt.check(text);
     int suggestionsFound = 0;
     for (RuleMatch match : matches) {
@@ -112,12 +112,12 @@ public class FalseFriendRuleTest {
       while (pos != -1) {
         pos = match.getMessage().indexOf("<suggestion>", pos + 1);
         suggestionsFound ++;
-      }       
+      }
     }
     if (suggestionsFound > 0) {
       suggestionsFound--;
     }
     assertEquals(suggestionCount, suggestionsFound);
   }
-  
+
 }

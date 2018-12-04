@@ -25,15 +25,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.rules.*;
-import org.languagetool.synthesis.ca.CatalanSynthesizer;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.synthesis.Synthesizer;
 
 /**
  * A rule that suggests better names for technical operation names
@@ -44,9 +45,9 @@ import org.languagetool.synthesis.ca.CatalanSynthesizer;
  */
 public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale CA_LOCALE = new Locale("CA");
-
+  //GTODO private static final Locale CA_LOCALE = new Locale("CA");
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
       if (wrongWords == null) {
@@ -54,8 +55,8 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
       }
     return wrongWords;
   }
-
-  private CatalanSynthesizer synth;
+*/
+  private Synthesizer synth;
 
   private static final Pattern PrevToken_POS = Pattern.compile("D[^R].*|PX.*|SPS00|SENT_START");
   private static final Pattern PrevToken_POS_Excep = Pattern.compile("RG_anteposat|N.*|CC|_PUNCT.*|_loc_unavegada|RN");
@@ -65,11 +66,11 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
   private static final Pattern DETERMINANT = Pattern.compile("D[^R].M.*");
 
 
-  public ReplaceOperationNamesRule(final ResourceBundle messages, Language language) throws IOException {
-    super(messages, language.getUseDataBroker());
+  public ReplaceOperationNamesRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, Synthesizer synthesizer, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     super.setLocQualityIssueType(ITSIssueType.Style);
     super.setCategory(new Category(new CategoryId("FORMES_SECUNDARIES"), "C8) Formes secundàries"));
-    synth = (CatalanSynthesizer) language.getSynthesizer();
+    synth = Objects.requireNonNull(synthesizer, "Synthesizer must be provided.");
   }
 
   @Override
@@ -93,11 +94,6 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
   }
 
   @Override
-  public Locale getLocale() {
-    return CA_LOCALE;
-  }
-
-  @Override
   public final RuleMatch[] match(final AnalyzedSentence sentence) {
     List<RuleMatch> ruleMatches = new ArrayList<>();
     AnalyzedTokenReadings[] tokens = sentence.getTokensWithoutWhitespace();
@@ -111,8 +107,8 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
       if (token.length()>3 && token.endsWith("s")) {
         token = token.substring(0, token.length() - 1);
       }
-      if (wrongWords.containsKey(token)) {
-        replacementLemmas = wrongWords.get(token);
+      if (containsWord(token)) {
+        replacementLemmas = getReplacements(token);
       } else {
         continue loop;
       }
@@ -159,13 +155,8 @@ public class ReplaceOperationNamesRule extends AbstractSimpleReplaceRule {
         } else {
           //synthesize plural
           for (String replacementLemma : replacementLemmas) {
-            try {
               synthesized = synth.synthesize(new AnalyzedToken(
                   replacementLemma, "NCMS000", replacementLemma), "NC.P.*");
-            } catch (IOException e) {
-              throw new RuntimeException("Could not synthesize: "
-                  + replacementLemma + " with tag NC.P.*.", e);
-            }
             possibleReplacements.addAll(Arrays.asList(synthesized));
           }
         }

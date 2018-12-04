@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -58,15 +58,15 @@ public class UserDictTest {
       HTTPServer server = new HTTPServer(config);
       try {
         server.run();
-        Language enUS = Languages.getLanguageForShortCode("en-US");
+        Language enUS = Languages.getLanguage("en-US");
         runTests(enUS, "This is Mysurname.", "This is Mxsurname.", "Mysurname", "MORFOLOGIK_RULE_EN_US");
         runTests(enUS, "Mysurname is my name.", "Mxsurname is my name.", "Mysurname", "MORFOLOGIK_RULE_EN_US");
-        Language deDE = Languages.getLanguageForShortCode("de-DE");
+        Language deDE = Languages.getLanguage("de-DE");
         runTests(deDE, "Das ist Meinname.", "Das ist Mxinname.", "Meinname", "GERMAN_SPELLER_RULE");
         runTests(deDE, "Meinname steht hier.", "Mxinname steht hier.", "Meinname", "GERMAN_SPELLER_RULE");
         runTests(deDE, "Hier steht Schöckl.", "Das ist Schückl.", "Schöckl", "GERMAN_SPELLER_RULE");
         String res = check(deDE, "Hier steht Schockl", USERNAME1, API_KEY1);
-        assertThat(StringUtils.countMatches(res, "GERMAN_SPELLER_RULE"), is (1));  // 'Schöckl' accepted, but not 'Schockl' (NOTE: depends on encoding/collation of database) 
+        assertThat(StringUtils.countMatches(res, "GERMAN_SPELLER_RULE"), is (1));  // 'Schöckl' accepted, but not 'Schockl' (NOTE: depends on encoding/collation of database)
         try {
           System.out.println("=== Testing multi word insertion now, ignore stack trace: ===");
           addWord("multi word", USERNAME1, API_KEY1);
@@ -111,7 +111,7 @@ public class UserDictTest {
   }
 
   private String check(Language lang, String text, String username, String apiKey) throws IOException {
-    String urlOptions = "?language=" + lang.getShortCodeWithCountryAndVariant();
+    String urlOptions = "?language=" + lang.getLocale().toLanguageTag();
     urlOptions += "&text=" + URLEncoder.encode(text, "UTF-8");
     if (username != null && apiKey != null) {
       urlOptions += "&username=" + URLEncoder.encode(username, "UTF-8");
@@ -133,15 +133,15 @@ public class UserDictTest {
     }
     return words;
   }
-  
+
   private String addWord(String word, String username, String apiKey) throws IOException {
     URL url = new URL("http://localhost:" + HTTPTools.getDefaultPort() + "/v2/words/add");
     return HTTPTools.checkAtUrlByPost(url, "word=" + word + "&username=" + username + "&apiKey=" + apiKey);
-  }  
-  
+  }
+
   private void deleteWord(String word, String username, String apiKey) throws IOException {
     URL url = new URL("http://localhost:" + HTTPTools.getDefaultPort() + "/v2/words/delete");
     HTTPTools.checkAtUrlByPost(url, "word=" + word + "&username=" + username + "&apiKey=" + apiKey);
   }
-  
+
 }

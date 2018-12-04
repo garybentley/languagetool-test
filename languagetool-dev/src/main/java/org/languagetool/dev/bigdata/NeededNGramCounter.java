@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.rules.ConfusionSetLoader;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +34,7 @@ import java.util.Set;
 
 /**
  * Counts how many ngrams in the Lucene index are actually needed, i.e.
- * that contain a word from confusion_set.txt. 
+ * that contain a word from confusion_set.txt.
  * @since 3.9
  */
 final class NeededNGramCounter {
@@ -43,17 +44,16 @@ final class NeededNGramCounter {
   private NeededNGramCounter() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 1) {
       System.out.println("Usage: " + NeededNGramCounter.class.getSimpleName() + " <ngramIndexDir>");
       System.exit(1);
     }
-    Language lang = Languages.getLanguageForShortCode(LANG);
-    String path = "/" + lang.getShortCode() + "/confusion_sets.txt";
+    Language lang = Languages.getLanguage(LANG);
+    String path = "/" + lang.getLocale().getLanguage() + "/confusion_sets.txt";
     Set<String> ngrams;
-    try (InputStream confSetStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(path)) {
-      ngrams = new ConfusionSetLoader().loadConfusionSet(confSetStream).keySet();
-    }
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    ngrams = broker.getConfusionSetFromResourcePath(path, DefaultResourceDataBroker.DEFAULT_CHARSET).keySet();
     String ngramIndexDir = args[0];
     FSDirectory fsDir = FSDirectory.open(new File(ngramIndexDir).toPath());
     IndexReader reader = DirectoryReader.open(fsDir);
@@ -91,5 +91,5 @@ final class NeededNGramCounter {
     System.out.println("needed ngrams    : " + needed);
     System.out.println("not needed ngrams: " + notNeeded);
   }
-  
+
 }

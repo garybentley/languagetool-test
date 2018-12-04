@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,7 +19,8 @@
 package org.languagetool.dev;
 
 import org.languagetool.rules.spelling.hunspell.Hunspell;
-import org.languagetool.rules.spelling.morfologik.MorfologikSpeller;
+import org.languagetool.rules.spelling.morfologik.MorfologikMultiSpeller;
+import org.languagetool.language.AmericanEnglish;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,17 +37,21 @@ import java.util.Scanner;
  */
 final class RareWordsFinder {
 
-  private static final String dictInClassPath = "/en/hunspell/en_US.dict";
-  
+  // GTODO private static final String dictInClassPath = "/en/hunspell/en_US.dict";
+
   private final Hunspell.Dictionary hunspellDict;
-  
+
   private RareWordsFinder(String hunspellBase) throws IOException {
     Hunspell hunspell = Hunspell.getInstance();
     hunspellDict = hunspell.getDictionary(hunspellBase);
   }
-  
-  private void run(File input, int minimum) throws FileNotFoundException, CharacterCodingException {
-    MorfologikSpeller speller = new MorfologikSpeller(dictInClassPath, 1);
+
+  private void run(File input, int minimum) throws Exception, FileNotFoundException, CharacterCodingException {
+    AmericanEnglish lang = new AmericanEnglish();
+    MorfologikMultiSpeller speller = lang.createMorfologikSpellerRule(null, null).getSpeller(1);
+    if (speller == null) {
+        throw new IllegalStateException(String.format("Expected to find a speller for locale: %1$s.", lang.getLocale().toLanguageTag()));
+    }
     int lineCount = 0;
     int wordCount = 0;
     try (Scanner s = new Scanner(input)) {
@@ -85,7 +90,7 @@ final class RareWordsFinder {
             !suggestions.get(0).equals(word.replaceFirst("s$", ""));
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 3) {
       System.out.println("Usage: " + RareWordsFinder.class.getSimpleName() + " <wordFile> <hunspellBase> <limit>");
       System.out.println("    <wordFile> is a word file with occurrence counts, separated by tabs");
@@ -98,5 +103,5 @@ final class RareWordsFinder {
     int minimum = Integer.parseInt(args[2]);
     finder.run(input, minimum);
   }
-  
+
 }

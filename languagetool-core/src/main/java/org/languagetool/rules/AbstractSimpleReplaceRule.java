@@ -45,18 +45,36 @@ public abstract class AbstractSimpleReplaceRule extends Rule {
 
   private Map<String, List<String>> wrongWords;
   private CaseConverter caseConverter;
+
+  public AbstractSimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages);
+    super.setCategory(Categories.MISC.getCategory(messages));
+    this.wrongWords = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
+    this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
+  }
+
+  public CaseConverter getCaseConverter() {
+      return caseConverter;
+  }
+
 /*
 GTODO: Clean up
   protected static Map<String, List<String>> load(String path, ResourceDataBroker dataBroker) {
     return new SimpleReplaceDataLoader().loadWords(path, dataBroker);
   }
 */
-/*
- GTODO Clean up
   public Map<String, List<String>> getWrongWords() {
       return wrongWords;
   }
-*/
+
+  public boolean containsWord(String word) {
+      return wrongWords.containsKey(word);
+  }
+
+  public List<String> getReplacements(String word) {
+      return wrongWords.get(word);
+  }
+
   /**
    * Indicates if the rule is case-sensitive. Default value is <code>true</code>.
    *
@@ -83,13 +101,6 @@ GTODO: Clean up
    */
   public void setIgnoreTaggedWords() {
     ignoreTaggedWords = true;
-  }
-
-  public AbstractSimpleReplaceRule(ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
-    super(messages);
-    super.setCategory(Categories.MISC.getCategory(messages));
-    this.wrongWords = Objects.requireNonNull(wrongWords, "Wrong words must be provided.");
-    this.caseConverter = Objects.requireNonNull(caseCon, "Case converter must be provided.");
   }
 
   @Override

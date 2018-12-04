@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 /**
  * Provides access to the sentences of a Wikipedia XML dump. Note that
  * conversion exceptions are logged to STDERR and are otherwise ignored.
- * 
+ *
  * Get data from http://data.statmt.org/ngrams/deduped/
  * @since 4.1
  */
@@ -39,7 +39,7 @@ class CommonCrawlSentenceSource extends SentenceSource {
 
   private static final int MIN_LENGTH = 15;
   private static final int MAX_LENGTH = 250;
-  
+
   private final List<CommonCrawlSentence> sentences;
   private final XZInputStream xzIn;
 
@@ -51,7 +51,7 @@ class CommonCrawlSentenceSource extends SentenceSource {
   private int count = 0;
   private int lineCount = 0;
 
-  CommonCrawlSentenceSource(InputStream input, Language language, Pattern filter) throws IOException {
+  CommonCrawlSentenceSource(InputStream input, Language language, Pattern filter) throws Exception {
     super(language, filter);
     sentences = new ArrayList<>();
     xzIn = new XZInputStream(input);

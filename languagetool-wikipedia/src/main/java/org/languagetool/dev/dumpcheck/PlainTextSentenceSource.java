@@ -40,12 +40,12 @@ public class PlainTextSentenceSource extends SentenceSource {
   // Each sentence is one article, but count anyway so it's coherent with what the Wikipedia code does:
   private int articleCount = 0;
 
-  public PlainTextSentenceSource(InputStream textInput, Language language) {
+  public PlainTextSentenceSource(InputStream textInput, Language language) throws Exception {
     this(textInput, language, null);
   }
-  
+
   /** @since 3.0 */
-  public PlainTextSentenceSource(InputStream textInput, Language language, Pattern filter) {
+  public PlainTextSentenceSource(InputStream textInput, Language language, Pattern filter) throws Exception {
     super(language, filter);
     scanner = new Scanner(textInput);
     sentences = new ArrayList<>();

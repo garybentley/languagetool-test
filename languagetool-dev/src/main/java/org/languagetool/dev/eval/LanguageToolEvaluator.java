@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,6 +26,7 @@ import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.markup.AnnotatedText;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.en.EnglishConfusionProbabilityRule;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,15 +41,16 @@ class LanguageToolEvaluator implements Evaluator {
   private final JLanguageTool langTool;
   private final LanguageModel languageModel;
 
-  LanguageToolEvaluator(File indexTopDir) throws IOException {
-    langTool = new JLanguageTool(new BritishEnglish());
+  LanguageToolEvaluator(File indexTopDir) throws Exception {
+    BritishEnglish lang = new BritishEnglish();
+    langTool = new JLanguageTool(lang);
     disableRules();
     if (indexTopDir != null) {
       if (indexTopDir.isDirectory()) {
-        languageModel = new LuceneLanguageModel(indexTopDir);
+        DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+        languageModel = broker.createLuceneLanguageModel(indexTopDir.toPath().toRealPath());
         System.out.println("Using Lucene language model from " + languageModel);
-        EnglishConfusionProbabilityRule probabilityRule =
-                new EnglishConfusionProbabilityRule(JLanguageTool.getMessageBundle(), languageModel, new English());
+        EnglishConfusionProbabilityRule probabilityRule = lang.createConfusionProbabilityRule(JLanguageTool.getMessageBundle(), languageModel);
         //new EnglishConfusionProbabilityRule(JLanguageTool.getMessageBundle(), languageModel, new File("/tmp/languagetool_network.net"));
         langTool.addRule(probabilityRule);
       } else {
@@ -58,7 +60,7 @@ class LanguageToolEvaluator implements Evaluator {
       languageModel = null;
     }
   }
-  
+
   @Override
   public void close() {
     if (languageModel != null) {
@@ -84,7 +86,7 @@ class LanguageToolEvaluator implements Evaluator {
   }
 
   @Override
-  public List<RuleMatch> check(AnnotatedText annotatedText) throws IOException {
+  public List<RuleMatch> check(AnnotatedText annotatedText) throws Exception {
     return langTool.check(annotatedText);
   }
 }

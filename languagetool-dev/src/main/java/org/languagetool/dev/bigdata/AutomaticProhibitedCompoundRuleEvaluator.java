@@ -28,11 +28,13 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.language.German;
 import org.languagetool.Languages;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.rules.ConfusionSetLoader;
+import org.languagetool.databroker.*;
 
 import java.io.*;
 import java.util.*;
@@ -53,22 +55,24 @@ class AutomaticProhibitedCompoundRuleEvaluator {
   private static final float MIN_RECALL = 0.1f;
   private static final String LUCENE_CONTENT_FIELD = "fieldLowercase";
 
+  private final German language;
   private final IndexSearcher searcher;
   private final Map<String, List<ConfusionSet>> knownSets;
   private final Set<String> finishedPairs = new HashSet<>();
 
   private int ignored = 0;
 
-  AutomaticProhibitedCompoundRuleEvaluator(File luceneIndexDir) throws IOException {
+  AutomaticProhibitedCompoundRuleEvaluator(File luceneIndexDir) throws Exception {
     DirectoryReader reader = DirectoryReader.open(FSDirectory.open(luceneIndexDir.toPath()));
     searcher = new IndexSearcher(reader);
-    InputStream confusionSetStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/" + LANGUAGE + "/confusion_sets.txt");
-    knownSets = new ConfusionSetLoader().loadConfusionSet(confusionSetStream);
+    language = new German();
+    knownSets = language.getUseDataBroker().getConfusionSets();
+    //InputStream confusionSetStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/" + LANGUAGE + "/confusion_sets.txt");
+    //knownSets = new ConfusionSetLoader().loadConfusionSet(confusionSetStream);
   }
 
-  private void run(List<String> lines, File indexDir) throws IOException {
-    Language language = Languages.getLanguageForShortCode(LANGUAGE);
-    LanguageModel lm = new LuceneLanguageModel(indexDir);
+  private void run(List<String> lines, File indexDir) throws Exception {
+    LanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(indexDir.toPath().toRealPath());
     ProhibitedCompoundRuleEvaluator evaluator = new ProhibitedCompoundRuleEvaluator(language, lm);
     int lineCount = 0;
     for (String line : lines) {
@@ -101,7 +105,7 @@ class AutomaticProhibitedCompoundRuleEvaluator {
     return str.replaceFirst("\\|.*", "").trim();
   }
 
-  private void runOnPair(ProhibitedCompoundRuleEvaluator evaluator, String line, int lineCount, int totalLines, String part1, String part2) throws IOException {
+  private void runOnPair(ProhibitedCompoundRuleEvaluator evaluator, String line, int lineCount, int totalLines, String part1, String part2) throws Exception {
     if (finishedPairs.contains(part1 + "/" + part2) || finishedPairs.contains(part2 + "/" + part1)) {
       System.out.println("Ignoring: " + part1 + "/" + part2 + ", finished before");
       return;
@@ -192,7 +196,7 @@ class AutomaticProhibitedCompoundRuleEvaluator {
     return count;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 3) {
       System.out.println("Usage: " + AutomaticProhibitedCompoundRuleEvaluator.class.getSimpleName() + " <confusionPairCandidates> <exampleSentenceIndexDir> <ngramDir>");
       System.out.println("   <confusionPairCandidates> is a semicolon-separated list of words (one pair per line)");

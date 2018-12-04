@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -28,6 +28,7 @@ import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.rules.ConfusionSetLoader;
 import org.languagetool.rules.ConfusionString;
+import org.languagetool.databroker.DefaultResourceDataBroker;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +42,7 @@ final class AllConfusionRulesEvaluator {
   private AllConfusionRulesEvaluator() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length < 3 || args.length > 4) {
       System.err.println("Usage: " + ConfusionRuleEvaluator.class.getSimpleName()
               + " <langCode> <languageModelTopDir> <wikipediaXml|tatoebaFile|dir>...");
@@ -55,9 +56,10 @@ final class AllConfusionRulesEvaluator {
     if ("en".equals(args[0])) {
       lang = new ConfusionRuleEvaluator.EnglishLight();
     } else {
-      lang = Languages.getLanguageForShortCode(args[0]);
+      lang = Languages.getLanguage(args[0]);
     }
-    LanguageModel languageModel = new LuceneLanguageModel(new File(args[1]));
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    LanguageModel languageModel = broker.createLuceneLanguageModel(new File(args[1]).toPath().toRealPath());
     List<String> inputsFiles = new ArrayList<>();
     inputsFiles.add(args[2]);
     if (args.length >= 4) {
@@ -65,9 +67,7 @@ final class AllConfusionRulesEvaluator {
     }
     ConfusionRuleEvaluator eval = new ConfusionRuleEvaluator(lang, languageModel, false);
     eval.setVerboseMode(false);
-    ConfusionSetLoader confusionSetLoader = new ConfusionSetLoader();
-    InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/en/confusion_sets.txt");
-    Map<String,List<ConfusionSet>> confusionSetMap = confusionSetLoader.loadConfusionSet(inputStream);
+    Map<String,List<ConfusionSet>> confusionSetMap = broker.getConfusionSetFromResourcePath("en/confusion_sets.txt", DefaultResourceDataBroker.DEFAULT_CHARSET);
     Set<String> done = new HashSet<>();
     int fMeasureCount = 0;
     float fMeasureTotal = 0;
@@ -107,5 +107,5 @@ final class AllConfusionRulesEvaluator {
     }
     System.out.println("Average f-measure: " + (fMeasureTotal/fMeasureCount));
   }
-  
+
 }

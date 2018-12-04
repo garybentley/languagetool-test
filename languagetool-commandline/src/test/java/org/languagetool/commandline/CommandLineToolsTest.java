@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -57,8 +57,8 @@ public class CommandLineToolsTest {
   }
 
   @Test
-  public void testCheck() throws IOException, ParserConfigurationException, SAXException {
-    JLanguageTool tool = new JLanguageTool(TestTools.getDemoLanguage());
+  public void testCheck() throws Exception, ParserConfigurationException, SAXException {
+    JLanguageTool tool = new JLanguageTool(TestTools.getTestLanguage());
 
     int matches = CommandLineTools.checkText("Foo.", tool);
     String output = new String(this.out.toByteArray());
@@ -66,7 +66,7 @@ public class CommandLineToolsTest {
     assertEquals(0, matches);
 
     tool.disableRule("test_unification_with_negation");
-    tool.addRule(new WordRepeatRule(TestTools.getEnglishMessages(), TestTools.getDemoLanguage()));
+    tool.addRule(new WordRepeatRule(TestTools.getEnglishMessages()));
     matches = CommandLineTools.checkText("To jest problem problem.", tool);
     output = new String(this.out.toByteArray());
     assertTrue(output.contains("Rule ID: WORD_REPEAT_RULE"));

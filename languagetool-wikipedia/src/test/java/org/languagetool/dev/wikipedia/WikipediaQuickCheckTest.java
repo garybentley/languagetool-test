@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 public class WikipediaQuickCheckTest {
 
   // only for interactive use, as it accesses a remote API
-  public void noTestCheckPage() throws IOException, PageNotFoundException {
+  public void noTestCheckPage() throws Exception, PageNotFoundException {
     WikipediaQuickCheck check = new WikipediaQuickCheck();
     //String url = "http://de.wikipedia.org/wiki/Benutzer_Diskussion:Dnaber";
     //String url = "http://de.wikipedia.org/wiki/OpenThesaurus";
@@ -55,7 +55,7 @@ public class WikipediaQuickCheckTest {
   }
 
   @Test
-  public void testCheckWikipediaMarkup() throws IOException {
+  public void testCheckWikipediaMarkup() throws Exception {
     WikipediaQuickCheck check = new WikipediaQuickCheck();
     String markup = "== Beispiele ==\n\n" +
             "Eine kleine Auswahl von Fehlern.\n\n" +

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -33,6 +33,7 @@ import org.languagetool.markup.AnnotatedText;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.en.EnglishNgramProbabilityRule;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,16 +62,16 @@ public class SimpleCorpusEvaluator {
   private int goodMatches;
   private int matchCount;
 
-  public SimpleCorpusEvaluator(File indexTopDir) throws IOException {
+  public SimpleCorpusEvaluator(File indexTopDir) throws Exception {
     evaluator = getEvaluator(indexTopDir);
   }
 
-  public SimpleCorpusEvaluator(File... indexTopDirs) throws IOException {
+  public SimpleCorpusEvaluator(File... indexTopDirs) throws Exception {
     evaluator = getEvaluator(indexTopDirs);
   }
 
   @NotNull
-  private Evaluator getEvaluator(File... indexTopDirs) throws IOException {
+  private Evaluator getEvaluator(File... indexTopDirs) throws Exception {
     return new NgramLanguageToolEvaluator(indexTopDirs);
   }
 
@@ -83,13 +84,13 @@ public class SimpleCorpusEvaluator {
     evaluator.close();
   }
 
-  public PrecisionRecall run(File file, double threshold) throws IOException {
+  public PrecisionRecall run(File file, double threshold) throws Exception {
     probabilityRule.setMinProbability(threshold);
     checkLines(getCorpus(file));
     return printAndResetResults();
   }
 
-  private void checkLines(ErrorCorpus corpus) throws IOException {
+  private void checkLines(ErrorCorpus corpus) throws Exception {
     for (ErrorSentence sentence : corpus) {
       List<RuleMatch> matches = evaluator.check(sentence.getAnnotatedText());
       sentenceCount++;
@@ -156,7 +157,7 @@ public class SimpleCorpusEvaluator {
     return false;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + SimpleCorpusEvaluator.class.getSimpleName() + " <corpusFile> <languageModelDir>");
       System.out.println("   <languageModelDir> is a Lucene index directory with ngram frequency information (use comma but not space to specify more than one)");
@@ -198,15 +199,15 @@ public class SimpleCorpusEvaluator {
     private final JLanguageTool langTool;
     private final LanguageModel languageModel;
 
-    NgramLanguageToolEvaluator(File... indexTopDirs) throws IOException {
+    NgramLanguageToolEvaluator(File... indexTopDirs) throws Exception {
       langTool = new JLanguageTool(new English());
       disableAllRules();
       List<LanguageModel> lms = new ArrayList<>();
       for (File indexTopDir : indexTopDirs) {
-        lms.add(new LuceneLanguageModel(indexTopDir));
+        lms.add(DefaultResourceDataBroker.createLuceneLanguageModel(indexTopDir.toPath().toRealPath()));
       }
       languageModel = new MultiLanguageModel(lms);
-      LuceneSingleIndexLanguageModel.clearCaches();
+      // GTODO Shouldn't be used now... LuceneSingleIndexLanguageModel.clearCaches();
       System.out.println("Using Lucene language model from " + languageModel);
       probabilityRule = new EnglishNgramProbabilityRule(JLanguageTool.getMessageBundle(), languageModel, new English());
       probabilityRule.setDefaultOn();
@@ -227,7 +228,7 @@ public class SimpleCorpusEvaluator {
     }
 
     @Override
-    public List<RuleMatch> check(AnnotatedText annotatedText) throws IOException {
+    public List<RuleMatch> check(AnnotatedText annotatedText) throws Exception {
       return langTool.check(annotatedText);
     }
   }

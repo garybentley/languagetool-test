@@ -27,17 +27,47 @@ import morfologik.stemming.Dictionary;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.CompoundRuleData;
 import org.languagetool.rules.patterns.PatternRule;
+import org.languagetool.rules.ContextWords;
 import org.languagetool.tagging.ca.CatalanTagger;
+import org.languagetool.AnalyzedTokenReadings;
 
 public interface CatalanResourceDataBroker extends ResourceDataBroker {
 
+    Set<Dictionary> getDictionaries(UserConfig userConfig) throws Exception;
+
+    List<String> getSpellingIgnoreWords() throws Exception;
+
+    List<ContextWords> getWrongWordsInContext() throws Exception;
+
+    List<ContextWords> getDiacriticWrongWordsInContext() throws Exception;
+
+    Map<String, AnalyzedTokenReadings> getAccentuationRelevantWords1() throws Exception;
+
+    Map<String, AnalyzedTokenReadings> getAccentuationRelevantWords2() throws Exception;
+
     Map<String, List<String>> getWrongWords() throws Exception;
 
-    CompoundRuleData getCompounds() throws Exception;
+    Map<String, List<String>> getDNVWrongWords() throws Exception;
 
-    List<PatternRule> getCompoundPatternRules(String message) throws Exception;
+    Map<String, List<String>> getDNVSecondaryWrongWords() throws Exception;
+
+    Map<String, List<String>> getDNVColloquialWrongWords() throws Exception;
+
+    Map<String, List<String>> getBalearicWrongWords() throws Exception;
+
+    Map<String, List<String>> getVerbsWrongWords() throws Exception;
+
+    Map<String, List<String>> getDiactriticsIECWrongWords() throws Exception;
+
+    Map<String, List<String>> getDiactriticsTraditionalWrongWords() throws Exception;
+
+    Map<String, List<String>> getOperationNameWrongWords() throws Exception;
+
+    //CompoundRuleData getCompounds() throws Exception;
+
+    //List<PatternRule> getCompoundPatternRules(String message) throws Exception;
 
     //@Override
-    CatalanTagger getTagger() throws Exception;
+    //CatalanTagger getTagger() throws Exception;
 
 }

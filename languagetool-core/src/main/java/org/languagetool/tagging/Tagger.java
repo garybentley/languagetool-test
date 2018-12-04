@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,24 +26,24 @@ import org.languagetool.AnalyzedTokenReadings;
 
 /**
  * The part-of-speech tagger interface, whose implementations are usually language-dependent.
- * 
+ *
  * @author Daniel Naber
  */
 public interface Tagger {
 
   /**
-   * Returns a list of {@link AnalyzedToken}s that assigns each term in the 
+   * Returns a list of {@link AnalyzedToken}s that assigns each term in the
    * sentence some kind of part-of-speech information (not necessarily just one tag).
-   * 
+   *
    * <p>Note that this method takes exactly one sentence. Its implementation
-   * may implement special cases for the first word of a sentence, which is 
+   * may implement special cases for the first word of a sentence, which is
    * usually written with an uppercase letter.
-   * 
-   * @param sentenceTokens the text as returned by a WordTokenizer 
+   *
+   * @param sentenceTokens the text as returned by a WordTokenizer
    */
-  List<AnalyzedTokenReadings> tag(List<String> sentenceTokens) throws IOException;
-  
-  /** 
+  List<AnalyzedTokenReadings> tag(List<String> sentenceTokens);
+
+  /**
    * Create the AnalyzedToken used for whitespace and other non-words. Use <code>null</code>
    * as the POS tag for this token.
    */
@@ -53,5 +53,5 @@ public interface Tagger {
    * Create a token specific to the language of the implementing class.
    */
   AnalyzedToken createToken(String token, String posTag);
-    
+
 }

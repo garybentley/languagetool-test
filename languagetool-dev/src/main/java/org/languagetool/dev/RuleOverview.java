@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,15 +21,16 @@ package org.languagetool.dev;
 import org.apache.commons.lang3.StringUtils;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.language.English;
 import org.languagetool.LanguageMaintainedState;
 import org.languagetool.Languages;
-import org.languagetool.databroker.ResourceDataBroker;
 import org.languagetool.language.Contributor;
 import org.languagetool.rules.ConfusionSetLoader;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.spelling.hunspell.HunspellNoSuggestionRule;
 import org.languagetool.tools.StringTools;
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -43,17 +44,17 @@ import static java.util.Comparator.comparing;
 
 /**
  * Command line tool to list supported languages and their number of rules.
- * 
+ *
  * @author Daniel Naber
  */
 @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 public final class RuleOverview {
-  
+
   enum SpellcheckSupport {
     Full, NoSuggestion, None
   }
 
-  public static void main(final String[] args) throws IOException {
+  public static void main(final String[] args) throws Exception {
     if (args.length != 1) {
       System.out.println("Usage: " + RuleOverview.class.getName() + " <webRoot>");
       System.exit(1);
@@ -61,12 +62,12 @@ public final class RuleOverview {
     final RuleOverview prg = new RuleOverview();
     prg.run(new File(args[0]));
   }
-  
+
   private RuleOverview() {
     // no public constructor
   }
-  
-  private void run(File webRoot) throws IOException {
+
+  private void run(File webRoot) throws Exception {
     System.out.println("<p><b>Rules in LanguageTool " + JLanguageTool.VERSION + "</b><br />");
     System.out.println("Date: " + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "</p>\n");
     System.out.println("<table class=\"tablesorter sortable\" style=\"width: auto\">");
@@ -87,9 +88,12 @@ public final class RuleOverview {
     System.out.println("<tbody>");
     final List<Language> sortedLanguages = getSortedLanguages();
 
+    English en = new English();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(en, en.getClass().getClassLoader());
+
     //setup false friends counting
-    final String falseFriendFile = JLanguageTool.getDataBroker().getRulesDir() + File.separator + "false-friends.xml";
-    final String falseFriendRules = StringTools.readStream(Tools.getStream(falseFriendFile), "utf-8")
+    //final String falseFriendFile = JLanguageTool.getDataBroker().getRulesDir() + File.separator + "false-friends.xml";
+    final String falseFriendRules = StringTools.readStream(broker.getRulesDirPathStream(DefaultResourceDataBroker.FALSE_FRIEND_RULES_FILE_NAME), DefaultResourceDataBroker.DEFAULT_CHARSET.name())
       .replaceAll("(?s)<!--.*?-->", "")
       .replaceAll("(?s)<rules.*?>", "");
 
@@ -101,7 +105,7 @@ public final class RuleOverview {
         continue;
       }
       System.out.print("<tr>");
-      final String langCode = lang.getShortCode();
+      final String langCode = lang.getLocale().getLanguage();
       final File langSpecificWebsite = new File(webRoot, langCode);
       final List<String> variants = getVariantNames(sortedLanguages, lang);
       String variantsText = "";
@@ -131,16 +135,16 @@ public final class RuleOverview {
 
       // count Java rules:
       final File dir = new File("../languagetool-language-modules/" + langCode + "/src/main/java" +
-              JLanguageTool.getDataBroker().getRulesDir() + "/" + langCode);
+              DefaultResourceDataBroker.DEFAULT_RULES_DIR + "/" + langCode);
       if (!dir.exists()) {
         System.out.print("<td valign=\"top\" align=\"right\">0</td>");
       } else {
         final File[] javaRules = dir.listFiles(new JavaFilter(lang.getName()));
         final int javaCount = javaRules.length;
         if (javaCount > 0) {
-          final String sourceCodeLink = 
+          final String sourceCodeLink =
                   "https://github.com/languagetool-org/languagetool/blob/master/languagetool-language-modules/"
-                  + langCode + "/src/main/java/org/languagetool/rules/" 
+                  + langCode + "/src/main/java/org/languagetool/rules/"
                   + langCode + "/";
           System.out.print("<td valign=\"top\" align=\"right\"><a href=\"" + sourceCodeLink + "\">" + javaCount + "</a></td>");
         } else {
@@ -172,7 +176,7 @@ public final class RuleOverview {
       }
       images += "<img title='" + commits + " commits in the last 6 months' src='../images/bar.png' width='" + width + "' height='10'/>";
       System.out.print("<td valign=\"top\" align=\"right\"><span style='display:none'>" + commits + "</span>" + images + "</td>");
-      
+
       // maintainer information:
       String maintainerInfo = getMaintainerInfo(lang);
       String maintainerText;
@@ -187,10 +191,10 @@ public final class RuleOverview {
         maintainerInfo = "<span class='previousMaintainer'><br>previous maintainer: " + maintainerInfo + "</span>";
       }
       System.out.print("<td valign=\"top\" align=\"left\">" + maintainerText + maintainerInfo + "</td>");
-      
-      System.out.println("</tr>");    
+
+      System.out.println("</tr>");
     }
-      
+
     if (overallJavaCount == 0) {
       throw new RuntimeException("No Java rules found - start this script from the languagetool-standalone directory");
     }
@@ -204,8 +208,11 @@ public final class RuleOverview {
   }
 
   private int countRulesForLanguage(Language lang) throws IOException {
+      int count = 0;
+      /*
+      GTODO Not the way to do this (seriously checking for a string in a stream?).
     List<String> ruleFileNames = lang.getRuleFileNames();
-    int count = 0;
+
     for (String ruleFileName : ruleFileNames) {
       final URL url = this.getClass().getResource(ruleFileName);
       if (url != null) {
@@ -216,6 +223,7 @@ public final class RuleOverview {
         count += countXmlRuleGroupRules(xmlRules);
       }
     }
+    */
     return count;
   }
 
@@ -231,7 +239,7 @@ public final class RuleOverview {
   private List<Language> getVariants(List<Language> allLanguages, Language lang) {
     List<Language> variants = new ArrayList<>();
     for (Language sortedLanguage : allLanguages) {
-      if (sortedLanguage.isVariant() && lang.getShortCode().equals(sortedLanguage.getShortCode())) {
+      if (sortedLanguage.isVariant() && lang.getLocale().getLanguage().equals(sortedLanguage.getLocale().getLanguage())) {
         variants.add(sortedLanguage);
       }
     }
@@ -256,7 +264,7 @@ public final class RuleOverview {
     int pos = 0;
     int count = 0;
     while (true) {
-      pos = falseFriendRules.indexOf("<pattern lang=\"" + lang.getShortCode(), pos + 1);
+      pos = falseFriendRules.indexOf("<pattern lang=\"" + lang.getLocale().getLanguage(), pos + 1);
       if (pos == -1) {
         break;
       }
@@ -266,7 +274,7 @@ public final class RuleOverview {
   }
 
 
-  private SpellcheckSupport spellcheckSupport(Language lang, List<Language> allLanguages) throws IOException {
+  private SpellcheckSupport spellcheckSupport(Language lang, List<Language> allLanguages) throws Exception {
     if (spellcheckSupport(lang) != SpellcheckSupport.None) {
       return spellcheckSupport(lang);
     }
@@ -279,8 +287,8 @@ public final class RuleOverview {
     return SpellcheckSupport.None;
   }
 
-  private SpellcheckSupport spellcheckSupport(Language lang) throws IOException {
-    for (Rule rule : lang.getRelevantRules(JLanguageTool.getMessageBundle(), null)) {
+  private SpellcheckSupport spellcheckSupport(Language<ResourceDataBroker> lang) throws Exception {
+    for (Rule rule : lang.getRelevantRules(JLanguageTool.getMessageBundle(), null, Collections.emptyList())) {
       if (rule.isDictionaryBasedSpellingRule()) {
         if (rule instanceof HunspellNoSuggestionRule) {
           return SpellcheckSupport.NoSuggestion;
@@ -292,20 +300,15 @@ public final class RuleOverview {
     return SpellcheckSupport.None;
   }
 
-  private int countConfusionPairs(Language lang) {
-    String path = "/" + lang.getShortCode() + "/confusion_sets.txt";
-    ResourceDataBroker dataBroker = JLanguageTool.getDataBroker();
-    if (dataBroker.resourceExists(path)) {
-      try (InputStream confusionSetStream = dataBroker.getFromResourceDirAsStream(path)) {
-        ConfusionSetLoader confusionSetLoader = new ConfusionSetLoader();
-        return confusionSetLoader.loadConfusionSet(confusionSetStream).size()/2;
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+  private int countConfusionPairs(Language lang) throws Exception {
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    String path = "/" + lang.getLocale().getLanguage() + "/confusion_sets.txt";
+    if (broker.resourceDirPathExists(path))  {
+        return broker.getConfusionSetFromResourcePath(path, DefaultResourceDataBroker.DEFAULT_CHARSET).size()/2;
     }
     return 0;
   }
-  
+
   private String getMaintainerInfo(Language lang) {
     final StringBuilder maintainerInfo = new StringBuilder();
     if (lang.getMaintainers() != null) {

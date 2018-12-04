@@ -21,6 +21,7 @@ package org.languagetool.dev.wikipedia;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.language.English;
@@ -42,8 +43,14 @@ public class SuggestionReplacerTest {
 
   private final SwebleWikipediaTextFilter filter = new SwebleWikipediaTextFilter();
   private final GermanyGerman germanyGerman = new GermanyGerman();
-  private final JLanguageTool langTool = getLanguageTool();
-  private final JLanguageTool englishLangTool = getLanguageTool(new English());
+  private JLanguageTool langTool;
+  private JLanguageTool englishLangTool;
+
+  @Before
+  public void setUp() throws Exception {
+      langTool = getLanguageTool();
+      englishLangTool = getLanguageTool(new English());
+  }
 
   @Test
   public void testApplySuggestionToOriginalText() throws Exception {
@@ -185,17 +192,17 @@ public class SuggestionReplacerTest {
     }
   }
 
-  private JLanguageTool getLanguageTool() {
+  private JLanguageTool getLanguageTool() throws Exception {
     JLanguageTool langTool = getLanguageTool(germanyGerman);
     langTool.disableRule("DE_CASE");
     return langTool;
   }
 
-  private JLanguageTool getLanguageTool(Language language) {
+  private JLanguageTool getLanguageTool(Language language) throws Exception {
     return new JLanguageTool(language);
   }
 
-  private void applySuggestion(JLanguageTool langTool, SwebleWikipediaTextFilter filter, String text, String expected) throws IOException {
+  private void applySuggestion(JLanguageTool langTool, SwebleWikipediaTextFilter filter, String text, String expected) throws Exception {
     PlainTextMapping mapping = filter.filter(text);
     List<RuleMatch> matches = langTool.check(mapping.getPlainText());
     assertThat("Expected 1 match, got: " + matches, matches.size(), is(1));

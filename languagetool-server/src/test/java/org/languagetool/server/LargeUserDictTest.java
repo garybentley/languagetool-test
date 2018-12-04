@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2018 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -52,7 +52,7 @@ public class LargeUserDictTest {
     HTTPServer server = new HTTPServer(config);
     try {
       server.run();
-      Language lang = Languages.getLanguageForShortCode("fr");
+      Language lang = Languages.getLanguage("fr");
       //Language lang = Languages.getLanguageForShortCode("de-DE");
       //Language lang = Languages.getLanguageForShortCode("en-US");
       warmup(lang);
@@ -69,7 +69,7 @@ public class LargeUserDictTest {
   private void warmup(Language lang) throws Exception {
     runPerformanceTest(lang, "This is a test", WARMUP_RUNS);
   }
-  
+
   private void runPerformanceTest(Language lang, String input) throws Exception {
     long time1 = System.currentTimeMillis();
     runPerformanceTest(lang, input, RUNS);
@@ -84,8 +84,8 @@ public class LargeUserDictTest {
     }
   }
 
-  private void check(Language lang, String text, String username, String apiKey) throws IOException {
-    String urlOptions = "?language=" + lang.getShortCodeWithCountryAndVariant();
+  private void check(Language lang, String text, String username, String apiKey) throws Exception {
+    String urlOptions = "?language=" + lang.getLocale().toLanguageTag();
     urlOptions += "&text=" + URLEncoder.encode(text, "UTF-8");
     urlOptions += "&username=" + URLEncoder.encode(username, "UTF-8");
     urlOptions += "&apikey=" + URLEncoder.encode(apiKey, "UTF-8");
@@ -99,10 +99,10 @@ public class LargeUserDictTest {
       addWord("word" + i, username, apiKey);
     }
   }
-  
+
   private void addWord(String word, String username, String apiKey) throws IOException {
     URL url = new URL("http://localhost:" + HTTPTools.getDefaultPort() + "/v2/words/add");
     HTTPTools.checkAtUrlByPost(url, "word=" + word + "&username=" + username + "&apikey=" + apiKey);
-  }  
-  
+  }
+
 }

@@ -37,7 +37,7 @@ import static org.junit.Assert.fail;
 
 /**
  * Test HTTP server access from multiple threads with multiple languages.
- * Unlike HTTPServerMultiLangLoadTest, this always sends the same text 
+ * Unlike HTTPServerMultiLangLoadTest, this always sends the same text
  * but actually checks results (compares multi-thread results to non-multi-thread).
  */
 @Ignore("for interactive use; requires local Tatoeba data")
@@ -58,7 +58,7 @@ public class HTTPServerMultiLangLoadTest2 extends HTTPServerMultiLangLoadTest {
     //languages.add(new German());
     languages.addAll(Languages.get());
     for (Language language : languages) {
-      File file = new File(dir, "tatoeba-" + language.getShortCode() + ".txt");
+      File file = new File(dir, "tatoeba-" + language.getLocale().getLanguage() + ".txt");
       if (!file.exists()) {
         System.err.println("No data found for " + language + ", language will not be tested");
       } else {
@@ -100,8 +100,8 @@ public class HTTPServerMultiLangLoadTest2 extends HTTPServerMultiLangLoadTest {
            "Exp. result: " + expectedResult
       );
     }
-    System.out.println(counter.get() + ". Sleep: " + sleepTime + "ms, Lang: " + language.getShortCodeWithCountryAndVariant()
+    System.out.println(counter.get() + ". Sleep: " + sleepTime + "ms, Lang: " + language.getLocale().toLanguageTag()
             + ", Length: " + text.length() + ", Time: " + (System.currentTimeMillis()-startTime) + "ms");
   }
-  
+
 }

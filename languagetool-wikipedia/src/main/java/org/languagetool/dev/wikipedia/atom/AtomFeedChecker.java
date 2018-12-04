@@ -28,6 +28,8 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.patterns.AbstractPatternRule;
 import org.languagetool.tools.ContextTools;
+import org.languagetool.databroker.*;
+import org.languagetool.languagemodel.LanguageModel;
 import xtc.tree.Location;
 
 import javax.xml.stream.XMLStreamException;
@@ -48,26 +50,30 @@ class AtomFeedChecker {
 
   private static final int CONTEXT_SIZE = 60;
   private static final String USER_AGENT = "http://tools.wmflabs.org/languagetool/ bot, contact: naber[@]danielnaber.de";
-  
+
   private final JLanguageTool langTool;
   private final Language language;
   private final MatchDatabase matchDatabase;
   private final TextMapFilter textFilter = new SwebleWikipediaTextFilter();
   private final ContextTools contextTools = new ContextTools();
 
-  AtomFeedChecker(Language language) throws IOException {
+  AtomFeedChecker(Language language) throws Exception {
     this(language, null);
   }
-  
-  AtomFeedChecker(Language language, DatabaseConfig dbConfig) throws IOException {
+
+  AtomFeedChecker(Language language, DatabaseConfig dbConfig) throws Exception {
     this(language, dbConfig, null);
   }
-  
-  AtomFeedChecker(Language language, DatabaseConfig dbConfig, File languageModelDir) throws IOException {
+
+  AtomFeedChecker(Language language, DatabaseConfig dbConfig, File languageModelDir) throws Exception {
     this.language = Objects.requireNonNull(language);
     langTool = new JLanguageTool(language);
     if (languageModelDir != null) {
-      langTool.activateLanguageModelRules(languageModelDir);
+      // GTODO We assume a Lucene language model here.
+      LanguageModel langModel = DefaultResourceDataBroker.createLuceneLanguageModel(languageModelDir.toPath());
+      if (langModel != null) {
+          langTool.activateLanguageModelRules(langModel);
+      }
     }
     // disable because they create too many false alarms:
     langTool.disableRule("UNPAIRED_BRACKETS");
@@ -112,13 +118,13 @@ class AtomFeedChecker {
     storeResults(checkResult);
     return checkResult;
   }
-  
+
   CheckResult runCheck(String url) throws IOException {
     CheckResult checkResult = checkChanges(new URL(url));
     storeResults(checkResult);
     return checkResult;
   }
-  
+
   private void storeResults(CheckResult checkResult) throws IOException {
     List<ChangeAnalysis> checkResults = checkResult.getCheckResults();
     System.out.println("Check results:");
@@ -139,7 +145,7 @@ class AtomFeedChecker {
             matchDatabase.markedFixed(match);
           }
         }
-        String diffLink = "https://" + language.getShortCode() + ".wikipedia.org/w/index.php?title="
+        String diffLink = "https://" + language.getLocale().getLanguage() + ".wikipedia.org/w/index.php?title="
                 + URLEncoder.encode(result.getTitle().replace(" ", "_"), "UTF-8") + "&diff=" + result.getDiffId();
         System.out.println("    " + diffLink);
       }
@@ -222,7 +228,7 @@ class AtomFeedChecker {
     }
   }
 
-  private List<WikipediaRuleMatch> getMatches(AtomFeedItem item, List<String> texts) throws IOException {
+  private List<WikipediaRuleMatch> getMatches(AtomFeedItem item, List<String> texts) throws Exception {
     List<WikipediaRuleMatch> oldMatches = new ArrayList<>();
     for (String text : texts) {
       PlainTextMapping filteredContent = textFilter.filter(text);

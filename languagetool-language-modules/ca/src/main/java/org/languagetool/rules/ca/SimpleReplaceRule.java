@@ -21,9 +21,8 @@ package org.languagetool.rules.ca;
 import org.languagetool.rules.AbstractSimpleReplaceRule;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.patterns.CaseConverter;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,9 +39,8 @@ import java.util.ResourceBundle;
  */
 public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
 
-  private Map<String, List<String>> wrongWords;
-  private static final Locale CA_LOCALE = new Locale("CA");
-
+/*
+GTODO
   @Override
   protected Map<String, List<String>> getWrongWords() {
       if (wrongWords == null) {
@@ -50,9 +48,9 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
       }
     return wrongWords;
   }
-
-  public SimpleReplaceRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
+*/
+  public SimpleReplaceRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, CaseConverter caseCon) {
+    super(messages, wrongWords, caseCon);
     super.setCategory(Categories.TYPOS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     this.setIgnoreTaggedWords();
@@ -82,11 +80,6 @@ public class SimpleReplaceRule extends AbstractSimpleReplaceRule {
   @Override
   public boolean isCaseSensitive() {
     return false;
-  }
-
-  @Override
-  public Locale getLocale() {
-    return CA_LOCALE;
   }
 
 }

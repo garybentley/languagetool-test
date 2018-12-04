@@ -42,15 +42,15 @@ class LanguageToolHttpHandler implements HttpHandler {
 
   private static final String ENCODING = "utf-8";
 
-  private final Set<String> allowedIps;  
+  private final Set<String> allowedIps;
   private final RequestLimiter requestLimiter;
   private final ErrorRequestLimiter errorRequestLimiter;
   private final LinkedBlockingQueue<Runnable> workQueue;
   private final TextChecker textCheckerV2;
   private final HTTPServerConfig config;
   private final RequestCounter reqCounter = new RequestCounter();
-  
-  LanguageToolHttpHandler(HTTPServerConfig config, Set<String> allowedIps, boolean internal, RequestLimiter requestLimiter, ErrorRequestLimiter errorLimiter, LinkedBlockingQueue<Runnable> workQueue) {
+
+  LanguageToolHttpHandler(HTTPServerConfig config, Set<String> allowedIps, boolean internal, RequestLimiter requestLimiter, ErrorRequestLimiter errorLimiter, LinkedBlockingQueue<Runnable> workQueue) throws Exception {
     this.config = config;
     this.allowedIps = allowedIps;
     this.requestLimiter = requestLimiter;
@@ -73,7 +73,7 @@ class LanguageToolHttpHandler implements HttpHandler {
     try {
       URI requestedUri = httpExchange.getRequestURI();
       if (requestedUri.getRawPath().startsWith("/v2/")) {
-        // healthcheck should come before other limit checks (requests per time etc.), to be sure it works: 
+        // healthcheck should come before other limit checks (requests per time etc.), to be sure it works:
         String pathWithoutVersion = requestedUri.getRawPath().substring("/v2/".length());
         if (pathWithoutVersion.equals("healthcheck")) {
           if (workQueueFull(httpExchange, "Healthcheck failed: There are currently too many parallel requests.")) {
@@ -201,7 +201,7 @@ class LanguageToolHttpHandler implements HttpHandler {
   }
 
   private boolean siteMatches(String referrer, String blockedRef) {
-    return referrer.startsWith(blockedRef) || 
+    return referrer.startsWith(blockedRef) ||
            referrer.startsWith("http://" + blockedRef) || referrer.startsWith("https://" + blockedRef) ||
            referrer.startsWith("http://www." + blockedRef) || referrer.startsWith("https://www." + blockedRef);
   }
@@ -244,7 +244,7 @@ class LanguageToolHttpHandler implements HttpHandler {
     print(message);
   }
 
-  private void logError(String remoteAddress, Exception e, int errorCode, HttpExchange httpExchange, Map<String, String> params, 
+  private void logError(String remoteAddress, Exception e, int errorCode, HttpExchange httpExchange, Map<String, String> params,
                         boolean textLoggingAllowed, boolean logStacktrace, long runtimeMillis) {
     String message = "An error has occurred: '" +  e.getMessage() + "', sending HTTP code " + errorCode + ". ";
     message += "Access from " + remoteAddress + ", ";

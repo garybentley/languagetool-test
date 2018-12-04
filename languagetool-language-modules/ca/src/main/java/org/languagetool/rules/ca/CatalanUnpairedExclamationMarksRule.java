@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2010 Daniel Naber (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,16 +23,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.languagetool.Language;
 import org.languagetool.rules.GenericUnpairedBracketsRule;
 import org.languagetool.rules.ITSIssueType;
 
 public class CatalanUnpairedExclamationMarksRule extends GenericUnpairedBracketsRule {
-  
+
   private static final List<String> CA_START_SYMBOLS = Arrays.asList("¡");
   private static final List<String> CA_END_SYMBOLS   = Arrays.asList("!");
-  
-  public CatalanUnpairedExclamationMarksRule(ResourceBundle messages, Language language) {
+
+  public CatalanUnpairedExclamationMarksRule(ResourceBundle messages) {
     super(messages, CA_START_SYMBOLS, CA_END_SYMBOLS);
     setLocQualityIssueType(ITSIssueType.Style);
     setDefaultOff();
@@ -47,5 +46,5 @@ public class CatalanUnpairedExclamationMarksRule extends GenericUnpairedBrackets
   public String getId() {
     return "CA_UNPAIRED_EXCLAMATION";
   }
-    
+
 }

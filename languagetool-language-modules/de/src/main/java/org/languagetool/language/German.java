@@ -329,11 +329,21 @@ public class German extends Language<GermanResourceDataBroker> {
       if (userConfig != null) {
         confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
       }
-      return createLongSentenceRule(messages, confWords);
+      return createLongSentenceRule(messages, confWords, false);
   }
 
-  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords) throws Exception {
-      return new LongSentenceRule(getUseMessages(messages), maxWords);
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, UserConfig userConfig, int maxWords, boolean defaultActive) throws Exception {
+      int confWords = -1;
+      if (userConfig != null) {
+        confWords = userConfig.getConfigValueByID(LongSentenceRule.getRuleConfiguration().getRuleId());
+      } else {
+         confWords = maxWords;
+      }
+      return createLongSentenceRule(messages, confWords, defaultActive);
+  }
+
+  public LongSentenceRule createLongSentenceRule(ResourceBundle messages, int maxWords, boolean defaultActive) throws Exception {
+      return new LongSentenceRule(getUseMessages(messages), maxWords, defaultActive);
   }
 
   /**

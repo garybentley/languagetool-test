@@ -45,7 +45,7 @@ public class HTTPServerConfig {
 
   /** The default port on which the server is running (8081). */
   public static final int DEFAULT_PORT = 8081;
-  
+
   static final String LANGUAGE_MODEL_OPTION = "--languageModel";
   static final String WORD2VEC_MODEL_OPTION = "--word2vecModel";
 
@@ -225,7 +225,7 @@ public class HTTPServerConfig {
         String langCodes = getOptionalProperty(props, "hiddenMatchesLanguages", "");
         for (String code : langCodes.split(",\\s*")) {
           if (!code.isEmpty()) {
-            hiddenMatchesLanguages.add(Languages.getLanguageForShortCode(code));
+            hiddenMatchesLanguages.add(Languages.getLanguage(code));
           }
         }
         dbDriver = getOptionalProperty(props, "dbDriver", null);
@@ -239,7 +239,7 @@ public class HTTPServerConfig {
   }
 
   private void setLanguageModelDirectory(String langModelDir) {
-    SuggestionsOrdererConfig.setNgramsPath(langModelDir);
+    // GTODO This needs to be applied at the point where the suggestion orderer is needed.  A LanguageModelSuggestionsOrderer should be created and used. Config.setNgramsPath(langModelDir);
     languageModelDir = new File(langModelDir);
     if (!languageModelDir.exists() || !languageModelDir.isDirectory()) {
       throw new RuntimeException("LanguageModel directory not found or is not a directory: " + languageModelDir);
@@ -299,7 +299,7 @@ public class HTTPServerConfig {
   /**
    * @param len the maximum text length allowed (in number of characters), texts that are longer
    *            will cause an exception when being checked, unless the user can provide
-   *            a JWT 'token' parameter with a 'maxTextLength' claim          
+   *            a JWT 'token' parameter with a 'maxTextLength' claim
    */
   public void setMaxTextLength(int len) {
     this.maxTextLength = len;
@@ -474,7 +474,7 @@ public class HTTPServerConfig {
     return cacheSize;
   }
 
-  /** 
+  /**
    * Set cache size (in number of sentences).
    * @since 4.2
    */
@@ -522,7 +522,7 @@ public class HTTPServerConfig {
   void setBlockedReferrers(List<String> blockedReferrers) {
     this.blockedReferrers = Objects.requireNonNull(blockedReferrers);
   }
-  
+
   /**
    * URL of server that is queried to add additional (but hidden) matches to the result.
    * @since 4.0
@@ -569,7 +569,7 @@ public class HTTPServerConfig {
   String getDatabaseDriver() {
     return dbDriver;
   }
-  
+
   /**
    * @since 4.2
    */
@@ -595,7 +595,7 @@ public class HTTPServerConfig {
   void setDatabaseUrl(String dbUrl) {
     this.dbUrl = dbUrl;
   }
-  
+
   /**
    * @return the database username, or {@code null}
    * @since 4.2
@@ -613,7 +613,7 @@ public class HTTPServerConfig {
   void setDatabaseUsername(String dbUsername) {
     this.dbUsername = dbUsername;
   }
-  
+
   /**
    * @return the database password matching {@link #getDatabaseUsername()}, or {@code null}
    * @since 4.2
@@ -631,9 +631,9 @@ public class HTTPServerConfig {
   void setDatabasePassword(String dbPassword) {
     this.dbPassword = dbPassword;
   }
-  
+
   /**
-   * @throws IllegalConfigurationException if property is not set 
+   * @throws IllegalConfigurationException if property is not set
    */
   protected String getProperty(Properties props, String propertyName, File config) {
     String propertyValue = (String)props.get(propertyName);

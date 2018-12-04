@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -20,14 +20,20 @@
 package org.languagetool.tokenizers.ca;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
-import org.languagetool.tokenizers.SRXSentenceTokenizer;
 import org.languagetool.tokenizers.SentenceTokenizer;
 
 public class CatalanSentenceTokenizerTest {
 
-  private final SentenceTokenizer stokenizer = new SRXSentenceTokenizer(new Catalan());
+  private SentenceTokenizer stokenizer;
+
+  @Before
+  public void setUp() throws Exception {
+      Catalan lang = new Catalan();
+      stokenizer = lang.getSentenceTokenizer();
+  }
 
   @Test
   public final void testTokenize() {
@@ -49,9 +55,9 @@ public class CatalanSentenceTokenizerTest {
             "»La Maria va engegar el cotxe");
     testSplit("diu que va dir. ", "A mi em feia estrany.");
     testSplit("Són del s. III dC. ", "Són importants les pintures.");
-    
+
     // N., t.
-    testSplit("Vés-te’n. ", "A mi em feia estrany.");  
+    testSplit("Vés-te’n. ", "A mi em feia estrany.");
     testSplit("Vés-te'n. ", "A mi em feia estrany.");
     testSplit("VÉS-TE'N. ", "A mi em feia estrany.");
     testSplit("Canten. ", "A mi em feia estrany.");
@@ -62,7 +68,7 @@ public class CatalanSentenceTokenizerTest {
     testSplit("(\"n. 3\".");
     testSplit("En el t. 2 de la col·lecció");
     testSplit("Llança't. ", "Fes-ho.");
-    
+
     // Initials
     testSplit("A l'atenció d'A. Comes.");
     testSplit("A l'atenció d'À. Comes.");
@@ -104,14 +110,14 @@ public class CatalanSentenceTokenizerTest {
     testSplit("Són d'1 m. ", "Han estat condicionades.");
     testSplit("Hi vivien 50 h. ", "Després el poble va créixer.");
     testSplit("L'acte serà a les 15.30 h. de la vesprada.");
-    
-    //Error: missing space. It is not split in order to trigger other errors. 
+
+    //Error: missing space. It is not split in order to trigger other errors.
     testSplit("s'hi enfrontà quan G.Oueddei n'esdevingué líder");
     testSplit("el jesuïta alemany J.E. Nithard");
   }
 
   private void testSplit(final String... sentences) {
-    TestTools.testSplit(sentences, stokenizer);
+    TestTools.testSplit(stokenizer, sentences);
   }
 
 }

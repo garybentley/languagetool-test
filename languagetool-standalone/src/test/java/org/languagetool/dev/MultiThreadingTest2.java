@@ -73,7 +73,7 @@ public class MultiThreadingTest2 {
     }
   }
 
-  private void initExpectedResults() throws IOException {
+  private void initExpectedResults() throws Exception {
     JLanguageTool lt = new JLanguageTool(LANG);
     for (String sentence : sentences) {
       List<RuleMatch> matches = lt.check(sentence);
@@ -102,7 +102,7 @@ public class MultiThreadingTest2 {
         if (!expectedResults.get(sentence).equals(real)) {
           fail("Got '" + real + "', expected '" + expected + "' for input: " + sentence);
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }

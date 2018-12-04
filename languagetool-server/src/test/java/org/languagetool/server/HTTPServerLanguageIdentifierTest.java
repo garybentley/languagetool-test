@@ -72,10 +72,10 @@ public class HTTPServerLanguageIdentifierTest extends HTTPServerMultiLangLoadTes
 
     String response = checkByPOST("auto", textSubstring);
     String detectedLang = getDetectedLanguageCodeFromJSON(response);
-    String detectedLangShort = Languages.getLanguageForShortCode(detectedLang).getShortCode();
-    boolean correctDetection = detectedLangShort.equals(language.getShortCode());
+    String detectedLangShort = Languages.getLanguage(detectedLang).getLocale().getLanguage();
+    boolean correctDetection = detectedLangShort.equals(language.getLocale().getLanguage());
     if (!correctDetection) {
-      System.out.printf("Expected %s / Detected %s -> %s%n", language.getShortCode(), detectedLangShort, textSubstring.replaceAll("\n", ""));
+      System.out.printf("Expected %s / Detected %s -> %s%n", language.getLocale().getLanguage(), detectedLangShort, textSubstring.replaceAll("\n", ""));
       synchronized (this) {
         numDetectionFailures.incrementAndGet();
       }

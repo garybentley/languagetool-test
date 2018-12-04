@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,13 +36,14 @@ public class AccentuationCheckRuleTest {
   private JLanguageTool         langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new AccentuationCheckRule(TestTools.getEnglishMessages());
-    langTool = new JLanguageTool(new Catalan());
+  public void setUp() throws Exception {
+    Catalan lang = new Catalan();
+    rule = lang.createAccentuationCheckRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException {
+  public void testRule() throws Exception {
 
     // correct sentences:
     assertCorrect("—I continues mantenint que això va succeir");
@@ -134,23 +133,21 @@ public class AccentuationCheckRuleTest {
     assertEquals(2, matches.length);
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool
         .getAnalyzedSentence(sentence));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool
         .getAnalyzedSentence(sentence));
     assertEquals(1, matches.length);
   }
 
   @Test
-  public void testPositions() throws IOException {
-    final AccentuationCheckRule rule = new AccentuationCheckRule(TestTools.getEnglishMessages());
+  public void testPositions() throws Exception {
     final RuleMatch[] matches;
-    final JLanguageTool langTool = new JLanguageTool(new Catalan());
 
     matches = rule.match(langTool
         .getAnalyzedSentence("Són circumstancies extraordinàries."));

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,6 +19,7 @@
 package org.languagetool.dev.bigdata;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.AnalyzedSentence;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.English;
@@ -32,10 +33,15 @@ import static org.junit.Assert.*;
 public class ContextBuilderTest {
 
   private final ContextBuilder cb = new ContextBuilder();
-  private final JLanguageTool lt = new JLanguageTool(new English());
+  private JLanguageTool lt;
+
+  @Before
+  public void setUp() throws Exception {
+      lt = new JLanguageTool(new English());
+  }
 
   @Test
-  public void testGetContext() throws IOException {
+  public void testGetContext() throws Exception {
     check("And this is a test.",  3/*'is'*/, 1, "[this, is, a]");
     check("And this is a test.",  3/*'is'*/, 2, "[And, this, is, a, test]");
     check("And this is a test.",  3/*'is'*/, 3, "[_START_, And, this, is, a, test, .]");
@@ -46,7 +52,7 @@ public class ContextBuilderTest {
     check("This",  1, 2, "[_START_, This, _END_]");
   }
 
-  private void check(String input, int pos, int contextSize, String expected) throws IOException {
+  private void check(String input, int pos, int contextSize, String expected) throws Exception {
     AnalyzedSentence sentence = lt.getAnalyzedSentence(input);
     List<String> context = cb.getContext(sentence.getTokensWithoutWhitespace(), pos, contextSize);
     assertThat(context.toString(), is(expected));

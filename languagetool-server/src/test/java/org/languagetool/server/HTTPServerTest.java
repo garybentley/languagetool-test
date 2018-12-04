@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2006 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
 public class HTTPServerTest {
 
   private static final int MAX_LENGTH = 50_000;  // needs to be in sync with server conf!
-  
+
   private static final String LOAD_TEST_URL = "http://localhost:<PORT>/v2/check";
   //private static final String LOAD_TEST_URL = "https://api.languagetool.org/v2/check";
   //private static final String LOAD_TEST_URL = "https://languagetool.org/api/v2/check";
@@ -106,16 +106,16 @@ public class HTTPServerTest {
     // tests for "&" character
     English english = new English();
     assertTrue(checkV2(english, "Me & you you").contains("&"));
-    // tests for mother tongue (copy from link {@link FalseFriendRuleTest})   
+    // tests for mother tongue (copy from link {@link FalseFriendRuleTest})
     assertTrue(checkV2(english, german, "We will berate you").contains("BERATE"));
     assertTrue(checkV2(german, english, "Man sollte ihn nicht so beraten.").contains("BERATE"));
     assertTrue(checkV2(polish, english, "To jest frywolne.").contains("FRIVOLOUS"));
-      
+
     //test for no changed if no options set
     String[] nothing = {};
-    assertEquals(checkV2(english, german, "We will berate you"), 
+    assertEquals(checkV2(english, german, "We will berate you"),
         checkWithOptionsV2(english, german, "We will berate you", nothing, nothing, false));
-    
+
     //disabling
     String[] disableAvsAn = {"EN_A_VS_AN"};
     assertTrue(!checkWithOptionsV2(
@@ -130,11 +130,11 @@ public class HTTPServerTest {
     //..unless explicitly stated.
     assertTrue(!checkWithOptionsV2(
         english, german, "We will berate you", disableAvsAn, nothing, true).contains("BERATE"));
-    
-    
+
+
     //test if two rules get enabled as well
     String[] twoRules = {"EN_A_VS_AN", "BERATE"};
-    
+
     String resultEn = checkWithOptionsV2(
             english, german, "This is an test. We will berate you.", twoRules, nothing, false);
     assertTrue("Result: " + resultEn, resultEn.contains("EN_A_VS_AN"));
@@ -145,7 +145,7 @@ public class HTTPServerTest {
             english, german, "This is an test. We will berate you.", nothing, twoRules, false);
     assertFalse("Result: " + result3, result3.contains("EN_A_VS_AN"));
     assertFalse("Result: " + result3, result3.contains("BERATE"));
-    
+
     //two disabled, one enabled, so enabled wins
     String result4 = checkWithOptionsV2(
             english, german, "This is an test. We will berate you.", disableAvsAn, twoRules, false);
@@ -224,7 +224,7 @@ public class HTTPServerTest {
     assertTrue(res4.contains("\"offset\":18"));
     assertTrue(res4.contains("EN_A_VS_AN"));
     assertTrue(res4.contains("\"offset\":35"));
-    
+
     try {
       dataTextCheck(english, null, "{\"annotation\": [{\"text\": \"An\", \"markup\": \"foo\"}]}", "");
       fail();
@@ -309,7 +309,7 @@ public class HTTPServerTest {
       server.stop();
     }
   }
-  
+
   @Test
   public void testEnabledOnlyParameter() throws Exception {
     HTTPServer server = new HTTPServer(new HTTPServerConfig(HTTPTools.getDefaultPort()), false);
@@ -379,10 +379,10 @@ public class HTTPServerTest {
   }
 
   private String check(String typeName, String urlPrefix, Language lang, Language motherTongue, String text, String parameters) throws IOException {
-    String urlOptions = urlPrefix + "?language=" + (lang == null ? "auto" : lang.getShortCode());
+    String urlOptions = urlPrefix + "?language=" + (lang == null ? "auto" : lang.getLocale().getLanguage());
     urlOptions += "&disabledRules=HUNSPELL_RULE&" + typeName + "=" + URLEncoder.encode(text, "UTF-8"); // latin1 is not enough for languages like polish, romanian, etc
     if (motherTongue != null) {
-      urlOptions += "&motherTongue=" + motherTongue.getShortCode();
+      urlOptions += "&motherTongue=" + motherTongue.getLocale().getLanguage();
     }
     urlOptions += parameters;
     URL url = new URL("http://localhost:" + HTTPTools.getDefaultPort() + urlOptions);
@@ -391,10 +391,10 @@ public class HTTPServerTest {
 
   private String checkWithOptionsV2(Language lang, Language motherTongue, String text,
                                   String[] enabledRules, String[] disabledRules, boolean useEnabledOnly) throws IOException {
-    String urlOptions = "/v2/check?language=" + lang.getShortCode();
+    String urlOptions = "/v2/check?language=" + lang.getLocale().getLanguage();
     urlOptions += "&text=" + URLEncoder.encode(text, "UTF-8"); // latin1 is not enough for languages like polish, romanian, etc
     if (motherTongue != null) {
-      urlOptions += "&motherTongue=" + motherTongue.getShortCode();
+      urlOptions += "&motherTongue=" + motherTongue.getLocale().getLanguage();
     }
     if (disabledRules.length > 0) {
       urlOptions += "&disabledRules=" + StringUtils.join(disabledRules, ",");
@@ -413,7 +413,7 @@ public class HTTPServerTest {
    * Same as {@link #checkV1(Language, String)} but using HTTP POST method instead of GET
    */
   String checkByPOST(Language lang, String text) throws IOException {
-    return checkByPOST(lang.getShortCodeWithCountryAndVariant(), text);
+    return checkByPOST(lang.getLocale().toLanguageTag(), text);
   }
 
   /**

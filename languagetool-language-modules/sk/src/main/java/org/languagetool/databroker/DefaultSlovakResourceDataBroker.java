@@ -52,7 +52,7 @@ import org.languagetool.synthesis.ManualSynthesizer;
 import org.languagetool.synthesis.Synthesizer;
 import org.languagetool.synthesis.sk.SlovakSynthesizer;
 import org.languagetool.rules.CompoundRuleData;
-import org.languagetool.rules.pattners.AbstractPatternRule;
+import org.languagetool.rules.patterns.AbstractPatternRule;
 
 public class DefaultSlovakResourceDataBroker extends DefaultResourceDataBroker implements SlovakResourceDataBroker {
 

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Jaume Ortolà
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,8 +25,6 @@ import org.languagetool.TestTools;
 import org.languagetool.language.Catalan;
 import org.languagetool.rules.RuleMatch;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,17 +36,18 @@ public class ReflexiveVerbsRuleTest {
   private JLanguageTool langTool;
 
   @Before
-  public void setUp() throws IOException {
-    rule = new ReflexiveVerbsRule(TestTools.getEnglishMessages());
-    langTool = new JLanguageTool(new Catalan());
+  public void setUp() throws Exception {
+    Catalan lang = new Catalan();
+    rule = lang.createReflexiveVerbsRule(null);
+    langTool = new JLanguageTool(lang);
   }
 
   @Test
-  public void testRule() throws IOException { 
+  public void testRule() throws Exception {
 
     //TODO: se'n vola / s'envola
     // correct sentences:
-    
+
     //assertCorrect("la festa de Rams es commemora anant a l'església a beneir el palmó");
     //assertCorrect("les circumstàncies m'obliguen a gloriar-me"); Cal buscar la concordança amb (m')
     //assertCorrect("es van agenollar i prosternar");
@@ -84,7 +83,7 @@ public class ReflexiveVerbsRuleTest {
     assertCorrect("cosa que li permetia, sense haver-s'hi d'esforçar gaire, seguir entre classe i classe");
     assertCorrect("fins que no em vingui la inspiració");
     assertCorrect("Si no ho trobes bé, vés-te a queixar al director");
-    
+
     assertCorrect("potser em vindria de gust fer un mossec");
     assertCorrect("li ho va fer empassar de cop");
     //assertCorrect("del lloc on m'havia caigut"); correcte o incorrecte segons quin sigui el subjecte
@@ -97,7 +96,7 @@ public class ReflexiveVerbsRuleTest {
     assertCorrect("Em deixes demanar-te una cosa?");
     assertCorrect("havien fet desbocar un cavall sense brida");
     assertCorrect("quan el vent ja m'hauria portat les rondalles");
-    assertCorrect("Llavors m'oloro les mans"); 
+    assertCorrect("Llavors m'oloro les mans");
     assertCorrect("Hem de poder-nos queixar");
     assertCorrect("Ens hem de poder queixar");
     assertCorrect("Després d'acomiadar-nos vam pujar a la nau");
@@ -222,7 +221,7 @@ public class ReflexiveVerbsRuleTest {
     assertCorrect("Se li'n va anar la mà");
     assertCorrect("El nen pot callar");
     assertCorrect("es va desfent");
-    assertCorrect("s'ha anat configurant");  
+    assertCorrect("s'ha anat configurant");
     assertCorrect("s'han anat fabricant amb materials");
     assertCorrect("la matèria que cau s'accelera");
     assertCorrect("Altres muntanyes foren pujades per pastors, caçadors o aventurers.");
@@ -252,14 +251,14 @@ public class ReflexiveVerbsRuleTest {
     assertCorrect("Joan s'ha anat a dutxar.");
     assertCorrect("amb els Confederats intentant burlar el bloqueig a Maryland.");
     //IMPERSONALS
-    assertCorrect("l'altre es duu la mà al llavi inferior"); 
-    assertCorrect("l'altre s'olora les mans"); 
+    assertCorrect("l'altre es duu la mà al llavi inferior");
+    assertCorrect("l'altre s'olora les mans");
     //assertCorrect("la impressió que es va endavant");
     assertCorrect("Es pot baixar la darrera versió.");
     assertCorrect("Se'l va fer callar.");
     assertCorrect("Se li va fer callar."); //incorrecta per una altra qüestió
     assertCorrect("Se'ns va fer callar.");
-    assertCorrect("També es canta quan es va a pasturar als animals");    
+    assertCorrect("També es canta quan es va a pasturar als animals");
     assertCorrect("Quan es baixa a l'ordinador de l'usuari,");
     assertCorrect("sinó que es baixa per parts a l'atzar.");
     assertCorrect("Es tem que la radioactivitat afecti la població local");
@@ -281,10 +280,10 @@ public class ReflexiveVerbsRuleTest {
     assertCorrect("A escola no es va a jugar.");
     assertCorrect("A escola no es va a plorar.");
     assertCorrect("Al nostre pis de la Torre es pujava per aquella llarga escala");
-    assertCorrect("Joan no es va a jugar la feina.");  
+    assertCorrect("Joan no es va a jugar la feina.");
     assertCorrect("I aquella flaire que em pujava al cap");
     assertCorrect("el que no s'olora, el que no es tasta");
-       
+
     // errors:
     assertIncorrect("Ells s'han crescut molt");
     assertIncorrect("Em vaig créixer davant les dificultats");
@@ -313,27 +312,27 @@ public class ReflexiveVerbsRuleTest {
     assertIncorrect("A mi se'm va caure la cara de vergonya");
     assertIncorrect("Joan no es va a l'escola");
     assertIncorrect("que el procés no se'ns vagi de les mans");
-    assertIncorrect("Ho volen per a anar-se de la zona"); 
-    assertIncorrect("Ho volen per anar-se de la zona"); 
-    assertIncorrect("Ho desitgen per anar-se de la zona"); 
+    assertIncorrect("Ho volen per a anar-se de la zona");
+    assertIncorrect("Ho volen per anar-se de la zona");
+    assertIncorrect("Ho desitgen per anar-se de la zona");
     assertIncorrect("els grups que es van caure del cartell");
     assertIncorrect("el nen que es va caure al pou");//--> Es pot tractar diferent: caure / anar
     assertCorrect("el dia que es va anar a la ciutat");
     //assertIncorrect("el dia que es va anar a la ciutat");
     assertIncorrect("tot l'auditori es callà");
-    assertIncorrect("les gotes que es van caure fora"); 
+    assertIncorrect("les gotes que es van caure fora");
     assertIncorrect("Ells s'han baixat del tren.");
     assertIncorrect("Ximo Puig i Rubalcaba no s'han baixat del cotxe oficial des del 79.");
     assertIncorrect("Se'ns va callar.");
     assertIncorrect("Tothom es va callar.");
-    assertIncorrect("Els nens van poder-se caure");  
+    assertIncorrect("Els nens van poder-se caure");
     assertIncorrect("Aleshores ell es va anar a estudiar a Barcelona"); //-->va anar a fer introspecció :-)
     assertIncorrect("Joan es va anar a estudiar a Barcelona.");
     assertIncorrect("se'ns va anar la mà");
-    assertIncorrect("A Joan se li va anar la mà");  
-    assertIncorrect("Al pare se li va anar la mà");  
+    assertIncorrect("A Joan se li va anar la mà");
+    assertIncorrect("Al pare se li va anar la mà");
     assertIncorrect("Escriu que quan era mosso «se li anaven els ulls»");
-    
+
     assertIncorrect("Es van caure en la trampa.");
     assertIncorrect("Aleshores es van anar a la ciutat a presentar una queixa.");
     assertIncorrect("Va entrar l'avi que pujava del taller i es va seure.");
@@ -341,7 +340,7 @@ public class ReflexiveVerbsRuleTest {
     //assertIncorrect("quan es pugen, permeten canviar de feina.");
     assertIncorrect("havent queixat");
     assertIncorrect("haver queixat");
-    assertIncorrect("les membranes s'han anat fabricat amb materials sintètics"); 
+    assertIncorrect("les membranes s'han anat fabricat amb materials sintètics");
     assertIncorrect("s'han anat fabricat amb materials sintètics");
     assertIncorrect("Holmes i Watson s'han anat d'acampada");
     assertIncorrect("L'independentisme s'ha anat a Brussel·les!");
@@ -358,7 +357,7 @@ public class ReflexiveVerbsRuleTest {
     //assertIncorrect("Es pujà al cel"); ->indecidible
     assertIncorrect("El berenar es pujà al cel");
     assertIncorrect("Va baixar-se del cotxe en marxa.");
-    
+
     assertIncorrect("comencen queixant");
     assertIncorrect("comenceu a queixar-nos");
     assertIncorrect("et puc queixar");
@@ -397,12 +396,12 @@ public class ReflexiveVerbsRuleTest {
     assertIncorrect("anem a aferrissar");
   }
 
-  private void assertCorrect(String sentence) throws IOException {
+  private void assertCorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals(0, matches.length);
   }
 
-  private void assertIncorrect(String sentence) throws IOException {
+  private void assertIncorrect(String sentence) throws Exception {
     final RuleMatch[] matches = rule.match(langTool.getAnalyzedSentence(sentence));
     assertEquals(1, matches.length);
   }

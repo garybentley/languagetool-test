@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -53,11 +53,11 @@ class CommonCrawlToNgram3 implements AutoCloseable {
   private final Map<String, Long> bigramToCount = new HashMap<>();
   private final Map<String, Long> trigramToCount = new HashMap<>();
   private final Map<Integer, FileWriter> ngramSizeToWriter = new HashMap<>();
-  
+
   private long charCount = 0;
   private long lineCount = 0;
 
-  CommonCrawlToNgram3(Language language, File input, File outputDir) throws IOException {
+  CommonCrawlToNgram3(Language language, File input, File outputDir) throws Exception {
     this.input = input;
     this.sentenceTokenizer = language.getSentenceTokenizer();
     this.wordTokenizer = new GoogleStyleWordTokenizer();
@@ -162,12 +162,12 @@ class CommonCrawlToNgram3 implements AutoCloseable {
       System.out.println("Usage: " + CommonCrawlToNgram3.class + " <langCode> <input.xz/bz2> <outputDir>");
       System.exit(1);
     }
-    Language language = Languages.getLanguageForShortCode(args[0]);
+    Language language = Languages.getLanguage(args[0]);
     File input = new File(args[1]);
     File outputDir = new File(args[2]);
     try (CommonCrawlToNgram3 prg = new CommonCrawlToNgram3(language, input, outputDir)) {
       prg.indexInputFile();
     }
   }
-  
+
 }

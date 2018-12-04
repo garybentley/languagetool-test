@@ -19,15 +19,15 @@
 package org.languagetool.rules.ca;
 
 import org.junit.Test;
+import org.languagetool.language.Catalan;
 import org.languagetool.rules.patterns.PatternRuleTest;
-
-import java.io.IOException;
 
 public class CatalanPatternRuleTest extends PatternRuleTest {
 
   @Test
-  public void testRules() throws IOException {
-    runGrammarRulesFromXmlTest();
+  public void testRules() throws Exception {
+    Catalan lang = new Catalan();
+    runTestForLanguage(lang);
   }
 
 }

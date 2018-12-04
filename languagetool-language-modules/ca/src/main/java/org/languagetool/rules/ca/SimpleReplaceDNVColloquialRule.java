@@ -18,11 +18,12 @@
  */
 package org.languagetool.rules.ca;
 
-import org.languagetool.Language;
 import org.languagetool.rules.Categories;
 import org.languagetool.rules.ITSIssueType;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.synthesis.Synthesizer;
 
-import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -37,9 +38,9 @@ import java.util.ResourceBundle;
  */
 public class SimpleReplaceDNVColloquialRule extends AbstractSimpleReplaceLemmasRule {
 
-  public SimpleReplaceDNVColloquialRule(final ResourceBundle messages, Language language) throws IOException {
-    super(messages, language);
-    wrongLemmas = load("/ca/replace_dnv_colloquial.txt", language.getUseDataBroker());
+  public SimpleReplaceDNVColloquialRule(final ResourceBundle messages, Map<String, List<String>> wrongWords, Synthesizer synthesizer, CaseConverter caseCon) {
+    super(messages, wrongWords, synthesizer, caseCon);
+    // GTODO wrongLemmas = load("/ca/replace_dnv_colloquial.txt", language.getUseDataBroker());
     super.setCategory(Categories.COLLOQUIALISMS.getCategory(messages));
     super.setLocQualityIssueType(ITSIssueType.Style);
   }

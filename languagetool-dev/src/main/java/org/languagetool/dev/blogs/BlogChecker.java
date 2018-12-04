@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -34,7 +34,7 @@ import java.io.IOException;
  */
 class BlogChecker {
 
-  private void check(File dir, Language lang) throws IOException {
+  private void check(File dir, Language lang) throws Exception {
     JLanguageTool lt = new JLanguageTool(lang);
     lt.disableRule("WHITESPACE_RULE");
     lt.disableRule("UNPAIRED_BRACKETS");
@@ -63,13 +63,13 @@ class BlogChecker {
     return StringEscapeUtils.unescapeHtml4(result).replace(" ", " ");  // nbsp
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.err.println("Usage: " + BlogChecker.class.getSimpleName() + " <langCode> <contentDir>");
       System.exit(1);
     }
     BlogChecker checker = new BlogChecker();
-    Language lang = Languages.getLanguageForShortCode(args[0]);
+    Language lang = Languages.getLanguage(args[0]);
     checker.check(new File(args[1]), lang);
   }
 }

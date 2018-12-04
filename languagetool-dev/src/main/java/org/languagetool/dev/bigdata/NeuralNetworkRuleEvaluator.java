@@ -1,6 +1,6 @@
 /* LanguageTool, a natural language style checker
  * Copyright (C) 2017 Markus Brenneis
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,6 +29,7 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.neuralnetwork.NeuralNetworkRule;
 import org.languagetool.rules.neuralnetwork.Word2VecModel;
+import org.languagetool.databroker.DefaultResourceDataBroker;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,9 +60,10 @@ class NeuralNetworkRuleEvaluator {
 
   private boolean verbose = true;
 
-  private NeuralNetworkRuleEvaluator(Language language, File word2vecDir, String ruleId) throws IOException {
+  private NeuralNetworkRuleEvaluator(Language language, File word2vecDir, String ruleId) throws Exception {
     this.language = language;
-    Word2VecModel word2vecModel = language.getWord2VecModel(word2vecDir);
+
+    Word2VecModel word2vecModel = DefaultResourceDataBroker.createWord2VecModel(word2vecDir.toPath().toRealPath(), word2vecDir.toPath().toRealPath());
     List<Rule> allRules = language.getRelevantWord2VecModelRules(JLanguageTool.getMessageBundle(), word2vecModel);
     rules = allRules.stream()
             .filter(r -> r instanceof NeuralNetworkRule)
@@ -74,10 +76,17 @@ class NeuralNetworkRuleEvaluator {
   }
 
   private List<Map<Double, EvalResult>> runAll(List<String> inputsOrDir, int maxSentences, List<Double> evalMinScores) {
-    return rules.stream().map(rule -> run(rule, inputsOrDir, maxSentences, evalMinScores)).collect(toList());
+    return rules.stream().map(rule ->
+    {
+        try {
+            return run(rule, inputsOrDir, maxSentences, evalMinScores);
+        } catch(Exception e) {
+            throw new RuntimeException(String.format("Unable to run rule: %1$s", rule), e);
+        }
+    }).collect(toList());
   }
 
-  private Map<Double, EvalResult> run(NeuralNetworkRule rule, List<String> inputsOrDir, int maxSentences, List<Double> evalMinScores) {
+  private Map<Double, EvalResult> run(NeuralNetworkRule rule, List<String> inputsOrDir, int maxSentences, List<Double> evalMinScores) throws Exception {
     for (Double evalFactor : evalMinScores) {
       evalValues1.put(evalFactor, new EvalValues());
       evalValues2.put(evalFactor, new EvalValues());
@@ -93,7 +102,7 @@ class NeuralNetworkRuleEvaluator {
     return printEvalResult(allToken1Sentences, allToken2Sentences, token1, token2);
   }
 
-  private void evaluate(NeuralNetworkRule rule, List<Sentence> sentences, boolean token1IsCorrect, String token1, String token2, Map<Double, EvalValues> evalValues, List<Double> evalMinScores) {
+  private void evaluate(NeuralNetworkRule rule, List<Sentence> sentences, boolean token1IsCorrect, String token1, String token2, Map<Double, EvalValues> evalValues, List<Double> evalMinScores) throws Exception {
     println("======================");
     printf("Starting evaluation on " + sentences.size() + " sentences with %s/%s:\n", token1, token2);
     JLanguageTool lt = new JLanguageTool(language);
@@ -103,7 +112,7 @@ class NeuralNetworkRuleEvaluator {
     }
   }
 
-  private void evaluateSentence(NeuralNetworkRule rule, boolean token1IsCorrect, String token1, String token2, Map<Double, EvalValues> evalValues, List<Double> evalMinScores, JLanguageTool lt, Sentence sentence) {
+  private void evaluateSentence(NeuralNetworkRule rule, boolean token1IsCorrect, String token1, String token2, Map<Double, EvalValues> evalValues, List<Double> evalMinScores, JLanguageTool lt, Sentence sentence) throws Exception {
     String textToken = token1IsCorrect ? token1 : token2;
     String plainText = sentence.getText();
     String replacement = token1;
@@ -186,7 +195,7 @@ class NeuralNetworkRuleEvaluator {
     SentenceSource sentenceSource;
     try {
       sentenceSource = MixingSentenceSource.create(inputs, language);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new RuntimeException("Error while loading sentence source", e);
     }
     return getSentencesFromSource(inputs, token, maxSentences, sentenceSource);
@@ -225,7 +234,7 @@ class NeuralNetworkRuleEvaluator {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length < 4) {
       System.err.println("Usage: " + NeuralNetworkRuleEvaluator.class.getSimpleName()
               + " <langCode> <word2vecDir> <ruleId> <wikipediaXml|tatoebaFile|plainTextFile|dir>...");
@@ -240,7 +249,7 @@ class NeuralNetworkRuleEvaluator {
     File word2vecDir = new File(args[1]);
     String ruleId = args[2];
     Language lang;
-    lang = Languages.getLanguageForShortCode(langCode);
+    lang = Languages.getLanguage(langCode);
     List<String> inputsFiles = Arrays.stream(args).skip(3).collect(toList());
     NeuralNetworkRuleEvaluator generator = new NeuralNetworkRuleEvaluator(lang, word2vecDir, ruleId);
     List<Map<Double, EvalResult>> evaluationResults = generator.runAll(inputsFiles, MAX_SENTENCES, EVAL_MIN_SCORES);

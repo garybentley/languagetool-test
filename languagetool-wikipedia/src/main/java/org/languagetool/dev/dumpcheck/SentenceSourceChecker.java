@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,6 +27,9 @@ import org.languagetool.MultiThreadedJLanguageTool;
 import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
+import org.languagetool.databroker.*;
+import org.languagetool.languagemodel.LanguageModel;
+import org.languagetool.rules.neuralnetwork.Word2VecModel;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +48,7 @@ public class SentenceSourceChecker {
     // no public constructor
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     SentenceSourceChecker prg = new SentenceSourceChecker();
     CommandLine commandLine = ensureCorrectUsageOrExit(args);
     File propFile = null;
@@ -144,15 +147,18 @@ public class SentenceSourceChecker {
   }
 
   private void run(File propFile, Set<String> disabledRules, String langCode, List<String> fileNames, String[] ruleIds,
-                   String[] additionalCategoryIds, int maxSentences, int maxErrors, File languageModelDir, File word2vecModelDir, Pattern filter) throws IOException {
-    Language lang = Languages.getLanguageForShortCode(langCode);
+                   String[] additionalCategoryIds, int maxSentences, int maxErrors, File languageModelDir, File word2vecModelDir, Pattern filter) throws Exception {
+    Language lang = Languages.getLanguage(langCode);
     MultiThreadedJLanguageTool languageTool = new MultiThreadedJLanguageTool(lang);
     languageTool.setCleanOverlappingMatches(false);
     if (languageModelDir != null) {
-      languageTool.activateLanguageModelRules(languageModelDir);
+      // GTODO We assume a Lucene language model here.
+      LanguageModel langModel = DefaultResourceDataBroker.createLuceneLanguageModel(languageModelDir.toPath());
+      languageTool.activateLanguageModelRules(langModel);
     }
     if (word2vecModelDir != null) {
-      languageTool.activateWord2VecModelRules(word2vecModelDir);
+      Word2VecModel model = DefaultResourceDataBroker.createWord2VecModel(word2vecModelDir.toPath(), word2vecModelDir.toPath());
+      languageTool.activateWord2VecModelRules(model);
     }
     if (ruleIds != null) {
       enableOnlySpecifiedRules(ruleIds, languageTool);

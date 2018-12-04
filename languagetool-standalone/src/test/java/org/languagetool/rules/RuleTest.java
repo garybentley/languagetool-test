@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class RuleTest {
 
   @Test
-  public void testJavaRules() throws IOException {
+  public void testJavaRules() throws Exception {
     Map<String,String> idsToClassName = new HashMap<>();
     Set<Class> ruleClasses = new HashSet<>();
     if (Languages.getWithDemoLanguage().size() <= 1) {
@@ -74,12 +74,12 @@ public class RuleTest {
     }
   }
 
-  private void testExamples(Rule rule, JLanguageTool lt) throws IOException {
+  private void testExamples(Rule rule, JLanguageTool lt) throws Exception {
     testCorrectExamples(rule, lt);
     testIncorrectExamples(rule, lt);
   }
 
-  private void testCorrectExamples(Rule rule, JLanguageTool lt) throws IOException {
+  private void testCorrectExamples(Rule rule, JLanguageTool lt) throws Exception {
     List<CorrectExample> correctExamples = rule.getCorrectExamples();
     for (CorrectExample correctExample : correctExamples) {
       String input = cleanMarkers(correctExample.getExample());
@@ -92,7 +92,7 @@ public class RuleTest {
     }
   }
 
-  private void testIncorrectExamples(Rule rule, JLanguageTool lt) throws IOException {
+  private void testIncorrectExamples(Rule rule, JLanguageTool lt) throws Exception {
     List<IncorrectExample> incorrectExamples = rule.getIncorrectExamples();
     for (IncorrectExample incorrectExample : incorrectExamples) {
       String input = cleanMarkers(incorrectExample.getExample());

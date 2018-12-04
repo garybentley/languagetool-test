@@ -19,12 +19,12 @@
 package org.languagetool.language;
 
 import org.languagetool.UserConfig;
+import org.languagetool.Language;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.de.LongSentenceRule;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,18 +44,8 @@ public class SimpleGerman extends GermanyGerman {
   }
 
   @Override
-  public String getShortCode() {
-    return "de-DE-x-simple-language";  // a "private use tag" according to http://tools.ietf.org/html/bcp47
-  }
-
-  @Override
   public Locale getLocale() {
       return LOCALE;
-  }
-
-  @Override
-  public boolean isVariant() {
-      return true;
   }
 
   @Override
@@ -66,20 +56,20 @@ public class SimpleGerman extends GermanyGerman {
   }
 
   @Override
-  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig) throws IOException {
+  public List<Rule> getRelevantRules(ResourceBundle messages, UserConfig userConfig, List<Language> altLanguages) throws Exception {
     List<Rule> rules = new ArrayList<>();
-    LongSentenceRule lengthRule = new LongSentenceRule(messages, userConfig, 12, true);
+    LongSentenceRule lengthRule = createLongSentenceRule(messages, userConfig, 12, true);
     rules.add(lengthRule);
     return rules;
   }
 
   @Override
-  public synchronized LanguageModel getLanguageModel(File indexDir) throws IOException {
+  public LanguageModel getLanguageModel() throws Exception {
     return null;
   }
 
   @Override
-  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws IOException {
+  public List<Rule> getRelevantLanguageModelRules(ResourceBundle messages, LanguageModel languageModel) throws Exception {
     return Collections.emptyList();
   }
 

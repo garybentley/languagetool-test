@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,11 +24,14 @@ import org.languagetool.language.English;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.rules.ConfusionSetLoader;
 import org.languagetool.rules.ConfusionString;
-import org.languagetool.tokenizers.WordTokenizer;
+import org.languagetool.tokenizers.Tokenizer;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.*;
 
 import java.io.*;
 import java.util.*;
+import java.nio.file.*;
+import java.nio.charset.*;
 
 /**
  * Takes the output of {@link HomophoneOccurrenceDumper} and automatically
@@ -39,24 +42,30 @@ import java.util.*;
 public class RuleCreator {
 
   private static final boolean XML_MODE = true;
-  
+
   private final Map<String, List<OccurrenceInfo>> occurrenceInfos = new HashMap<>();
   private final Map<String, Long> ngramToOccurrence = new HashMap<>();
-  private final WordTokenizer wordTokenizer = new English().getWordTokenizer();
+  private final Tokenizer wordTokenizer;
   private final float minErrorProb;
 
   private int ruleCount = 0;
   private int tokenFilteredRules = 0;
   private int probFilteredRules = 0;
 
-  public RuleCreator(float minErrorProb) {
+  public RuleCreator(float minErrorProb) throws Exception {
     this.minErrorProb = minErrorProb;
+    English lang = new English();
+    wordTokenizer = lang.getWordTokenizer();
   }
 
   private void run(File homophoneOccurrences, String homophonePath) throws IOException {
+    Map<String, List<ConfusionSet>> confusionSetMap = DefaultResourceDataBroker.createConfusionSet(Paths.get(homophonePath), StandardCharsets.UTF_8);
+/*
+GTODO
     ConfusionSetLoader confusionSetLoader = new ConfusionSetLoader();
     InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(homophonePath);
     Map<String,List<ConfusionSet>> confusionSetMap = confusionSetLoader.loadConfusionSet(inputStream);
+    */
     initMaps(homophoneOccurrences);
     int groupCount = 0;
     if (XML_MODE) {
@@ -178,8 +187,8 @@ public class RuleCreator {
       return ngram + "/" + occurrence;
     }
   }
-  
-  public static void main(String[] args) throws IOException {
+
+  public static void main(String[] args) throws Exception {
     if (args.length < 1 || args.length > 2) {
       System.out.println("Usage: " + RuleCreator.class.getSimpleName() + " <homophoneResultFile> [minErrorProbability]");
       System.out.println("    homophoneResultFile   the output of org.languagetool.dev.HomophoneOccurrenceDumper");

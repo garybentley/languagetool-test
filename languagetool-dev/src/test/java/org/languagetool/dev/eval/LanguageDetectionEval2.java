@@ -31,7 +31,7 @@ class LanguageDetectionEval2 {
   // Not properly detected with shortTextAlgorithm(500):
   private final static String text = "Den Vogel kennt man am Gesang, den Topf an dem Klang, den Esel an den Ohren und am Gesang den Toren.";
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     LanguageIdentifier languageIdentifier = new LanguageIdentifier();
     Language detectedLangObj = languageIdentifier.detectLanguage(text);
     System.out.println("'" + text + "'");

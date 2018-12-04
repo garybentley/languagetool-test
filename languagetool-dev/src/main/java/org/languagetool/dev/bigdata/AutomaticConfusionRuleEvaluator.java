@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,11 +25,13 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.language.English;
 import org.languagetool.Languages;
 import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.rules.ConfusionSetLoader;
+import org.languagetool.databroker.*;
 
 import java.io.*;
 import java.util.*;
@@ -41,7 +43,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"resource", "CallToPrintStackTrace"})
 class AutomaticConfusionRuleEvaluator {
-  
+
   private static final String LANGUAGE = "en";
   private static final boolean CASE_SENSITIVE = true;
   private static final int MAX_EXAMPLES = 1000;
@@ -54,19 +56,19 @@ class AutomaticConfusionRuleEvaluator {
   private final IndexSearcher searcher;
   private final Map<String, List<ConfusionSet>> knownSets;
   private final Set<String> finishedPairs = new HashSet<>();
-  
+
   private int ignored = 0;
 
-  AutomaticConfusionRuleEvaluator(File luceneIndexDir) throws IOException {
+  AutomaticConfusionRuleEvaluator(File luceneIndexDir) throws Exception {
+    English lang = new English();
+    knownSets = lang.getUseDataBroker().getConfusionSets();
     DirectoryReader reader = DirectoryReader.open(FSDirectory.open(luceneIndexDir.toPath()));
     searcher = new IndexSearcher(reader);
-    InputStream confusionSetStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream("/en/confusion_sets.txt");
-    knownSets = new ConfusionSetLoader().loadConfusionSet(confusionSetStream);
   }
 
-  private void run(List<String> lines, File indexDir) throws IOException {
-    Language language = Languages.getLanguageForShortCode(LANGUAGE);
-    LanguageModel lm = new LuceneLanguageModel(indexDir);
+  private void run(List<String> lines, File indexDir) throws Exception {
+    Language language = Languages.getLanguage(LANGUAGE);
+    LanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(indexDir.toPath().toRealPath());
     ConfusionRuleEvaluator evaluator = new ConfusionRuleEvaluator(language, lm, CASE_SENSITIVE);
     int lineCount = 0;
     for (String line : lines) {
@@ -99,7 +101,7 @@ class AutomaticConfusionRuleEvaluator {
     return str.replaceFirst("\\|.*", "");
   }
 
-  private void runOnPair(ConfusionRuleEvaluator evaluator, String line, int lineCount, int totalLines, String part1, String part2) throws IOException {
+  private void runOnPair(ConfusionRuleEvaluator evaluator, String line, int lineCount, int totalLines, String part1, String part2) throws Exception {
     if (finishedPairs.contains(part1 + "/" + part2) || finishedPairs.contains(part2 + "/" + part1)) {
       System.out.println("Ignoring: " + part1 + "/" + part2 + ", finished before");
       return;
@@ -196,7 +198,7 @@ class AutomaticConfusionRuleEvaluator {
     return count;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 3) {
       System.out.println("Usage: " + AutomaticConfusionRuleEvaluator.class.getSimpleName() + " <confusionPairCandidates> <exampleSentenceIndexDir> <ngramDir>");
       System.out.println("   <confusionPairCandidates> is a semicolon-separated list of words (one pair per line)");

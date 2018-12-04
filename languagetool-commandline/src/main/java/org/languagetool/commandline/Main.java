@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -31,11 +31,15 @@ import org.languagetool.language.LanguageIdentifier;
 import org.languagetool.rules.Rule;
 import org.languagetool.rules.bitext.BitextRule;
 import org.languagetool.rules.patterns.AbstractPatternRule;
-import org.languagetool.rules.patterns.PatternRuleLoader;
+import org.languagetool.rules.patterns.FalseFriendPatternRule;
+import org.languagetool.rules.patterns.RuleFilterCreator;
 import org.languagetool.tools.JnaTools;
 import org.languagetool.tools.StringTools.ApiPrintMode;
 import org.languagetool.tools.Tools;
 import org.xml.sax.SAXException;
+import org.languagetool.databroker.*;
+import org.languagetool.rules.neuralnetwork.Word2VecModel;
+import org.languagetool.languagemodel.LanguageModel;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -45,6 +49,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.nio.file.*;
 
 import static org.languagetool.tools.StringTools.filterXML;
 import static org.languagetool.tools.StringTools.readerToString;
@@ -55,7 +60,7 @@ import static org.languagetool.tools.StringTools.readerToString;
 class Main {
 
   private final CommandLineOptions options;
-  
+
   private MultiThreadedJLanguageTool lt;
   private boolean profileRules;
   private boolean bitextMode;
@@ -63,7 +68,7 @@ class Main {
   private List<BitextRule> bRules;
   private Rule currentRule;
 
-  Main(CommandLineOptions options) throws IOException {
+  Main(CommandLineOptions options) throws Exception {
     this.options = options;
     profileRules = false;
     bitextMode = false;
@@ -75,22 +80,27 @@ class Main {
       addExternalRules(options.getRuleFile());
     }
     if (options.getLanguageModel() != null) {
-      lt.activateLanguageModelRules(options.getLanguageModel());
+        LanguageModel model = DefaultResourceDataBroker.createLuceneLanguageModel(options.getLanguageModel().toPath());
+        lt.activateLanguageModelRules(model);
     }
     if (options.getWord2VecModel() != null) {
-      lt.activateWord2VecModelRules(options.getWord2VecModel());
+        // Going to assume here that the path to both is the same.
+        Word2VecModel model = DefaultResourceDataBroker.createWord2VecModel(options.getWord2VecModel().toPath(), options.getWord2VecModel().toPath());
+        lt.activateWord2VecModelRules(model);
     }
     Tools.selectRules(lt, options.getDisabledCategories(), options.getEnabledCategories(),
             new HashSet<>(options.getDisabledRules()), new HashSet<>(options.getEnabledRules()), options.isUseEnabledOnly());
   }
 
-  private void addExternalRules(String filename) throws IOException {
-    PatternRuleLoader ruleLoader = new PatternRuleLoader();
-    try (InputStream is = new FileInputStream(filename)) {
-      List<AbstractPatternRule> externalRules = ruleLoader.getRules(is, filename);
-      for (AbstractPatternRule externalRule : externalRules) {
+  private void addExternalRules(String filename) throws Exception {
+    Path path = Paths.get(filename);
+    if (Files.notExists(path)) {
+        throw new IOException(String.format("Rules path: %1$s does not exist.", filename));
+    }
+    path = path.toRealPath();
+    List<AbstractPatternRule> rules = DefaultResourceDataBroker.createPatternRules(path, new RuleFilterCreator(lt.getLanguage().getClass().getClassLoader()), false);
+    for (AbstractPatternRule externalRule : rules) {
         lt.addRule(externalRule);
-      }
     }
   }
 
@@ -103,15 +113,15 @@ class Main {
     }
     return false;
   }
-  
+
   JLanguageTool getJLanguageTool() {
     return lt;
   }
-  
+
   private void setListUnknownWords(boolean listUnknownWords) {
     lt.setListUnknownWords(listUnknownWords);
   }
-  
+
   private void cleanUp() {
     if (lt != null) {
       lt.shutdown();
@@ -121,13 +131,13 @@ class Main {
     }
     JLanguageTool.removeTemporaryFiles();
   }
-  
+
   private void setProfilingMode() {
     profileRules = true;
   }
 
   private void setBitextMode(Language sourceLang,
-      List<String> disabledRules, List<String> enabledRules, File bitextRuleFile) throws IOException, ParserConfigurationException, SAXException {
+      List<String> disabledRules, List<String> enabledRules, File bitextRuleFile) throws Exception {
     bitextMode = true;
     Language target = lt.getLanguage();
     lt = new MultiThreadedJLanguageTool(target, null);
@@ -159,7 +169,7 @@ class Main {
   }
 
   private void runOnFile(String filename, String encoding,
-      boolean xmlFiltering) throws IOException {
+      boolean xmlFiltering) throws Exception {
     if (bitextMode) {
       TabBitextReader reader = new TabBitextReader(filename, encoding);
       if (options.isApplySuggestions()) {
@@ -198,7 +208,7 @@ class Main {
     }
   }
 
-  private void runOnFileLineByLine(String filename, String encoding) throws IOException {
+  private void runOnFileLineByLine(String filename, String encoding) throws Exception {
     System.err.println("Warning: running in line by line mode. Cross-paragraph checks will not work.\n");
     if (options.isVerbose()) {
       lt.setOutput(System.err);
@@ -270,7 +280,7 @@ class Main {
     }
   }
 
-  private void handleLine(ApiPrintMode mode, int lineOffset, StringBuilder sb) throws IOException {
+  private void handleLine(ApiPrintMode mode, int lineOffset, StringBuilder sb) throws Exception {
     int matches = 0;
     String s = filterXML(sb.toString());
     if (options.isApplySuggestions()) {
@@ -278,14 +288,14 @@ class Main {
     } else if (profileRules) {
       Tools.profileRulesOnLine(s, lt, currentRule);
     } else if (!options.isTaggerOnly()) {
-      CommandLineTools.checkText(s, lt, options.isXmlFormat(), options.isJsonFormat(), -1, 
+      CommandLineTools.checkText(s, lt, options.isXmlFormat(), options.isJsonFormat(), -1,
           lineOffset, matches, mode, options.isListUnknown(), Collections.emptyList());
     } else {
       CommandLineTools.tagText(s, lt);
     }
   }
 
-  private boolean isBreakPoint(String line) {
+  private boolean isBreakPoint(String line) throws Exception {
     return lt.getLanguage().getSentenceTokenizer().singleLineBreaksMarksPara() || "".equals(line);
   }
 
@@ -329,7 +339,7 @@ class Main {
       } catch (Exception e) {
         throw new RuntimeException("Could not check text in file " + file, e);
       }
-    }    
+    }
   }
 
   /**
@@ -367,7 +377,7 @@ class Main {
   /**
    * Command line tool to check plain text files.
    */
-  public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
+  public static void main(String[] args) throws Exception {
     JnaTools.setBugWorkaroundProperty();
     CommandLineParser commandLineParser = new CommandLineParser();
     CommandLineOptions options = null;
@@ -421,10 +431,15 @@ class Main {
 
     Main prg = new Main(options);
     if (options.getFalseFriendFile() != null) {
-      List<AbstractPatternRule> ffRules = prg.lt.loadFalseFriendRules(options.getFalseFriendFile());
-      for (AbstractPatternRule ffRule : ffRules) {
-        prg.lt.addRule(ffRule);
-      }
+        Path path = Paths.get(options.getFalseFriendFile());
+        if (Files.notExists(path)) {
+            System.err.println(String.format("False friends file: %1$s does not exist.", options.getFalseFriendFile()));
+        }
+        path = path.toRealPath();
+        List<FalseFriendPatternRule> ffRules = DefaultResourceDataBroker.createFalseFriendPatternRules(path, prg.lt.getLanguage(), prg.lt.getMotherTongue());
+        for (AbstractPatternRule ffRule : ffRules) {
+           prg.lt.addRule(ffRule);
+        }
     }
     if (prg.lt.getAllActiveRules().size() == 0) {
       List<String> catIds = options.getEnabledCategories().stream().map(i -> i.toString()).collect(Collectors.toList());
@@ -469,7 +484,7 @@ class Main {
   private static void printLanguages() {
     List<String> languages = new ArrayList<>();
     for (Language language : Languages.get()) {
-      languages.add(language.getShortCodeWithCountryAndVariant() + " " + language.getName());
+      languages.add(language.getLocale().toLanguageTag() + " " + language.getName());
     }
     Collections.sort(languages);
     for (String s : languages) {
@@ -477,7 +492,7 @@ class Main {
     }
   }
 
-  private Language detectLanguageOfString(String text) {
+  private Language detectLanguageOfString(String text) throws Exception {
     LanguageIdentifier identifier = new LanguageIdentifier();
     identifier.enableFasttext(options.getFasttextBinary(), options.getFasttextModel());
     return identifier.detectLanguage(text);

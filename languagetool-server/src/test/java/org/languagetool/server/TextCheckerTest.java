@@ -27,6 +27,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.markup.AnnotatedTextBuilder;
 
 import java.io.*;
@@ -43,7 +44,12 @@ import static org.junit.Assert.*;
 public class TextCheckerTest {
 
   private final String english = "This is clearly an English text, should be easy to detect.";
-  private final TextChecker checker = new V2TextChecker(new HTTPServerConfig(), false, null, new RequestCounter());
+  private TextChecker checker;
+
+  @Before
+  public void setUp() throws Exception {
+      checker = new V2TextChecker(new HTTPServerConfig(), false, null, new RequestCounter());
+  }
 
   @Test
   public void testMaxTextLength() throws Exception {
@@ -89,7 +95,7 @@ public class TextCheckerTest {
       // too long even with claim from token, which allows 30 characters
     }
   }
-  
+
   @Test
   @Ignore("use to create JWT test tokens for the other tests")
   public void makeToken() throws UnsupportedEncodingException {
@@ -102,19 +108,19 @@ public class TextCheckerTest {
             .sign(algorithm);
     System.out.println(token);
   }
-  
+
   @Test
   public void testDetectLanguageOfString() {
-    assertThat(checker.detectLanguageOfString("", "en", Arrays.asList("en-GB")).getShortCodeWithCountryAndVariant(), is("en-GB"));
-    assertThat(checker.detectLanguageOfString("X", "en", Arrays.asList("en-GB")).getShortCodeWithCountryAndVariant(), is("en-GB"));
-    assertThat(checker.detectLanguageOfString("X", "en", Arrays.asList("en-ZA")).getShortCodeWithCountryAndVariant(), is("en-ZA"));
-    assertThat(checker.detectLanguageOfString(english, "de", Arrays.asList("en-GB", "de-AT")).getShortCodeWithCountryAndVariant(), is("en-GB"));
-    assertThat(checker.detectLanguageOfString(english, "de", Arrays.asList()).getShortCodeWithCountryAndVariant(), is("en-US"));
-    assertThat(checker.detectLanguageOfString(english, "de", Arrays.asList("de-AT", "en-ZA")).getShortCodeWithCountryAndVariant(), is("en-ZA"));
+    assertThat(checker.detectLanguageOfString("", "en", Arrays.asList("en-GB")).getLocale().getLanguage(), is("en-GB"));
+    assertThat(checker.detectLanguageOfString("X", "en", Arrays.asList("en-GB")).getLocale().getLanguage(), is("en-GB"));
+    assertThat(checker.detectLanguageOfString("X", "en", Arrays.asList("en-ZA")).getLocale().getLanguage(), is("en-ZA"));
+    assertThat(checker.detectLanguageOfString(english, "de", Arrays.asList("en-GB", "de-AT")).getLocale().getLanguage(), is("en-GB"));
+    assertThat(checker.detectLanguageOfString(english, "de", Arrays.asList()).getLocale().getLanguage(), is("en-US"));
+    assertThat(checker.detectLanguageOfString(english, "de", Arrays.asList("de-AT", "en-ZA")).getLocale().getLanguage(), is("en-ZA"));
     String german = "Das hier ist klar ein deutscher Text, sollte gut zu erkennen sein.";
-    assertThat(checker.detectLanguageOfString(german, "fr", Arrays.asList("de-AT", "en-ZA")).getShortCodeWithCountryAndVariant(), is("de-AT"));
-    assertThat(checker.detectLanguageOfString(german, "fr", Arrays.asList("de-at", "en-ZA")).getShortCodeWithCountryAndVariant(), is("de-AT"));
-    assertThat(checker.detectLanguageOfString(german, "fr", Arrays.asList()).getShortCodeWithCountryAndVariant(), is("de-DE"));
+    assertThat(checker.detectLanguageOfString(german, "fr", Arrays.asList("de-AT", "en-ZA")).getLocale().getLanguage(), is("de-AT"));
+    assertThat(checker.detectLanguageOfString(german, "fr", Arrays.asList("de-at", "en-ZA")).getLocale().getLanguage(), is("de-AT"));
+    assertThat(checker.detectLanguageOfString(german, "fr", Arrays.asList()).getLocale().getLanguage(), is("de-DE"));
   }
 
   @Test(expected = RuntimeException.class)

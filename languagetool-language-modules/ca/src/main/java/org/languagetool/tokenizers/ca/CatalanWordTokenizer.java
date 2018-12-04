@@ -18,12 +18,14 @@
  */
 package org.languagetool.tokenizers.ca;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import morfologik.stemming.Dictionary;
 
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpeller;
@@ -45,7 +47,7 @@ public class CatalanWordTokenizer extends WordTokenizer {
   private final int maxPatterns = 11;
   private final Pattern[] patterns = new Pattern[maxPatterns];
 
-  private static final String DICT_FILENAME = "/ca/ca-ES-valencia.dict";
+  // GTODO private static final String DICT_FILENAME = "/ca/ca-ES-valencia.dict";
   protected MorfologikSpeller speller;
 
   //Patterns to avoid splitting words in certain special cases
@@ -70,18 +72,8 @@ public class CatalanWordTokenizer extends WordTokenizer {
   private static final Pattern SPACE_DIGITS= Pattern.compile("([\\d]) ([\\d])",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
 
 
-  public CatalanWordTokenizer(ResourceDataBroker dataBroker) {
-
-    // lazy init
-    if (speller == null) {
-      if (dataBroker.resourceExists(DICT_FILENAME)) {
-        try {
-          speller = new MorfologikSpeller(DICT_FILENAME, dataBroker);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    }
+  public CatalanWordTokenizer(Dictionary dict) {
+      this.speller = new MorfologikSpeller(Objects.requireNonNull(dict, "Dictionary must be provided."), 1);
 
     // Apostrophe at the beginning of a word. Ex.: l'home, s'estima, n'omple, hivern, etc.
     // It creates 2 tokens: <token>l'</token><token>home</token>

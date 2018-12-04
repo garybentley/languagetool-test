@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -71,8 +71,8 @@ public class Main extends WeakBase implements XJobExecutor,
 
   private static final ResourceBundle MESSAGES = JLanguageTool.getMessageBundle();
 
-  
-  // LibreOffice (since 4.2.0) special tag for locale with variant 
+
+  // LibreOffice (since 4.2.0) special tag for locale with variant
   // e.g. language ="qlt" country="ES" variant="ca-ES-valencia":
   private static final String LIBREOFFICE_SPECIAL_LANGUAGE_TAG = "qlt";
 
@@ -84,7 +84,7 @@ public class Main extends WeakBase implements XJobExecutor,
   private Set<String> disabledRulesUI;
 
   private XComponentContext xContext;
-  
+
   private MultiDocumentsHandler documents = null;
 
 
@@ -206,16 +206,16 @@ public class Main extends WeakBase implements XJobExecutor,
         if (lang.getCountries().length == 0) {
           // e.g. Esperanto
           if (lang.getVariant() != null) {
-            locales.add(new Locale(LIBREOFFICE_SPECIAL_LANGUAGE_TAG, "", lang.getShortCodeWithCountryAndVariant()));
+            locales.add(new Locale(LIBREOFFICE_SPECIAL_LANGUAGE_TAG, "", lang.getLocale().toLanguageTag()));
           } else {
-            locales.add(new Locale(lang.getShortCode(), "", ""));
+            locales.add(new Locale(lang.getLocale().getLanguage(), "", ""));
           }
         } else {
           for (String country : lang.getCountries()) {
             if (lang.getVariant() != null) {
-              locales.add(new Locale(LIBREOFFICE_SPECIAL_LANGUAGE_TAG, country, lang.getShortCodeWithCountryAndVariant()));
+              locales.add(new Locale(LIBREOFFICE_SPECIAL_LANGUAGE_TAG, country, lang.getLocale().toLanguageTag()));
             } else {
-              locales.add(new Locale(lang.getShortCode(), country, ""));
+              locales.add(new Locale(lang.getLocale().getLanguage(), country, ""));
             }
           }
         }
@@ -239,7 +239,7 @@ public class Main extends WeakBase implements XJobExecutor,
   /**
    * Add a listener that allow re-checking the document after changing the
    * options in the configuration dialog box.
-   * 
+   *
    * @param eventListener the listener to be added
    * @return true if listener is non-null and has been added, false otherwise
    */
@@ -254,7 +254,7 @@ public class Main extends WeakBase implements XJobExecutor,
 
   /**
    * Remove a listener from the event listeners list.
-   * 
+   *
    * @param eventListener the listener to be removed
    * @return true if listener is non-null and has been removed, false otherwise
    */
@@ -442,7 +442,7 @@ public class Main extends WeakBase implements XJobExecutor,
   /**
    * Called on rechecking the document - resets the ignore status for rules that
    * was set in the spelling dialog box or in the context menu.
-   * 
+   *
    * The rules disabled in the config dialog box are left as intact.
    */
   @Override
@@ -473,7 +473,7 @@ public class Main extends WeakBase implements XJobExecutor,
     //  to finish checking thread without crashing
     XComponent goneContext = UnoRuntime.queryInterface(XComponent.class, source.Source);
     documents.setContextOfClosedDoc(goneContext);
-    goneContext.removeEventListener(this); 
+    goneContext.removeEventListener(this);
   }
 
 

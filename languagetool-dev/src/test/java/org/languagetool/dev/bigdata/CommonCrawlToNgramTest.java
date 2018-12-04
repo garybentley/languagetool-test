@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,10 +27,10 @@ import java.io.File;
 import java.io.IOException;
 
 public class CommonCrawlToNgramTest {
-  
+
   @Test
   @Ignore("Interactive use only, has not assertions")
-  public void testIndexing() throws IOException {
+  public void testIndexing() throws Exception {
     File tempDir = new File(FileUtils.getTempDirectory(), "common-crawl-test");
     try {
       tempDir.mkdir();

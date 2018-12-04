@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -47,17 +47,17 @@ public class SentenceSourceIndexer extends DefaultHandler implements AutoCloseab
   public static final String MAX_DOC_COUNT_VALUE = "maxDocCountValue";
   public static final String MAX_DOC_COUNT_FIELD = "maxDocCount";
   public static final String MAX_DOC_COUNT_FIELD_VAL = "1";
-  
+
   private static final boolean LC_ONLY = true;
 
   private final Indexer indexer;
   private final int maxSentences;
-  
+
   private boolean stopped = false;
-  
+
   private int sentenceCount = 0;
-  
-  SentenceSourceIndexer(Directory dir, Language language, int maxSentences, Analyzer analyzer) {
+
+  SentenceSourceIndexer(Directory dir, Language language, int maxSentences, Analyzer analyzer) throws Exception {
     if (analyzer == null) {
       this.indexer = new Indexer(dir, language);
     } else {
@@ -78,7 +78,7 @@ public class SentenceSourceIndexer extends DefaultHandler implements AutoCloseab
     });
   }
 
-  SentenceSourceIndexer(Directory dir, Language language, int maxSentences) {
+  SentenceSourceIndexer(Directory dir, Language language, int maxSentences) throws Exception {
     this(dir, language, maxSentences, null);
   }
 
@@ -87,7 +87,7 @@ public class SentenceSourceIndexer extends DefaultHandler implements AutoCloseab
     indexer.close();
   }
 
-  private void run(List<String> dumpFileNames, Language language) throws IOException {
+  private void run(List<String> dumpFileNames, Language language) throws Exception {
     MixingSentenceSource mixingSource = MixingSentenceSource.create(dumpFileNames, language);
     while (mixingSource.hasNext()) {
       if (stopped) {
@@ -128,7 +128,7 @@ public class SentenceSourceIndexer extends DefaultHandler implements AutoCloseab
     String languageCode = args[2];
     int maxSentences = Integer.parseInt(args[3]);
 
-    Language language = Languages.getLanguageForShortCode(languageCode);
+    Language language = Languages.getLanguage(languageCode);
     if (maxSentences == 0) {
       System.out.println("Going to index contents from " + dumpFilesNames);
     } else {

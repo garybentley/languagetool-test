@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -27,11 +27,17 @@ import org.languagetool.JLanguageTool;
 import org.languagetool.languagemodel.LuceneSingleIndexLanguageModel;
 import org.languagetool.rules.ConfusionSet;
 import org.languagetool.rules.ConfusionSetLoader;
+import org.languagetool.databroker.*;
+import org.languagetool.language.English;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.nio.file.*;
+import java.nio.charset.*;
+
+import org.apache.lucene.search.*;
 
 /**
  * Dump the occurrences of homophone 3grams to STDOUT. Useful to have a more
@@ -44,15 +50,15 @@ class HomophoneOccurrenceDumper extends LuceneSingleIndexLanguageModel {
 
   private static final int MIN_COUNT = 1000;
 
-  HomophoneOccurrenceDumper(File topIndexDir) throws IOException {
-    super(topIndexDir);
+  HomophoneOccurrenceDumper(Map<Integer, IndexSearcher> searchers) {
+    super(searchers);
   }
 
   /**
    * Get the context (left and right words) for the given word(s). This is slow,
    * as it needs to scan the whole index.
    */
-  Map<String,Long> getContext(String... tokens) throws IOException {
+  Map<String,Long> getContext(String... tokens) throws Exception {
     Objects.requireNonNull(tokens);
     TermsEnum iterator = getIterator();
     Map<String,Long> result = new HashMap<>();
@@ -76,11 +82,13 @@ class HomophoneOccurrenceDumper extends LuceneSingleIndexLanguageModel {
     return result;
   }
 
-  private void run(String confusionSetPath) throws IOException {
-    System.err.println("Loading confusion sets from " + confusionSetPath + ", minimum occurrence: " + MIN_COUNT);
+  private void run(Map<String, List<ConfusionSet>> map) throws Exception {
+/*
+GTODO
     ConfusionSetLoader confusionSetLoader = new ConfusionSetLoader();
     InputStream inputStream = JLanguageTool.getDataBroker().getFromResourceDirAsStream(confusionSetPath);
     Map<String,List<ConfusionSet>> map = confusionSetLoader.loadConfusionSet(inputStream);
+    */
     Set<String> confusionTerms = map.keySet();
     dumpOccurrences(confusionTerms);
   }
@@ -110,20 +118,24 @@ class HomophoneOccurrenceDumper extends LuceneSingleIndexLanguageModel {
   }
 
   private TermsEnum getIterator() throws IOException {
-    LuceneSearcher luceneSearcher = getLuceneSearcher(3);
-    Fields fields = MultiFields.getFields(luceneSearcher.getReader());
+    IndexSearcher is = getIndexSearcher(3);
+    Fields fields = MultiFields.getFields(is.getIndexReader());
     Terms terms = fields.terms("ngram");
     return terms.iterator();
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 1) {
       System.out.println("Usage: " + HomophoneOccurrenceDumper.class.getSimpleName() + " <indexDir>");
       System.exit(1);
     }
-    try (HomophoneOccurrenceDumper dumper = new HomophoneOccurrenceDumper(new File(args[0]))) {
-      dumper.run("/en/confusion_sets.txt");
-    }
+    // Here we use an English language loading via the class path.
+    English lang = new English();
+    Map<Integer, IndexSearcher> map = DefaultResourceDataBroker.getLuceneIndexSearchers(new File(args[0]).toPath());
+    HomophoneOccurrenceDumper dumper = new HomophoneOccurrenceDumper(map);
+    Map<String, List<ConfusionSet>> sets = lang.getUseDataBroker().getConfusionSets();
+    System.err.println(String.format("Loading confusion sets for: %1$s, minimum occurrence: %2$s", lang.getLocale().toLanguageTag(), MIN_COUNT));
+    dumper.run(sets);
   }
 
   @Override

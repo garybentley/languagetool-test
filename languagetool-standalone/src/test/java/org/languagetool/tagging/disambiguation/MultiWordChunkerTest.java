@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -24,6 +24,8 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.English;
 import org.languagetool.language.Ukrainian;
+import org.languagetool.language.Polish;
+import org.languagetool.databroker.*;
 
 import static org.junit.Assert.assertTrue;
 
@@ -31,8 +33,11 @@ public class MultiWordChunkerTest {
 
   @Test
   public void testDisambiguate() throws Exception {
-    Disambiguator chunker = new MultiWordChunker("/pl/multiwords.txt");
-    JLanguageTool lt = new JLanguageTool(new English());
+    Polish lang = new Polish();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    MultiWordChunker chunker = broker.createMultiWordChunkerFromResourcePath("pl/multiwords.txt", DefaultResourceDataBroker.DEFAULT_CHARSET, false);
+    // GTODO Disambiguator chunker = new MultiWordChunker("/pl/multiwords.txt");
+    JLanguageTool lt = new JLanguageTool(lang);
     AnalyzedSentence analyzedSentence = lt.getAnalyzedSentence("A test... More.");
     AnalyzedSentence disambiguated = chunker.disambiguate(analyzedSentence);
     AnalyzedTokenReadings[] tokens = disambiguated.getTokens();
@@ -42,8 +47,11 @@ public class MultiWordChunkerTest {
 
   @Test
   public void testDisambiguateMultiSpace() throws Exception {
-      Disambiguator chunker = new MultiWordChunker("/uk/multiwords.txt");
-      JLanguageTool lt = new JLanguageTool(new Ukrainian());
+      Ukrainian lang = new Ukrainian();
+      DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+      MultiWordChunker chunker = broker.createMultiWordChunkerFromResourcePath("uk/multiwords.txt", DefaultResourceDataBroker.DEFAULT_CHARSET, false);
+      // GTODO Disambiguator chunker = new MultiWordChunker("/uk/multiwords.txt");
+      JLanguageTool lt = new JLanguageTool(lang);
       AnalyzedSentence analyzedSentence = lt.getAnalyzedSentence("для  годиться.");
       AnalyzedSentence disambiguated = chunker.disambiguate(analyzedSentence);
       AnalyzedTokenReadings[] tokens = disambiguated.getTokens();

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,6 +23,9 @@ import org.apache.commons.io.FileUtils;
 import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.tagging.de.GermanTagger;
+import org.languagetool.tagging.Tagger;
+import org.languagetool.language.German;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +37,7 @@ import java.util.*;
  * e.g. Morphy knows "Antrag" and "Antrags", but not "Antrages".
  * Uses Google n-gram data as a filter, but may nonetheless create
  * forms that aren't common anymore (e.g. Verb -&gt; Verbes).
- * 
+ *
  * @author Daniel Naber
  */
 public class MissingGenitiveFinder {
@@ -61,9 +64,11 @@ public class MissingGenitiveFinder {
   }
 
   @SuppressWarnings("UnnecessaryParentheses")
-  private void run() throws IOException {
-    GermanTagger tagger = new GermanTagger();
-    final FSA fsa = FSA.read(JLanguageTool.getDataBroker().getFromResourceDirAsStream(DICT_FILENAME));
+  private void run() throws Exception {
+    German lang = new German();
+    Tagger tagger = lang.getTagger();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    final FSA fsa = FSA.read(broker.getResourceDirPathStream(DICT_FILENAME));
     int i = 0;
     for (ByteBuffer buffer : fsa) {
       final byte [] sequence = new byte [buffer.remaining()];
@@ -90,7 +95,7 @@ public class MissingGenitiveFinder {
 
   private boolean isRelevantWord(String word) {
     return word.endsWith("s")
-            && !word.endsWith("es") 
+            && !word.endsWith("es")
             && !word.endsWith("ens")
             && !word.endsWith("ems")
             && !word.endsWith("els")
@@ -107,7 +112,7 @@ public class MissingGenitiveFinder {
             && !word.endsWith("ols");
   }
 
-  private boolean hasEsGenitive(GermanTagger tagger, String word) throws IOException {
+  private boolean hasEsGenitive(Tagger tagger, String word) throws IOException {
     String esForm = word.replaceFirst("s$", "es");
     List<AnalyzedTokenReadings> readings = tagger.tag(Collections.singletonList(esForm));
     for (AnalyzedTokenReadings reading : readings) {
@@ -118,9 +123,9 @@ public class MissingGenitiveFinder {
     return false;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     MissingGenitiveFinder prg = new MissingGenitiveFinder();
     prg.run();
   }
-    
+
 }

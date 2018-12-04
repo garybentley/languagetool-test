@@ -167,7 +167,7 @@ abstract class Server {
       System.out.println("****************************************************************************************************");
     }
   }
-  
+
   protected ThreadPoolExecutor getExecutorService(LinkedBlockingQueue<Runnable> workQueue, HTTPServerConfig config) {
     int threadPoolSize = config.getMaxCheckThreads();
     System.out.println("Setting up thread pool with " + threadPoolSize + " threads");
@@ -185,23 +185,23 @@ abstract class Server {
     for (int i = 1; i <= 2; i++) {
       long startTime = System.currentTimeMillis();
       for (Language language : languages) {
-        System.out.print(language.getLocaleWithCountryAndVariant() + " ");
-        JLanguageTool lt = new JLanguageTool(language);
         try {
+          JLanguageTool lt = new JLanguageTool(language);
           lt.check("test");
-        } catch (IOException e) {
+        } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
       long endTime = System.currentTimeMillis();
       float runTime = (endTime-startTime)/1000.0f;
+      // GTODO Where is this text going?
       System.out.printf(Locale.ENGLISH, "\nRun #" + i + " took %.2fs\n", runTime);
     }
     System.out.println("Warm up finished");
   }
 
   static class StoppingThreadPoolExecutor extends ThreadPoolExecutor {
-  
+
     StoppingThreadPoolExecutor(int threadPoolSize, LinkedBlockingQueue<Runnable> workQueue) {
       super(threadPoolSize, threadPoolSize, 0L, TimeUnit.MILLISECONDS, workQueue,
             new ThreadFactoryBuilder().setNameFormat("lt-server-thread-%d").build());

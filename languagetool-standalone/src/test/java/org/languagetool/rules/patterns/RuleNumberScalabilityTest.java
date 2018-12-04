@@ -31,12 +31,12 @@ import java.io.IOException;
  */
 final class RuleNumberScalabilityTest {
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + RuleNumberScalabilityTest.class.getSimpleName() + " <languageCode> <text_file>");
       System.exit(1);
     }
-    JLanguageTool lt = new JLanguageTool(Languages.getLanguageForShortCode(args[0]));
+    JLanguageTool lt = new JLanguageTool(Languages.getLanguage(args[0]));
     String text = StringTools.readStream(new FileInputStream(args[1]), "utf-8");
     System.out.println("Warmup...");
     lt.check(text);
@@ -81,7 +81,7 @@ final class RuleNumberScalabilityTest {
     System.out.println(" => badly with respect to the number of rules");
   }
 
-  private static long getBaselineTime(JLanguageTool langTool, String text) throws IOException {
+  private static long getBaselineTime(JLanguageTool langTool, String text) throws Exception {
     deactivateAllRules(langTool);
     long baselineStartTime = System.currentTimeMillis();
     langTool.check(text);

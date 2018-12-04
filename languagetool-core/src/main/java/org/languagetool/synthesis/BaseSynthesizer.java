@@ -52,17 +52,15 @@ public class BaseSynthesizer implements Synthesizer {
    * @param possibleTags The tags.
    */
   public BaseSynthesizer(IStemmer stemmer, Set<String> possibleTags) {
-     Objects.requireNonNull(stemmer, "Stemmer must be provided.");
-     Objects.requireNonNull(possibleTags, "Possible tags must be provided.");
+     this.stemmer = Objects.requireNonNull(stemmer, "Stemmer must be provided.");
+     this.possibleTags = Objects.requireNonNull(possibleTags, "Possible tags must be provided.");
       //GTODO String resourceFileName, String tagFileName,
     //GTODO this.resourceFileName = resourceFileName;
     //GTODO this.tagFileName = tagFileName;
     //GTODO this.dataBroker = dataBroker;
     //this.dictionary = dict;
-    this.possibleTags = possibleTags;
     //this.stemmer = createStemmer();
     //this.stemmer = new DictionaryLookup(dictionary);
-    this.stemmer = stemmer;
   }
 
   /**

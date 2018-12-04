@@ -64,7 +64,7 @@ public class HTTPSServerTest {
       server.stop();
     }
   }
-  
+
   @Test
   public void runReferrerLimitationTest() throws Exception {
     HTTPTools.disableCertChecks();
@@ -104,7 +104,7 @@ public class HTTPSServerTest {
       server.stop();
     }
   }
-  
+
   @Test
   public void testHTTPSServer() throws Exception {
     HTTPTools.disableCertChecks();
@@ -173,9 +173,9 @@ public class HTTPSServerTest {
   }
 
   private String check(Language lang, String text) throws IOException {
-    return check(lang.getShortCode(), text);
+    return check(lang.getLocale().getLanguage(), text);
   }
-  
+
   private String encode(String text) throws UnsupportedEncodingException {
     return URLEncoder.encode(text, "utf-8");
   }

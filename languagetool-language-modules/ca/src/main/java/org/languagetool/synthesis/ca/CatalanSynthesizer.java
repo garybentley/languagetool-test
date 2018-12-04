@@ -18,7 +18,7 @@
  */
 package org.languagetool.synthesis.ca;
 
-import java.io.IOException;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +31,6 @@ import morfologik.stemming.WordData;
 import org.languagetool.AnalyzedToken;
 import org.languagetool.Language;
 import org.languagetool.synthesis.BaseSynthesizer;
-import org.languagetool.databroker.ResourceDataBroker;
 
 /**
  * Catalan word form synthesizer.
@@ -69,14 +68,12 @@ public class CatalanSynthesizer extends BaseSynthesizer {
   /** Patterns verb **/
   private static final Pattern pVerb = Pattern.compile("V.*[CVBXYZ0123456]");
 
-  public CatalanSynthesizer(ResourceDataBroker dataBroker) {
-    super("/ca/ca-ES-valencia_synth.dict",
-        "/ca/ca-ES-valencia_tags.txt", dataBroker);
+  public CatalanSynthesizer(IStemmer stemmer, Set<String> tags) {
+    super(stemmer, tags);
   }
 
   @Override
-  public String[] synthesize(final AnalyzedToken token, final String posTag) throws IOException {
-    initPossibleTags();
+  public String[] synthesize(final AnalyzedToken token, final String posTag) {
     Pattern p;
     boolean addDt = false;
     String prep = "";
@@ -93,9 +90,9 @@ public class CatalanSynthesizer extends BaseSynthesizer {
       p = Pattern.compile(posTag);
     }
     final List<String> results = new ArrayList<>();
-    final IStemmer synthesizer = createStemmer();
+    final IStemmer synthesizer = getStemmer();
 
-    for (final String tag : possibleTags) {
+    for (final String tag : getPossibleTags()) {
       final Matcher m = p.matcher(tag);
       if (m.matches()) {
         if (addDt) {
@@ -120,19 +117,19 @@ public class CatalanSynthesizer extends BaseSynthesizer {
 
   @Override
   public String[] synthesize(final AnalyzedToken token, final String posTag,
-      final boolean posTagRegExp) throws IOException {
+      final boolean posTagRegExp) {
     if (posTagRegExp) {
-      initPossibleTags();
       Pattern p = null;
       try {
         p = Pattern.compile(posTag);
       } catch (PatternSyntaxException e) {
+          // GTODO This should be sent to a log or thrown.
         System.err.println("WARNING: Error trying to synthesize POS tag "
             + posTag + " from token " + token.getToken() + ".");
         return null;
       }
       final List<String> results = new ArrayList<>();
-      for (final String tag : possibleTags) {
+      for (final String tag : getPossibleTags()) {
         final Matcher m = p.matcher(tag);
         if (m.matches()) {
           lookup(token.getLemma(), tag, results);
@@ -145,7 +142,7 @@ public class CatalanSynthesizer extends BaseSynthesizer {
           if (!posTag.endsWith("0")) {
             p = Pattern.compile(posTag.substring(0, posTag.length() - 1)
                 .concat("0"));
-            for (final String tag : possibleTags) {
+            for (final String tag : getPossibleTags()) {
               final Matcher m = p.matcher(tag);
               if (m.matches()) {
                 lookup(token.getLemma(), tag, results);
@@ -155,7 +152,7 @@ public class CatalanSynthesizer extends BaseSynthesizer {
           if (results.size() == 0) { // another try
             p = Pattern.compile(posTag.substring(0, posTag.length() - 1)
                 .concat("."));
-            for (final String tag : possibleTags) {
+            for (final String tag : getPossibleTags()) {
               final Matcher m = p.matcher(tag);
               if (m.matches()) {
                 lookup(token.getLemma(), tag, results);

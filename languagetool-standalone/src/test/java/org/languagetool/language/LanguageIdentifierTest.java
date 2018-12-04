@@ -19,6 +19,7 @@
 package org.languagetool.language;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 
@@ -29,10 +30,15 @@ import static org.junit.Assert.fail;
 
 public class LanguageIdentifierTest {
 
-  private final LanguageIdentifier identifier = new LanguageIdentifier();
+  private LanguageIdentifier identifier;
+
+  @Before
+  public void setUp() throws Exception {
+      identifier = new LanguageIdentifier();
+  }
 
   @Test
-  public void testDetection() {
+  public void testDetection() throws Exception {
 //    identifier.enableFasttext(new File("/path/to/fasttext/binary"), new File("/path/to/fasttext/model"));
     // fasttext just assumes english, ignore / comment out
     langAssert(null, "");
@@ -72,7 +78,7 @@ public class LanguageIdentifierTest {
   }
 
   @Test
-  public void testShortAndLongText() {
+  public void testShortAndLongText() throws Exception {
     LanguageIdentifier id10 = new LanguageIdentifier(10);
     langAssert(null, "Das ist so ein Text, mit dem man testen kann", id10);  // too short when max length is applied
     langAssert(null, "012345678", id10);
@@ -84,7 +90,7 @@ public class LanguageIdentifierTest {
     LanguageIdentifier id20 = new LanguageIdentifier(20);
     langAssert("de", "Das ist so ein Text, mit dem man testen kann", id20);
   }
-  
+
   @Test
   public void testKnownLimitations() {
     // not activated because it impairs detection of Spanish, so ast and gl may be mis-detected:
@@ -101,13 +107,13 @@ public class LanguageIdentifierTest {
     langAssert("de", "Das ist ein deutscher Text\n-- \nBut this is an\nEnglish text in the signature, and it's much longer than the original text.");
     langAssert("en", "This is an English text.\n-- \nDas ist ein\ndeutscher Text in der Signatur, der länger ist als der Haupttext.");
   }
-  
+
   private void langAssert(String expectedLangCode, String text) {
     langAssert(expectedLangCode, text, identifier);
   }
-  
+
   private void langAssert(String expectedLangCode, String text, LanguageIdentifier id) {
-    Language expectedLang = expectedLangCode != null ? Languages.getLanguageForShortCode(expectedLangCode) : null;
+    Language expectedLang = expectedLangCode != null ? Languages.getLanguage(expectedLangCode) : null;
     //long start = System.currentTimeMillis();
     Language detectedLang = id.detectLanguage(text);
     //long end = System.currentTimeMillis();

@@ -44,14 +44,14 @@ class LanguageDetectionEval {
   private int misclassifications = 0;
   private int numClassifications = 0;
 
-  private LanguageDetectionEval() {
+  private LanguageDetectionEval() throws Exception {
     languageIdentifier = new LanguageIdentifier();
 //    languageIdentifier.enableFasttext(new File("/path/to/fasttext/binary"), new File("/path/to/fasttext/model"));
   }
 
-  private float evaluate(Language language) throws IOException {
+  private float evaluate(Language language) throws Exception {
 //    String evalTextFile = "/org/languagetool/dev/eval/lang/" + language.getShortCode() + "_long.txt";
-    String evalTextFile = "/org/languagetool/dev/eval/lang/" + language.getShortCode() + ".txt";
+    String evalTextFile = "/org/languagetool/dev/eval/lang/" + language.getLocale().getLanguage() + ".txt";
     InputStream stream = LanguageDetectionEval.class.getResourceAsStream(evalTextFile);
     System.out.println("=== " + language + " ===");
     if (stream == null) {
@@ -90,7 +90,7 @@ class LanguageDetectionEval {
       numClassifications++;
       String detectedLang = null;
       if (detectedLangObj != null) {
-        detectedLang = detectedLangObj.getShortCode();
+        detectedLang = detectedLangObj.getLocale().getLanguage();
       }
       if (detectedLang == null && i == line.length()) {
         throw new DetectionException("Detection failed for '" + line + "', detected <null>");
@@ -99,9 +99,9 @@ class LanguageDetectionEval {
         //System.out.println("minLen: " + textLength);
         //System.out.println("TEXT     : " + line);
         //System.out.println("TOO SHORT : " + text + " => " + detectedLang + " (" + textLength + ")");
-      } else if (!expectedLanguage.getShortCode().equals(detectedLang)){
+    } else if (!expectedLanguage.getLocale().getLanguage().equals(detectedLang)){
         misclassifications++;
-        System.out.printf("WRONG: Expected %s, but got %s -> %s%n", expectedLanguage.getShortCode(), detectedLang, text);
+        System.out.printf("WRONG: Expected %s, but got %s -> %s%n", expectedLanguage.getLocale().getLanguage(), detectedLang, text);
       } else {
         //System.out.println("STILL OKAY: " + text + " => " + detectedLang);
       }
@@ -119,9 +119,9 @@ class LanguageDetectionEval {
       totalInputs++;
       String detectedLang = null;
       if (detectedLangObj != null) {
-        detectedLang = detectedLangObj.getShortCode();
+        detectedLang = detectedLangObj.getLocale().getLanguage();
       }
-      if (detectedLang == null || !expectedLanguage.getShortCode().equals(detectedLang)) {
+      if (detectedLang == null || !expectedLanguage.getLocale().getLanguage().equals(detectedLang)) {
         //System.out.printf("detected %s, expected %s: %s%n", detectedLang, expectedLanguage.getShortCode(), text);
         errors++;
       }
@@ -139,7 +139,7 @@ class LanguageDetectionEval {
     return result;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     LanguageDetectionEval eval = new LanguageDetectionEval();
     long startTime = System.currentTimeMillis();
     float minCharsTotal = 0;

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2013 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -21,7 +21,7 @@ package org.languagetool.rules.bitext;
 import org.junit.Test;
 
 /**
- * Calls a test from core, because only here in stand-alone all languages 
+ * Calls a test from core, because only here in stand-alone all languages
  * are available.
  */
 public class StandaloneBitextPatternRuleTest {
@@ -29,7 +29,7 @@ public class StandaloneBitextPatternRuleTest {
   @Test
   public void testBitextPatternRuleTest() throws Exception {
     BitextPatternRuleTest test = new BitextPatternRuleTest();
-    test.testBitextRulesFromXML();
+    test.testBitextRules();
   }
 
 }

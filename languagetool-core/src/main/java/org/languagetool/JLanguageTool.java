@@ -462,8 +462,12 @@ public class JLanguageTool {
    * @param indexDir directory with a '3grams' sub directory which contains a Lucene index with 3gram occurrence counts
    * @since 2.7
    */
-  public void activateLanguageModelRules(/*GTODO File indexDir*/) throws Exception {
-    LanguageModel languageModel = language.getLanguageModel(/*GTODO indexDir*/);
+  public void activateLanguageModelRules() throws Exception {
+    LanguageModel languageModel = language.getLanguageModel();
+    activateLanguageModelRules(languageModel);
+  }
+
+  public void activateLanguageModelRules(LanguageModel languageModel) throws Exception {
     if (languageModel != null) {
       ResourceBundle messages = getMessageBundle(language);
       List<Rule> rules = language.getRelevantLanguageModelRules(messages, languageModel);
@@ -471,22 +475,16 @@ public class JLanguageTool {
     }
   }
 
-  /**
-   * Activate rules that depend on a word2vec language model.
-   * @param indexDir directory with a subdirectories like 'en', each containing dictionary.txt and final_embeddings.txt
-   * @since 4.0
-   */
-   // GTODO Sort out
-  public void activateWord2VecModelRules(File indexDir) throws Exception {
-      /*
-      GTODO Sort out
-    Word2VecModel word2vecModel = language.getWord2VecModel(indexDir);
-    if (word2vecModel != null) {
-      ResourceBundle messages = getMessageBundle(language);
-      List<Rule> rules = language.getRelevantWord2VecModelRules(messages, word2vecModel);
-      userRules.addAll(rules);
-    }
-    */
+  public void activateWord2VecModelRules() throws Exception {
+      activateWord2VecModelRules(language.getWord2VecModel());
+  }
+
+  public void activateWord2VecModelRules(Word2VecModel word2vecModel) throws Exception {
+      if (word2vecModel != null) {
+        ResourceBundle messages = getMessageBundle(language);
+        List<Rule> rules = language.getRelevantWord2VecModelRules(messages, word2vecModel);
+        userRules.addAll(rules);
+      }
   }
 
   /**
@@ -577,6 +575,13 @@ public class JLanguageTool {
    */
   public Language getLanguage() {
     return language;
+  }
+
+  /**
+   * Get the mother tonuge language used to configure this instance.
+   */
+  public Language getMotherTongue() {
+      return motherTongue;
   }
 
   /**

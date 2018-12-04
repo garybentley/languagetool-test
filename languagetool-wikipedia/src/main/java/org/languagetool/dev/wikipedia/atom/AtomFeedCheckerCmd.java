@@ -34,7 +34,7 @@ final class AtomFeedCheckerCmd {
   private AtomFeedCheckerCmd() {
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args) throws Exception, InterruptedException {
     if (args.length < 2 || args.length > 4) {
       System.out.println("Usage: " + AtomFeedCheckerCmd.class.getSimpleName() + " <atomFeedUrl> <sleepTime> [database.properties] [languageModelDir]");
       System.out.println("  <atomFeedUrl> is a Wikipedia URL to the latest changes, for example:");
@@ -70,7 +70,7 @@ final class AtomFeedCheckerCmd {
       System.out.println("Writing results to database at: " + databaseConfig.getUrl());
     }
     AtomFeedChecker atomFeedChecker;
-    Language language = Languages.getLanguageForShortCode(langCode);
+    Language language = Languages.getLanguage(langCode);
     if (args.length == 4) {
       String languageModelDir = args[3];
       atomFeedChecker = new AtomFeedChecker(language, databaseConfig, new File(languageModelDir));

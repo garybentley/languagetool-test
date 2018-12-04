@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -46,7 +46,7 @@ import static org.languagetool.dev.index.PatternRuleQueryBuilder.SOURCE_FIELD_NA
 
 /**
  * A class with a main() method that takes a text file and indexes its sentences, including POS tags
- * 
+ *
  * @author Tao Lin, Miaojuan Dai
  */
 public class Indexer implements AutoCloseable {
@@ -58,19 +58,15 @@ public class Indexer implements AutoCloseable {
 
   private boolean lowercaseOnly;
 
-  public Indexer(Directory dir, Language language) {
+  public Indexer(Directory dir, Language language) throws Exception {
     this(dir, language, getAnalyzer(language));
   }
 
-  public Indexer(Directory dir, Language language, Analyzer analyzer) {
-    try {
+  public Indexer(Directory dir, Language language, Analyzer analyzer) throws Exception {
       IndexWriterConfig writerConfig = getIndexWriterConfig(analyzer);
       writerConfig.setOpenMode(OpenMode.CREATE);
       writer = new IndexWriter(dir, writerConfig);
       sentenceTokenizer = language.getSentenceTokenizer();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**
@@ -79,13 +75,13 @@ public class Indexer implements AutoCloseable {
   public void setLowercaseOnly(boolean lowercaseOnly) {
     this.lowercaseOnly = lowercaseOnly;
   }
-  
-  public static void main(String[] args) throws IOException {
+
+  public static void main(String[] args) throws Exception {
     ensureCorrectUsageOrExit(args);
     run(args[0], args[1], args[2]);
   }
 
-  static Analyzer getAnalyzer(Language language) {
+  static Analyzer getAnalyzer(Language language) throws Exception {
     Map<String, Analyzer> analyzerMap = new HashMap<>();
     analyzerMap.put(FIELD_NAME, new LanguageToolAnalyzer(new JLanguageTool(language), false));
     analyzerMap.put(FIELD_NAME_LOWERCASE, new LanguageToolAnalyzer(new JLanguageTool(language), true));
@@ -106,7 +102,7 @@ public class Indexer implements AutoCloseable {
     }
   }
 
-  private static void run(String textFile, String indexDir, String languageCode) throws IOException {
+  private static void run(String textFile, String indexDir, String languageCode) throws Exception {
     File file = new File(textFile);
     if (!file.exists() || !file.canRead()) {
       System.out.println("Text file '" + file.getAbsolutePath()
@@ -116,7 +112,7 @@ public class Indexer implements AutoCloseable {
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       System.out.println("Indexing to directory '" + indexDir + "'...");
       try (FSDirectory directory = FSDirectory.open(new File(indexDir).toPath())) {
-        Language language = Languages.getLanguageForShortCode(languageCode);
+        Language language = Languages.getLanguage(languageCode);
         try (Indexer indexer = new Indexer(directory, language)) {
           indexer.indexText(reader);
         }
@@ -125,7 +121,7 @@ public class Indexer implements AutoCloseable {
     System.out.println("Index complete!");
   }
 
-  public static void run(String content, Directory dir, Language language) throws IOException {
+  public static void run(String content, Directory dir, Language language) throws Exception {
     BufferedReader br = new BufferedReader(new StringReader(content));
     try (Indexer indexer = new Indexer(dir, language)) {
       indexer.indexText(br);

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,10 +32,10 @@ import java.util.Scanner;
  * @since 2.7
  */
 class SentenceChecker {
-  
+
   private static final int BATCH_SIZE = 1000;
 
-  private void run(Language language, File file) throws IOException {
+  private void run(Language language, File file) throws Exception {
     JLanguageTool lt = new JLanguageTool(language);
     try (Scanner scanner = new Scanner(file)) {
       int count = 0;
@@ -52,12 +52,12 @@ class SentenceChecker {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.err.println("Usage: " + SentenceChecker.class.getSimpleName() + " <langCode> <sentenceFile>");
       System.exit(1);
     }
     SentenceChecker checker = new SentenceChecker();
-    checker.run(Languages.getLanguageForShortCode(args[0]), new File(args[1]));
+    checker.run(Languages.getLanguage(args[0]), new File(args[1]));
   }
 }

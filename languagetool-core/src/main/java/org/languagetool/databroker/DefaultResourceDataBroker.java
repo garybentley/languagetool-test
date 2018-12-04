@@ -1064,7 +1064,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
   }
 */
 
-  protected Path getResourceDirPath(String... path) throws Exception {
+  public Path getResourceDirPath(String... path) throws Exception {
       return getResourceDirPath(Arrays.asList(path));
   }
 
@@ -1074,7 +1074,7 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    * @param path Resolve the path against the resource dir path.
    * @return The resolved path.
    */
-  protected Path getResourceDirPath(List<String> path) throws Exception {
+  public Path getResourceDirPath(List<String> path) throws Exception {
       Path p = pathProvider.getResourceDirPath(path);
       try {
           p = p.toRealPath();
@@ -1087,15 +1087,15 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
       }
   }
 
-  protected InputStream getResourceDirPathStream(String path) throws Exception {
+  public InputStream getResourceDirPathStream(String path) throws Exception {
       return Files.newInputStream(getResourceDirPath(path));
   }
 
-  protected boolean resourceDirPathExists(String... path) {
+  public boolean resourceDirPathExists(String... path) {
       return resourceDirPathExists(Arrays.asList(path));
   }
 
-  protected boolean resourceDirPathExists(List<String> path) {
+  public boolean resourceDirPathExists(List<String> path) {
       try {
           // Will throw an exception if not present...
           getResourceDirPath(path);
@@ -1105,11 +1105,11 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
       }
   }
 
-  protected boolean rulesDirPathExists(String... path) {
+  public boolean rulesDirPathExists(String... path) {
       return rulesDirPathExists(Arrays.asList(path));
   }
 
-  protected boolean rulesDirPathExists(List<String> path) {
+  public boolean rulesDirPathExists(List<String> path) {
       try {
           // Will throw an exception if not present...
           getRulesDirPath(path);
@@ -1125,11 +1125,11 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
    * @param path Resolve the path against the rules dir path.
    * @return The resolved path.
    */
-  protected Path getRulesDirPath(String... path) throws Exception {
+  public Path getRulesDirPath(String... path) throws Exception {
       return getRulesDirPath(Arrays.asList(path));
   }
 
-  protected Path getRulesDirPath(List<String> path) throws Exception {
+  public Path getRulesDirPath(List<String> path) throws Exception {
       Path p = pathProvider.getRulesDirPath(path);
       try {
           p = p.toRealPath();
@@ -1142,111 +1142,10 @@ public class DefaultResourceDataBroker implements ResourceDataBroker {
       }
   }
 
-  protected InputStream getRuleDirPathStream(String path) throws Exception {
+  public InputStream getRulesDirPathStream(String path) throws Exception {
       return Files.newInputStream(getRulesDirPath(path));
   }
 
-  /**
-   * Concatenates the passed resource path with the currently set {@code
-   * resource} directory path.
-   *
-   * @param path The relative path to a resource item inside of the {@code resource} directory.
-   * @return The full relative path to the resource including the path to the
-   *         {@code resource} directory.
-   */
-   /*
-  private String getCompleteResourceUrl(String path) {
-    return appendPath(resourceDir, path);
-  }
-*/
-  /**
-   * See:
-   * {@link ResourceDataBroker#getFromRulesDirAsStream(String)}
-   *
-   * @param path The relative path to the item inside of the {@code /rules}
-   *  directory. Please start your path information with {@code /} because it
-   *  will be concatenated with the directory's name: /rules<b>/yourpath</b>.
-   * @return An {@link InputStream} object to the requested item
-   * @throws RuntimeException if path cannot be found
-   */
-/*
-  private InputStream getFromRulesDirAsStream(String path) {
-    String completePath = getCompleteRulesUrl(path);
-    InputStream resourceAsStream = getResourceAsStream(completePath, classLoader);
-    assertNotNull(resourceAsStream, path, completePath);
-    return resourceAsStream;
-  }
-*/
-  /**
-   * See: {@link ResourceDataBroker#getFromRulesDirAsUrl(String)}
-   *
-   * @param path The relative path to the item inside of the {@code /rules}
-   *  directory. Please start your path information with {@code /} because it
-   *  will be concatenated with the directory's name: /rules<b>/yourpath</b>.
-   * @return An {@link URL} object to the requested item
-   * @throws RuntimeException if path cannot be found
-   */
-/*
-  private URL getFromRulesDirAsUrl(String path) {
-    String completePath = getCompleteRulesUrl(path);
-    URL resource = getResourceAsURL(completePath, classLoader);
-    assertNotNull(resource, path, completePath);
-    return resource;
-  }
-*/
-
-  /**
-   * Concatenates the passed resource path with the currently set {@code
-   * rules} directory path.
-   *
-   * @param path The relative path to a resource item inside of the {@code rules} directory.
-   * @return The full relative path to the resource including the path to the {@code rules} directory.
-   */
-   /*
-  private String getCompleteRulesUrl(String path) {
-    return appendPath(rulesDir, path);
-  }
-*/
-/*
-  private String appendPath(String baseDir, String path) {
-    StringBuilder completePath = new StringBuilder(baseDir);
-    if (!this.rulesDir.endsWith("/") && !path.startsWith("/")) {
-      completePath.append('/');
-    }
-    if (this.rulesDir.endsWith("/") && path.startsWith("/") && path.length() > 1) {
-      completePath.append(path.substring(1));
-    } else {
-      completePath.append(path);
-    }
-    return completePath.toString();
-  }
-*/
-  /**
-   * See: {@link ResourceDataBroker#resourceExists(String)}
-   *
-   * Checks if a resource in the grammar checker's {@code /resource} exists.
-   * @param path Path to an item from the {@code /resource} directory.
-   * @return {@code true} if the resource file exists.
-   */
-   /*
-  private boolean resourceExists(String path) {
-    String completePath = getCompleteResourceUrl(path);
-    return getResourceAsURL(completePath, classLoader) != null;
-  }
-*/
-  /**
-   * See: {@link ResourceDataBroker#ruleFileExists(String)}
-   *
-   * Checks if a resource in the grammar checker's {@code /rules} exists.
-   * @param path Path to an item from the {@code /rules} directory.
-   * @return {@code true} if the resource file exists.
-   */
-   /*
-  private boolean ruleFileExists(String path) {
-    String completePath = getCompleteRulesUrl(path);
-    return getResourceAsURL(completePath, classLoader) != null;
-  }
-*/
   /**
    * @return The class loader used to load resources.
    */

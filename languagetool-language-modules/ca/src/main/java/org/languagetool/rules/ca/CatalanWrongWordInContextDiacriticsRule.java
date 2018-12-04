@@ -18,19 +18,19 @@
  */
 package org.languagetool.rules.ca;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.languagetool.rules.Category;
 import org.languagetool.rules.CategoryId;
 import org.languagetool.rules.ITSIssueType;
 import org.languagetool.rules.WrongWordInContextRule;
-import org.languagetool.databroker.ResourceDataBroker;
+import org.languagetool.rules.ContextWords;
 
 public class CatalanWrongWordInContextDiacriticsRule extends WrongWordInContextRule {
 
-  public CatalanWrongWordInContextDiacriticsRule(final ResourceBundle messages, ResourceDataBroker dataBroker) throws IOException {
-    super(messages, dataBroker);
+  public CatalanWrongWordInContextDiacriticsRule(final ResourceBundle messages, List<ContextWords> wrongWords) {
+    super(messages, wrongWords);
     super.setCategory(new Category(new CategoryId("DIACRITICS_TRADITIONAL"), "Z) Accents diacrítics tradicionals"));
     super.setLocQualityIssueType(ITSIssueType.Misspelling);
     setMatchLemmmas();
@@ -50,12 +50,13 @@ public class CatalanWrongWordInContextDiacriticsRule extends WrongWordInContextR
   public String getDescription() {
     return "Confusió segons el context (os/ós, mora/móra, bota/bóta)";
   }
-
+/*
+GTODO
   @Override
   protected String getFilename() {
     return "/ca/wrongWordInContext2.txt";
   }
-
+*/
   @Override
   protected String getMessageString() {
     return "¿Volíeu dir <suggestion>$SUGGESTION</suggestion> en lloc de '$WRONGWORD'?";

@@ -42,12 +42,12 @@ final class PerformanceTest2 {
   private static final int RUNS = 100;
   private static final int SKIP = 3;
   private static final int MAX_TEXT_LENGTH = 150;
-  
-  private void run(String languageCode, File textFile) throws IOException {
+
+  private void run(String languageCode, File textFile) throws Exception {
     String text = StringTools.readStream(new FileInputStream(textFile), "utf-8");
     System.out.println("Text length: " + text.length());
     Random rnd = new Random(42);
-    Language language = Languages.getLanguageForShortCode(languageCode);
+    Language language = Languages.getLanguage(languageCode);
     long totalTime = 0;
     for (int i = 0; i < RUNS; i++) {
       int beginIndex = rnd.nextInt(text.length());
@@ -73,7 +73,7 @@ final class PerformanceTest2 {
     System.out.println("Avg. Time: " + (float)totalTime/RUNS);
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + PerformanceTest2.class.getSimpleName() + " <languageCode> <text_file>");
       System.exit(1);

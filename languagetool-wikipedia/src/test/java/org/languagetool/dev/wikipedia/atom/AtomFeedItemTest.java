@@ -21,6 +21,8 @@ package org.languagetool.dev.wikipedia.atom;
 import org.junit.Test;
 import org.languagetool.tools.StringTools;
 import org.languagetool.tools.Tools;
+import org.languagetool.databroker.*;
+import org.languagetool.language.English;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +32,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class AtomFeedItemTest {
-  
+
   @Test
-  public void testModifiedContent() throws IOException {
+  public void testModifiedContent() throws Exception {
     AtomFeedItem item = getSummary("summary1.txt");
     assertThat(item.getOldContent().size(), is(1));
     assertThat(item.getOldContent().get(0), is("}}added"));
@@ -41,7 +43,7 @@ public class AtomFeedItemTest {
   }
 
   @Test
-  public void testAddedParagraphs() throws IOException {
+  public void testAddedParagraphs() throws Exception {
     AtomFeedItem item = getSummary("summary2.txt");
     assertThat(item.getOldContent().size(), is(0));  // some content was added, so there's no old version
     assertThat(item.getNewContent().size(), is(3));
@@ -51,7 +53,7 @@ public class AtomFeedItemTest {
   }
 
   @Test
-  public void testDeletedParagraphs() throws IOException {
+  public void testDeletedParagraphs() throws Exception {
     AtomFeedItem item = getSummary("summary3.txt");
     assertThat(item.getOldContent().size(), is(3));
     assertThat(item.getOldContent().get(0), is("* [http://www.rp-online.de/nrw/staedte/]"));
@@ -61,7 +63,7 @@ public class AtomFeedItemTest {
   }
 
   @Test
-  public void testAddedTableLine() throws IOException {
+  public void testAddedTableLine() throws Exception {
     // The table changes we get may be incomplete tables, so Sweble cannot filter
     // them and we'd be left with Mediawiki syntax without filtering...
     AtomFeedItem item = getSummary("summary-table.txt");
@@ -70,8 +72,10 @@ public class AtomFeedItemTest {
     assertThat(item.getNewContent().get(0), is("Besetzung"));  // was "!Besetzung" in XML
   }
 
-  private AtomFeedItem getSummary(String filename) throws IOException {
-    InputStream stream = Tools.getStream("/org/languagetool/dev/wikipedia/atom/" + filename);
+  private AtomFeedItem getSummary(String filename) throws Exception {
+    English lang = new English();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    InputStream stream = broker.getResourceDirPathStream("/org/languagetool/dev/wikipedia/atom/" + filename);
     return new AtomFeedItem("fakeId", "fakeTitle", StringTools.streamToString(stream, "UTF-8"), new Date(100000));
   }
 

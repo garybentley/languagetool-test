@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2011 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -42,6 +42,8 @@ import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.patterns.AbstractPatternRule;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.*;
+import org.languagetool.languagemodel.LanguageModel;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -52,7 +54,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class WikipediaQuickCheck {
 
-  private static final Pattern WIKIPEDIA_URL_REGEX = Pattern.compile("https?://(..)\\.wikipedia\\.org/wiki/(.*)"); 
+  private static final Pattern WIKIPEDIA_URL_REGEX = Pattern.compile("https?://(..)\\.wikipedia\\.org/wiki/(.*)");
   private static final Pattern SECURE_WIKIPEDIA_URL_REGEX = Pattern.compile("https://secure\\.wikimedia\\.org/wikipedia/(..)/wiki/(.*)");
 
   private final File ngramDir;
@@ -82,24 +84,24 @@ public class WikipediaQuickCheck {
     this.maxSizeBytes = maxSizeBytes;
   }
 
-  public String getMediaWikiContent(URL wikipediaUrl) throws IOException {
+  public String getMediaWikiContent(URL wikipediaUrl) throws Exception {
     Language lang = getLanguage(wikipediaUrl);
     String pageTitle = getPageTitle(wikipediaUrl);
-    String apiUrl = "https://" + lang.getShortCode() + ".wikipedia.org/w/api.php?titles=" 
+    String apiUrl = "https://" + lang.getLocale().getLanguage() + ".wikipedia.org/w/api.php?titles="
             + URLEncoder.encode(pageTitle, "utf-8") + "&action=query&prop=revisions&rvprop=content|timestamp&format=xml";
     return getContent(new URL(apiUrl));
   }
 
-  public Language getLanguage(URL url) {
+  public Language getLanguage(URL url) throws Exception {
     Matcher matcher = getUrlMatcher(url.toString());
-    return Languages.getLanguageForShortCode(matcher.group(1));
+    return Languages.getLanguage(matcher.group(1));
   }
 
   public String getPageTitle(URL url) {
     Matcher matcher = getUrlMatcher(url.toString());
     return matcher.group(2);
   }
-  
+
   private Matcher getUrlMatcher(String url) {
     Matcher matcher1 = WIKIPEDIA_URL_REGEX.matcher(url);
     Matcher matcher2 = SECURE_WIKIPEDIA_URL_REGEX.matcher(url);
@@ -114,19 +116,19 @@ public class WikipediaQuickCheck {
   public void setDisabledRuleIds(List<String> ruleIds) {
     disabledRuleIds = ruleIds;
   }
-  
+
   public List<String> getDisabledRuleIds() {
     return disabledRuleIds;
   }
 
-  public MarkupAwareWikipediaResult checkPage(URL url) throws IOException, PageNotFoundException {
+  public MarkupAwareWikipediaResult checkPage(URL url) throws Exception, PageNotFoundException {
     return checkPage(url, null);
   }
 
   /**
    * @since 2.6
    */
-  public MarkupAwareWikipediaResult checkPage(URL url, ErrorMarker errorMarker) throws IOException, PageNotFoundException {
+  public MarkupAwareWikipediaResult checkPage(URL url, ErrorMarker errorMarker) throws Exception, PageNotFoundException {
     validateWikipediaUrl(url);
     String xml = getMediaWikiContent(url);
     if (xml.length() > maxSizeBytes) {
@@ -144,7 +146,7 @@ public class WikipediaQuickCheck {
     return checkWikipediaMarkup(url, wikiContent, getLanguage(url), errorMarker);
   }
 
-  MarkupAwareWikipediaResult checkWikipediaMarkup(URL url, MediaWikiContent wikiContent, Language language, ErrorMarker errorMarker) throws IOException {
+  MarkupAwareWikipediaResult checkWikipediaMarkup(URL url, MediaWikiContent wikiContent, Language language, ErrorMarker errorMarker) throws Exception {
     SwebleWikipediaTextFilter filter = new SwebleWikipediaTextFilter();
     PlainTextMapping mapping = filter.filter(wikiContent.getContent());
     MultiThreadedJLanguageTool langTool = getLanguageTool(language);
@@ -157,7 +159,7 @@ public class WikipediaQuickCheck {
     }
     int internalErrors = 0;
     for (RuleMatch match : matches) {
-      SuggestionReplacer replacer = errorMarker != null ? 
+      SuggestionReplacer replacer = errorMarker != null ?
               new SuggestionReplacer(mapping, wikiContent.getContent(), errorMarker) :
               new SuggestionReplacer(mapping, wikiContent.getContent());
       try {
@@ -171,11 +173,11 @@ public class WikipediaQuickCheck {
     return new MarkupAwareWikipediaResult(wikiContent, appliedMatches, internalErrors);
   }
 
-  public WikipediaQuickCheckResult checkPage(String plainText, Language lang) throws IOException {
+  public WikipediaQuickCheckResult checkPage(String plainText, Language lang) throws Exception {
     MultiThreadedJLanguageTool langTool = getLanguageTool(lang);
     try {
       List<RuleMatch> ruleMatches = langTool.check(plainText);
-      return new WikipediaQuickCheckResult(plainText, ruleMatches, lang.getShortCode());
+      return new WikipediaQuickCheckResult(plainText, ruleMatches, lang.getLocale().getLanguage());
     } finally {
       langTool.shutdown();
     }
@@ -231,14 +233,16 @@ public class WikipediaQuickCheck {
     return new MediaWikiContent(handler.getRevisionContent(), handler.getTimestamp());
   }
 
-  private MultiThreadedJLanguageTool getLanguageTool(Language lang) throws IOException {
+  private MultiThreadedJLanguageTool getLanguageTool(Language lang) throws Exception {
     MultiThreadedJLanguageTool langTool = new MultiThreadedJLanguageTool(lang);
     enableWikipediaRules(langTool);
     for (String disabledRuleId : disabledRuleIds) {
       langTool.disableRule(disabledRuleId);
     }
     if (ngramDir != null) {
-      langTool.activateLanguageModelRules(ngramDir);
+      // GTODO We assume a Lucene language model here.
+      LanguageModel langModel = DefaultResourceDataBroker.createLuceneLanguageModel(ngramDir.toPath());
+      langTool.activateLanguageModelRules(langModel);
     }
     disableSpellingRules(langTool);
     return langTool;
@@ -282,8 +286,8 @@ public class WikipediaQuickCheck {
       String plainText = filter.filter("hallo\n* eins\n* zwei");
       System.out.println(plainText);
   }*/
-    
-  public static void main(String[] args) throws IOException, PageNotFoundException {
+
+  public static void main(String[] args) throws Exception, PageNotFoundException {
     if (args.length != 1) {
       System.out.println("Usage: " + WikipediaQuickCheck.class.getName() + " <url>");
       System.exit(1);
@@ -312,7 +316,7 @@ public class WikipediaQuickCheck {
       System.out.println("    ..." + matchApplication.getOriginalErrorContext(50).replace("\n", "\\n") + "...");
     }
   }
-  
+
   class RevisionContentHandler extends DefaultHandler {
 
     private final StringBuilder revisionText = new StringBuilder();
@@ -336,7 +340,7 @@ public class WikipediaQuickCheck {
         inRevision = false;
       }
     }
-    
+
     @Override
     public void characters(char[] buf, int offset, int len) {
       String s = new String(buf, offset, len);

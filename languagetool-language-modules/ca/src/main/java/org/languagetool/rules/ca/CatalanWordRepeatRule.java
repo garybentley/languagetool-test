@@ -21,7 +21,6 @@ package org.languagetool.rules.ca;
 import java.util.ResourceBundle;
 
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
 import org.languagetool.rules.WordRepeatRule;
 
 /**
@@ -29,8 +28,8 @@ import org.languagetool.rules.WordRepeatRule;
  */
 public class CatalanWordRepeatRule extends WordRepeatRule {
 
-  public CatalanWordRepeatRule(final ResourceBundle messages, final Language language) {
-    super(messages, language);
+  public CatalanWordRepeatRule(final ResourceBundle messages) {
+    super(messages);
   }
 
   @Override

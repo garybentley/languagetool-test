@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2016 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import org.languagetool.databroker.*;
 
 import static java.util.Arrays.asList;
 
@@ -39,7 +40,7 @@ final class GermanAuxVerbGuesser2 {
   private GermanAuxVerbGuesser2() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + GermanAuxVerbGuesser2.class.getName() + " <ngramDataIndex> <lemmaFile>");
       System.out.println("   <lemmaFile> is a text file with 'participle2 \\t lemma' per line, e.g. 'getrunken \t trinken'");
@@ -48,7 +49,7 @@ final class GermanAuxVerbGuesser2 {
     String indexTopDir = args[0];
     List<String> lines = Files.readAllLines(Paths.get(args[1]));
     System.out.println("# factor lemma Dativ/mir Akkusativ/mich");
-    try (LuceneLanguageModel lm = new LuceneLanguageModel(new File(indexTopDir))) {
+    LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(new File(indexTopDir).toPath().toRealPath());
       for (String line : lines) {
         String pa2 = line.split("\t")[0];
         String lemma = line.split("\t")[1];
@@ -59,12 +60,11 @@ final class GermanAuxVerbGuesser2 {
         float factor = ((float)mir + dir) / ((float)mich + dich);
         System.out.println(factor + " " + lemma + " " + mir + " " + mich);
       }
-    }
   }
 
   private static long count(LuceneLanguageModel lm, String pa2, String lemma, String reflexivePronoun) {
-    return 
-        lm.getCount(asList(reflexivePronoun, pa2)) 
+    return
+        lm.getCount(asList(reflexivePronoun, pa2))
       + lm.getCount(asList(reflexivePronoun, lemma));
   }
 

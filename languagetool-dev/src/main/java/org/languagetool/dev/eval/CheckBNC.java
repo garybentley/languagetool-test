@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -32,7 +32,7 @@ import org.languagetool.tools.StringTools;
 
 /**
  * Uses JLanguageTol recursively on the files of the BNC (British National Corpus).
- * 
+ *
  * @author Daniel Naber
  */
 public final class CheckBNC {
@@ -50,8 +50,8 @@ public final class CheckBNC {
     final CheckBNC prg = new CheckBNC();
     prg.run(new File(args[0]));
   }
-  
-  private CheckBNC() throws IOException {
+
+  private CheckBNC() throws Exception {
     langTool = new JLanguageTool(new English());
     final String[] disRules = {"UPPERCASE_SENTENCE_START", "COMMA_PARENTHESIS_WHITESPACE",
         "WORD_REPEAT_RULE", "DOUBLE_PUNCTUATION"};
@@ -62,7 +62,7 @@ public final class CheckBNC {
     }
   }
 
-  private void run(final File file) throws IOException {
+  private void run(final File file) throws Exception {
     if (file.isDirectory()) {
       final File[] files = file.listFiles();
       for (File file1 : files) {

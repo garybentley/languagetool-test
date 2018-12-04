@@ -25,7 +25,8 @@ import org.languagetool.AnalyzedTokenReadings;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.German;
 import org.languagetool.tagging.Tagger;
-import org.languagetool.tools.StringTools;
+import org.languagetool.rules.patterns.CaseConverter;
+import org.languagetool.databroker.*;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -53,15 +54,17 @@ public class GermanTaggerEnhancer {
           "ADJ:AKK:PLU:MAS:GRU", "ADJ:AKK:PLU:NEU:GRU", "ADJ:AKK:PLU:FEM:GRU",    // den Berliner Bewohnern
   };
 
-  private void run() throws IOException {
-    final Dictionary dictionary = Dictionary.read(
-            JLanguageTool.getDataBroker().getFromResourceDirAsUrl("/de/german.dict"));
+  private void run() throws Exception {
+    German lang = new German();
+    DefaultResourceDataBroker broker = DefaultResourceDataBroker.newClassPathInstance(lang, lang.getClass().getClassLoader());
+    final Dictionary dictionary = broker.getMorfologikBinaryDictionaryFromResourcePath("/de/german.dict");
     final DictionaryLookup dl = new DictionaryLookup(dictionary);
-    Tagger tagger = new German().getTagger();
+    Tagger tagger = lang.getTagger();
+    CaseConverter caseCon = lang.getCaseConverter();
     String prev = null;
     for (WordData wd : dl) {
       String word = wd.getWord().toString();
-      if (word.endsWith("er") && StringTools.startsWithUppercase(word)) {
+      if (word.endsWith("er") && caseCon.startsWithUpperCase(word)) {
         if (!hasAdjReading(tagger, word) && isEigenname(tagger, word.substring(0, word.length()-2)) && !word.equals(prev)) {
           for (String newTags : ADJ_READINGS) {
             System.out.println(word + "\t" + word + "\t" + newTags + ":DEF");
@@ -94,7 +97,7 @@ public class GermanTaggerEnhancer {
     return false;
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     GermanTaggerEnhancer enhancer = new GermanTaggerEnhancer();
     enhancer.run();
   }

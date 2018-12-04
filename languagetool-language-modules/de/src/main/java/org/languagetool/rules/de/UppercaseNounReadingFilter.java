@@ -53,7 +53,6 @@ public class UppercaseNounReadingFilter extends RuleFilter {
     if (token == null) {
       throw new RuntimeException("Set 'token' for filter " + UppercaseNounReadingFilter.class.getName() + " in rule " + match.getRule().getId());
     }
-    try {
       String uppercase = StringTools.uppercaseFirstChar(token);
       List<AnalyzedTokenReadings> tags = tagger.tag(Collections.singletonList(uppercase));
       boolean hasNounReading = false;
@@ -66,9 +65,6 @@ public class UppercaseNounReadingFilter extends RuleFilter {
       if (hasNounReading) {
         return match;
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
     return null;
   }
 }

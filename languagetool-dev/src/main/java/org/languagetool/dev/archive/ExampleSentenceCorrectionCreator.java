@@ -44,12 +44,12 @@ final class ExampleSentenceCorrectionCreator {
 
   private int addedCorrectionsCount = 0;
 
-  private void run(Language lang) throws IOException {
+  private void run(Language lang) throws Exception {
     File basePath = new File("/lt/git/languagetool/languagetool-language-modules");
     if (!basePath.exists()) {
       throw new RuntimeException("basePath does not exist: " + basePath);
     }
-    String langCode = lang.getShortCode();
+    String langCode = lang.getLocale().getLanguage();
     File xml = new File(basePath, "/" + langCode + "/src/main/resources/org/languagetool/rules/" + langCode + "/grammar.xml");
     List<String> xmlLines = IOUtils.readLines(new FileReader(xml));
     JLanguageTool tool = new JLanguageTool(lang);
@@ -68,7 +68,7 @@ final class ExampleSentenceCorrectionCreator {
     }
   }
 
-  private void checkCorrections(Rule rule, IncorrectExample incorrectExample, List<String> xmlLines, JLanguageTool tool) throws IOException {
+  private void checkCorrections(Rule rule, IncorrectExample incorrectExample, List<String> xmlLines, JLanguageTool tool) throws Exception {
     List<String> corrections = incorrectExample.getCorrections();
     if (corrections.isEmpty()) {
       for (Rule r : tool.getAllActiveRules()) {
@@ -139,9 +139,9 @@ final class ExampleSentenceCorrectionCreator {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     ExampleSentenceCorrectionCreator prg = new ExampleSentenceCorrectionCreator();
-    prg.run(Languages.getLanguageForShortCode("de"));
+    prg.run(Languages.getLanguage("de"));
   }
 
 }

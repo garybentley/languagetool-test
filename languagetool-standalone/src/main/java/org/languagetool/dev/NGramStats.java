@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import org.languagetool.databroker.*;
+
+import org.apache.lucene.search.*;
 
 /**
  * Simple command line tool to look up occurrence counts in an ngram index.
@@ -46,7 +49,7 @@ class NGramStats {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 1 && args.length != 2) {
       System.out.println("Usage: " + NGramStats.class.getSimpleName() + " <dir> <phrase>");
       System.out.println("  'dir' is a directory with '1grams' etc sub directories with a Lucene index of ngrams");
@@ -57,13 +60,13 @@ class NGramStats {
     String phraseOrFile = args[1];
     NGramStats stats = new NGramStats();
     File file = new File(phraseOrFile);
-    try (HomophoneOccurrenceDumper lm = new HomophoneOccurrenceDumper(new File(dir))) {
+    Map<Integer, IndexSearcher> map = DefaultResourceDataBroker.getLuceneIndexSearchers(new File(dir).toPath());
+    HomophoneOccurrenceDumper lm = new HomophoneOccurrenceDumper(map);
       if (file.exists()) {
         stats.lookup(lm, file);
       } else {
         stats.lookup(lm, phraseOrFile);
       }
-    }
   }
 
 }

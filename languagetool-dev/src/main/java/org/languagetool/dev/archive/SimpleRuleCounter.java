@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2015 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -38,7 +38,7 @@ import static java.util.Comparator.comparing;
  */
 public class SimpleRuleCounter {
 
-    private void run(List<Language> languages) {
+    private void run(List<Language> languages) throws Exception {
         List<Language> sortedLanguages = new ArrayList<>(languages);
         sortedLanguages.sort(comparing(Language::getName));
         for (Language language : sortedLanguages) {
@@ -78,13 +78,13 @@ public class SimpleRuleCounter {
     }
 
     private boolean isSimple(PatternToken t) {
-        return !(t.getNegation() || t.getPOSNegation() || t.hasAndGroup() || t.hasExceptionList() || 
+        return !(t.getNegation() || t.getPOSNegation() || t.hasAndGroup() || t.hasExceptionList() ||
                  t.hasNextException() || t.hasOrGroup() || t.isInflected() || t.isPOStagRegularExpression() ||
                  t.getPOStag() != null || t.isReferenceElement() || t.isSentenceStart() ||
                  t.getSkipNext() != 0);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         SimpleRuleCounter finder = new SimpleRuleCounter();
         finder.run(Languages.get());
         //finder.run(Collections.singletonList(new GermanyGerman()));

@@ -34,6 +34,7 @@ import org.languagetool.languagemodel.LanguageModel;
 import org.languagetool.languagemodel.LuceneLanguageModel;
 import org.languagetool.rules.*;
 import org.languagetool.rules.de.ProhibitedCompoundRule;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +63,7 @@ class ProhibitedCompoundRuleEvaluator {
   private final Map<Long, RuleEvalValues> evalValues = new HashMap<>();
   private boolean verbose = true;
 
-  ProhibitedCompoundRuleEvaluator(Language language, LanguageModel languageModel) {
+  ProhibitedCompoundRuleEvaluator(Language language, LanguageModel languageModel) throws Exception {
     this.language = language;
     try {
       List<Rule> rules = language.getRelevantLanguageModelRules(JLanguageTool.getMessageBundle(), languageModel);
@@ -90,7 +91,7 @@ class ProhibitedCompoundRuleEvaluator {
     this.verbose = verbose;
   }
 
-  Map<Long, RuleEvalResult> run(List<String> inputsOrDir, String token, String homophoneToken, int maxSentences, List<Long> evalFactors) throws IOException {
+  Map<Long, RuleEvalResult> run(List<String> inputsOrDir, String token, String homophoneToken, int maxSentences, List<Long> evalFactors) throws Exception {
     for (Long evalFactor : evalFactors) {
       evalValues.put(evalFactor, new RuleEvalValues());
     }
@@ -109,7 +110,7 @@ class ProhibitedCompoundRuleEvaluator {
   }
 
   @SuppressWarnings("ConstantConditions")
-  private void evaluate(List<Map.Entry<Sentence, Integer>> sentences, boolean isCorrect, String token, String homophoneToken, List<Long> evalFactors) throws IOException {
+  private void evaluate(List<Map.Entry<Sentence, Integer>> sentences, boolean isCorrect, String token, String homophoneToken, List<Long> evalFactors) throws Exception {
     println("======================");
     printf("Starting evaluation on " + sentences.size() + " sentences with %s/%s (%s):\n", token, homophoneToken, String.valueOf(isCorrect));
     JLanguageTool lt = new JLanguageTool(language);
@@ -194,7 +195,7 @@ class ProhibitedCompoundRuleEvaluator {
   }
 
   // TODO deduplicate / delegate
-  private List<Map.Entry<Sentence, Integer>> getRelevantSentences(List<String> inputs, String token, int maxSentences) throws IOException {
+  private List<Map.Entry<Sentence, Integer>> getRelevantSentences(List<String> inputs, String token, int maxSentences) throws Exception {
     List<Map.Entry<Sentence, Integer>> sentences = new ArrayList<>();
     for (String input : inputs) {
       if (new File(input).isDirectory()) {
@@ -246,7 +247,7 @@ class ProhibitedCompoundRuleEvaluator {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length < 4 || args.length > 5) {
       System.err.println("Usage: " + ProhibitedCompoundRuleEvaluator.class.getSimpleName()
               + " <tokens> <langCode> <languageModelTopDir> <wikipediaXml|tatoebaFile|plainTextFile|dir>...");
@@ -265,8 +266,8 @@ class ProhibitedCompoundRuleEvaluator {
     ConfusionSetLoader loader = new ConfusionSetLoader();
     Map<String, List<ConfusionSet>> confusionSet = loader.loadConfusionSet(new FileInputStream(confusionSetFile));
     String langCode = args[1];
-    Language lang = Languages.getLanguageForShortCode(langCode);
-    LanguageModel languageModel = new LuceneLanguageModel(new File(args[2], lang.getShortCode()));
+    Language lang = Languages.getLanguage(langCode);
+    LanguageModel languageModel = DefaultResourceDataBroker.createLuceneLanguageModel(new File(args[2], lang.getLocale().getLanguage()).toPath().toRealPath());
     //LanguageModel languageModel = new BerkeleyRawLanguageModel(new File("/media/Data/berkeleylm/google_books_binaries/ger.blm.gz"));
     //LanguageModel languageModel = new BerkeleyLanguageModel(new File("/media/Data/berkeleylm/google_books_binaries/ger.blm.gz"));
     List<String> inputsFiles = new ArrayList<>();
@@ -288,4 +289,3 @@ class ProhibitedCompoundRuleEvaluator {
     System.out.println("\nTime: " + (endTime-startTime)+"ms");
   }
 }
-

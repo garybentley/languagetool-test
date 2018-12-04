@@ -47,7 +47,7 @@ public class HTTPServerMultiLangLoadTest extends HTTPServerLoadTest {
 
   long totalTimes = 0;
   long totalChars = 0;
-  
+
   final Map<Language, String> langCodeToText = new HashMap<>();
   final Random random = new Random(1234);
   final AtomicInteger counter = new AtomicInteger();
@@ -60,7 +60,7 @@ public class HTTPServerMultiLangLoadTest extends HTTPServerLoadTest {
     List<Language> languages = new ArrayList<>();
     languages.addAll(Languages.get());
     for (Language language : languages) {
-      File file = new File(dir, "tatoeba-" + language.getShortCode() + ".txt");
+      File file = new File(dir, "tatoeba-" + language.getLocale().getLanguage() + ".txt");
       if (!file.exists()) {
         System.err.println("No data found for " + language + ", language will not be tested");
       } else {
@@ -110,9 +110,9 @@ public class HTTPServerMultiLangLoadTest extends HTTPServerLoadTest {
     float millisPer100Chars = (float)runtime / (float)textSubstring.length() * 100.0f;
     float avgMillisPer100Chars = (float)totalTimes / (float)totalChars * 100.0f;
     System.out.println(counter.get() + ". Sleep: " + sleepTime + "ms"
-            + ", Lang: " + padLeft(language.getShortCodeWithCountryAndVariant(), 5)
+            + ", Lang: " + padLeft(language.getLocale().getLanguage(), 5)
             + ", Length: " + padLeft(textSubstring.length() + "", 5) + ", Time: " + padLeft(runtime + "", 6) + "ms"
-            + ", per100Chars: " + padLeft((int)millisPer100Chars + "", 4) + "ms" 
+            + ", per100Chars: " + padLeft((int)millisPer100Chars + "", 4) + "ms"
             + ", per100Chars on avg.: " + padLeft((int)avgMillisPer100Chars + "", 3) + "ms");
   }
 

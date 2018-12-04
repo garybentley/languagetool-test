@@ -45,6 +45,6 @@ public class DetectedLanguage {
 
   @Override
   public String toString() {
-    return detectedLanguage.getShortCodeWithCountryAndVariant();
+    return detectedLanguage.getLocale().toLanguageTag();
   }
 }

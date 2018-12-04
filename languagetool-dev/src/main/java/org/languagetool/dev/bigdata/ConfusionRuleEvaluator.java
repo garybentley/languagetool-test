@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2014 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -35,6 +35,7 @@ import org.languagetool.rules.RuleMatch;
 import org.languagetool.tagging.Tagger;
 import org.languagetool.tagging.xx.DemoTagger;
 import org.languagetool.tools.StringTools;
+import org.languagetool.databroker.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,10 +51,10 @@ import static java.util.stream.Collectors.toList;
 /**
  * Loads sentences with a homophone (e.g. there/their) from Wikipedia or confusion set files
  * and evaluates EnglishConfusionProbabilityRule with them.
- * 
+ *
  * @see AutomaticConfusionRuleEvaluator
  * @since 3.0
- * @author Daniel Naber 
+ * @author Daniel Naber
  */
 class ConfusionRuleEvaluator {
 
@@ -68,10 +69,9 @@ class ConfusionRuleEvaluator {
 
   private boolean verbose = true;
 
-  ConfusionRuleEvaluator(Language language, LanguageModel languageModel, boolean caseSensitive) {
+  ConfusionRuleEvaluator(Language language, LanguageModel languageModel, boolean caseSensitive) throws Exception {
     this.language = language;
     this.caseSensitive = caseSensitive;
-    try {
       List<Rule> rules = language.getRelevantLanguageModelRules(JLanguageTool.getMessageBundle(), languageModel);
       if (rules == null) {
         throw new RuntimeException("Language " + language + " doesn't seem to support a language model");
@@ -88,16 +88,13 @@ class ConfusionRuleEvaluator {
       } else {
         this.rule = foundRule;
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
-  
+
   void setVerboseMode(boolean verbose) {
     this.verbose = verbose;
   }
 
-  Map<Long, RuleEvalResult> run(List<String> inputsOrDir, String token, String homophoneToken, int maxSentences, List<Long> evalFactors) throws IOException {
+  Map<Long, RuleEvalResult> run(List<String> inputsOrDir, String token, String homophoneToken, int maxSentences, List<Long> evalFactors) throws Exception {
     for (Long evalFactor : evalFactors) {
       evalValues.put(evalFactor, new RuleEvalValues());
     }
@@ -116,7 +113,7 @@ class ConfusionRuleEvaluator {
   }
 
   @SuppressWarnings("ConstantConditions")
-  private void evaluate(List<Sentence> sentences, boolean isCorrect, String token, String homophoneToken, List<Long> evalFactors) throws IOException {
+  private void evaluate(List<Sentence> sentences, boolean isCorrect, String token, String homophoneToken, List<Long> evalFactors) throws Exception {
     println("======================");
     printf("Starting evaluation on " + sentences.size() + " sentences with %s/%s:\n", token, homophoneToken);
     JLanguageTool lt = new JLanguageTool(language);
@@ -185,7 +182,7 @@ class ConfusionRuleEvaluator {
     return results;
   }
 
-  private List<Sentence> getRelevantSentences(List<String> inputs, String token, int maxSentences) throws IOException {
+  private List<Sentence> getRelevantSentences(List<String> inputs, String token, int maxSentences) throws Exception {
     List<Sentence> sentences = new ArrayList<>();
     for (String input : inputs) {
       if (new File(input).isDirectory()) {
@@ -225,7 +222,7 @@ class ConfusionRuleEvaluator {
     println("Loaded " + sentences.size() + " sentences with '" + token + "' from " + inputs);
     return sentences;
   }
-  
+
   private void println(String msg) {
     if (verbose) {
       System.out.println(msg);
@@ -238,7 +235,7 @@ class ConfusionRuleEvaluator {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length < 5 || args.length > 6) {
       System.err.println("Usage: " + ConfusionRuleEvaluator.class.getSimpleName()
               + " <token> <homophoneToken> <langCode> <languageModelTopDir> <wikipediaXml|tatoebaFile|plainTextFile|dir>...");
@@ -259,9 +256,9 @@ class ConfusionRuleEvaluator {
     if ("en".equals(langCode)) {
       lang = new EnglishLight();
     } else {
-      lang = Languages.getLanguageForShortCode(langCode);
+      lang = Languages.getLanguage(langCode);
     }
-    LanguageModel languageModel = new LuceneLanguageModel(new File(args[3], lang.getShortCode()));
+    LanguageModel languageModel = DefaultResourceDataBroker.createLuceneLanguageModel(new File(args[3], lang.getLocale().getLanguage()).toPath().toRealPath());
     //LanguageModel languageModel = new BerkeleyRawLanguageModel(new File("/media/Data/berkeleylm/google_books_binaries/ger.blm.gz"));
     //LanguageModel languageModel = new BerkeleyLanguageModel(new File("/media/Data/berkeleylm/google_books_binaries/ger.blm.gz"));
     List<String> inputsFiles = new ArrayList<>();
@@ -277,14 +274,14 @@ class ConfusionRuleEvaluator {
 
   // faster version of English as it uses no chunking:
   static class EnglishLight extends English {
-    
+
     private DemoTagger tagger;
 
     @Override
     public String getName() {
       return "English Light";
     }
-    
+
     @Override
     public Tagger getTagger() {
       if (tagger == null) {

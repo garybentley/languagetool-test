@@ -19,6 +19,7 @@
 package org.languagetool.dev.bigdata;
 
 import org.languagetool.languagemodel.LuceneLanguageModel;
+import org.languagetool.databroker.DefaultResourceDataBroker;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,13 +35,13 @@ final class ConfusionSetOccurrenceLookup {
   private ConfusionSetOccurrenceLookup() {
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     if (args.length != 2) {
       System.out.println("Usage: " + ConfusionSetOccurrenceLookup.class.getName() + " <confusion-file> <ngram-data-dir>");
       System.exit(1);
     }
     try (Scanner sc = new Scanner(new File(args[0]));
-         LuceneLanguageModel lm = new LuceneLanguageModel(new File(args[1]))
+         LuceneLanguageModel lm = DefaultResourceDataBroker.createLuceneLanguageModel(new File(args[1]).toPath().toRealPath());
     ) {
       while (sc.hasNextLine()) {
         String line = sc.nextLine();
@@ -59,5 +60,5 @@ final class ConfusionSetOccurrenceLookup {
       }
     }
   }
-  
+
 }

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2007 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -39,7 +39,7 @@ public class TranslationTest {
     enProps.load(new FileInputStream(englishFile));
     Set<Object> englishKeys = enProps.keySet();
     for (Language lang : Languages.get()) {
-      if (lang.getShortCode().equals("en")) {
+      if (lang.getLocale().getLanguage().equals("en")) {
         continue;
       }
       Properties langProps = new Properties();
@@ -83,7 +83,7 @@ public class TranslationTest {
       }
     }
   }
-  
+
   private List<String> loadFile(File file) throws IOException {
     List<String> l = new ArrayList<>();
     try (Scanner scanner = new Scanner(file)) {
@@ -100,16 +100,16 @@ public class TranslationTest {
   }
 
   private File getTranslationFile(Language lang) {
-    String langCode = lang.getShortCode();
-    String name = "../languagetool-language-modules/" + langCode + "/src/main/resources/org/languagetool" 
+    String langCode = lang.getLocale().getLanguage();
+    String name = "../languagetool-language-modules/" + langCode + "/src/main/resources/org/languagetool"
             + "/MessagesBundle_" + langCode + ".properties";
     return new File(name.replace("/", File.separator));
   }
 
   private File getTranslationFileWithVariant(Language lang) {
-    String langCode = lang.getShortCode();
-    String name = "../languagetool-language-modules/" + langCode + "/src/main/resources/org/languagetool" 
-            + "/MessagesBundle_" + lang.getShortCodeWithCountryAndVariant().replace('-', '_') + ".properties";
+    String langCode = lang.getLocale().getLanguage();
+    String name = "../languagetool-language-modules/" + langCode + "/src/main/resources/org/languagetool"
+            + "/MessagesBundle_" + lang.getLocale().toLanguageTag().replace('-', '_') + ".properties";
     return new File(name.replace("/", File.separator));
   }
 

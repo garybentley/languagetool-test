@@ -35,15 +35,15 @@ final class StartupTimePerformanceTest {
 
   private static final int RUNS = 100;
   private static final int SKIP = 5;
-  
-  private void run() throws IOException {
+
+  private void run() throws Exception {
     List<Language> languages = Languages.get();
     for (Language language : languages) {
       run(language);
     }
   }
 
-  private void run(Language language) throws IOException {
+  private void run(Language language) throws Exception {
     long totalTime = 0;
     for (int i = 0; i < RUNS; i++) {
       long startTime = System.currentTimeMillis();
@@ -59,10 +59,10 @@ final class StartupTimePerformanceTest {
       }
       //System.out.println(runTime + "ms");
     }
-    System.out.println(language.getShortCodeWithCountryAndVariant() + ": avg. Time: " + (float)totalTime/RUNS + "ms");
+    System.out.println(language.getLocale().toLanguageTag() + ": avg. Time: " + (float)totalTime/RUNS + "ms");
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     StartupTimePerformanceTest test = new StartupTimePerformanceTest();
     test.run();
     //test.run(new GermanyGerman());

@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2005 Daniel Naber (http://www.danielnaber.de)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -46,14 +46,14 @@ class UndoRedoSupport {
 
   final UndoAction undoAction;
   final RedoAction redoAction;
-  
+
   private final UndoManager undoManager;
   private final ResourceBundle messages;
-  
+
   private boolean compoundMode = false;
   private CompoundEdit ce = null;
 
-  UndoRedoSupport(JTextComponent textComponent, ResourceBundle messages) {
+  UndoRedoSupport(JTextComponent textComponent, ResourceBundle messages) throws Exception {
     this.messages = messages;
     undoManager = new UndoManager();
     undoAction = new UndoAction();
@@ -83,7 +83,7 @@ class UndoRedoSupport {
 
   /**
    * Notify manager to start merging undoable edits.
-   * 
+   *
    * Calling startCompoundEdit when already in compound mode is an error
    * and will throw a RuntimeException.
    *
@@ -100,17 +100,17 @@ class UndoRedoSupport {
 
   /**
    * Notify manager to stop merging undoable edits.
-   * 
+   *
    * Calling endCompoundEdit when not in compound mode is an error
    * and will throw a RuntimeException.
    *
    * @since 2.7
-   */  
+   */
   void endCompoundEdit()
   {
       if(!compoundMode) {
         throw new RuntimeException("not in compound mode");
-      }      
+      }
       ce.end();
       undoManager.addEdit(ce);
       ce = null;
@@ -119,14 +119,12 @@ class UndoRedoSupport {
 
   class UndoAction extends AbstractAction {
 
-    private UndoAction() {
+    private UndoAction() throws Exception {
       super(messages.getString("guiUndo"));
       Image img;
-      img = Toolkit.getDefaultToolkit().getImage(
-              JLanguageTool.getDataBroker().getFromResourceDirAsUrl("sc_undo.png"));
+      img = Main.getImageResource("sc_undo.png");
       putValue(Action.SMALL_ICON, new ImageIcon(img));
-      img = Toolkit.getDefaultToolkit().getImage(
-              JLanguageTool.getDataBroker().getFromResourceDirAsUrl("lc_undo.png"));
+      img = Main.getImageResource("lc_undo.png");
       putValue(Action.LARGE_ICON_KEY, new ImageIcon(img));
       KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_Z,
               Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
@@ -157,14 +155,12 @@ class UndoRedoSupport {
 
   class RedoAction extends AbstractAction {
 
-    private RedoAction() {
+    private RedoAction() throws Exception {
       super(messages.getString("guiRedo"));
       Image img;
-      img = Toolkit.getDefaultToolkit().getImage(
-              JLanguageTool.getDataBroker().getFromResourceDirAsUrl("sc_redo.png"));
+      img = Main.getImageResource("sc_redo.png");
       putValue(Action.SMALL_ICON, new ImageIcon(img));
-      img = Toolkit.getDefaultToolkit().getImage(
-              JLanguageTool.getDataBroker().getFromResourceDirAsUrl("lc_redo.png"));
+      img = Main.getImageResource("lc_redo.png");
       putValue(Action.LARGE_ICON_KEY, new ImageIcon(img));
       KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_Z,
               Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | java.awt.event.InputEvent.SHIFT_DOWN_MASK);

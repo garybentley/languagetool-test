@@ -1,6 +1,6 @@
-/* LanguageTool, a natural language style checker 
+/* LanguageTool, a natural language style checker
  * Copyright (C) 2012 Marcin Miłkowski (http://www.languagetool.org)
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,29 +19,34 @@
 
 package org.languagetool.rules.ca;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import morfologik.stemming.Dictionary;
+
 import org.languagetool.AnalyzedToken;
 import org.languagetool.AnalyzedTokenReadings;
-import org.languagetool.Language;
+import org.languagetool.AnalyzedSentence;
+import org.languagetool.language.Catalan;
 import org.languagetool.UserConfig;
 import org.languagetool.rules.spelling.morfologik.MorfologikSpellerRule;
-import org.languagetool.tagging.ca.CatalanTagger;
+import org.languagetool.rules.spelling.morfologik.suggestions_ordering.SuggestionsOrderer;
+import org.languagetool.tagging.Tagger;
 
 public final class MorfologikCatalanSpellerRule extends MorfologikSpellerRule {
 
-  private String dictFilename;
-  private static final String SPELLING_FILE = "/ca/spelling.txt";
-  
+  // GTODO private String dictFilename;
+  // GTODO private static final String SPELLING_FILE = "/ca/spelling.txt";
+
   private static final Pattern PARTICULA_INICIAL = Pattern.compile("^(els?|als?|pels?|dels?|de|per|uns?|una|unes|la|les|[tms]eus?) (..+)$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
-  
+
   private static final Pattern APOSTROF_INICI_VERBS = Pattern.compile("^([lnmts])(h?[aeiouàéèíòóú].*)$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   private static final Pattern APOSTROF_INICI_NOM_SING = Pattern.compile("^([ld])(h?[aeiouàéèíòóú].+)$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
   private static final Pattern APOSTROF_INICI_NOM_PLURAL = Pattern.compile("^(d)(h?[aeiouàéèíòóú].+)$",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
@@ -51,36 +56,53 @@ public final class MorfologikCatalanSpellerRule extends MorfologikSpellerRule {
   private static final Pattern NOM_SING = Pattern.compile("V.[NG].*|V.P..S..|N..[SN].*|A...[SN].|PX..S...|DD..S.");
   private static final Pattern NOM_PLURAL = Pattern.compile("V.P..P..|N..[PN].*|A...[PN].|PX..P...|DD..P.");
   private static final Pattern VERB_INFGERIMP = Pattern.compile("V.[NGM].*");
-  private CatalanTagger tagger;
+  private Tagger tagger;
 
-  public MorfologikCatalanSpellerRule(ResourceBundle messages, Language language, UserConfig userConfig) throws IOException {
-    super(messages, language, userConfig);
+  public MorfologikCatalanSpellerRule(ResourceBundle messages, Catalan language, UserConfig userConfig, Set<Dictionary> dictionaries, List<String> ignoreWords, Tagger tagger) throws Exception {
+    super(messages, language, userConfig, dictionaries, ignoreWords, Collections.emptyList());
     this.setIgnoreTaggedWords();
-    tagger = new CatalanTagger(language);
-    dictFilename = "/ca/" + language.getShortCodeWithCountryAndVariant() + ".dict";
+    tagger = Objects.requireNonNull(tagger, "Tagger must be provided.");
+    // GTODO dictFilename = "/ca/" + language.getShortCodeWithCountryAndVariant() + ".dict";
+    setSuggestionsOrderer(new SuggestionsOrderer() {
+        @Override
+        public List<String> orderSuggestions(List<String> suggestions, String word, AnalyzedSentence sentence, int startPos, int wordLength) throws Exception {
+            List<String> newSuggestions = new ArrayList<>();
+            for (String suggestion : suggestions) {
+              if (PARTICULA_INICIAL.matcher(suggestion).matches()) {
+                newSuggestions.add(0, suggestion);
+              } else {
+                newSuggestions.add(suggestion);
+              }
+            }
+            return newSuggestions;
+        }
+    });
   }
-
+/*
+GTODO
   @Override
   public String getFileName() {
     return dictFilename;
   }
-  
+
   @Override
   public String getSpellingFileName() {
     return SPELLING_FILE;
   }
-
+*/
   @Override
   public String getId() {
     return "MORFOLOGIK_RULE_CA_ES";
   }
-  
+
   @Override
   // Use this rule in LO/OO extension despite being a spelling rule
   public boolean useInOffice() {
     return true;
   }
-  
+
+/*
+GTODO replaced with a suggestions orderer.
   @Override
   protected List<String> orderSuggestions(List<String> suggestions, String word) {
     //move some run-on-words suggestions to the top
@@ -94,11 +116,11 @@ public final class MorfologikCatalanSpellerRule extends MorfologikSpellerRule {
     }
     return newSuggestions;
   }
-  
+*/
   @Override
   protected List<String> getAdditionalTopSuggestions(List<String> suggestions,
-      String word) throws IOException {
-    //TODO Try other combinations. Ex. daconseguirlos, 
+      String word) {
+    //TODO Try other combinations. Ex. daconseguirlos,
     //TODO Including errors (Hunspell can do it). Ex. sescontaminarla > descontaminar-la
     /*if (word.length() < 5) {
       return Collections.emptyList();
@@ -107,19 +129,19 @@ public final class MorfologikCatalanSpellerRule extends MorfologikSpellerRule {
     suggestion = findSuggestion(suggestion, word, APOSTROF_INICI_VERBS, VERB_INDSUBJ, 2, "'");
     suggestion = findSuggestion(suggestion, word, APOSTROF_INICI_NOM_SING, NOM_SING, 2, "'");
     suggestion = findSuggestion(suggestion, word, APOSTROF_INICI_NOM_PLURAL, NOM_PLURAL, 2, "'");
-    if (!word.endsWith("as") && !word.endsWith("et")) { 
+    if (!word.endsWith("as") && !word.endsWith("et")) {
       suggestion = findSuggestion(suggestion, word, APOSTROF_FINAL, VERB_INFGERIMP, 1, "'");
     }
     suggestion = findSuggestion(suggestion, word, GUIONET_FINAL, VERB_INFGERIMP, 1, "-");
     if (!suggestion.isEmpty()) {
       return Collections.singletonList(suggestion);
-    } 
+    }
     return Collections.emptyList();
   }
-  
+
   private String findSuggestion(String suggestion, String word,
       Pattern wordPattern, Pattern postagPattern, int suggestionPosition,
-      String separator) throws IOException {
+      String separator) {
     if (!suggestion.isEmpty()) {
       return suggestion;
     }
@@ -132,7 +154,7 @@ public final class MorfologikCatalanSpellerRule extends MorfologikSpellerRule {
     }
     return "";
   }
- 
+
 
   /**
    * Match POS tag with regular expression
